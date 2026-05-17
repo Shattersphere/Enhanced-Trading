@@ -19,6 +19,7 @@ Archives preserve useful detail that should remain searchable but should not be 
 | `.agent/archive/history/2026-05-gui-framework-migration.md` | GUI migration history | historical | Investigating why the popup uses the current `WimGui*` custom-panel/list architecture or why a helper/validator exists. | `WimGui`, `ACG`, `StockReviewRenderer`, `NoClassDefFoundError`, `modal list` |
 | `.agent/archive/history/2026-05-trade-source-remediation.md` | Trade/source remediation history | historical | Investigating completed review-agent tasks, source-mode evolution, rollback hardening, or trade execution boundaries. | `rollback`, `Sector Market`, `Fixer's Market`, `perItem`, `BUY_FROM_SUBMARKET`, `TradeMoney` |
 | `.agent/archive/history/2026-05-product-and-validation-history.md` | Product/release history | historical | Investigating clean-vs-patched product boundary, release validation posture, or why badge approaches are avoided. | `clean popup`, `patched badges`, `CargoStackView`, `late over-icon`, `Sanity`, `deploy-live-mod` |
+| `.agent/archive/history/2026-05-18-agent-takeover-handover.md` | Agent takeover handover | historical snapshot | A new agent needs point-in-time project context beyond the living handover, especially after Kotlin migration, Fixer catalog work, UI cleanup, or private badge changes. | `takeover`, `Kotlin migration`, `stock review`, `Fixer`, `Sector Market`, `patched badges`, `public release`, `ship catalog debug` |
 
 ## Retired Plans
 
