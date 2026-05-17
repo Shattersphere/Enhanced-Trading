@@ -4,13 +4,11 @@ import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.controls.StockReviewActionRef
-import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewItemTooltip
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
-import weaponsprocurement.ui.stockreview.trade.StockReviewSellerAllocation
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
@@ -67,7 +65,7 @@ object StockReviewItemRows {
         }
         StockReviewItemInfoRows.add(rows, record, state, layout)
         if (trade.isBuy()) {
-            addSourceAllocationRows(rows, tradeContext.sellerAllocations(trade), layout)
+            StockReviewSourceAllocationRows.add(rows, tradeContext.sellerAllocations(trade), layout)
         }
     }
 
@@ -86,38 +84,6 @@ object StockReviewItemRows {
                 layout,
             ),
         )
-    }
-
-    @JvmStatic
-    fun addSourceAllocationRows(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        allocations: List<StockReviewSellerAllocation>,
-        layout: StockReviewRowLayout,
-    ) {
-        if (allocations.isEmpty()) {
-            rows.add(
-                StockReviewListRow.labelTextIndented(
-                    "Purchase Source",
-                    "Unavailable",
-                    layout,
-                    layout.dataIndent,
-                    true,
-                ),
-            )
-            return
-        }
-        for (i in allocations.indices) {
-            val allocation = allocations[i]
-            rows.add(
-                StockReviewListRow.labelTextIndented(
-                    sourceLabel(allocation),
-                    allocationSummary(allocation),
-                    layout,
-                    layout.dataIndent,
-                    i == 0,
-                ),
-            )
-        }
     }
 
     private fun addItemRow(
@@ -163,10 +129,4 @@ object StockReviewItemRows {
             .icon(icon)
             .build(),
     )
-
-    private fun sourceLabel(allocation: StockReviewSellerAllocation): String =
-        if (allocation.submarketName.isNullOrEmpty()) "Purchase Source" else allocation.submarketName
-
-    private fun allocationSummary(allocation: StockReviewSellerAllocation): String =
-        allocation.quantity.toString() + " / " + StockReviewFormat.credits(allocation.cost)
 }

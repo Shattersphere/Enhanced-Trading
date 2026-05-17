@@ -44,8 +44,12 @@ $stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRev
 $stockReviewItemRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemRows.kt"
 $stockReviewItemInfoRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoRows.kt"
 $stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowLayout.kt"
+$stockReviewDetailRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewDetailRows.kt"
+$stockReviewSourceAllocationRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewSourceAllocationRows.kt"
 $stockReviewCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewCellGroup.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
+$stockReviewTradeSummaryRendererPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryRenderer.kt"
+$stockReviewTradeSummaryFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryFields.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 $stockReviewItemInfoFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoFields.kt"
 $stockReviewActionControlsPath = Join-Path $kotlinGuiDir "stockreview\controls\StockReviewActionControls.kt"
@@ -57,7 +61,7 @@ $stockReviewHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRev
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -121,8 +125,12 @@ if ($reviewModelText -notmatch "SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup\.B
 }
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
+$detailRowsText = Get-Content -LiteralPath $stockReviewDetailRowsPath -Raw
+$sourceAllocationRowsText = Get-Content -LiteralPath $stockReviewSourceAllocationRowsPath -Raw
 $cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
 $itemInfoFieldsText = Get-Content -LiteralPath $stockReviewItemInfoFieldsPath -Raw
+$tradeSummaryRendererText = Get-Content -LiteralPath $stockReviewTradeSummaryRendererPath -Raw
+$tradeSummaryFieldsText = Get-Content -LiteralPath $stockReviewTradeSummaryFieldsPath -Raw
 $actionControlsText = Get-Content -LiteralPath $stockReviewActionControlsPath -Raw
 $rowSpecText = Get-Content -LiteralPath $stockReviewRowSpecPath -Raw
 $listRowText = Get-Content -LiteralPath $stockReviewListRowPath -Raw
@@ -173,6 +181,7 @@ if ($headingRowsText -notmatch "fun itemType" -or
     throw "Stock-review heading labels/actions/tooltips must route through StockReviewHeadingRows."
 }
 if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
+    $itemInfoFieldsText -notmatch "StockReviewDetailRows\.itemInfo" -or
     $itemInfoFieldsText -notmatch "WEAPON_BASIC_FIELDS" -or
     $itemInfoFieldsText -notmatch "WING_BASIC_FIELDS" -or
     $itemInfoFieldsText -notmatch "WEAPON_ADVANCED_FIELDS" -or
@@ -186,6 +195,29 @@ if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
     $itemInfoRowsText -match "isMeaningful" -or
     $itemInfoRowsText -match "isPositiveValue") {
     throw "Stock-review Basic/Advanced detail fields must be declared in StockReviewItemInfoFields."
+}
+if ($detailRowsText -notmatch "object StockReviewDetailRows" -or
+    $detailRowsText -notmatch "fun itemInfo" -or
+    $detailRowsText -notmatch "fun sourceAllocation" -or
+    $sourceAllocationRowsText -notmatch "object StockReviewSourceAllocationRows" -or
+    $sourceAllocationRowsText -notmatch "Purchase Source" -or
+    $sourceAllocationRowsText -notmatch "Unavailable" -or
+    $sourceAllocationRowsText -notmatch "StockReviewDetailRows\.sourceAllocation" -or
+    $itemRowsText -notmatch "StockReviewSourceAllocationRows\.add" -or
+    $itemRowsText -match "addSourceAllocationRows" -or
+    $itemRowsText -match "sourceLabel" -or
+    $itemRowsText -match "allocationSummary") {
+    throw "Stock-review source-allocation rows must route through StockReviewSourceAllocationRows and StockReviewDetailRows."
+}
+if ($tradeSummaryRendererText -notmatch "StockReviewTradeSummaryFields\.build" -or
+    $tradeSummaryRendererText -match "addSummaryRow" -or
+    $tradeSummaryRendererText -match "tariffsPaidLabel" -or
+    $tradeSummaryFieldsText -notmatch "class StockReviewTradeSummaryField" -or
+    $tradeSummaryFieldsText -notmatch "object StockReviewTradeSummaryFields" -or
+    $tradeSummaryFieldsText -notmatch "Tariffs Paid" -or
+    $tradeSummaryFieldsText -notmatch '\[\$percent%\]' -or
+    $tradeSummaryFieldsText -notmatch "totalBuyCost") {
+    throw "Stock-review footer summary row definitions must live in StockReviewTradeSummaryFields."
 }
 if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
     throw "Stock-review worst-case weapon debug row label is missing."

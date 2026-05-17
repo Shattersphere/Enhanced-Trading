@@ -21,13 +21,10 @@ class StockReviewItemInfoField private constructor(
         if (!shouldShow(value)) {
             return null
         }
-        return StockReviewListRow.labelTextIndented(
+        return StockReviewDetailRows.itemInfo(
             label.invoke(record),
             value,
-            layout.dataIndent,
-            false,
-            layout.detailRightReserveWidth,
-            layout.listWidth,
+            layout,
             tooltip.invoke(record),
         )
     }
