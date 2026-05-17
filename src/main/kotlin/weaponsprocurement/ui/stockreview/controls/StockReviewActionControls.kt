@@ -28,7 +28,7 @@ class StockReviewActionButtonFactory(borderColor: Color) {
         fillColor: Color,
         tooltip: String?,
     ): WimGuiButtonSpec<StockReviewAction> {
-        requireActionGroup(group, action)
+        StockReviewActionGuards.requireGroup(group, action)
         return delegate.button(width, label, action, enabled, fillColor, tooltip)
     }
 
@@ -48,6 +48,31 @@ class StockReviewActionButtonFactory(borderColor: Color) {
         fillColor: Color,
         tooltip: String?,
     ): WimGuiButtonSpec<StockReviewAction> = button(group, width, label, action, true, fillColor, tooltip)
+}
+
+class StockReviewActionRef private constructor(
+    @JvmField val group: StockReviewActionGroup,
+    @JvmField val action: StockReviewAction,
+) {
+    companion object {
+        @JvmStatic
+        fun of(group: StockReviewActionGroup, action: StockReviewAction): StockReviewActionRef {
+            StockReviewActionGuards.requireGroup(group, action)
+            return StockReviewActionRef(group, action)
+        }
+
+        @JvmStatic
+        fun rowExpansion(action: StockReviewAction): StockReviewActionRef = of(StockReviewActionGroup.ROW_EXPANSION, action)
+
+        @JvmStatic
+        fun filters(action: StockReviewAction): StockReviewActionRef = of(StockReviewActionGroup.FILTERS, action)
+
+        @JvmStatic
+        fun debugMode(action: StockReviewAction): StockReviewActionRef = of(StockReviewActionGroup.DEBUG_MODE, action)
+
+        @JvmStatic
+        fun scroll(action: StockReviewAction): StockReviewActionRef = of(StockReviewActionGroup.SCROLL, action)
+    }
 }
 
 class StockReviewActionCells private constructor() {
@@ -72,15 +97,18 @@ class StockReviewActionCells private constructor() {
             enabled: Boolean,
             tooltip: String?,
         ): WimGuiRowCell<StockReviewAction> {
-            requireActionGroup(group, action)
+            StockReviewActionGuards.requireGroup(group, action)
             return WimGuiRowCell.standardAction(label, width, fillColor, action, enabled, tooltip)
         }
     }
 }
 
-private fun requireActionGroup(expected: StockReviewActionGroup, action: StockReviewAction) {
-    val actual = action.getGroup()
-    require(actual == expected) {
-        "Stock-review action ${action.getType()} belongs to ${actual.name}, not ${expected.name}"
+object StockReviewActionGuards {
+    @JvmStatic
+    fun requireGroup(expected: StockReviewActionGroup, action: StockReviewAction) {
+        val actual = action.getGroup()
+        require(actual == expected) {
+            "Stock-review action ${action.getType()} belongs to ${actual.name}, not ${expected.name}"
+        }
     }
 }

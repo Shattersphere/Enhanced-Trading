@@ -46,11 +46,30 @@ $stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRevie
 $stockReviewCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewCellGroup.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
+$stockReviewActionControlsPath = Join-Path $kotlinGuiDir "stockreview\controls\StockReviewActionControls.kt"
+$stockReviewRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowSpec.kt"
+$stockReviewListRowPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListRow.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
+}
+
+$stockReviewSourceRoot = Join-Path $kotlinGuiDir "stockreview"
+$stockReviewSourceFiles = @(Get-ChildItem -Path $stockReviewSourceRoot -Recurse -File -Include *.kt)
+$directStockReviewActionButtonFactoryHits = @($stockReviewSourceFiles |
+    Where-Object { $_.FullName -ne $stockReviewActionControlsPath } |
+    Select-String -Pattern "WimGuiSemanticButtonFactory<StockReviewAction>" -SimpleMatch)
+if ($directStockReviewActionButtonFactoryHits.Count -gt 0) {
+    throw "Stock-review action buttons must route through StockReviewActionButtonFactory. Hits:`n$($directStockReviewActionButtonFactoryHits -join "`n")"
+}
+
+$directStockReviewActionCellHits = @($stockReviewSourceFiles |
+    Where-Object { $_.FullName -ne $stockReviewActionControlsPath } |
+    Select-String -Pattern "WimGuiRowCell.standardAction" -SimpleMatch)
+if ($directStockReviewActionCellHits.Count -gt 0) {
+    throw "Stock-review action cells must route through StockReviewActionCells. Hits:`n$($directStockReviewActionCellHits -join "`n")"
 }
 
 $styleText = Get-Content -LiteralPath $stockReviewStylePath -Raw
@@ -95,6 +114,18 @@ if ($reviewModelText -notmatch "SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup\.B
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
 $cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
+$actionControlsText = Get-Content -LiteralPath $stockReviewActionControlsPath -Raw
+$rowSpecText = Get-Content -LiteralPath $stockReviewRowSpecPath -Raw
+$listRowText = Get-Content -LiteralPath $stockReviewListRowPath -Raw
+if ($actionControlsText -notmatch "class StockReviewActionRef" -or
+    $actionControlsText -notmatch "StockReviewActionGuards\.requireGroup" -or
+    $rowSpecText -notmatch "fun action\(value: StockReviewActionRef\?\)" -or
+    $listRowText -notmatch "StockReviewActionRef\.rowExpansion" -or
+    $listRowText -notmatch "StockReviewActionRef\.filters" -or
+    $listRowText -notmatch "StockReviewActionRef\.scroll" -or
+    $itemRowsText -notmatch "StockReviewActionRef\.debugMode") {
+    throw "Stock-review row actions must use group-checked StockReviewActionRef/StockReviewActionControls helpers."
+}
 if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
     throw "Stock-review worst-case weapon debug row label is missing."
 }

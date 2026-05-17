@@ -3,6 +3,8 @@ package weaponsprocurement.ui.stockreview.rows
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
+import weaponsprocurement.ui.stockreview.controls.StockReviewActionRef
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.TooltipMakerAPI
@@ -39,7 +41,7 @@ object StockReviewListRow {
         action: StockReviewAction?,
         topGap: Boolean,
         tooltip: String?,
-    ): WimGuiListRow<StockReviewAction> = category(label, textColor, action, topGap, tooltip, 0f)
+    ): WimGuiListRow<StockReviewAction> = category(label, textColor, action?.let { StockReviewActionRef.rowExpansion(it) }, topGap, tooltip, 0f)
 
     @JvmStatic
     fun categoryIndented(
@@ -49,12 +51,12 @@ object StockReviewListRow {
         topGap: Boolean,
         tooltip: String?,
         indent: Float,
-    ): WimGuiListRow<StockReviewAction> = category(label, textColor, action, topGap, tooltip, indent)
+    ): WimGuiListRow<StockReviewAction> = category(label, textColor, action?.let { StockReviewActionRef.rowExpansion(it) }, topGap, tooltip, indent)
 
     private fun category(
         label: String?,
         textColor: Color?,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         topGap: Boolean,
         tooltip: String?,
         indent: Float,
@@ -82,6 +84,26 @@ object StockReviewListRow {
         action: StockReviewAction?,
         topGap: Boolean,
         tooltip: String?,
+    ): WimGuiListRow<StockReviewAction> = filterHeading(label, StockReviewActionGroup.ROW_EXPANSION, action, topGap, tooltip)
+
+    @JvmStatic
+    fun filterControlHeading(
+        label: String?,
+        action: StockReviewAction?,
+        topGap: Boolean,
+        tooltip: String?,
+    ): WimGuiListRow<StockReviewAction> = filterHeading(label, StockReviewActionGroup.FILTERS, action, topGap, tooltip)
+
+    @JvmStatic
+    fun staticHeading(label: String?, topGap: Boolean, tooltip: String?): WimGuiListRow<StockReviewAction> =
+        filterHeading(label, null, null, topGap, tooltip)
+
+    private fun filterHeading(
+        label: String?,
+        actionGroup: StockReviewActionGroup?,
+        action: StockReviewAction?,
+        topGap: Boolean,
+        tooltip: String?,
     ): WimGuiListRow<StockReviewAction> = row(
         label,
         StockReviewStyle.TEXT,
@@ -89,7 +111,7 @@ object StockReviewListRow {
         StockReviewStyle.HEADING_BACKGROUND,
         null,
         0f,
-        action,
+        action?.let { StockReviewActionRef.of(requireNotNull(actionGroup), it) },
         Alignment.LMID,
         null,
         topGap,
@@ -111,7 +133,7 @@ object StockReviewListRow {
         StockReviewStyle.HEADING_BACKGROUND,
         null,
         indent,
-        action,
+        action?.let { StockReviewActionRef.rowExpansion(it) },
         Alignment.LMID,
         null,
         topGap,
@@ -140,7 +162,7 @@ object StockReviewListRow {
             fill,
             StockReviewStyle.ROW_BORDER,
             if (active) 0f else StockReviewStyle.WEAPON_INDENT,
-            action,
+            action?.let { StockReviewActionRef.filters(it) },
             Alignment.LMID,
             null,
             topGap,
@@ -198,7 +220,7 @@ object StockReviewListRow {
         StockReviewStyle.CELL_BACKGROUND,
         StockReviewStyle.ROW_BORDER,
         indent,
-        action,
+        action?.let { StockReviewActionRef.rowExpansion(it) },
         Alignment.LMID,
         cells,
         false,
@@ -361,7 +383,7 @@ object StockReviewListRow {
         StockReviewStyle.HEADING_BACKGROUND,
         null,
         0f,
-        action,
+        action?.let { StockReviewActionRef.scroll(it) },
         Alignment.MID,
         null,
         false,
@@ -392,24 +414,22 @@ object StockReviewListRow {
         buttonFillColor: Color?,
         borderColor: Color?,
         indent: Float,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         alignment: Alignment?,
         cells: List<WimGuiRowCell<StockReviewAction>>?,
         topGap: Boolean,
-    ): WimGuiListRow<StockReviewAction> = WimGuiListRow(
-        label,
-        textColor,
-        fillColor,
-        buttonFillColor,
-        borderColor,
-        indent,
-        action,
-        alignment,
-        cells,
-        topGap,
-        null,
-        0f,
-        null,
+    ): WimGuiListRow<StockReviewAction> = fromSpec(
+        StockReviewRowSpec.builder(label)
+            .textColor(textColor)
+            .fillColor(fillColor)
+            .buttonFillColor(buttonFillColor)
+            .borderColor(borderColor)
+            .indent(indent)
+            .action(action)
+            .alignment(alignment)
+            .cells(cells)
+            .topGap(topGap)
+            .build(),
     )
 
     private fun row(
@@ -419,7 +439,7 @@ object StockReviewListRow {
         buttonFillColor: Color?,
         borderColor: Color?,
         indent: Float,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         alignment: Alignment?,
         cells: List<WimGuiRowCell<StockReviewAction>>?,
         topGap: Boolean,
@@ -446,7 +466,7 @@ object StockReviewListRow {
         buttonFillColor: Color?,
         borderColor: Color?,
         indent: Float,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         alignment: Alignment?,
         cells: List<WimGuiRowCell<StockReviewAction>>?,
         topGap: Boolean,
@@ -475,7 +495,7 @@ object StockReviewListRow {
         buttonFillColor: Color?,
         borderColor: Color?,
         indent: Float,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         alignment: Alignment?,
         cells: List<WimGuiRowCell<StockReviewAction>>?,
         topGap: Boolean,
@@ -506,7 +526,7 @@ object StockReviewListRow {
         buttonFillColor: Color?,
         borderColor: Color?,
         indent: Float,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         alignment: Alignment?,
         cells: List<WimGuiRowCell<StockReviewAction>>?,
         topGap: Boolean,
@@ -522,7 +542,7 @@ object StockReviewListRow {
         buttonFillColor: Color?,
         borderColor: Color?,
         indent: Float,
-        action: StockReviewAction?,
+        action: StockReviewActionRef?,
         alignment: Alignment?,
         cells: List<WimGuiRowCell<StockReviewAction>>?,
         topGap: Boolean,

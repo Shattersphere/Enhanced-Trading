@@ -58,7 +58,7 @@ class StockReviewFilterListModel private constructor() {
             val activeInGroup = StockReviewFilters.activeInGroup(state.getActiveFilters(), group)
             val label = WimGuiToggleHeading.countedLabel(group.label, activeInGroup.size, expanded)
             rows.add(
-                StockReviewListRow.filterHeading(
+                StockReviewListRow.filterControlHeading(
                     label,
                     StockReviewAction.toggle(group),
                     topGap,

@@ -4,6 +4,7 @@ import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.controls.StockReviewActionRef
 import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -80,7 +81,7 @@ object StockReviewItemRows {
             itemRow(
                 StockReviewCellGroup.DEBUG_WORST_CASE_LABEL,
                 StockReviewTradeRowCells.worstCaseCells(layout),
-                StockReviewAction.debugNoop(),
+                StockReviewActionRef.debugMode(StockReviewAction.debugNoop()),
                 "Worst-case row-width test sample. It does not affect trades.",
                 null,
                 layout,
@@ -133,7 +134,7 @@ object StockReviewItemRows {
             itemRow(
                 label,
                 cells,
-                action,
+                StockReviewActionRef.rowExpansion(action),
                 itemTooltip,
                 StockReviewItemTooltip.forRecord(record, itemTooltip),
                 layout,
@@ -145,7 +146,7 @@ object StockReviewItemRows {
     private fun itemRow(
         label: String,
         cells: List<WimGuiRowCell<StockReviewAction>>,
-        action: StockReviewAction,
+        actionRef: StockReviewActionRef,
         tooltip: String?,
         tooltipCreator: com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator?,
         layout: StockReviewRowLayout,
@@ -156,7 +157,7 @@ object StockReviewItemRows {
             .buttonFillColor(StockReviewStyle.CELL_BACKGROUND)
             .borderColor(StockReviewStyle.ROW_BORDER)
             .indent(layout.itemIndent)
-            .action(action)
+            .action(actionRef)
             .cells(cells)
             .tooltip(tooltip)
             .tooltipCreator(tooltipCreator)

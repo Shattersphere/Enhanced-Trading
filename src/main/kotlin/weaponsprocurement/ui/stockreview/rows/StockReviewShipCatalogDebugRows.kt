@@ -23,9 +23,8 @@ object StockReviewShipCatalogDebugRows {
         val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
 
         rows.add(
-            StockReviewListRow.filterHeading(
+            StockReviewListRow.staticHeading(
                 "Theoretical Ship Catalog [Hull Types: ${theoretical.size}]",
-                null,
                 false,
                 "Developer diagnostic view for Fixer ship catalog candidates. This does not make ships purchasable.",
             ),
@@ -42,9 +41,8 @@ object StockReviewShipCatalogDebugRows {
         val observedOnly = observed.filterKeys { !theoretical.containsKey(it) }.values
             .sortedBy { it.cheapestReferenceSource?.displayName ?: it.cheapestReferenceSource?.hullId ?: "" }
         rows.add(
-            StockReviewListRow.filterHeading(
+            StockReviewListRow.staticHeading(
                 "Observed-Only Ships [Hull Types: ${observedOnly.size}]",
-                null,
                 true,
                 "Ships seen in live cargo that are not in the vanilla-theoretical catalog.",
             ),

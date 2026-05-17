@@ -4,6 +4,8 @@ import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
+import weaponsprocurement.ui.stockreview.controls.StockReviewActionRef
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import java.awt.Color
 
@@ -14,6 +16,7 @@ class StockReviewRowSpec private constructor(
     @JvmField val buttonFillColor: Color?,
     @JvmField val borderColor: Color?,
     @JvmField val indent: Float,
+    @JvmField val actionGroup: StockReviewActionGroup?,
     @JvmField val action: StockReviewAction?,
     @JvmField val alignment: Alignment?,
     @JvmField val cells: List<WimGuiRowCell<StockReviewAction>>?,
@@ -30,7 +33,7 @@ class StockReviewRowSpec private constructor(
         private var buttonFillColor: Color? = null
         private var borderColor: Color? = null
         private var indent: Float = 0f
-        private var action: StockReviewAction? = null
+        private var actionRef: StockReviewActionRef? = null
         private var alignment: Alignment? = Alignment.LMID
         private var cells: List<WimGuiRowCell<StockReviewAction>>? = null
         private var topGap: Boolean = false
@@ -45,7 +48,7 @@ class StockReviewRowSpec private constructor(
         fun buttonFillColor(value: Color?) = apply { buttonFillColor = value }
         fun borderColor(value: Color?) = apply { borderColor = value }
         fun indent(value: Float) = apply { indent = value }
-        fun action(value: StockReviewAction?) = apply { action = value }
+        fun action(value: StockReviewActionRef?) = apply { actionRef = value }
         fun alignment(value: Alignment?) = apply { alignment = value }
         fun cells(value: List<WimGuiRowCell<StockReviewAction>>?) = apply { cells = value }
         fun topGap(value: Boolean) = apply { topGap = value }
@@ -62,7 +65,8 @@ class StockReviewRowSpec private constructor(
             buttonFillColor,
             borderColor,
             indent,
-            action,
+            actionRef?.group,
+            actionRef?.action,
             alignment,
             cells,
             topGap,
