@@ -102,7 +102,7 @@ class StockReviewReviewListModel private constructor() {
                     StockReviewAction.toggleItem(record.itemKey),
                     itemTooltip,
                     StockReviewItemTooltip.forRecord(record, itemTooltip),
-                    StockReviewStyle.SECTION_INDENT,
+                    StockReviewStyle.WEAPON_INDENT,
                     StockReviewRowIcon.item(record),
                 ),
             )
@@ -172,7 +172,7 @@ class StockReviewReviewListModel private constructor() {
                     cells,
                     StockReviewAction.debugNoop(),
                     "Worst-case review-row width test sample. It does not affect trades.",
-                    StockReviewStyle.SECTION_INDENT,
+                    StockReviewStyle.WEAPON_INDENT,
                 ),
             )
         }

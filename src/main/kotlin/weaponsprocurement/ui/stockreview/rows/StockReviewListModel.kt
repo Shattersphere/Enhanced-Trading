@@ -190,7 +190,7 @@ object StockReviewListModel {
                 StockReviewAction.toggleItem(record.itemKey),
                 itemTooltip,
                 StockReviewItemTooltip.forRecord(record, itemTooltip),
-                StockReviewStyle.SECTION_INDENT,
+                StockReviewStyle.WEAPON_INDENT,
                 StockReviewRowIcon.item(record),
             ),
         )

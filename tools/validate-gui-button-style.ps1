@@ -40,10 +40,11 @@ if ($controlsText -notmatch "(Color|val) hover = .*colors(\?|\.)\.hover|val hove
 
 $stockReviewStylePath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewStyle.kt"
 $stockReviewListModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListModel.kt"
+$stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewReviewListModel.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -57,12 +58,24 @@ if ($styleText -notmatch "const val ROW_ICON_INDENT = ACTION_BUTTON_HEIGHT \+ BU
     $styleText -notmatch "const val WEAPON_INDENT = ROW_ICON_INDENT") {
     throw "Stock-review weapon indent must match the rendered row icon footprint."
 }
+if ($styleText -notmatch "const val STOCK_CELL_WIDTH = 156f" -or
+    $styleText -notmatch "const val REVIEW_STOCK_CELL_WIDTH = STOCK_CELL_WIDTH") {
+    throw "Stock-review storage cells must be wide enough for the capped worst-case storage label in trade and review screens."
+}
 
 $listModelText = Get-Content -LiteralPath $stockReviewListModelPath -Raw
 if (-not $listModelText.Contains('" [$typeLabel: $itemTypes, "') -or
     -not $listModelText.Contains('"Selling: ${maxOf(0, selling)}, "') -or
     $listModelText.Contains('"Selling: ${maxOf(0, selling)} | "')) {
     throw "Stock-review category headings must use comma-separated type/selling/buying summaries."
+}
+if ($listModelText -notmatch "StockReviewStyle\.WEAPON_INDENT,\s*StockReviewRowIcon\.item\(record\)") {
+    throw "Main stock-review item rows must start at the category indent; the icon supplies the next visual indent."
+}
+
+$reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
+if ($reviewModelText -notmatch "StockReviewStyle\.WEAPON_INDENT,\s*StockReviewRowIcon\.item\(record\)") {
+    throw "Review stock-review item rows must use the same icon-indent model as the main trade screen."
 }
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
@@ -73,6 +86,9 @@ if ($tradeCellsText -notmatch "Storage: 99\+ \[-99\+\]" -or
     $tradeCellsText -notmatch "Price: 99,999\+" -or
     $tradeCellsText -notmatch "Selling: 99\+ \[999,999\+") {
     throw "Stock-review worst-case weapon debug row must exercise capped storage, price, and plan labels."
+}
+if ($tradeCellsText -notmatch "StockReviewStyle\.WEAPON_INDENT") {
+    throw "Stock-review worst-case weapon debug row must use the same icon-indent model as real weapon rows."
 }
 
 $tooltipText = Get-Content -LiteralPath $stockReviewTooltipPath -Raw

@@ -80,7 +80,7 @@ class StockReviewTradeRowCells private constructor() {
                     cells,
                     StockReviewAction.debugNoop(),
                     "Worst-case row-width test sample. It does not affect trades.",
-                    StockReviewStyle.SECTION_INDENT,
+                    StockReviewStyle.WEAPON_INDENT,
                 ),
             )
         }
