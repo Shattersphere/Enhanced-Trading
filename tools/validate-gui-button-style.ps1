@@ -74,7 +74,10 @@ $stockReviewDetailRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRevi
 $stockReviewDetailRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewDetailRowSpec.kt"
 $stockReviewSourceAllocationRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewSourceAllocationRows.kt"
 $stockReviewCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewCellGroup.kt"
+$stockReviewDebugCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewDebugCellGroup.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
+$stockReviewColorDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewColorDebugRows.kt"
+$stockReviewShipCatalogDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewShipCatalogDebugRows.kt"
 $stockReviewTradeSummaryRendererPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryRenderer.kt"
 $stockReviewTradeSummaryFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryFields.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
@@ -96,7 +99,7 @@ $stockReviewLegacyHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\St
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -307,6 +310,9 @@ $detailRowsText = Get-Content -LiteralPath $stockReviewDetailRowsPath -Raw
 $detailRowSpecText = Get-Content -LiteralPath $stockReviewDetailRowSpecPath -Raw
 $sourceAllocationRowsText = Get-Content -LiteralPath $stockReviewSourceAllocationRowsPath -Raw
 $cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
+$debugCellGroupText = Get-Content -LiteralPath $stockReviewDebugCellGroupPath -Raw
+$colorDebugRowsText = Get-Content -LiteralPath $stockReviewColorDebugRowsPath -Raw
+$shipCatalogDebugRowsText = Get-Content -LiteralPath $stockReviewShipCatalogDebugRowsPath -Raw
 $itemInfoFieldsText = Get-Content -LiteralPath $stockReviewItemInfoFieldsPath -Raw
 $tradeSummaryRendererText = Get-Content -LiteralPath $stockReviewTradeSummaryRendererPath -Raw
 $tradeSummaryFieldsText = Get-Content -LiteralPath $stockReviewTradeSummaryFieldsPath -Raw
@@ -469,6 +475,27 @@ if ($cellGroupText -notmatch "Storage: 99\+ \[-99\+\]" -or
 $rawTradeCellConstructionHits = @((Get-Item -LiteralPath $stockReviewTradeCellsPath) | Select-String -Pattern "WimGuiRowCell\.info|StockReviewActionCells\.standard")
 if ($rawTradeCellConstructionHits.Count -gt 0) {
     throw "Stock-review trade/review row cells must route cell creation through StockReviewCellGroup. Hits:`n$($rawTradeCellConstructionHits -join "`n")"
+}
+$rawDiagnosticCellConstructionHits = @(
+    (Get-Item -LiteralPath $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath) |
+        Select-String -Pattern "WimGuiRowCell\.info|StockReviewActionCells\.standard|private fun info|private fun debugCell|private const val RARITY_WIDTH|private const val PRICE_WIDTH"
+)
+if ($rawDiagnosticCellConstructionHits.Count -gt 0) {
+    throw "Stock-review diagnostic rows must route debug cell construction through StockReviewDebugCellGroup. Hits:`n$($rawDiagnosticCellConstructionHits -join "`n")"
+}
+if ($debugCellGroupText -notmatch "object StockReviewDebugCellGroup" -or
+    $debugCellGroupText -notmatch "fun colorSampleInfo" -or
+    $debugCellGroupText -notmatch "fun colorValueButton" -or
+    $debugCellGroupText -notmatch "fun colorDelta" -or
+    $debugCellGroupText -notmatch "fun shipRarityFill" -or
+    $debugCellGroupText -notmatch "StockReviewActionGroup\.DEBUG_MODE" -or
+    $debugCellGroupText -notmatch "StockReviewCellGroup\.infoCell" -or
+    $colorDebugRowsText -notmatch "StockReviewDebugCellGroup\.colorSampleInfo" -or
+    $colorDebugRowsText -notmatch "StockReviewDebugCellGroup\.colorValueButton" -or
+    $colorDebugRowsText -notmatch "StockReviewDebugCellGroup\.colorDelta" -or
+    $shipCatalogDebugRowsText -notmatch "StockReviewDebugCellGroup\.shipRarityFill" -or
+    $shipCatalogDebugRowsText -notmatch "StockReviewDebugCellGroup\.shipPrice") {
+    throw "Stock-review color and ship diagnostics must share StockReviewDebugCellGroup factories."
 }
 if ($itemRowFrameText -notmatch "\.indent\(layout\.itemIndent\)" -or
     $worstCaseItemRowsText -notmatch "StockReviewItemRowFrame\.build" -or

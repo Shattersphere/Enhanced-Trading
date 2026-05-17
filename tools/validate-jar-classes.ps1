@@ -108,6 +108,7 @@ $requiredClasses = @(
     'weaponsprocurement/ui/WimGuiColorDebug$Target.class',
     'weaponsprocurement/ui/stockreview/rendering/StockReviewFormat.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewColorDebugRows.class',
+    'weaponsprocurement/ui/stockreview/rows/StockReviewDebugCellGroup.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewListEmptyRows.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewListSection.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewListSectionSpec.class',
