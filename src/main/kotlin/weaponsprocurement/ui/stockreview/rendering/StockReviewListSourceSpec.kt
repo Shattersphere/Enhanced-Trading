@@ -35,34 +35,35 @@ class StockReviewListSourceContext(
 
 class StockReviewListSourceSpec private constructor(
     @JvmField val kind: StockReviewListSourceKind,
-    private val builder: (StockReviewListSourceContext) -> List<WimGuiListRow<StockReviewAction>>,
 ) {
-    fun build(context: StockReviewListSourceContext): List<WimGuiListRow<StockReviewAction>> = builder.invoke(context)
+    fun build(context: StockReviewListSourceContext): List<WimGuiListRow<StockReviewAction>> =
+        when (kind) {
+            StockReviewListSourceKind.TRADE ->
+                StockReviewListModel.build(context.snapshot, context.state, context.tradeContext, context.rowLayout)
+            StockReviewListSourceKind.REVIEW ->
+                StockReviewReviewListModel.build(context.snapshot, context.pendingTrades, context.state, context.tradeContext, context.rowLayout)
+            StockReviewListSourceKind.FILTERS ->
+                StockReviewFilterListModel.build(context.state)
+            StockReviewListSourceKind.COLOR_DEBUG ->
+                StockReviewColorDebugRows.build(context.colorDebugTargetIndex, context.colorDebugDraft, context.colorDebugPersistent)
+            StockReviewListSourceKind.SHIP_CATALOG_DEBUG ->
+                StockReviewShipCatalogDebugRows.build()
+        }
 
     companion object {
         @JvmStatic
-        fun trade(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.TRADE) { context ->
-            StockReviewListModel.build(context.snapshot, context.state, context.tradeContext, context.rowLayout)
-        }
+        fun trade(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.TRADE)
 
         @JvmStatic
-        fun review(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.REVIEW) { context ->
-            StockReviewReviewListModel.build(context.snapshot, context.pendingTrades, context.state, context.tradeContext, context.rowLayout)
-        }
+        fun review(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.REVIEW)
 
         @JvmStatic
-        fun filters(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.FILTERS) { context ->
-            StockReviewFilterListModel.build(context.state)
-        }
+        fun filters(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.FILTERS)
 
         @JvmStatic
-        fun colorDebug(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.COLOR_DEBUG) { context ->
-            StockReviewColorDebugRows.build(context.colorDebugTargetIndex, context.colorDebugDraft, context.colorDebugPersistent)
-        }
+        fun colorDebug(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.COLOR_DEBUG)
 
         @JvmStatic
-        fun shipCatalogDebug(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.SHIP_CATALOG_DEBUG) {
-            StockReviewShipCatalogDebugRows.build()
-        }
+        fun shipCatalogDebug(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.SHIP_CATALOG_DEBUG)
     }
 }

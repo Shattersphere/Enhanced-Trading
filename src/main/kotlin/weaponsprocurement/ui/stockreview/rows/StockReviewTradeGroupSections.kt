@@ -36,20 +36,22 @@ class StockReviewTradeGroupSection private constructor(
         layout: StockReviewRowLayout,
     ) {
         val expanded = state.isExpanded(tradeGroup)
-        StockReviewListSection.builder(groupTrades)
-            .expanded(expanded)
-            .heading {
+        StockReviewListSection.add(
+            rows,
+            layout,
+            StockReviewListSectionSpec(
+                groupTrades,
+                expanded,
                 StockReviewTradeGroupHeadingRows.reviewGroup(
                     tradeGroup,
                     groupTrades.size,
                     expanded,
                     topGap,
-                )
-            }
-            .includeWorstCaseRow(includesWorstCaseRow)
-            .itemAppender { targetRows, trade -> StockReviewReviewItemRows.add(targetRows, snapshot, trade, state, tradeContext, layout) }
-            .build()
-            .addTo(rows, layout)
+                ),
+                includesWorstCaseRow,
+                StockReviewReviewTradeRowAppender(snapshot, state, tradeContext, layout),
+            ),
+        )
     }
 
     private fun matches(trade: StockReviewPendingTrade): Boolean =

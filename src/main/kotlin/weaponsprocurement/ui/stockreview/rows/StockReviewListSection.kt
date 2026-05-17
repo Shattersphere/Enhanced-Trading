@@ -4,30 +4,42 @@ import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 
+interface StockReviewSectionRowAppender<T> {
+    fun add(rows: MutableList<WimGuiListRow<StockReviewAction>>, item: T)
+}
+
+class StockReviewListSectionSpec<T>(
+    @JvmField val items: List<T>,
+    @JvmField val expanded: Boolean,
+    @JvmField val heading: WimGuiListRow<StockReviewAction>,
+    @JvmField val includeWorstCaseRow: Boolean,
+    @JvmField val itemAppender: StockReviewSectionRowAppender<T>,
+)
+
 class StockReviewListSection<T> private constructor(
-    private val items: List<T>,
-    private val expanded: Boolean,
-    private val heading: () -> WimGuiListRow<StockReviewAction>,
-    private val includeWorstCaseRow: Boolean,
-    private val itemAppender: (MutableList<WimGuiListRow<StockReviewAction>>, T) -> Unit,
+    private val spec: StockReviewListSectionSpec<T>,
 ) {
     fun addTo(rows: MutableList<WimGuiListRow<StockReviewAction>>, layout: StockReviewRowLayout): Int {
-        rows.add(heading.invoke())
-        if (!expanded) {
-            return items.size
+        rows.add(spec.heading)
+        if (!spec.expanded) {
+            return spec.items.size
         }
-        if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && includeWorstCaseRow) {
+        if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && spec.includeWorstCaseRow) {
             StockReviewWorstCaseItemRows.add(rows, layout)
         }
-        for (item in items) {
-            itemAppender.invoke(rows, item)
+        for (item in spec.items) {
+            spec.itemAppender.add(rows, item)
         }
-        return items.size
+        return spec.items.size
     }
 
     companion object {
         @JvmStatic
-        fun <T> builder(items: List<T>): Builder<T> = Builder(items)
+        fun <T> add(
+            rows: MutableList<WimGuiListRow<StockReviewAction>>,
+            layout: StockReviewRowLayout,
+            spec: StockReviewListSectionSpec<T>,
+        ): Int = StockReviewListSection(spec).addTo(rows, layout)
 
         @JvmStatic
         fun addHeading(
@@ -36,26 +48,5 @@ class StockReviewListSection<T> private constructor(
         ) {
             rows.add(heading)
         }
-    }
-
-    class Builder<T>(private val items: List<T>) {
-        private var expanded: Boolean = true
-        private var heading: (() -> WimGuiListRow<StockReviewAction>)? = null
-        private var includeWorstCaseRow: Boolean = false
-        private var itemAppender: ((MutableList<WimGuiListRow<StockReviewAction>>, T) -> Unit)? = null
-
-        fun expanded(value: Boolean) = apply { expanded = value }
-        fun heading(value: () -> WimGuiListRow<StockReviewAction>) = apply { heading = value }
-        fun includeWorstCaseRow(value: Boolean) = apply { includeWorstCaseRow = value }
-        fun itemAppender(value: (MutableList<WimGuiListRow<StockReviewAction>>, T) -> Unit) = apply { itemAppender = value }
-
-        fun build(): StockReviewListSection<T> =
-            StockReviewListSection(
-                items,
-                expanded,
-                heading ?: throw IllegalStateException("Stock-review list section heading is required."),
-                includeWorstCaseRow,
-                itemAppender ?: throw IllegalStateException("Stock-review list section item appender is required."),
-            )
     }
 }

@@ -104,9 +104,9 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 `StockReviewPanelPlugin` is lifecycle/context orchestration. Keep domain work in focused controllers/renderers:
 
 - `StockReviewRenderer`: shell/header/body/footer composition.
-- `StockReviewModeSpec` / `StockReviewLayoutContext`: mode selection and screen-level modal/list/summary layout.
+- `StockReviewModeSpec` / `StockReviewLayoutContext` / `StockReviewListSourceSpec`: mode selection plus explicit source-kind dispatch for screen-level modal/list/summary layout.
 - `StockReviewListModel` / `StockReviewReviewListModel`: main and review list sources.
-- `StockReviewListSection` / `StockReviewListEmptyRows`: shared heading/expansion/debug-row list section flow and empty-state rows.
+- `StockReviewListSection` / `StockReviewListSectionSpec` / `StockReviewSectionRowAppender` / `StockReviewListEmptyRows`: shared heading/expansion/debug-row list section flow, named row appenders, and empty-state rows.
 - `StockReviewItemTypeSections`: main-list item-type order, section top gaps, item-type headings, and category composition.
 - `StockReviewStockCategorySections`: main-list stock-category order, filters, heading totals, colors, top gaps, and debug-row policy.
 - `StockReviewTradeGroupSections`: review-list trade-group order, trade splitting, headings, top gaps, and debug-row policy.

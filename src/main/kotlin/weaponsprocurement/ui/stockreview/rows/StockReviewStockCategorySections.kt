@@ -30,9 +30,12 @@ class StockReviewStockCategorySection private constructor(
     ): Int {
         val records = filteredRecords(snapshot?.getRecords(itemType, category), state.getActiveFilters())
         val expanded = state.isExpanded(itemType, category)
-        return StockReviewListSection.builder(records)
-            .expanded(expanded)
-            .heading {
+        return StockReviewListSection.add(
+            rows,
+            layout,
+            StockReviewListSectionSpec(
+                records,
+                expanded,
                 StockReviewStockCategoryHeadingRows.stockCategory(
                     categoryHeading(itemType, records, tradeContext),
                     itemType,
@@ -40,12 +43,11 @@ class StockReviewStockCategorySection private constructor(
                     fillColor,
                     expanded,
                     topGap,
-                )
-            }
-            .includeWorstCaseRow(includesWorstCaseRow && StockItemType.WEAPON == itemType)
-            .itemAppender { targetRows, record -> StockReviewTradeItemRows.add(targetRows, record, state, tradeContext, layout) }
-            .build()
-            .addTo(rows, layout)
+                ),
+                includesWorstCaseRow && StockItemType.WEAPON == itemType,
+                StockReviewTradeRecordRowAppender(state, tradeContext, layout),
+            ),
+        )
     }
 
     private fun filteredRecords(
