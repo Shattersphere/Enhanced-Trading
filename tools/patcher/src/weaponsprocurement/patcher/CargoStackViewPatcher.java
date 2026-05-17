@@ -21,6 +21,7 @@ import jdk.internal.org.objectweb.asm.tree.VarInsnNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -143,6 +144,7 @@ public class CargoStackViewPatcher {
         boolean targetMethodFound;
         boolean weaponsGuardFound;
         boolean helperEmbedded;
+        boolean helperReferencesKotlinRuntime;
         boolean legacyHookCall;
         boolean diagnosticDuplicateDraw;
         boolean markerDraw;
@@ -164,6 +166,7 @@ public class CargoStackViewPatcher {
             System.out.println("Target method renderAtCenter(FFF)V: " + ok(targetMethodFound));
             System.out.println("WEAPONS branch guard: " + ok(weaponsGuardFound));
             System.out.println("Embedded helper class: " + ok(helperEmbedded));
+            System.out.println("Embedded helper Kotlin runtime refs: " + yesNo(helperReferencesKotlinRuntime));
             System.out.println("WEAPONS total helper calls: " + totalHelperCallsInWeapons);
             System.out.println("Non-WEAPONS total helper calls: " + totalHelperCallsOutsideWeapons);
             System.out.println("WEAPONS badge sprite render calls: " + spriteRenderCallsInWeapons);
@@ -984,7 +987,9 @@ public class CargoStackViewPatcher {
         PatchReport report = new PatchReport();
         byte[] classBytes = readClassBytes(jarPath, TARGET_CLASS_ENTRY);
         report.targetClassFound = classBytes != null;
-        report.helperEmbedded = findEntry(jarPath, HELPER_CLASS_ENTRY);
+        byte[] helperBytes = readClassBytes(jarPath, HELPER_CLASS_ENTRY);
+        report.helperEmbedded = helperBytes != null;
+        report.helperReferencesKotlinRuntime = referencesKotlinRuntime(helperBytes);
         if (classBytes == null) {
             return report;
         }
@@ -1034,6 +1039,9 @@ public class CargoStackViewPatcher {
         }
         if (!report.helperEmbedded) {
             throw new IllegalStateException("Patch verification failed: embedded helper class missing.");
+        }
+        if (report.helperReferencesKotlinRuntime) {
+            throw new IllegalStateException("Patch verification failed: embedded helper references Kotlin runtime, which is not visible to the core classloader.");
         }
         if (!report.helperCallInWeapons || report.totalHelperCallsInWeapons != 1) {
             throw new IllegalStateException("Patch verification failed: expected exactly one WEAPONS total helper(kind,id) call.");
@@ -1138,6 +1146,16 @@ public class CargoStackViewPatcher {
         try (JarFile jarFile = new JarFile(jarPath.toFile())) {
             return jarFile.getJarEntry(entryName) != null;
         }
+    }
+
+    private static boolean referencesKotlinRuntime(byte[] classBytes) {
+        if (classBytes == null) {
+            return false;
+        }
+        String constantPoolText = new String(classBytes, StandardCharsets.ISO_8859_1);
+        return constantPoolText.contains("kotlin/jvm/")
+                || constantPoolText.contains("kotlin/Metadata")
+                || constantPoolText.contains("Lkotlin/");
     }
 
     private static void writePatchedJar(Path jarPath, String entryName, byte[] replacementBytes, Map<String, byte[]> helperEntries) throws IOException {

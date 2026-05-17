@@ -179,7 +179,6 @@ function Assert-PrivateBadgeJar {
     $entries = Get-JarEntries -Path $Path
     $required = @(
         "weaponsprocurement/internal/WeaponsProcurementBadgeHelper.class",
-        "weaponsprocurement/internal/WeaponsProcurementBadgeHelper`$Companion.class",
         "weaponsprocurement/internal/WeaponsProcurementBadgeConfig.class",
         "weaponsprocurement/internal/WeaponsProcurementCountUpdater.class"
     )
@@ -187,6 +186,14 @@ function Assert-PrivateBadgeJar {
     $missing = @($required | Where-Object { $entries -notcontains $_ })
     if ($missing.Count -gt 0) {
         throw "Jar is missing private badge bridge classes: $($missing -join ', ')"
+    }
+
+    $kotlinOnlyHelperEntries = @(
+        "weaponsprocurement/internal/WeaponsProcurementBadgeHelper`$Companion.class"
+    )
+    $stale = @($kotlinOnlyHelperEntries | Where-Object { $entries -contains $_ })
+    if ($stale.Count -gt 0) {
+        throw "Jar contains Kotlin-compiled embedded helper entries that are unsafe for the core classloader: $($stale -join ', ')"
     }
 }
 
