@@ -105,8 +105,8 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 
 - `StockReviewRenderer`: shell/header/body/footer composition.
 - `StockReviewModeSpec` / `StockReviewLayoutContext`: mode selection and screen-level modal/list/summary layout.
-- `StockReviewListModel`: main trade rows.
-- `StockReviewReviewListModel`: review rows.
+- `StockReviewListModel` / `StockReviewReviewListModel`: main and review list sources.
+- `StockReviewListSection` / `StockReviewListEmptyRows`: shared heading/expansion/debug-row list section flow and empty-state rows.
 - `StockReviewListRow` / `StockReviewRowSpec`: shared row construction path for labels, cells, icons, actions, reserves, and tooltips.
 - `StockReviewHeadingRows`: shared stock, review, filter, and detail toggle heading policies.
 - `StockReviewItemInfoRows` / `StockReviewItemInfoFields`: Basic/Advanced item detail section flow and named field definitions.

@@ -2,7 +2,6 @@ package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
@@ -30,13 +29,13 @@ class StockReviewReviewListModel private constructor() {
         ): List<WimGuiListRow<StockReviewAction>> {
             val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
             if (pendingTrades.isNullOrEmpty()) {
-                rows.add(StockReviewListRow.empty("No trades are planned."))
+                rows.add(StockReviewListEmptyRows.review())
                 return rows
             }
             val buying = reviewTradesForGroup(pendingTrades, StockReviewTradeGroup.BUYING)
             val selling = reviewTradesForGroup(pendingTrades, StockReviewTradeGroup.SELLING)
             if (buying.isEmpty() && selling.isEmpty()) {
-                rows.add(StockReviewListRow.empty("No trades are planned."))
+                rows.add(StockReviewListEmptyRows.review())
                 return rows
             }
             addReviewGroup(rows, snapshot, buying, state, tradeContext, layout, StockReviewTradeGroup.BUYING)
@@ -54,23 +53,20 @@ class StockReviewReviewListModel private constructor() {
             tradeGroup: StockReviewTradeGroup,
         ) {
             val expanded = state.isExpanded(tradeGroup)
-            rows.add(
-                StockReviewHeadingRows.reviewGroup(
-                    tradeGroup,
-                    groupTrades.size,
-                    expanded,
-                    StockReviewTradeGroup.SELLING == tradeGroup,
-                ),
-            )
-            if (!expanded) {
-                return
-            }
-            if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup.BUYING == tradeGroup) {
-                StockReviewItemRows.addWorstCaseRow(rows, layout)
-            }
-            for (trade in groupTrades) {
-                StockReviewItemRows.addReviewRow(rows, snapshot, trade, state, tradeContext, layout)
-            }
+            StockReviewListSection.builder(groupTrades)
+                .expanded(expanded)
+                .heading {
+                    StockReviewHeadingRows.reviewGroup(
+                        tradeGroup,
+                        groupTrades.size,
+                        expanded,
+                        StockReviewTradeGroup.SELLING == tradeGroup,
+                    )
+                }
+                .includeWorstCaseRow(StockReviewTradeGroup.BUYING == tradeGroup)
+                .itemAppender { targetRows, trade -> StockReviewItemRows.addReviewRow(targetRows, snapshot, trade, state, tradeContext, layout) }
+                .build()
+                .addTo(rows, layout)
         }
 
         private fun reviewTradesForGroup(

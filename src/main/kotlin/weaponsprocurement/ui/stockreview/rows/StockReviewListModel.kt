@@ -9,7 +9,6 @@ import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.stock.item.StockCategory
 import weaponsprocurement.stock.item.StockItemType
-import weaponsprocurement.stock.item.StockSourceMode
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
@@ -31,30 +30,16 @@ object StockReviewListModel {
     ): List<WimGuiListRow<StockReviewAction>> {
         val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
         if (state == null) {
-            rows.add(StockReviewListRow.empty(emptyStateMessage(snapshot, null)))
+            rows.add(StockReviewListEmptyRows.main(snapshot, null))
             return rows
         }
         var displayed = 0
         displayed += addItemType(rows, snapshot, state, tradeContext, layout, StockItemType.WEAPON, false)
         displayed += addItemType(rows, snapshot, state, tradeContext, layout, StockItemType.WING, true)
         if (displayed == 0) {
-            rows.add(StockReviewListRow.empty(emptyStateMessage(snapshot, state)))
+            rows.add(StockReviewListEmptyRows.main(snapshot, state))
         }
         return rows
-    }
-
-    private fun emptyStateMessage(snapshot: WeaponStockSnapshot?, state: StockReviewState?): String {
-        if (snapshot != null && snapshot.getTotalRecords() > 0 && state != null && state.getActiveFilterCount() > 0) {
-            return "All rows are hidden by the active filters."
-        }
-        val sourceMode = snapshot?.getSourceMode() ?: StockSourceMode.LOCAL
-        if (StockSourceMode.SECTOR == sourceMode) {
-            return "No Sector Market weapon or wing stock is currently available."
-        }
-        if (StockSourceMode.FIXERS == sourceMode) {
-            return "Fixer's Market has no eligible theoretical or observed stock, or all eligible stock is blacklisted."
-        }
-        return "No local weapon or wing stock is buyable here, and no player-cargo weapons or wings are available to sell."
     }
 
     private fun addItemType(
@@ -68,16 +53,13 @@ object StockReviewListModel {
     ): Int {
         val count = snapshot?.getCount(itemType) ?: 0
         val expanded = state.isExpanded(itemType)
-        rows.add(
-            StockReviewHeadingRows.itemType(itemType, count, expanded, topGap),
-        )
-        if (!expanded) {
-            return count
-        }
+        StockReviewListSection.addHeading(rows, StockReviewHeadingRows.itemType(itemType, count, expanded, topGap))
+        if (!expanded) return count
+
         var displayed = 0
-        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.NO_STOCK, StockReviewStyle.NO_STOCK, false)
-        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.INSUFFICIENT, StockReviewStyle.INSUFFICIENT, true)
-        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.SUFFICIENT, StockReviewStyle.SUFFICIENT, true)
+        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.NO_STOCK, false)
+        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.INSUFFICIENT, true)
+        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.SUFFICIENT, true)
         return displayed
     }
 
@@ -89,32 +71,34 @@ object StockReviewListModel {
         layout: StockReviewRowLayout,
         itemType: StockItemType,
         category: StockCategory,
-        color: Color,
         topGap: Boolean,
     ): Int {
         val records = filteredRecords(snapshot?.getRecords(itemType, category), state.getActiveFilters())
         val expanded = state.isExpanded(itemType, category)
-        rows.add(
-            StockReviewHeadingRows.stockCategory(
-                categoryHeading(itemType, category, records, tradeContext),
-                itemType,
-                category,
-                color,
-                expanded,
-                topGap,
-            ),
-        )
-        if (!expanded) {
-            return records.size
-        }
-        if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && StockItemType.WEAPON == itemType && StockCategory.NO_STOCK == category) {
-            StockReviewItemRows.addWorstCaseRow(rows, layout)
-        }
-        for (record in records) {
-            StockReviewItemRows.addTradeRow(rows, record, state, tradeContext, layout)
-        }
-        return records.size
+        return StockReviewListSection.builder(records)
+            .expanded(expanded)
+            .heading {
+                StockReviewHeadingRows.stockCategory(
+                    categoryHeading(itemType, category, records, tradeContext),
+                    itemType,
+                    category,
+                    categoryColor(category),
+                    expanded,
+                    topGap,
+                )
+            }
+            .includeWorstCaseRow(StockItemType.WEAPON == itemType && StockCategory.NO_STOCK == category)
+            .itemAppender { targetRows, record -> StockReviewItemRows.addTradeRow(targetRows, record, state, tradeContext, layout) }
+            .build()
+            .addTo(rows, layout)
     }
+
+    private fun categoryColor(category: StockCategory): Color =
+        when (category) {
+            StockCategory.NO_STOCK -> StockReviewStyle.NO_STOCK
+            StockCategory.INSUFFICIENT -> StockReviewStyle.INSUFFICIENT
+            StockCategory.SUFFICIENT -> StockReviewStyle.SUFFICIENT
+        }
 
     private fun filteredRecords(
         records: List<WeaponStockRecord>?,
