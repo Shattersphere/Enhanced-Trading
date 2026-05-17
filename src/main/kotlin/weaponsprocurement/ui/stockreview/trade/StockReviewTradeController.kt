@@ -8,6 +8,7 @@ import kotlin.math.abs
 class StockReviewTradeController(
     private val state: StockReviewState,
     private val pendingTrades: StockReviewPendingTrades,
+    private val localMarketIntent: StockReviewLocalMarketIntent,
     private val host: Host,
 ) {
     interface Host {
@@ -34,6 +35,7 @@ class StockReviewTradeController(
         val requested = action.getQuantity()
         val quantity = if (requested > 0) Math.min(requested, available) else -Math.min(-requested, available)
         pendingTrades.adjustItemNet(action.getItemKey(), quantity)
+        localMarketIntent.captureFromTrades(pendingTrades.asList())
         if (abs(quantity) < abs(requested)) {
             host.postMessage("Only ${abs(quantity)} more can be planned for that item.")
         }
@@ -43,6 +45,7 @@ class StockReviewTradeController(
 
     fun resetPlan(itemKey: String?) {
         pendingTrades.resetItem(itemKey)
+        localMarketIntent.clearItem(itemKey)
         host.updateTradeWarning(null)
         host.requestContentRebuild()
     }
@@ -79,6 +82,7 @@ class StockReviewTradeController(
             host.requestContentRebuild()
             return
         }
+        localMarketIntent.captureFromTrades(pendingTrades.asList())
         host.updateTradeWarning(explicitWarning)
         host.requestContentRebuild()
     }
@@ -103,6 +107,7 @@ class StockReviewTradeController(
             host.requestContentRebuild()
             return
         }
+        localMarketIntent.captureFromTrades(pendingTrades.asList())
         host.updateTradeWarning(null)
         host.requestContentRebuild()
     }

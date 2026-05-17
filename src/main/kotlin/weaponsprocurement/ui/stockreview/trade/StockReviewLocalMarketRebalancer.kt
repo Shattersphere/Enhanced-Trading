@@ -16,6 +16,7 @@ object StockReviewLocalMarketRebalancer {
         previousSnapshot: WeaponStockSnapshot?,
         currentSnapshot: WeaponStockSnapshot?,
         previousTrades: List<StockReviewPendingTrade>?,
+        intent: StockReviewLocalMarketIntent?,
         includeBlackMarket: Boolean,
     ): List<StockReviewPendingTrade> {
         if (previousTrades.isNullOrEmpty()) {
@@ -29,7 +30,6 @@ object StockReviewLocalMarketRebalancer {
 
         val result = ArrayList<StockReviewPendingTrade>()
         val buyQuantityByItem = HashMap<String, Int>()
-        val blackQuantityByItem = if (includeBlackMarket) emptyMap() else blackBuyAllocations(previousSnapshot, previousTrades)
         for (trade in previousTrades) {
             if (trade.isSell()) {
                 add(result, trade.itemKey, trade.submarketId, trade.quantity)
@@ -41,30 +41,8 @@ object StockReviewLocalMarketRebalancer {
         }
 
         for ((itemKey, quantity) in buyQuantityByItem) {
-            val targetQuantity = if (includeBlackMarket) {
-                quantity
-            } else {
-                Math.max(0, quantity - (blackQuantityByItem[itemKey] ?: 0))
-            }
+            val targetQuantity = intent?.desiredBuyQuantity(itemKey, quantity) ?: Math.max(0, quantity)
             addSourceBuys(result, currentSnapshot.getRecord(itemKey), targetQuantity, includeBlackMarket)
-        }
-        return result
-    }
-
-    private fun blackBuyAllocations(
-        snapshot: WeaponStockSnapshot,
-        trades: List<StockReviewPendingTrade>,
-    ): Map<String, Int> {
-        val result = HashMap<String, Int>()
-        val quote = StockReviewQuoteBook(snapshot).quotePortfolio(trades)
-        for (trade in trades) {
-            if (!trade.isBuy()) continue
-            val allocations = quote.sellerAllocations(trade.itemKey, trade.submarketId)
-            for (allocation in allocations) {
-                if (allocation.isBlackMarket()) {
-                    result[trade.itemKey] = (result[trade.itemKey] ?: 0) + allocation.quantity
-                }
-            }
         }
         return result
     }

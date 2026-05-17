@@ -4,6 +4,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
+import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketIntent
 import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketRebalancer
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
@@ -13,6 +14,7 @@ class StockReviewUiController(
     private val state: StockReviewState,
     private val modes: StockReviewModeController,
     private val pendingTrades: StockReviewPendingTrades,
+    private val localMarketIntent: StockReviewLocalMarketIntent,
     private val host: Host,
 ) {
     interface Host {
@@ -95,6 +97,7 @@ class StockReviewUiController(
             }
             val previousSnapshot = host.snapshot()
             val previousTrades = ArrayList(pendingTrades.asList())
+            localMarketIntent.seedFromTrades(previousTrades)
             state.toggleBlackMarket()
             clearSourceWarningAndReviewMode()
             host.rebuildSnapshot()
@@ -103,6 +106,7 @@ class StockReviewUiController(
                     previousSnapshot,
                     host.snapshot(),
                     previousTrades,
+                    localMarketIntent,
                     state.isIncludeBlackMarket(),
                 ),
             )
@@ -117,6 +121,7 @@ class StockReviewUiController(
         }
         if (StockReviewAction.Type.RESET_ALL_TRADES == type) {
             pendingTrades.clear()
+            localMarketIntent.clear()
             host.updateTradeWarning(null)
             host.requestContentRebuild()
             return true
@@ -242,6 +247,7 @@ class StockReviewUiController(
 
     private fun resetTradeStateForSourceChange() {
         pendingTrades.clear()
+        localMarketIntent.clear()
         clearSourceWarningAndReviewMode()
     }
 

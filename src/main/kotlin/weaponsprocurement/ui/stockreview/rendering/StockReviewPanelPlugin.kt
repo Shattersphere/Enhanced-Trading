@@ -10,6 +10,7 @@ import weaponsprocurement.ui.stockreview.state.StockReviewLaunchState
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewExecutionController
+import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketIntent
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeController
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
@@ -42,6 +43,7 @@ class StockReviewPanelPlugin(
     private val snapshotBuilder = WeaponStockSnapshotBuilder()
     private val purchaseService = StockPurchaseService()
     private val pendingTrades = StockReviewPendingTrades()
+    private val localMarketIntent = StockReviewLocalMarketIntent(launchState?.getLocalBuyIntent())
     private val modes: StockReviewModeController
     private val ui: StockReviewUiController
     private val trades: StockReviewTradeController
@@ -51,10 +53,11 @@ class StockReviewPanelPlugin(
     init {
         if (launchState != null) {
             pendingTrades.replaceWith(launchState.getPendingTrades())
+            localMarketIntent.seedFromTrades(pendingTrades.asList())
         }
         modes = StockReviewModeController(reviewMode(launchState))
-        ui = StockReviewUiController(state, modes, pendingTrades, this)
-        trades = StockReviewTradeController(state, pendingTrades, this)
+        ui = StockReviewUiController(state, modes, pendingTrades, localMarketIntent, this)
+        trades = StockReviewTradeController(state, pendingTrades, localMarketIntent, this)
         execution = StockReviewExecutionController(state, pendingTrades, purchaseService, this)
     }
 
@@ -200,7 +203,7 @@ class StockReviewPanelPlugin(
     override fun requestReopen(review: Boolean) {
         StockReviewHotkeyScript.requestReopen(
             market(),
-            StockReviewLaunchState(state, pendingTrades.asList(), review),
+            StockReviewLaunchState(state, pendingTrades.asList(), localMarketIntent.asMap(), review),
         )
     }
 
