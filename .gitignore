@@ -1,6 +1,7 @@
 build/
 .gradle/
 .agent-deploy/
+Deploy Status.txt
 tools/patcher/build/
 .pytest_cache/
 *.class

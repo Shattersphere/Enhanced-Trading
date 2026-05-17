@@ -22,6 +22,7 @@ $stateRoot = Join-Path $repoRoot ".agent-deploy"
 $stateFile = Join-Path $stateRoot "deploy-private-badges.json"
 $logFile = Join-Path $stateRoot "deploy-private-badges.log"
 $obfJar = Join-Path $StarsectorDir "starsector-core\starfarer_obf.jar"
+$deployStatusFile = Join-Path $repoRoot "Deploy Status.txt"
 
 function Write-DeployLog {
     param([string]$Message)
@@ -30,6 +31,46 @@ function Write-DeployLog {
         New-Item -ItemType Directory -Force -Path $stateRoot | Out-Null
     }
     Add-Content -LiteralPath $logFile -Value $line
+}
+
+function Get-DeployCommit {
+    param([string]$RepoRoot)
+    try {
+        $commit = (& git -C $RepoRoot rev-parse --short HEAD 2>$null)
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($commit)) {
+            return $commit.Trim()
+        }
+    } catch {
+    }
+    return "unknown"
+}
+
+function Get-DeployStatusTimestamp {
+    return (Get-Date -Format "d/M/yy h:mmtt").ToLowerInvariant()
+}
+
+function Write-DeployStatus {
+    param(
+        [string]$Path,
+        [string]$Commit,
+        [string]$Status,
+        [string]$Message = "",
+        [switch]$Reset
+    )
+
+    $timestamp = Get-DeployStatusTimestamp
+    if ($Status -eq "error") {
+        $safeMessage = (($Message -replace "(\r\n|\n|\r)", " ") -replace "'", "''")
+        $line = "$timestamp - Deploy $Commit error: '$safeMessage'"
+    } else {
+        $line = "$timestamp - Deploy $Commit $Status"
+    }
+
+    if ($Reset) {
+        Set-Content -LiteralPath $Path -Value $line -Encoding UTF8
+    } else {
+        Add-Content -LiteralPath $Path -Value $line -Encoding UTF8
+    }
 }
 
 function Test-FileReplaceable {
@@ -119,8 +160,91 @@ function ConvertTo-ProcessArgument {
     return '"' + ($Value -replace '"', '\"') + '"'
 }
 
+function Start-MinimizedNoActivateProcess {
+    param([string]$FilePath, [object]$ArgumentList)
+
+    if (-not ("QueuedDeploy.NativeMethods" -as [type])) {
+        Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+
+namespace QueuedDeploy {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct STARTUPINFO {
+        public UInt32 cb;
+        public string lpReserved;
+        public string lpDesktop;
+        public string lpTitle;
+        public UInt32 dwX;
+        public UInt32 dwY;
+        public UInt32 dwXSize;
+        public UInt32 dwYSize;
+        public UInt32 dwXCountChars;
+        public UInt32 dwYCountChars;
+        public UInt32 dwFillAttribute;
+        public UInt32 dwFlags;
+        public UInt16 wShowWindow;
+        public UInt16 cbReserved2;
+        public IntPtr lpReserved2;
+        public IntPtr hStdInput;
+        public IntPtr hStdOutput;
+        public IntPtr hStdError;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PROCESS_INFORMATION {
+        public IntPtr hProcess;
+        public IntPtr hThread;
+        public UInt32 dwProcessId;
+        public UInt32 dwThreadId;
+    }
+
+    public static class NativeMethods {
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool CreateProcess(
+            string lpApplicationName,
+            string lpCommandLine,
+            IntPtr lpProcessAttributes,
+            IntPtr lpThreadAttributes,
+            bool bInheritHandles,
+            UInt32 dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            ref STARTUPINFO lpStartupInfo,
+            out PROCESS_INFORMATION lpProcessInformation);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr hObject);
+    }
+}
+'@
+    }
+
+    $argumentText = if ($ArgumentList -is [array]) { $ArgumentList -join " " } else { [string]$ArgumentList }
+    $commandLine = '"' + $FilePath + '"'
+    if (-not [string]::IsNullOrWhiteSpace($argumentText)) {
+        $commandLine += " $argumentText"
+    }
+
+    $startupInfo = New-Object QueuedDeploy.STARTUPINFO
+    $startupInfo.cb = [Runtime.InteropServices.Marshal]::SizeOf([type][QueuedDeploy.STARTUPINFO])
+    $startupInfo.dwFlags = 0x00000001
+    $startupInfo.wShowWindow = 7
+    $processInfo = New-Object QueuedDeploy.PROCESS_INFORMATION
+    $created = [QueuedDeploy.NativeMethods]::CreateProcess($null, $commandLine, [IntPtr]::Zero, [IntPtr]::Zero, $false, 0x00000010, [IntPtr]::Zero, $null, [ref]$startupInfo, [ref]$processInfo)
+    if (-not $created) {
+        $errorCode = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+        throw "Failed to start queued deploy worker without activating focus. Win32 error: $errorCode"
+    }
+
+    [void][QueuedDeploy.NativeMethods]::CloseHandle($processInfo.hThread)
+    [void][QueuedDeploy.NativeMethods]::CloseHandle($processInfo.hProcess)
+    return [pscustomobject]@{ Id = [int]$processInfo.dwProcessId }
+}
+
 function Start-QueuedPrivateBadgeDeploy {
     Stop-OlderQueuedPrivateDeploy
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "blocked, waiting..."
     $powerShellPath = (Get-Process -Id $PID).Path
     $args = @(
         "-NoProfile",
@@ -134,10 +258,16 @@ function Start-QueuedPrivateBadgeDeploy {
         $args += "-SkipCorePatchRefresh"
     }
     $argumentLine = ($args | ForEach-Object { ConvertTo-ProcessArgument -Value $_ }) -join " "
-    $process = Start-Process -FilePath $powerShellPath -ArgumentList $argumentLine -WindowStyle Hidden -PassThru
+    $process = Start-MinimizedNoActivateProcess -FilePath $powerShellPath -ArgumentList $argumentLine
     Write-DeployState -ProcessId $process.Id -Phase "queued"
     Write-DeployLog "Queued private badge deploy pid=$($process.Id) target=$obfJar."
-    Write-Host "Private badge deploy queued: core jar is locked. Hidden worker pid=$($process.Id) will rebuild, patch, and deploy after the lock clears."
+    Write-Host "Private badge deploy queued: core jar is locked. Minimized visible worker pid=$($process.Id) will rebuild, patch, and deploy after the lock clears."
+}
+
+$deployCommit = Get-DeployCommit -RepoRoot $repoRoot
+trap {
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "error" -Message $_.Exception.Message
+    break
 }
 
 if ($QueuedWorker) {
@@ -155,6 +285,8 @@ if ($QueuedWorker) {
         Start-Sleep -Seconds $PollSeconds
     }
     Write-DeployState -ProcessId $PID -Phase "running"
+} else {
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "initialised" -Reset
 }
 
 function Get-JarEntries {
@@ -298,6 +430,7 @@ if ($deployQueued) {
     )
 
     Write-Host "Private patched-badge build, patch, deploy, and validation completed."
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "succeeded"
 }
 
 Restore-CleanRepoJar

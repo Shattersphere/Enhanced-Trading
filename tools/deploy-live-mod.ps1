@@ -49,6 +49,46 @@ function Write-DeployLog {
     Add-Content -LiteralPath $logFile -Value $line
 }
 
+function Get-DeployCommit {
+    param([string]$RepoRoot)
+    try {
+        $commit = (& git -C $RepoRoot rev-parse --short HEAD 2>$null)
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($commit)) {
+            return $commit.Trim()
+        }
+    } catch {
+    }
+    return "unknown"
+}
+
+function Get-DeployStatusTimestamp {
+    return (Get-Date -Format "d/M/yy h:mmtt").ToLowerInvariant()
+}
+
+function Write-DeployStatus {
+    param(
+        [string]$Path,
+        [string]$Commit,
+        [string]$Status,
+        [string]$Message = "",
+        [switch]$Reset
+    )
+
+    $timestamp = Get-DeployStatusTimestamp
+    if ($Status -eq "error") {
+        $safeMessage = (($Message -replace "(\r\n|\n|\r)", " ") -replace "'", "''")
+        $line = "$timestamp - Deploy $Commit error: '$safeMessage'"
+    } else {
+        $line = "$timestamp - Deploy $Commit $Status"
+    }
+
+    if ($Reset) {
+        Set-Content -LiteralPath $Path -Value $line -Encoding UTF8
+    } else {
+        Add-Content -LiteralPath $Path -Value $line -Encoding UTF8
+    }
+}
+
 function Get-RelativeDeployItems {
     return $script:items
 }
@@ -376,13 +416,7 @@ namespace QueuedDeploy {
     $created = [QueuedDeploy.NativeMethods]::CreateProcess($null, $commandLine, [IntPtr]::Zero, [IntPtr]::Zero, $false, 0x00000010, [IntPtr]::Zero, $null, [ref]$startupInfo, [ref]$processInfo)
     if (-not $created) {
         $errorCode = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
-        Write-DeployLog "CreateProcess queued worker launch failed with Win32 error $errorCode; falling back to minimized Start-Process."
-        try {
-            $fallbackProcess = Start-Process -FilePath $FilePath -ArgumentList $argumentText -WindowStyle Minimized -PassThru
-            return [pscustomobject]@{ Id = [int]$fallbackProcess.Id }
-        } catch {
-            throw "Failed to start queued deploy worker. CreateProcess Win32 error: $errorCode; Start-Process fallback failed: $($_.Exception.Message)"
-        }
+        throw "Failed to start queued deploy worker without activating focus. Win32 error: $errorCode"
     }
 
     [void][QueuedDeploy.NativeMethods]::CloseHandle($processInfo.hThread)
@@ -394,6 +428,7 @@ function Start-QueuedDeploy {
     param([string]$StageRoot)
 
     Stop-OlderQueuedDeploy
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "blocked, waiting..."
 
     $runId = Split-Path -Leaf $StageRoot
     $deployAttemptedAtValue = (Get-Date).ToString("o")
@@ -420,7 +455,14 @@ function Start-QueuedDeploy {
     $process = Start-MinimizedNoActivateProcess -FilePath $powerShellPath -ArgumentList $argumentLine
     Write-DeployState -RunId $runId -ProcessId $process.Id -StageRoot $StageRoot -Phase "queued"
     Write-DeployLog "Queued deploy runId=$runId pid=$($process.Id) target=$deployRoot stage=$StageRoot."
-    Write-Host "Deploy queued: target is locked. Staged files at $StageRoot; hidden worker pid=$($process.Id) will publish after the lock clears."
+    Write-Host "Deploy queued: target is locked. Staged files at $StageRoot; minimized visible worker pid=$($process.Id) will publish after the lock clears."
+}
+
+$deployStatusFile = Join-Path $repoRoot "Deploy Status.txt"
+$deployCommit = Get-DeployCommit -RepoRoot $repoRoot
+trap {
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "error" -Message $_.Exception.Message
+    break
 }
 
 if ($QueuedWorker) {
@@ -448,9 +490,11 @@ if ($QueuedWorker) {
     Publish-StagedDeploy -StageRoot $StagingRoot
     Write-DeployState -RunId $runId -ProcessId $PID -StageRoot $StagingRoot -Phase "completed"
     Write-DeployLog "Completed queued deploy runId=$runId target=$deployRoot."
+    Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "succeeded"
     exit 0
 }
 
+Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "initialised" -Reset
 Assert-DeployJarBoundary -BaseRoot $repoRoot
 $stagedRoot = New-DeployStaging
 $blockerPath = Get-DeployBlocker
@@ -462,3 +506,4 @@ if (-not [string]::IsNullOrWhiteSpace($blockerPath)) {
 Publish-StagedDeploy -StageRoot $stagedRoot
 $mode = if ($NoClean) { "copy-over" } else { "clean-sync" }
 Write-Host "Deployed Weapons Procurement clean package files to $deployRoot ($mode)"
+Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "succeeded"
