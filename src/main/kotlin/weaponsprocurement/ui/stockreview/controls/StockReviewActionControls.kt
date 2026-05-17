@@ -7,6 +7,34 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
 import java.awt.Color
 
+class StockReviewButtonDefinition<C>(
+    @JvmField val id: String,
+    @JvmField val group: StockReviewActionGroup,
+    @JvmField val width: Float,
+    private val label: (C) -> String?,
+    private val action: (C) -> StockReviewAction,
+    private val enabled: (C) -> Boolean,
+    private val fillColor: (C) -> Color,
+    private val tooltip: (C) -> String?,
+) {
+    fun build(context: C, factory: StockReviewActionButtonFactory): WimGuiButtonSpec<StockReviewAction> =
+        factory.button(group, width, label.invoke(context), action.invoke(context), enabled.invoke(context), fillColor.invoke(context), tooltip.invoke(context))
+
+    companion object {
+        @JvmStatic
+        fun <C> alwaysEnabled(
+            id: String,
+            group: StockReviewActionGroup,
+            width: Float,
+            label: (C) -> String?,
+            action: (C) -> StockReviewAction,
+            fillColor: (C) -> Color,
+            tooltip: (C) -> String?,
+        ): StockReviewButtonDefinition<C> =
+            StockReviewButtonDefinition(id, group, width, label, action, { true }, fillColor, tooltip)
+    }
+}
+
 class StockReviewActionButtonFactory(borderColor: Color) {
     private val delegate = WimGuiSemanticButtonFactory<StockReviewAction>(borderColor)
 

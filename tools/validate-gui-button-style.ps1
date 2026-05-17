@@ -49,8 +49,12 @@ $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockRev
 $stockReviewActionControlsPath = Join-Path $kotlinGuiDir "stockreview\controls\StockReviewActionControls.kt"
 $stockReviewRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowSpec.kt"
 $stockReviewListRowPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListRow.kt"
+$stockReviewFooterSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFooterSpec.kt"
+$stockReviewFooterButtonsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFooterButtons.kt"
+$stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
+$stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -117,7 +121,12 @@ $cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
 $actionControlsText = Get-Content -LiteralPath $stockReviewActionControlsPath -Raw
 $rowSpecText = Get-Content -LiteralPath $stockReviewRowSpecPath -Raw
 $listRowText = Get-Content -LiteralPath $stockReviewListRowPath -Raw
+$footerSpecText = Get-Content -LiteralPath $stockReviewFooterSpecPath -Raw
+$footerButtonsText = Get-Content -LiteralPath $stockReviewFooterButtonsPath -Raw
+$actionRowRendererText = Get-Content -LiteralPath $stockReviewActionRowRendererPath -Raw
+$actionRowButtonsText = Get-Content -LiteralPath $stockReviewActionRowButtonsPath -Raw
 if ($actionControlsText -notmatch "class StockReviewActionRef" -or
+    $actionControlsText -notmatch "class StockReviewButtonDefinition" -or
     $actionControlsText -notmatch "StockReviewActionGuards\.requireGroup" -or
     $rowSpecText -notmatch "fun action\(value: StockReviewActionRef\?\)" -or
     $listRowText -notmatch "StockReviewActionRef\.rowExpansion" -or
@@ -125,6 +134,23 @@ if ($actionControlsText -notmatch "class StockReviewActionRef" -or
     $listRowText -notmatch "StockReviewActionRef\.scroll" -or
     $itemRowsText -notmatch "StockReviewActionRef\.debugMode") {
     throw "Stock-review row actions must use group-checked StockReviewActionRef/StockReviewActionControls helpers."
+}
+if ($footerSpecText -match "StockReviewActionGroup" -or
+    $footerSpecText -match "BUTTON_FACTORY\.button" -or
+    $footerSpecText -notmatch "StockReviewFooterButtons\.tradeLeft" -or
+    $footerSpecText -notmatch "StockReviewFooterButtons\.reviewLeft" -or
+    $footerButtonsText -notmatch "StockReviewButtonDefinition" -or
+    $footerButtonsText -notmatch "PURCHASE_ALL" -or
+    $footerButtonsText -notmatch "RESET_ALL") {
+    throw "Stock-review footer buttons must be declared in StockReviewFooterButtons, not inline in StockReviewFooterSpec."
+}
+if ($actionRowRendererText -match "StockReviewActionGroup" -or
+    $actionRowRendererText -match "BUTTON_FACTORY\.button" -or
+    $actionRowRendererText -notmatch "StockReviewActionRowButtons\.build" -or
+    $actionRowButtonsText -notmatch "StockReviewButtonDefinition" -or
+    $actionRowButtonsText -notmatch "BLACK_MARKET" -or
+    $actionRowButtonsText -notmatch "WeaponsProcurementConfig\.isDebugShipCatalogViewEnabled") {
+    throw "Stock-review action-row buttons must be declared in StockReviewActionRowButtons, not inline in StockReviewActionRowRenderer."
 }
 if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
     throw "Stock-review worst-case weapon debug row label is missing."
