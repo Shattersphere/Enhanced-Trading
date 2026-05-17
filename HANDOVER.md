@@ -125,6 +125,8 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 
 Shared `WimGui*` helpers own modal panels, list rendering, row cells, buttons, scrolling, input, tooltips, and campaign dialog host behavior. Future screens should compose these helpers instead of copying stock-review renderer logic.
 
+`WimGuiButtonSpec` creation is factory-owned. The repo no longer has Java UI callers, so old direct Java constructor compatibility is intentionally not preserved; new button specs should go through the existing factories.
+
 Starsector GUI runtime constraints:
 
 - Nested custom-panel buttons are not reliable through `buttonPressed(...)` alone; keep the event-gated `WimGuiButtonPoller` fallback.

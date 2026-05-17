@@ -6,6 +6,8 @@ $controlsCandidates = @(
     (Join-Path $kotlinGuiDir "WimGuiControls.kt")
 )
 $controlsPath = $controlsCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+$buttonSpecPath = Join-Path $kotlinGuiDir "WimGuiButtonSpec.kt"
+$modalFooterPath = Join-Path $kotlinGuiDir "WimGuiModalFooter.kt"
 
 if (-not $controlsPath) {
     throw "WimGuiControls source not found. Checked: $($controlsCandidates -join ', ')"
@@ -28,6 +30,20 @@ $directButtonHits = @($sourceFiles |
     Select-String -Pattern ".addButton(" -SimpleMatch)
 if ($directButtonHits.Count -gt 0) {
     throw "WP GUI buttons must route through WimGuiControls.addButton. Hits:`n$($directButtonHits -join "`n")"
+}
+
+$directButtonSpecConstructorHits = @($sourceFiles |
+    Where-Object { $_.FullName -ne $buttonSpecPath } |
+    Select-String -Pattern "new\s+WimGuiButtonSpec|WimGuiButtonSpec(?:<[^>]+>)?\s*\(")
+if ($directButtonSpecConstructorHits.Count -gt 0) {
+    throw "WimGuiButtonSpec construction must stay inside WimGuiButtonSpec.kt factories. Hits:`n$($directButtonSpecConstructorHits -join "`n")"
+}
+
+$buttonSpecsOfHits = @($sourceFiles | Select-String -Pattern "WimGuiButtonSpecs\.of\(")
+if ($buttonSpecsOfHits.Count -ne 1 -or
+    $buttonSpecsOfHits[0].Path -ne $modalFooterPath -or
+    $buttonSpecsOfHits[0].Line -notmatch "WimGuiButtonSpecs\.of\(left\)") {
+    throw "WimGuiButtonSpecs.of must remain limited to the known non-null modal-footer call unless a new nullable-vararg policy is added. Hits:`n$($buttonSpecsOfHits -join "`n")"
 }
 
 $controlsText = Get-Content -LiteralPath $controlsPath -Raw
