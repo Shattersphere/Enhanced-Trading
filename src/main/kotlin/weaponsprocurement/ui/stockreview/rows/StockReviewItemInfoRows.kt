@@ -1,11 +1,9 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.stock.item.WeaponStockRecord
-import java.util.Locale
 
 object StockReviewItemInfoRows {
     @JvmStatic
@@ -20,16 +18,16 @@ object StockReviewItemInfoRows {
         state: StockReviewState?,
         layout: StockReviewRowLayout,
     ) {
-        val basicExpanded = isInfoSectionExpanded(state, record, "basic")
-        rows.add(infoHeading("Basic Info", record, "basic", basicExpanded, layout))
+        val basicExpanded = isInfoSectionExpanded(state, StockReviewHeadingRows.basicInfoSectionKey(record))
+        rows.add(StockReviewHeadingRows.basicInfo(record, basicExpanded, layout))
         if (basicExpanded) {
             addBasicInfo(rows, record, layout)
         }
         if (record.isWing()) {
             return
         }
-        val advancedExpanded = isInfoSectionExpanded(state, record, "advanced")
-        rows.add(infoHeading("Advanced Info", record, "advanced", advancedExpanded, layout))
+        val advancedExpanded = isInfoSectionExpanded(state, StockReviewHeadingRows.advancedInfoSectionKey(record))
+        rows.add(StockReviewHeadingRows.advancedInfo(record, advancedExpanded, layout))
         if (advancedExpanded) {
             addAdvancedInfo(rows, record, layout)
         }
@@ -112,25 +110,8 @@ object StockReviewItemInfoRows {
         addDataRow(rows, "Guided", record.guidedLabel, layout)
     }
 
-    private fun infoHeading(
-        label: String,
-        record: WeaponStockRecord,
-        section: String,
-        expanded: Boolean,
-        layout: StockReviewRowLayout,
-    ): WimGuiListRow<StockReviewAction> = StockReviewListRow.nestedHeading(
-        WimGuiToggleHeading.label(label, expanded),
-        layout.infoIndent,
-        layout.rightBlockWidth,
-        StockReviewAction.toggleItem(infoSectionKey(record, section)),
-        false,
-        "Show or hide ${label.lowercase(Locale.US)} rows.",
-    )
-
-    private fun isInfoSectionExpanded(state: StockReviewState?, record: WeaponStockRecord, section: String): Boolean =
-        state == null || !state.isItemExpanded(infoSectionKey(record, section))
-
-    private fun infoSectionKey(record: WeaponStockRecord, section: String): String = record.itemKey + "::info::" + section
+    private fun isInfoSectionExpanded(state: StockReviewState?, sectionKey: String): Boolean =
+        state == null || !state.isItemExpanded(sectionKey)
 
     private fun addRequiredDataRow(
         rows: MutableList<WimGuiListRow<StockReviewAction>>,

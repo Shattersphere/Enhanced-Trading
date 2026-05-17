@@ -8,7 +8,6 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 import weaponsprocurement.stock.item.WeaponStockSnapshot
-import java.awt.Color
 import java.util.ArrayList
 
 class StockReviewReviewListModel private constructor() {
@@ -55,14 +54,11 @@ class StockReviewReviewListModel private constructor() {
             tradeGroup: StockReviewTradeGroup,
         ) {
             val expanded = state.isExpanded(tradeGroup)
-            val headingColor: Color = if (StockReviewTradeGroup.BUYING == tradeGroup) StockReviewStyle.CONFIRM_BUTTON else StockReviewStyle.CANCEL_BUTTON
             rows.add(
-                StockReviewGroupRows.reviewGroupHeading(
-                    tradeGroup.label,
+                StockReviewHeadingRows.reviewGroup(
+                    tradeGroup,
                     groupTrades.size,
                     expanded,
-                    headingColor,
-                    StockReviewAction.toggle(tradeGroup),
                     StockReviewTradeGroup.SELLING == tradeGroup,
                 ),
             )

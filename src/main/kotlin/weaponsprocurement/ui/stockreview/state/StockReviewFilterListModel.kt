@@ -1,8 +1,8 @@
 package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.rows.StockReviewHeadingRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.stock.item.StockSourceMode
@@ -56,14 +56,8 @@ class StockReviewFilterListModel private constructor() {
         ) {
             val expanded = state.isExpanded(group)
             val activeInGroup = StockReviewFilters.activeInGroup(state.getActiveFilters(), group)
-            val label = WimGuiToggleHeading.countedLabel(group.label, activeInGroup.size, expanded)
             rows.add(
-                StockReviewListRow.filterControlHeading(
-                    label,
-                    StockReviewAction.toggle(group),
-                    topGap,
-                    StockReviewTooltips.filterHeading(group),
-                ),
+                StockReviewHeadingRows.filterGroup(group, activeInGroup.size, expanded, topGap),
             )
             if (!expanded) {
                 return

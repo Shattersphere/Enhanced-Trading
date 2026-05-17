@@ -108,7 +108,7 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 - `StockReviewListModel`: main trade rows.
 - `StockReviewReviewListModel`: review rows.
 - `StockReviewListRow` / `StockReviewRowSpec`: shared row construction path for labels, cells, icons, actions, reserves, and tooltips.
-- `StockReviewGroupRows`: shared stock/review group headings.
+- `StockReviewHeadingRows`: shared stock, review, filter, and detail toggle heading policies.
 - `StockReviewItemInfoRows`: basic/advanced item data rows.
 - `StockReviewCellGroup` / `StockReviewTradeRowCells`: stock/price/plan/action widths, capped labels, debug extrema, and cell factories.
 - `StockReviewFooterRenderer`: mode-specific footers.

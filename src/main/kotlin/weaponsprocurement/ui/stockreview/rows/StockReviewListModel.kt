@@ -69,7 +69,7 @@ object StockReviewListModel {
         val count = snapshot?.getCount(itemType) ?: 0
         val expanded = state.isExpanded(itemType)
         rows.add(
-            StockReviewGroupRows.itemTypeHeading(itemType, count, expanded, topGap),
+            StockReviewHeadingRows.itemType(itemType, count, expanded, topGap),
         )
         if (!expanded) {
             return count
@@ -95,7 +95,7 @@ object StockReviewListModel {
         val records = filteredRecords(snapshot?.getRecords(itemType, category), state.getActiveFilters())
         val expanded = state.isExpanded(itemType, category)
         rows.add(
-            StockReviewGroupRows.stockCategoryHeading(
+            StockReviewHeadingRows.stockCategory(
                 categoryHeading(itemType, category, records, tradeContext),
                 itemType,
                 category,

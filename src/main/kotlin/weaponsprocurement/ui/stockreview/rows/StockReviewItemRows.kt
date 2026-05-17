@@ -2,7 +2,6 @@ package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiRowCell
-import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.controls.StockReviewActionRef
 import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
@@ -30,7 +29,7 @@ object StockReviewItemRows {
             rows,
             layout,
             record,
-            WimGuiToggleHeading.label(record.displayNameWithFixerMarker, expanded),
+            StockReviewHeadingRows.itemLabel(record, expanded),
             StockReviewTradeRowCells.tradeCells(record, tradeContext, layout),
             StockReviewAction.toggleItem(record.itemKey),
         )
@@ -59,7 +58,7 @@ object StockReviewItemRows {
             rows,
             layout,
             record,
-            WimGuiToggleHeading.label(record.displayNameWithFixerMarker, expanded),
+            StockReviewHeadingRows.itemLabel(record, expanded),
             StockReviewTradeRowCells.reviewCells(record, trade, tradeContext, layout),
             StockReviewAction.toggleItem(record.itemKey),
         )
