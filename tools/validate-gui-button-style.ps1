@@ -45,6 +45,7 @@ $stockReviewListSectionPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRev
 $stockReviewListEmptyRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListEmptyRows.kt"
 $stockReviewItemTypeSectionsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemTypeSections.kt"
 $stockReviewStockCategorySectionsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewStockCategorySections.kt"
+$stockReviewTradeGroupSectionsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeGroupSections.kt"
 $stockReviewItemRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemRows.kt"
 $stockReviewItemInfoRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoRows.kt"
 $stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowLayout.kt"
@@ -65,7 +66,7 @@ $stockReviewHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRev
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -107,6 +108,8 @@ $listSectionText = Get-Content -LiteralPath $stockReviewListSectionPath -Raw
 $listEmptyRowsText = Get-Content -LiteralPath $stockReviewListEmptyRowsPath -Raw
 $itemTypeSectionsText = Get-Content -LiteralPath $stockReviewItemTypeSectionsPath -Raw
 $stockCategorySectionsText = Get-Content -LiteralPath $stockReviewStockCategorySectionsPath -Raw
+$tradeGroupSectionsText = Get-Content -LiteralPath $stockReviewTradeGroupSectionsPath -Raw
+$reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
 if ($itemTypeSectionsText -notmatch "class StockReviewItemTypeSection" -or
     $itemTypeSectionsText -notmatch "object StockReviewItemTypeSections" -or
     $itemTypeSectionsText -notmatch "StockReviewItemTypeSection\(StockItemType\.WEAPON, false\)" -or
@@ -138,6 +141,23 @@ if ($stockCategorySectionsText -notmatch "class StockReviewStockCategorySection"
     $listModelText -match "filteredRecords") {
     throw "Stock-review stock-category order, filters, headings, colors, top gaps, and debug-row policy must live in StockReviewStockCategorySections."
 }
+if ($tradeGroupSectionsText -notmatch "class StockReviewTradeGroupSection" -or
+    $tradeGroupSectionsText -notmatch "object StockReviewTradeGroupSections" -or
+    $tradeGroupSectionsText -notmatch "StockReviewTradeGroupSection\(StockReviewTradeGroup\.BUYING, false, true\)" -or
+    $tradeGroupSectionsText -notmatch "StockReviewTradeGroupSection\(StockReviewTradeGroup\.SELLING, true, false\)" -or
+    $tradeGroupSectionsText -notmatch "StockReviewListSection\.builder\(groupTrades\)" -or
+    $tradeGroupSectionsText -notmatch "StockReviewHeadingRows\.reviewGroup" -or
+    $tradeGroupSectionsText -notmatch "includeWorstCaseRow\(includesWorstCaseRow\)" -or
+    $tradeGroupSectionsText -notmatch "fun tradesFrom" -or
+    $tradeGroupSectionsText -notmatch "class StockReviewTradeGroupRows" -or
+    $tradeGroupSectionsText -notmatch "fun allEmpty" -or
+    $reviewModelText -notmatch "StockReviewTradeGroupSections\.build" -or
+    $reviewModelText -match "StockReviewTradeGroup\.BUYING" -or
+    $reviewModelText -match "StockReviewTradeGroup\.SELLING" -or
+    $reviewModelText -match "reviewTradesForGroup" -or
+    $reviewModelText -match "StockReviewListSection\.builder") {
+    throw "Stock-review review-group order, trade splitting, top gaps, headings, and debug-row policy must live in StockReviewTradeGroupSections."
+}
 $itemRowsText = Get-Content -LiteralPath $stockReviewItemRowsPath -Raw
 if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
     $itemRowsText -notmatch "StockReviewRowIcon\.item\(record\)" -or
@@ -145,7 +165,6 @@ if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
     throw "Main stock-review item rows must start at the category indent; the icon supplies the next visual indent."
 }
 
-$reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
 $itemInfoRowsText = Get-Content -LiteralPath $stockReviewItemInfoRowsPath -Raw
 if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
     $itemRowsText -notmatch "StockReviewRowIcon\.item\(record\)" -or
@@ -158,8 +177,8 @@ if ($listSectionText -notmatch "class StockReviewListSection" -or
     $listSectionText -notmatch "fun addHeading" -or
     $itemTypeSectionsText -notmatch "StockReviewListSection\.addHeading" -or
     $stockCategorySectionsText -notmatch "StockReviewListSection\.builder\(records\)" -or
-    $reviewModelText -notmatch "StockReviewListSection\.builder\(groupTrades\)" -or
-    $reviewModelText -notmatch "\.includeWorstCaseRow\(StockReviewTradeGroup\.BUYING == tradeGroup\)" -or
+    $tradeGroupSectionsText -notmatch "StockReviewListSection\.builder\(groupTrades\)" -or
+    $tradeGroupSectionsText -notmatch "\.includeWorstCaseRow\(includesWorstCaseRow\)" -or
     $rowLayoutText -notmatch "fun review\(\): StockReviewRowLayout") {
     throw "Stock-review main/review list sections must route heading, expansion, and worst-case rows through StockReviewListSection."
 }
