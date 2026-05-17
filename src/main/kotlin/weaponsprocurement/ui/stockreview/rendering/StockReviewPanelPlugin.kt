@@ -22,7 +22,6 @@ import org.apache.log4j.Logger
 import weaponsprocurement.trade.execution.StockPurchaseService
 import weaponsprocurement.config.StockReviewConfig
 import weaponsprocurement.stock.item.WeaponStockSnapshot
-import weaponsprocurement.stock.item.WeaponStockSnapshotBuilder
 import weaponsprocurement.lifecycle.StockReviewHotkeyScript
 
 class StockReviewPanelPlugin(
@@ -41,7 +40,7 @@ class StockReviewPanelPlugin(
     private val config: StockReviewConfig = StockReviewConfig.load()
     private val state: StockReviewState = launchState?.getState()?.let { StockReviewState(it) } ?: StockReviewState(config)
     private val renderer = StockReviewRenderer()
-    private val snapshotBuilder = WeaponStockSnapshotBuilder()
+    private val snapshots = StockReviewSnapshotController(initialMarket, config, state, renderer)
     private val purchaseService = StockPurchaseService()
     private val pendingTrades = StockReviewPendingTrades()
     private val localMarketIntent = StockReviewLocalMarketIntent(launchState?.getLocalBuyIntent())
@@ -50,7 +49,6 @@ class StockReviewPanelPlugin(
     private val trades: StockReviewTradeController
     private val execution: StockReviewExecutionController
     private val tradeActionDispatcher: StockReviewTradeActionDispatcher
-    private var snapshot: WeaponStockSnapshot? = null
 
     init {
         if (launchState != null) {
@@ -80,13 +78,13 @@ class StockReviewPanelPlugin(
         StockReviewHotkeyScript.markDialogClosed()
     }
 
-    override fun canRenderContent(): Boolean = snapshot != null
+    override fun canRenderContent(): Boolean = snapshots.hasSnapshot()
 
     override fun renderContent(
         content: CustomPanelAPI,
         buttonBindings: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
-        val currentSnapshot = snapshot ?: return StockReviewStyle.initialListBounds(modes.currentScreenMode())
+        val currentSnapshot = snapshots.current() ?: return StockReviewStyle.initialListBounds(modes.currentScreenMode())
         val screenMode = modes.currentScreenMode()
         return renderer.render(
             content,
@@ -117,10 +115,10 @@ class StockReviewPanelPlugin(
         }
     }
 
-    override fun snapshot(): WeaponStockSnapshot? = snapshot
+    override fun snapshot(): WeaponStockSnapshot? = snapshots.current()
 
     override fun updateTradeWarning(explicitWarning: String?) {
-        StockReviewTradeWarnings.update(snapshot, state, pendingTrades.asList(), explicitWarning)
+        StockReviewTradeWarnings.update(snapshots.current(), state, pendingTrades.asList(), explicitWarning)
     }
 
     override fun requestContentRebuild() {
@@ -148,20 +146,7 @@ class StockReviewPanelPlugin(
     }
 
     override fun rebuildSnapshot() {
-        state.normalizeSourceMode()
-        renderer.invalidateModelCache()
-        val host = WimGuiCampaignDialogHost.current()
-        val sector = host.getSector()
-        val market = host.getCurrentMarketOr(initialMarket)
-        snapshot = snapshotBuilder.build(
-            sector,
-            market,
-            config,
-            state.getSortMode(),
-            state.isIncludeCurrentMarketStorage(),
-            state.isIncludeBlackMarket(),
-            state.getSourceMode(),
-        )
+        snapshots.rebuild()
     }
 
     override fun exitReviewMode() {

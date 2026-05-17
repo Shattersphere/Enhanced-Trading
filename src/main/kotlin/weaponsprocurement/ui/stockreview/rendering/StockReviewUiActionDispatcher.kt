@@ -7,17 +7,14 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
-import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketIntent
-import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketRebalancer
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
-import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
 
 class StockReviewUiActionDispatcher(
     private val state: StockReviewState,
     private val modes: StockReviewModeController,
     private val pendingTrades: StockReviewPendingTrades,
-    private val localMarketIntent: StockReviewLocalMarketIntent,
+    private val sourceTransitions: StockReviewSourceTransitionController,
     private val host: StockReviewUiController.Host,
 ) {
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
@@ -30,29 +27,17 @@ class StockReviewUiActionDispatcher(
         ) { action ->
             handleRowExpansion(action)
         },
-        StockReviewActionHandlerGroup.one("sort mode", Type.CYCLE_SORT_MODE) {
-            state.cycleSortMode()
-            host.rebuildSnapshot()
-            host.requestContentRebuild()
-        },
-        StockReviewActionHandlerGroup.one("source mode", Type.CYCLE_SOURCE_MODE) {
-            state.cycleSourceMode()
-            resetTradeStateForSourceChange()
-            state.setListScrollOffset(0)
-            host.rebuildSnapshot()
-            host.requestContentRebuild()
-        },
-        StockReviewActionHandlerGroup.one("black market mode", Type.TOGGLE_BLACK_MARKET) {
-            handleBlackMarketToggle()
+        StockReviewActionHandlerGroup.many(
+            "source and snapshot transitions",
+            Type.CYCLE_SORT_MODE,
+            Type.CYCLE_SOURCE_MODE,
+            Type.TOGGLE_BLACK_MARKET,
+            Type.RESET_ALL_TRADES,
+        ) { action ->
+            sourceTransitions.handle(action)
         },
         StockReviewActionHandlerGroup.one("list scroll", Type.SCROLL_LIST) { action ->
             state.adjustListScrollOffset(action.getQuantity(), host.currentMaxScrollOffset())
-            host.requestContentRebuild()
-        },
-        StockReviewActionHandlerGroup.one("reset all trades", Type.RESET_ALL_TRADES) {
-            pendingTrades.clear()
-            localMarketIntent.clear()
-            host.updateTradeWarning(null)
             host.requestContentRebuild()
         },
         StockReviewActionHandlerGroup.many(
@@ -106,30 +91,6 @@ class StockReviewUiActionDispatcher(
         host.requestContentRebuild()
     }
 
-    private fun handleBlackMarketToggle() {
-        if (!state.getSourceMode().supportsBlackMarketToggle()) {
-            host.requestContentRebuild()
-            return
-        }
-        val previousSnapshot = host.snapshot()
-        val previousTrades = ArrayList(pendingTrades.asList())
-        localMarketIntent.seedFromTrades(previousTrades)
-        state.toggleBlackMarket()
-        clearSourceWarningAndReviewMode()
-        host.rebuildSnapshot()
-        pendingTrades.replaceWith(
-            StockReviewLocalMarketRebalancer.rebalanceBlackMarketToggle(
-                previousSnapshot,
-                host.snapshot(),
-                previousTrades,
-                localMarketIntent,
-                state.isIncludeBlackMarket(),
-            ),
-        )
-        StockReviewTradeWarnings.clear(state)
-        host.requestContentRebuild()
-    }
-
     private fun handleFilters(action: StockReviewAction) {
         when (action.getType()) {
             Type.OPEN_FILTERS -> modes.enterFilters(state)
@@ -171,14 +132,4 @@ class StockReviewUiActionDispatcher(
         host.reopen(false)
     }
 
-    private fun resetTradeStateForSourceChange() {
-        pendingTrades.clear()
-        localMarketIntent.clear()
-        clearSourceWarningAndReviewMode()
-    }
-
-    private fun clearSourceWarningAndReviewMode() {
-        StockReviewTradeWarnings.clear(state)
-        modes.setReviewMode(false)
-    }
 }

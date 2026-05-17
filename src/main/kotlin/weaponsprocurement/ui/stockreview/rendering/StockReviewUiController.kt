@@ -14,14 +14,11 @@ class StockReviewUiController(
     private val localMarketIntent: StockReviewLocalMarketIntent,
     private val host: Host,
 ) {
-    private val actionDispatcher = StockReviewUiActionDispatcher(state, modes, pendingTrades, localMarketIntent, host)
+    private val sourceTransitions = StockReviewSourceTransitionController(state, modes, pendingTrades, localMarketIntent, host)
+    private val actionDispatcher = StockReviewUiActionDispatcher(state, modes, pendingTrades, sourceTransitions, host)
 
-    interface Host {
+    interface Host : StockReviewSourceTransitionController.Host {
         fun currentMaxScrollOffset(): Int
-        fun snapshot(): WeaponStockSnapshot?
-        fun updateTradeWarning(explicitWarning: String?)
-        fun rebuildSnapshot()
-        fun requestContentRebuild()
         fun reopen(review: Boolean)
         fun requestClose()
     }
