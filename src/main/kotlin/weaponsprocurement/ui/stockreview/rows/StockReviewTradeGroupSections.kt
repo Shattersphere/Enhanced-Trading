@@ -47,7 +47,7 @@ class StockReviewTradeGroupSection private constructor(
                 )
             }
             .includeWorstCaseRow(includesWorstCaseRow)
-            .itemAppender { targetRows, trade -> StockReviewItemRows.addReviewRow(targetRows, snapshot, trade, state, tradeContext, layout) }
+            .itemAppender { targetRows, trade -> StockReviewReviewItemRows.add(targetRows, snapshot, trade, state, tradeContext, layout) }
             .build()
             .addTo(rows, layout)
     }

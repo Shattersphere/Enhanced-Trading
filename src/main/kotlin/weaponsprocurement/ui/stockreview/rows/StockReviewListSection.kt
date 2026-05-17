@@ -17,7 +17,7 @@ class StockReviewListSection<T> private constructor(
             return items.size
         }
         if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && includeWorstCaseRow) {
-            StockReviewItemRows.addWorstCaseRow(rows, layout)
+            StockReviewWorstCaseItemRows.add(rows, layout)
         }
         for (item in items) {
             itemAppender.invoke(rows, item)

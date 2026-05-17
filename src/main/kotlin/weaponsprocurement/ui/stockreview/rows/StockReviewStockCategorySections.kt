@@ -43,7 +43,7 @@ class StockReviewStockCategorySection private constructor(
                 )
             }
             .includeWorstCaseRow(includesWorstCaseRow && StockItemType.WEAPON == itemType)
-            .itemAppender { targetRows, record -> StockReviewItemRows.addTradeRow(targetRows, record, state, tradeContext, layout) }
+            .itemAppender { targetRows, record -> StockReviewTradeItemRows.add(targetRows, record, state, tradeContext, layout) }
             .build()
             .addTo(rows, layout)
     }
