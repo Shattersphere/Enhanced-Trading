@@ -4,8 +4,9 @@ import weaponsprocurement.config.WeaponsProcurementConfig
 import weaponsprocurement.ui.WimGuiButtonBinding
 import weaponsprocurement.ui.WimGuiButtonSpecs
 import weaponsprocurement.ui.WimGuiModalActionRow
-import weaponsprocurement.ui.WimGuiSemanticButtonFactory
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
+import weaponsprocurement.ui.stockreview.controls.StockReviewActionButtonFactory
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.stock.item.WeaponStockSnapshot
@@ -13,7 +14,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI
 
 class StockReviewActionRowRenderer private constructor() {
     companion object {
-        private val BUTTON_FACTORY = WimGuiSemanticButtonFactory<StockReviewAction>(StockReviewStyle.ROW_BORDER)
+        private val BUTTON_FACTORY = StockReviewActionButtonFactory(StockReviewStyle.ROW_BORDER)
 
         @JvmStatic
         fun render(
@@ -35,6 +36,7 @@ class StockReviewActionRowRenderer private constructor() {
                 StockReviewStyle.BUTTON_GAP,
                 WimGuiButtonSpecs.of(
                     BUTTON_FACTORY.enabledButton(
+                        StockReviewActionGroup.SOURCE_TRANSITIONS,
                         StockReviewStyle.SORT_BUTTON_WIDTH,
                         "Sort: ${snapshot.getSortMode().label}",
                         StockReviewAction.cycleSortMode(),
@@ -42,6 +44,7 @@ class StockReviewActionRowRenderer private constructor() {
                         StockReviewTooltips.sort(snapshot.getSortMode()),
                     ),
                     BUTTON_FACTORY.enabledButton(
+                        StockReviewActionGroup.SOURCE_TRANSITIONS,
                         StockReviewStyle.SOURCE_BUTTON_WIDTH,
                         "Source: ${snapshot.getSourceMode().label}",
                         StockReviewAction.cycleSourceMode(),
@@ -49,6 +52,7 @@ class StockReviewActionRowRenderer private constructor() {
                         StockReviewTooltips.source(snapshot.getSourceMode()),
                     ),
                     BUTTON_FACTORY.button(
+                        StockReviewActionGroup.SOURCE_TRANSITIONS,
                         StockReviewStyle.BLACK_MARKET_BUTTON_WIDTH,
                         "Black Market: ${StockReviewUiText.onOff(snapshot.isIncludeBlackMarket())}",
                         StockReviewAction.toggleBlackMarket(),
@@ -57,6 +61,7 @@ class StockReviewActionRowRenderer private constructor() {
                         "Include black-market stock for Local and Sector Market source modes. Fixer's Market controls its own virtual stock.",
                     ),
                     BUTTON_FACTORY.enabledButton(
+                        StockReviewActionGroup.FILTERS,
                         StockReviewStyle.FILTER_BUTTON_WIDTH,
                         "Filters: ${state.getActiveFilterCount()}",
                         StockReviewAction.openFilters(),
@@ -64,6 +69,7 @@ class StockReviewActionRowRenderer private constructor() {
                         "Open the weapon filter list.",
                     ),
                     BUTTON_FACTORY.enabledButton(
+                        StockReviewActionGroup.DEBUG_MODE,
                         StockReviewStyle.COLOR_BUTTON_WIDTH,
                         "Colors",
                         StockReviewAction.openColorDebug(),
@@ -72,6 +78,7 @@ class StockReviewActionRowRenderer private constructor() {
                     ),
                     if (WeaponsProcurementConfig.isDebugShipCatalogViewEnabled()) {
                         BUTTON_FACTORY.enabledButton(
+                            StockReviewActionGroup.DEBUG_MODE,
                             StockReviewStyle.COLOR_BUTTON_WIDTH,
                             "Ships",
                             StockReviewAction.openShipCatalogDebug(),

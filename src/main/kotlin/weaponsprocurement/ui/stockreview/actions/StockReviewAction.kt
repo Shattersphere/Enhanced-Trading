@@ -61,6 +61,7 @@ class StockReviewAction private constructor(
     fun getItemKey(): String? = itemKey
     fun getSubmarketId(): String? = submarketId
     fun getQuantity(): Int = quantity
+    fun getGroup(): StockReviewActionGroup = StockReviewActionGroup.forType(type)
 
     companion object {
         @JvmStatic

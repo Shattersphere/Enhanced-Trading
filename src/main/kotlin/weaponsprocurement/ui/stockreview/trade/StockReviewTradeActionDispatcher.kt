@@ -1,9 +1,9 @@
 package weaponsprocurement.ui.stockreview.trade
 
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 
 class StockReviewTradeActionDispatcher(
@@ -11,23 +11,19 @@ class StockReviewTradeActionDispatcher(
     private val execution: StockReviewExecutionController,
 ) {
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
-        StockReviewActionHandlerGroup.many(
-            "item plan adjustment",
-            Type.ADJUST_PLAN,
-            Type.ADJUST_TO_SUFFICIENT,
-        ) { action ->
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.PLAN_ADJUSTMENT) { action ->
             trades.adjustPendingTrade(action)
         },
-        StockReviewActionHandlerGroup.one("item plan reset", Type.RESET_PLAN) { action ->
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.PLAN_RESET) { action ->
             trades.resetPlan(action.getItemKey())
         },
-        StockReviewActionHandlerGroup.one("bulk sufficient purchase", Type.PURCHASE_ALL_UNTIL_SUFFICIENT) {
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.BULK_SUFFICIENT_PURCHASE) {
             trades.purchaseAllUntilSufficient()
         },
-        StockReviewActionHandlerGroup.one("bulk sufficient sale", Type.SELL_ALL_UNTIL_SUFFICIENT) {
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.BULK_SUFFICIENT_SALE) {
             trades.sellAllUntilSufficient()
         },
-        StockReviewActionHandlerGroup.one("confirmed execution", Type.CONFIRM_PURCHASE) {
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.CONFIRMED_EXECUTION) {
             execution.confirmPendingTrades()
         },
     )

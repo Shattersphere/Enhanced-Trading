@@ -2,6 +2,8 @@ package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
+import weaponsprocurement.ui.stockreview.controls.StockReviewActionCells
 import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
@@ -39,7 +41,8 @@ class StockReviewTradeRowCells private constructor() {
                     StockReviewAction.adjustPlan(record.itemKey, -sellStepQuantity),
                     StockReviewTooltips.decreasePlan(sellStepQuantity),
                 ),
-                WimGuiRowCell.standardAction(
+                StockReviewActionCells.standard(
+                    StockReviewActionGroup.PLAN_ADJUSTMENT,
                     "-1",
                     StockReviewStyle.TRADE_STEP_BUTTON_WIDTH,
                     StockReviewStyle.SELL_BUTTON,
@@ -47,7 +50,8 @@ class StockReviewTradeRowCells private constructor() {
                     sellRemaining >= 1,
                     StockReviewTooltips.decreasePlan(1),
                 ),
-                WimGuiRowCell.standardAction(
+                StockReviewActionCells.standard(
+                    StockReviewActionGroup.PLAN_ADJUSTMENT,
                     "+1",
                     StockReviewStyle.TRADE_STEP_BUTTON_WIDTH,
                     StockReviewStyle.BUY_BUTTON,
@@ -62,7 +66,8 @@ class StockReviewTradeRowCells private constructor() {
                     StockReviewAction.adjustPlan(record.itemKey, buyStepQuantity),
                     StockReviewTooltips.increasePlan(buyStepQuantity),
                 ),
-                WimGuiRowCell.standardAction(
+                StockReviewActionCells.standard(
+                    StockReviewActionGroup.PLAN_ADJUSTMENT,
                     "Sufficient",
                     StockReviewStyle.SUFFICIENT_BUTTON_WIDTH,
                     if (sufficientDelta < 0) StockReviewStyle.SELL_BUTTON else StockReviewStyle.BUY_BUTTON,
@@ -70,7 +75,8 @@ class StockReviewTradeRowCells private constructor() {
                     sufficientDelta != 0,
                     StockReviewTooltips.sufficient(record),
                 ),
-                WimGuiRowCell.standardAction(
+                StockReviewActionCells.standard(
+                    StockReviewActionGroup.PLAN_RESET,
                     "Reset",
                     StockReviewStyle.RESET_BUTTON_WIDTH,
                     StockReviewStyle.ACTION_BACKGROUND,
@@ -102,12 +108,12 @@ class StockReviewTradeRowCells private constructor() {
             }
             cells.add(WimGuiRowCell.info(StockReviewCellGroup.debugPlanLabel(), StockReviewCellGroup.planWidth(layout), StockReviewStyle.PLAN_NEGATIVE, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PLAN))
             if (StockReviewCellGroup.hasControls(layout)) {
-                cells.add(WimGuiRowCell.standardAction("-10", StockReviewCellGroup.stepWidth(), StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(10)))
-                cells.add(WimGuiRowCell.standardAction("-1", StockReviewCellGroup.stepWidth(), StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(1)))
-                cells.add(WimGuiRowCell.standardAction("+1", StockReviewCellGroup.stepWidth(), StockReviewStyle.BUY_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.increasePlan(1)))
-                cells.add(WimGuiRowCell.standardAction("+10", StockReviewCellGroup.stepWidth(), StockReviewStyle.BUY_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.increasePlan(10)))
-                cells.add(WimGuiRowCell.standardAction("Sufficient", StockReviewCellGroup.sufficientWidth(), StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, "Adjust the queued trade quantity so that your stock of this item just meets the sufficiency threshold (99)."))
-                cells.add(WimGuiRowCell.standardAction("Reset", StockReviewCellGroup.resetWidth(), StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugNoop(), true, StockReviewTooltips.resetPlan()))
+                cells.add(debugCell("-10", StockReviewCellGroup.stepWidth(), StockReviewStyle.SELL_BUTTON, StockReviewTooltips.decreasePlan(10)))
+                cells.add(debugCell("-1", StockReviewCellGroup.stepWidth(), StockReviewStyle.SELL_BUTTON, StockReviewTooltips.decreasePlan(1)))
+                cells.add(debugCell("+1", StockReviewCellGroup.stepWidth(), StockReviewStyle.BUY_BUTTON, StockReviewTooltips.increasePlan(1)))
+                cells.add(debugCell("+10", StockReviewCellGroup.stepWidth(), StockReviewStyle.BUY_BUTTON, StockReviewTooltips.increasePlan(10)))
+                cells.add(debugCell("Sufficient", StockReviewCellGroup.sufficientWidth(), StockReviewStyle.SELL_BUTTON, "Adjust the queued trade quantity so that your stock of this item just meets the sufficiency threshold (99)."))
+                cells.add(debugCell("Reset", StockReviewCellGroup.resetWidth(), StockReviewStyle.ACTION_BACKGROUND, StockReviewTooltips.resetPlan()))
             }
             return cells
         }
@@ -160,8 +166,19 @@ class StockReviewTradeRowCells private constructor() {
         fun step(sign: String, quantity: Int, fill: Color, action: StockReviewAction, tooltip: String): WimGuiRowCell<StockReviewAction> {
             val enabled = quantity > 1
             val label = if (enabled) sign + quantity else sign + "10"
-            return WimGuiRowCell.standardAction(label, StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, fill, action, enabled, tooltip)
+            return StockReviewActionCells.standard(StockReviewActionGroup.PLAN_ADJUSTMENT, label, StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, fill, action, enabled, tooltip)
         }
+
+        private fun debugCell(label: String, width: Float, fill: Color, tooltip: String): WimGuiRowCell<StockReviewAction> =
+            StockReviewActionCells.standard(
+                StockReviewActionGroup.DEBUG_MODE,
+                label,
+                width,
+                fill,
+                StockReviewAction.debugNoop(),
+                true,
+                tooltip,
+            )
 
         private fun storageLabel(ownedCount: Int, planQuantity: Int): String {
             if (planQuantity == 0) {

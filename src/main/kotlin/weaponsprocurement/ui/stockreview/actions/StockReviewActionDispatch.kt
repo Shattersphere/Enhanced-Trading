@@ -25,12 +25,13 @@ class StockReviewActionDispatcher(
 }
 
 class StockReviewActionHandlerGroup(
-    @JvmField val name: String,
-    private val types: Set<StockReviewAction.Type>,
+    @JvmField val group: StockReviewActionGroup,
     private val handler: (StockReviewAction) -> Unit,
 ) {
+    @JvmField val name: String = group.label
+
     fun handle(action: StockReviewAction): Boolean {
-        if (!types.contains(action.getType())) {
+        if (action.getGroup() != group) {
             return false
         }
         handler.invoke(action)
@@ -39,17 +40,9 @@ class StockReviewActionHandlerGroup(
 
     companion object {
         @JvmStatic
-        fun one(
-            name: String,
-            type: StockReviewAction.Type,
+        fun group(
+            group: StockReviewActionGroup,
             handler: (StockReviewAction) -> Unit,
-        ): StockReviewActionHandlerGroup = StockReviewActionHandlerGroup(name, setOf(type), handler)
-
-        @JvmStatic
-        fun many(
-            name: String,
-            vararg types: StockReviewAction.Type,
-            handler: (StockReviewAction) -> Unit,
-        ): StockReviewActionHandlerGroup = StockReviewActionHandlerGroup(name, types.toSet(), handler)
+        ): StockReviewActionHandlerGroup = StockReviewActionHandlerGroup(group, handler)
     }
 }

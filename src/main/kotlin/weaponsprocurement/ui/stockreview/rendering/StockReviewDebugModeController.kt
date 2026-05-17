@@ -4,6 +4,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -18,20 +19,7 @@ class StockReviewDebugModeController(
     }
 
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
-        StockReviewActionHandlerGroup.many(
-            "debug mode controls",
-            Type.OPEN_COLOR_DEBUG,
-            Type.OPEN_SHIP_CATALOG_DEBUG,
-            Type.DEBUG_CYCLE_TARGET,
-            Type.DEBUG_TOGGLE_PERSISTENCE,
-            Type.DEBUG_ADJUST_RED,
-            Type.DEBUG_ADJUST_GREEN,
-            Type.DEBUG_ADJUST_BLUE,
-            Type.DEBUG_APPLY,
-            Type.DEBUG_CONFIRM,
-            Type.DEBUG_RESTORE,
-            Type.DEBUG_NOOP,
-        ) { action ->
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.DEBUG_MODE) { action ->
             when (action.getType()) {
                 Type.OPEN_COLOR_DEBUG -> modes.enterColorDebug(state)
                 Type.OPEN_SHIP_CATALOG_DEBUG -> modes.enterShipCatalogDebug(state)
@@ -47,7 +35,7 @@ class StockReviewDebugModeController(
                 }
                 Type.DEBUG_RESTORE -> modes.restoreColorDebugDraft()
                 Type.DEBUG_NOOP -> Unit
-                else -> return@many
+                else -> return@group
             }
             host.requestContentRebuild()
         },

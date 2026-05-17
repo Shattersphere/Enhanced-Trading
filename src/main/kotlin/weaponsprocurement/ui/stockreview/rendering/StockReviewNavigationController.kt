@@ -4,6 +4,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -23,11 +24,12 @@ class StockReviewNavigationController(
     }
 
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
-        StockReviewActionHandlerGroup.one("review screen", Type.REVIEW_PURCHASE) {
-            openReviewIfNeeded()
-        },
-        StockReviewActionHandlerGroup.one("back navigation", Type.GO_BACK) {
-            goBack()
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.NAVIGATION) { action ->
+            when (action.getType()) {
+                Type.REVIEW_PURCHASE -> openReviewIfNeeded()
+                Type.GO_BACK -> goBack()
+                else -> return@group
+            }
         },
     )
 

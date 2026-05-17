@@ -5,6 +5,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -28,17 +29,14 @@ class StockReviewSourceTransitionController(
     }
 
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
-        StockReviewActionHandlerGroup.one("sort mode", Type.CYCLE_SORT_MODE) {
-            cycleSortMode()
-        },
-        StockReviewActionHandlerGroup.one("source mode", Type.CYCLE_SOURCE_MODE) {
-            cycleSourceMode()
-        },
-        StockReviewActionHandlerGroup.one("black market mode", Type.TOGGLE_BLACK_MARKET) {
-            toggleBlackMarket()
-        },
-        StockReviewActionHandlerGroup.one("reset all trades", Type.RESET_ALL_TRADES) {
-            resetAllTrades()
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.SOURCE_TRANSITIONS) { action ->
+            when (action.getType()) {
+                Type.CYCLE_SORT_MODE -> cycleSortMode()
+                Type.CYCLE_SOURCE_MODE -> cycleSourceMode()
+                Type.TOGGLE_BLACK_MARKET -> toggleBlackMarket()
+                Type.RESET_ALL_TRADES -> resetAllTrades()
+                else -> return@group
+            }
         },
     )
 
