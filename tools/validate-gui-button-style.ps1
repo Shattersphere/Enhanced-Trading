@@ -42,10 +42,12 @@ $stockReviewStylePath = Join-Path $kotlinGuiDir "stockreview\rendering\StockRevi
 $stockReviewListModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListModel.kt"
 $stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewReviewListModel.kt"
 $stockReviewItemRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemRows.kt"
+$stockReviewItemInfoRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoRows.kt"
 $stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowLayout.kt"
 $stockReviewCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewCellGroup.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
+$stockReviewItemInfoFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoFields.kt"
 $stockReviewActionControlsPath = Join-Path $kotlinGuiDir "stockreview\controls\StockReviewActionControls.kt"
 $stockReviewRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowSpec.kt"
 $stockReviewListRowPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListRow.kt"
@@ -55,7 +57,7 @@ $stockReviewHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRev
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -106,6 +108,7 @@ if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
 }
 
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
+$itemInfoRowsText = Get-Content -LiteralPath $stockReviewItemInfoRowsPath -Raw
 if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
     $itemRowsText -notmatch "StockReviewRowIcon\.item\(record\)" -or
     $rowLayoutText -notmatch "fun review\(\): StockReviewRowLayout") {
@@ -119,6 +122,7 @@ if ($reviewModelText -notmatch "SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup\.B
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
 $cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
+$itemInfoFieldsText = Get-Content -LiteralPath $stockReviewItemInfoFieldsPath -Raw
 $actionControlsText = Get-Content -LiteralPath $stockReviewActionControlsPath -Raw
 $rowSpecText = Get-Content -LiteralPath $stockReviewRowSpecPath -Raw
 $listRowText = Get-Content -LiteralPath $stockReviewListRowPath -Raw
@@ -167,6 +171,21 @@ if ($headingRowsText -notmatch "fun itemType" -or
     $itemRowsText -match "fun infoSectionKey" -or
     $itemRowsText -match "::info::") {
     throw "Stock-review heading labels/actions/tooltips must route through StockReviewHeadingRows."
+}
+if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
+    $itemInfoFieldsText -notmatch "WEAPON_BASIC_FIELDS" -or
+    $itemInfoFieldsText -notmatch "WING_BASIC_FIELDS" -or
+    $itemInfoFieldsText -notmatch "WEAPON_ADVANCED_FIELDS" -or
+    $itemInfoFieldsText -notmatch "Damage/Sec \(sustained\)" -or
+    $itemInfoFieldsText -notmatch "EMP/Second \(sustained\)" -or
+    $itemInfoRowsText -notmatch "StockReviewItemInfoFields\.basic\(record\)" -or
+    $itemInfoRowsText -notmatch "StockReviewItemInfoFields\.advanced\(record\)" -or
+    $itemInfoRowsText -match "addDataRow" -or
+    $itemInfoRowsText -match "addPositiveDataRow" -or
+    $itemInfoRowsText -match "fun dataRow" -or
+    $itemInfoRowsText -match "isMeaningful" -or
+    $itemInfoRowsText -match "isPositiveValue") {
+    throw "Stock-review Basic/Advanced detail fields must be declared in StockReviewItemInfoFields."
 }
 if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
     throw "Stock-review worst-case weapon debug row label is missing."

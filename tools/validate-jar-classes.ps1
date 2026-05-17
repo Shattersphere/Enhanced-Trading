@@ -92,6 +92,8 @@ $requiredClasses = @(
     'weaponsprocurement/ui/stockreview/state/StockReviewFilterGroup.class',
     'weaponsprocurement/ui/stockreview/state/StockReviewFilterListModel.class',
     'weaponsprocurement/ui/stockreview/state/StockReviewFilters.class',
+    'weaponsprocurement/ui/stockreview/rows/StockReviewItemInfoField.class',
+    'weaponsprocurement/ui/stockreview/rows/StockReviewItemInfoFields.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewItemInfoRows.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewReviewListModel.class',
     'weaponsprocurement/ui/stockreview/rows/StockReviewTradeRowCells.class',
