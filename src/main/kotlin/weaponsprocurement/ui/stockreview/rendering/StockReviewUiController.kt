@@ -28,18 +28,7 @@ class StockReviewUiController(
     }
 
     fun handleCloseRequested() {
-        if (modes.isColorDebugMode()) {
-            modes.leaveColorDebug(state)
-            host.requestContentRebuild()
-            return
-        }
-        if (modes.isShipCatalogDebugMode()) {
-            modes.leaveShipCatalogDebug(state)
-            host.requestContentRebuild()
-            return
-        }
-        if (modes.isFilterMode()) {
-            modes.leaveFilters(state)
+        if (modes.leaveTransientMode(state)) {
             host.requestContentRebuild()
             return
         }
@@ -226,18 +215,7 @@ class StockReviewUiController(
     }
 
     private fun handleGoBack() {
-        if (modes.isColorDebugMode()) {
-            modes.leaveColorDebug(state)
-            host.requestContentRebuild()
-            return
-        }
-        if (modes.isShipCatalogDebugMode()) {
-            modes.leaveShipCatalogDebug(state)
-            host.requestContentRebuild()
-            return
-        }
-        if (modes.isFilterMode()) {
-            modes.leaveFilters(state)
+        if (modes.leaveTransientMode(state)) {
             host.requestContentRebuild()
             return
         }

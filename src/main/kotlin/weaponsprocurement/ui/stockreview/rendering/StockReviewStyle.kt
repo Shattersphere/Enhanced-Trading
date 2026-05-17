@@ -4,6 +4,7 @@ import weaponsprocurement.ui.WimGuiListBounds
 import weaponsprocurement.ui.WimGuiModalLayout
 import weaponsprocurement.ui.WimGuiModalListSpec
 import weaponsprocurement.ui.WimGuiStyle
+import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import com.fs.starfarer.api.Global
 import java.awt.Color
 
@@ -265,16 +266,26 @@ class StockReviewStyle private constructor() {
             }
 
         @JvmStatic
+        fun initialListBounds(screenMode: StockReviewScreenMode): WimGuiListBounds =
+            initialListBounds(screenMode == StockReviewScreenMode.REVIEW)
+
+        @JvmStatic
         fun widthFor(reviewMode: Boolean): Float {
             refreshLayout()
             return if (reviewMode) REVIEW_WIDTH else WIDTH
         }
 
         @JvmStatic
+        fun widthFor(screenMode: StockReviewScreenMode): Float = widthFor(screenMode == StockReviewScreenMode.REVIEW)
+
+        @JvmStatic
         fun heightFor(reviewMode: Boolean): Float {
             refreshLayout()
             return if (reviewMode) REVIEW_HEIGHT else HEIGHT
         }
+
+        @JvmStatic
+        fun heightFor(screenMode: StockReviewScreenMode): Float = heightFor(screenMode == StockReviewScreenMode.REVIEW)
 
         @JvmStatic
         fun modalFor(reviewMode: Boolean, filterMode: Boolean, colorDebugMode: Boolean): WimGuiModalLayout {

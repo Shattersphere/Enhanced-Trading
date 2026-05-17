@@ -1,23 +1,16 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiButtonBinding
-import weaponsprocurement.ui.WimGuiButtonSpec
-import weaponsprocurement.ui.WimGuiButtonSpecs
 import weaponsprocurement.ui.WimGuiModalFooter
-import weaponsprocurement.ui.WimGuiSemanticButtonFactory
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rendering.StockReviewModeSpec
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import com.fs.starfarer.api.ui.CustomPanelAPI
-import java.awt.Color
 
 class StockReviewFooterRenderer private constructor() {
     companion object {
-        private val BUTTON_FACTORY = WimGuiSemanticButtonFactory<StockReviewAction>(StockReviewStyle.ROW_BORDER)
-
         @JvmStatic
         fun render(
             root: CustomPanelAPI,
@@ -26,108 +19,27 @@ class StockReviewFooterRenderer private constructor() {
             modeSpec: StockReviewModeSpec,
             buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
         ) {
-            when (modeSpec.screenMode) {
-                StockReviewScreenMode.COLOR_DEBUG -> renderColorDebugFooter(root, buttons)
-                StockReviewScreenMode.SHIP_CATALOG_DEBUG -> renderShipCatalogDebugFooter(root, buttons)
-                StockReviewScreenMode.FILTERS -> renderFilterFooter(root, buttons)
-                StockReviewScreenMode.REVIEW -> renderReviewFooter(root, tradeContext, pendingTrades, buttons)
-                StockReviewScreenMode.TRADE -> renderTradeFooter(root, pendingTrades, buttons)
+            val footerSpec = modeSpec.footerSpec
+            val context = StockReviewFooterContext(tradeContext, pendingTrades)
+            when (footerSpec.layoutKind) {
+                StockReviewFooterLayoutKind.LEFT_BUTTON_ROW -> WimGuiModalFooter.addLeftButtonRow(
+                    root,
+                    footerSpec.modal,
+                    StockReviewStyle.ACTION_BUTTON_HEIGHT,
+                    StockReviewStyle.BUTTON_GAP,
+                    footerSpec.leftButtons(context),
+                    buttons,
+                )
+                StockReviewFooterLayoutKind.LEFT_ROW_AND_RIGHT_BUTTON -> WimGuiModalFooter.addLeftRowAndRightButton(
+                    root,
+                    footerSpec.modal,
+                    StockReviewStyle.ACTION_BUTTON_HEIGHT,
+                    StockReviewStyle.BUTTON_GAP,
+                    footerSpec.leftButtons(context),
+                    footerSpec.rightButton(context) ?: return,
+                    buttons,
+                )
             }
         }
-
-        private fun renderColorDebugFooter(root: CustomPanelAPI, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>) {
-            WimGuiModalFooter.addLeftRowAndRightButton(
-                root,
-                StockReviewStyle.MODAL,
-                StockReviewStyle.ACTION_BUTTON_HEIGHT,
-                StockReviewStyle.BUTTON_GAP,
-                WimGuiButtonSpecs.of(
-                    footerButton("Confirm", StockReviewAction.debugConfirm(), true, StockReviewStyle.CONFIRM_BUTTON, "Apply the color and return to the trade screen."),
-                    footerButton("Apply", StockReviewAction.debugApply(), true, StockReviewStyle.SAVE_BUTTON, "Apply the color without closing the debug menu."),
-                    footerButton("Restore", StockReviewAction.debugRestore(), true, StockReviewStyle.LOAD_BUTTON, "Restore the selected color to its default value."),
-                ),
-                footerButton("Cancel", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return without applying additional changes."),
-                buttons,
-            )
-        }
-
-        private fun renderFilterFooter(root: CustomPanelAPI, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>) {
-            WimGuiModalFooter.addLeftRowAndRightButton(
-                root,
-                StockReviewStyle.FILTER_MODAL,
-                StockReviewStyle.ACTION_BUTTON_HEIGHT,
-                StockReviewStyle.BUTTON_GAP,
-                WimGuiButtonSpecs.of(
-                    footerButton("Confirm", StockReviewAction.goBack(), true, StockReviewStyle.CONFIRM_BUTTON, "Return to the trade screen with the current filters."),
-                    footerButton("Reset", StockReviewAction.resetFilters(), true, StockReviewStyle.LOAD_BUTTON, "Clear every active filter."),
-                ),
-                footerButton("Cancel", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return to the trade screen."),
-                buttons,
-            )
-        }
-
-        private fun renderShipCatalogDebugFooter(root: CustomPanelAPI, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>) {
-            WimGuiModalFooter.addLeftButtonRow(
-                root,
-                StockReviewStyle.MODAL,
-                StockReviewStyle.ACTION_BUTTON_HEIGHT,
-                StockReviewStyle.BUTTON_GAP,
-                WimGuiButtonSpecs.of(
-                    footerButton("Go Back", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return to the trade screen."),
-                ),
-                buttons,
-            )
-        }
-
-        private fun renderReviewFooter(
-            root: CustomPanelAPI,
-            tradeContext: StockReviewTradeContext,
-            pendingTrades: List<StockReviewPendingTrade>?,
-            buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
-        ) {
-            WimGuiModalFooter.addLeftRowAndRightButton(
-                root,
-                StockReviewStyle.REVIEW_MODAL,
-                StockReviewStyle.ACTION_BUTTON_HEIGHT,
-                StockReviewStyle.BUTTON_GAP,
-                WimGuiButtonSpecs.of(
-                    footerButton(
-                        "Confirm Trades",
-                        StockReviewAction.confirmPurchase(),
-                        !pendingTrades.isNullOrEmpty() && tradeContext.canConfirm(),
-                        StockReviewStyle.CONFIRM_BUTTON,
-                        "Execute the queued buys and sells.",
-                    ),
-                ),
-                footerButton("Go Back", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return to the trade screen without executing trades."),
-                buttons,
-            )
-        }
-
-        private fun renderTradeFooter(
-            root: CustomPanelAPI,
-            pendingTrades: List<StockReviewPendingTrade>?,
-            buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
-        ) {
-            WimGuiModalFooter.addLeftButtonRow(
-                root,
-                StockReviewStyle.MODAL,
-                StockReviewStyle.ACTION_BUTTON_HEIGHT,
-                StockReviewStyle.BUTTON_GAP,
-                WimGuiButtonSpecs.of(
-                    footerButton("Review Trades", StockReviewAction.reviewPurchase(), !pendingTrades.isNullOrEmpty(), StockReviewStyle.CONFIRM_BUTTON, "Review the queued trades before confirming them."),
-                    bulkButton("Purchase All Until Sufficient", StockReviewAction.purchaseAllUntilSufficient(), true, StockReviewStyle.BUY_BUTTON, StockReviewTooltips.purchaseAllUntilSufficient()),
-                    bulkButton("Sell All Until Sufficient", StockReviewAction.sellAllUntilSufficient(), true, StockReviewStyle.SELL_BUTTON, StockReviewTooltips.sellAllUntilSufficient()),
-                    BUTTON_FACTORY.button(StockReviewStyle.RESET_ALL_BUTTON_WIDTH, "Reset All Trades", StockReviewAction.resetAllTrades(), !pendingTrades.isNullOrEmpty(), StockReviewStyle.ACTION_BACKGROUND, "Clear every queued buy and sell."),
-                ),
-                buttons,
-            )
-        }
-
-        private fun footerButton(label: String, action: StockReviewAction, enabled: Boolean, fill: Color, tooltip: String): WimGuiButtonSpec<StockReviewAction> =
-            BUTTON_FACTORY.button(StockReviewStyle.FOOTER_BUTTON_WIDTH, label, action, enabled, fill, tooltip)
-
-        private fun bulkButton(label: String, action: StockReviewAction, enabled: Boolean, fill: Color, tooltip: String): WimGuiButtonSpec<StockReviewAction> =
-            BUTTON_FACTORY.button(StockReviewStyle.BULK_BUTTON_WIDTH, label, action, enabled, fill, tooltip)
     }
 }

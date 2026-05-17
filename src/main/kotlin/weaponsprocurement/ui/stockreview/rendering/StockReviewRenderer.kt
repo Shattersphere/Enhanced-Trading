@@ -1,40 +1,26 @@
 package weaponsprocurement.ui.stockreview.rendering
 
 import weaponsprocurement.ui.WimGuiButtonBinding
-import weaponsprocurement.ui.WimGuiButtonSpecs
-import weaponsprocurement.ui.WimGuiColorDebug
 import weaponsprocurement.ui.WimGuiListBounds
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiModalActionRow
-import weaponsprocurement.ui.WimGuiModalHeader
 import weaponsprocurement.ui.WimGuiModalListRenderer
 import weaponsprocurement.ui.WimGuiModalListSpec
-import weaponsprocurement.ui.WimGuiSemanticButtonFactory
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.rows.StockReviewColorDebugRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewFooterRenderer
-import weaponsprocurement.ui.stockreview.rows.StockReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
-import weaponsprocurement.ui.stockreview.rows.StockReviewReviewListModel
-import weaponsprocurement.ui.stockreview.rows.StockReviewShipCatalogDebugRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewTradeSummaryRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
-import weaponsprocurement.ui.stockreview.state.StockReviewFilterListModel
 import weaponsprocurement.ui.stockreview.state.StockReviewState
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import com.fs.starfarer.api.ui.CustomPanelAPI
-import weaponsprocurement.config.WeaponsProcurementConfig
-import weaponsprocurement.stock.item.StockSourceMode
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
 
 class StockReviewRenderer :
     WimGuiModalListRenderer.ScrollRowFactory<StockReviewAction>,
     WimGuiModalListRenderer.ExtraGapProvider<StockReviewAction> {
-    private val buttonFactory = WimGuiSemanticButtonFactory<StockReviewAction>(StockReviewStyle.ROW_BORDER)
     private var cachedModel: RenderModel? = null
 
     fun invalidateModelCache() {
@@ -48,21 +34,18 @@ class StockReviewRenderer :
         pendingTrades: List<StockReviewPendingTrade>,
         pendingTradeRevision: Int,
         modeRevision: Int,
-        reviewMode: Boolean,
-        filterMode: Boolean,
-        colorDebugMode: Boolean,
-        shipCatalogDebugMode: Boolean,
+        screenMode: StockReviewScreenMode,
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
-        val modeSpec = StockReviewModeSpec.resolve(reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode)
-        if (modeSpec.showHeader) {
-            renderHeader(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
+        val modeSpec = StockReviewModeSpec.forScreenMode(screenMode)
+        if (modeSpec.hasHeader()) {
+            StockReviewHeaderRenderer.render(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
         }
-        if (modeSpec.showTradeActionRow) {
-            renderActionRow(root, snapshot, state, buttons)
+        if (modeSpec.hasTradeActionRow()) {
+            StockReviewActionRowRenderer.render(root, snapshot, state, modeSpec, buttons)
         }
         val model = renderModel(
             snapshot,
@@ -76,7 +59,7 @@ class StockReviewRenderer :
             colorDebugPersistent,
         )
         val result = renderRows(root, model.rows, state, model.listSpec, buttons)
-        if (modeSpec.showSummary) {
+        if (modeSpec.hasTradeSummary()) {
             StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, model.rowLayout)
         }
         StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, modeSpec, buttons)
@@ -112,118 +95,23 @@ class StockReviewRenderer :
 
         val tradeContext = StockReviewTradeContext(snapshot, pendingTrades)
         val rowLayout = modeSpec.rowLayout
-        val rows: List<WimGuiListRow<StockReviewAction>> = when (modeSpec.screenMode) {
-            StockReviewScreenMode.COLOR_DEBUG -> StockReviewColorDebugRows.build(colorDebugTargetIndex, colorDebugDraft, colorDebugPersistent)
-            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> StockReviewShipCatalogDebugRows.build()
-            StockReviewScreenMode.FILTERS -> StockReviewFilterListModel.build(state)
-            StockReviewScreenMode.REVIEW -> StockReviewReviewListModel.build(snapshot, pendingTrades, state, tradeContext, rowLayout)
-            StockReviewScreenMode.TRADE -> StockReviewListModel.build(snapshot, state, tradeContext, rowLayout)
-        }
+        val rows: List<WimGuiListRow<StockReviewAction>> = modeSpec.listSourceSpec.build(
+            StockReviewListSourceContext(
+                snapshot,
+                state,
+                pendingTrades,
+                tradeContext,
+                rowLayout,
+                colorDebugTargetIndex,
+                colorDebugDraft,
+                colorDebugPersistent,
+            ),
+        )
         val listSpec = modeSpec.listSpec
 
         val built = RenderModel(snapshot, key, tradeContext, rowLayout, rows, listSpec)
         cachedModel = built
         return built
-    }
-
-    private fun renderHeader(
-        root: CustomPanelAPI,
-        snapshot: WeaponStockSnapshot,
-        state: StockReviewState,
-        modeSpec: StockReviewModeSpec,
-        colorDebugTargetIndex: Int,
-        colorDebugDraft: Color?,
-    ) {
-        val title = when (modeSpec.screenMode) {
-            StockReviewScreenMode.COLOR_DEBUG -> "Debug Colors"
-            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> "Ship Catalog Debug"
-            StockReviewScreenMode.FILTERS -> "Filters"
-            StockReviewScreenMode.REVIEW -> "Review Trades"
-            StockReviewScreenMode.TRADE -> "Make Trades"
-        }
-        val status = when (modeSpec.screenMode) {
-            StockReviewScreenMode.COLOR_DEBUG -> colorStatusLine(colorDebugTargetIndex, colorDebugDraft)
-            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> "Developer-only Fixer ship catalog candidate view"
-            StockReviewScreenMode.FILTERS -> filterStatusLine(state)
-            StockReviewScreenMode.REVIEW,
-            StockReviewScreenMode.TRADE -> statusLine(snapshot, state)
-        }
-        WimGuiModalHeader.addTitleStatusHeader(
-            root,
-            modeSpec.modal,
-            StockReviewStyle.HEADER_HEIGHT,
-            title,
-            status,
-            StockReviewStyle.PANEL_BACKGROUND,
-            StockReviewStyle.PANEL_BORDER,
-            StockReviewStyle.TEXT,
-        )
-    }
-
-    private fun renderActionRow(
-        root: CustomPanelAPI,
-        snapshot: WeaponStockSnapshot,
-        state: StockReviewState,
-        buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
-    ) {
-        WimGuiModalActionRow.add(
-            root,
-            StockReviewStyle.MODAL,
-            0f,
-            0f,
-            StockReviewStyle.ACTION_BUTTON_HEIGHT,
-            StockReviewStyle.BUTTON_GAP,
-            WimGuiButtonSpecs.of(
-                buttonFactory.enabledButton(
-                    StockReviewStyle.SORT_BUTTON_WIDTH,
-                    "Sort: ${snapshot.getSortMode().label}",
-                    StockReviewAction.cycleSortMode(),
-                    StockReviewStyle.ACTION_BACKGROUND,
-                    StockReviewTooltips.sort(snapshot.getSortMode()),
-                ),
-                buttonFactory.enabledButton(
-                    StockReviewStyle.SOURCE_BUTTON_WIDTH,
-                    "Source: ${snapshot.getSourceMode().label}",
-                    StockReviewAction.cycleSourceMode(),
-                    StockReviewStyle.ACTION_BACKGROUND,
-                    StockReviewTooltips.source(snapshot.getSourceMode()),
-                ),
-                buttonFactory.button(
-                    StockReviewStyle.BLACK_MARKET_BUTTON_WIDTH,
-                    "Black Market: ${onOff(snapshot.isIncludeBlackMarket())}",
-                    StockReviewAction.toggleBlackMarket(),
-                    snapshot.getSourceMode().supportsBlackMarketToggle(),
-                    StockReviewStyle.ACTION_BACKGROUND,
-                    "Include black-market stock for Local and Sector Market source modes. Fixer's Market controls its own virtual stock.",
-                ),
-                buttonFactory.enabledButton(
-                    StockReviewStyle.FILTER_BUTTON_WIDTH,
-                    "Filters: ${state.getActiveFilterCount()}",
-                    StockReviewAction.openFilters(),
-                    StockReviewStyle.ACTION_BACKGROUND,
-                    "Open the weapon filter list.",
-                ),
-                buttonFactory.enabledButton(
-                    StockReviewStyle.COLOR_BUTTON_WIDTH,
-                    "Colors",
-                    StockReviewAction.openColorDebug(),
-                    StockReviewStyle.ACTION_BACKGROUND,
-                    "Open the color debug menu.",
-                ),
-                if (WeaponsProcurementConfig.isDebugShipCatalogViewEnabled()) {
-                    buttonFactory.enabledButton(
-                        StockReviewStyle.COLOR_BUTTON_WIDTH,
-                        "Ships",
-                        StockReviewAction.openShipCatalogDebug(),
-                        StockReviewStyle.ACTION_BACKGROUND,
-                        "Open the developer-only Fixer ship catalog diagnostic view.",
-                    )
-                } else {
-                    null
-                },
-            ),
-            buttons,
-        )
     }
 
     private fun renderRows(
@@ -249,40 +137,6 @@ class StockReviewRenderer :
         if (row.hasTopGap()) StockReviewStyle.CATEGORY_TOP_GAP else 0f
 
     companion object {
-        private fun statusLine(snapshot: WeaponStockSnapshot, state: StockReviewState): String =
-            "Market: ${snapshot.getMarketName()}" +
-                " | Sort: ${snapshot.getSortMode().label}" +
-                " | Owned source: ${ownedSourceLabel(snapshot)}" +
-                " | Stock source: ${sourceLabel(snapshot.getSourceMode())}" +
-                " | Black market: ${onOff(snapshot.isIncludeBlackMarket())}" +
-                " | Filters: ${state.getActiveFilterCount()}"
-
-        private fun sourceLabel(sourceMode: StockSourceMode?): String = sourceMode?.label ?: "local"
-
-        private fun filterStatusLine(state: StockReviewState): String =
-            "Active filters: ${state.getActiveFilterCount()} | Active filter rows are shown first"
-
-        private fun colorStatusLine(targetIndex: Int, draft: Color?): String {
-            val target = WimGuiColorDebug.targetAt(targetIndex)
-            val color = draft ?: WimGuiColorDebug.currentColor(target)
-            return (target?.label ?: "Unknown") + " | RGB(" +
-                color.red + ", " +
-                color.green + ", " +
-                color.blue + ")"
-        }
-
-        private fun ownedSourceLabel(snapshot: WeaponStockSnapshot): String {
-            if (snapshot.getOwnedSourcePolicy().name.contains("ACCESSIBLE_STORAGE")) {
-                return "fleet + all accessible storage"
-            }
-            if (snapshot.getOwnedSourcePolicy().name.contains("CURRENT_MARKET_STORAGE")) {
-                return "fleet + current market storage"
-            }
-            return "fleet only"
-        }
-
-        private fun onOff(enabled: Boolean): String = if (enabled) "On" else "Off"
-
         private fun colorKey(color: Color?): Int = color?.rgb ?: 0
     }
 

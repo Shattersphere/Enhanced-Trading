@@ -1,6 +1,7 @@
 package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.ui.WimGuiColorDebug
+import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import java.awt.Color
 
 class StockReviewModeController(private var reviewMode: Boolean) {
@@ -18,11 +19,32 @@ class StockReviewModeController(private var reviewMode: Boolean) {
 
     fun isReviewMode(): Boolean = reviewMode
 
-    fun isFilterMode(): Boolean = filterMode
+    fun currentScreenMode(): StockReviewScreenMode =
+        when {
+            colorDebugMode -> StockReviewScreenMode.COLOR_DEBUG
+            shipCatalogDebugMode -> StockReviewScreenMode.SHIP_CATALOG_DEBUG
+            filterMode -> StockReviewScreenMode.FILTERS
+            reviewMode -> StockReviewScreenMode.REVIEW
+            else -> StockReviewScreenMode.TRADE
+        }
 
-    fun isColorDebugMode(): Boolean = colorDebugMode
-
-    fun isShipCatalogDebugMode(): Boolean = shipCatalogDebugMode
+    fun leaveTransientMode(state: StockReviewState): Boolean =
+        when (currentScreenMode()) {
+            StockReviewScreenMode.COLOR_DEBUG -> {
+                leaveColorDebug(state)
+                true
+            }
+            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> {
+                leaveShipCatalogDebug(state)
+                true
+            }
+            StockReviewScreenMode.FILTERS -> {
+                leaveFilters(state)
+                true
+            }
+            StockReviewScreenMode.REVIEW,
+            StockReviewScreenMode.TRADE -> false
+        }
 
     fun isColorDebugPersistent(): Boolean = colorDebugPersistent
 

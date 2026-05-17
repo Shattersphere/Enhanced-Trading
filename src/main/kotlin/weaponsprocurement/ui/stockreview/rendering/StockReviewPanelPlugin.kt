@@ -6,6 +6,7 @@ import weaponsprocurement.ui.WimGuiListBounds
 import weaponsprocurement.ui.WimGuiModalPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
+import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import weaponsprocurement.ui.stockreview.state.StockReviewLaunchState
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -29,10 +30,10 @@ class StockReviewPanelPlugin(
     launchState: StockReviewLaunchState?,
 ) : WimGuiModalPanelPlugin<StockReviewAction>(
     StockReviewAction::class.java,
-    StockReviewStyle.widthFor(reviewMode(launchState)),
-    StockReviewStyle.heightFor(reviewMode(launchState)),
+    StockReviewStyle.widthFor(initialScreenMode(launchState)),
+    StockReviewStyle.heightFor(initialScreenMode(launchState)),
     StockReviewStyle.BUTTON_POLL_FRAMES_AFTER_MOUSE_EVENT,
-    StockReviewStyle.initialListBounds(reviewMode(launchState)),
+    StockReviewStyle.initialListBounds(initialScreenMode(launchState)),
 ),
     StockReviewUiController.Host,
     StockReviewTradeController.Host,
@@ -83,7 +84,8 @@ class StockReviewPanelPlugin(
         content: CustomPanelAPI,
         buttonBindings: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
-        val currentSnapshot = snapshot ?: return StockReviewStyle.initialListBounds(modes.isReviewMode())
+        val currentSnapshot = snapshot ?: return StockReviewStyle.initialListBounds(modes.currentScreenMode())
+        val screenMode = modes.currentScreenMode()
         return renderer.render(
             content,
             currentSnapshot,
@@ -91,10 +93,7 @@ class StockReviewPanelPlugin(
             pendingTrades.asList(),
             pendingTrades.getRevision(),
             modes.getRevision(),
-            modes.isReviewMode(),
-            modes.isFilterMode(),
-            modes.isColorDebugMode(),
-            modes.isShipCatalogDebugMode(),
+            screenMode,
             modes.getColorDebugTargetIndex(),
             modes.currentColorDebugDraft(),
             modes.isColorDebugPersistent(),
@@ -220,5 +219,8 @@ class StockReviewPanelPlugin(
         private val LOG: Logger = Logger.getLogger(StockReviewPanelPlugin::class.java)
 
         private fun reviewMode(launchState: StockReviewLaunchState?): Boolean = launchState != null && launchState.isReviewMode()
+
+        private fun initialScreenMode(launchState: StockReviewLaunchState?): StockReviewScreenMode =
+            if (reviewMode(launchState)) StockReviewScreenMode.REVIEW else StockReviewScreenMode.TRADE
     }
 }
