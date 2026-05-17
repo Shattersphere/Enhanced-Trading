@@ -1,7 +1,10 @@
 param(
     [string]$StarsectorDir = $env:STARSECTOR_DIRECTORY,
     [switch]$SkipCorePatchRefresh,
+    [switch]$Status,
     [switch]$QueuedWorker,
+    [string]$SourceProject = "",
+    [string]$DeployAttemptedAt = "",
     [int]$PollSeconds = 5
 )
 
@@ -107,6 +110,38 @@ function Read-DeployState {
     }
 }
 
+function Test-QueuedPrivateDeployActive {
+    param([object]$State)
+
+    if ($null -eq $State -or $null -eq $State.Pid) {
+        return $false
+    }
+    if ([string]::Equals([string]$State.Phase, "completed", [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $false
+    }
+    if ([string]::Equals([string]$State.Phase, "failed", [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $false
+    }
+
+    $process = Get-Process -Id ([int]$State.Pid) -ErrorAction SilentlyContinue
+    if ($null -eq $process) {
+        return $false
+    }
+
+    $scriptPath = [string]$State.ScriptPath
+    if (![string]::IsNullOrWhiteSpace($scriptPath)) {
+        $commandLine = ""
+        try {
+            $commandLine = [string](Get-CimInstance Win32_Process -Filter "ProcessId = $([int]$State.Pid)" -ErrorAction Stop).CommandLine
+        } catch {
+        }
+        if ($commandLine.IndexOf($scriptPath, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+            return $false
+        }
+    }
+    return $true
+}
+
 function Write-DeployState {
     param(
         [int]$ProcessId,
@@ -120,6 +155,7 @@ function Write-DeployState {
         ScriptPath = $PSCommandPath
         RepoRoot = $repoRoot
         StarsectorDir = $StarsectorDir
+        DeployName = "deploy-private-badges"
         Target = $obfJar
         Phase = $Phase
         UpdatedAt = (Get-Date).ToString("o")
@@ -246,12 +282,15 @@ function Start-QueuedPrivateBadgeDeploy {
     Stop-OlderQueuedPrivateDeploy
     Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "blocked, waiting..."
     $powerShellPath = (Get-Process -Id $PID).Path
+    $deployAttemptedAtValue = (Get-Date).ToString("o")
     $args = @(
         "-NoProfile",
         "-ExecutionPolicy", "Bypass",
         "-File", $PSCommandPath,
         "-StarsectorDir", $StarsectorDir,
         "-QueuedWorker",
+        "-SourceProject", $repoRoot,
+        "-DeployAttemptedAt", $deployAttemptedAtValue,
         "-PollSeconds", ([string]$PollSeconds)
     )
     if ($SkipCorePatchRefresh) {
@@ -264,13 +303,65 @@ function Start-QueuedPrivateBadgeDeploy {
     Write-Host "Private badge deploy queued: core jar is locked. Minimized visible worker pid=$($process.Id) will rebuild, patch, and deploy after the lock clears."
 }
 
+function Write-PrivateBadgeDeployStatus {
+    Write-Host "Private badge deploy status only; no files were modified."
+    Write-Host "Source project: $repoRoot"
+    Write-Host "Starsector directory: $StarsectorDir"
+    Write-Host "Core jar target: $obfJar"
+    Write-Host "Deploy state file: $stateFile"
+    Write-Host "Deploy status file: $deployStatusFile"
+
+    $state = Read-DeployState
+    if ($null -eq $state) {
+        Write-Host "Private badge queue state: none"
+    } else {
+        Write-Host "Private badge queue state: present"
+        Write-Host "Private badge queue active: $(Test-QueuedPrivateDeployActive -State $state)"
+        Write-Host "Private badge queue phase: $($state.Phase)"
+        Write-Host "Private badge queue pid: $($state.Pid)"
+        Write-Host "Private badge queue updated: $($state.UpdatedAt)"
+    }
+
+    if (Test-Path -LiteralPath $deployStatusFile) {
+        Write-Host "Deploy Status.txt:"
+        Get-Content -LiteralPath $deployStatusFile | ForEach-Object { Write-Host "  $_" }
+    } else {
+        Write-Host "Deploy Status.txt: missing"
+    }
+
+    $blocker = Get-CorePatchBlocker
+    if ([string]::IsNullOrWhiteSpace($blocker)) {
+        Write-Host "Current core patch blocker: none"
+    } else {
+        Write-Host "Current core patch blocker: $blocker"
+    }
+}
+
 $deployCommit = Get-DeployCommit -RepoRoot $repoRoot
+if ($Status) {
+    if ($QueuedWorker) {
+        throw "Status mode is a foreground diagnostic; do not combine it with -QueuedWorker."
+    }
+    Write-PrivateBadgeDeployStatus
+    exit 0
+}
+
 trap {
     Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "error" -Message $_.Exception.Message
+    $state = Read-DeployState
+    if ($null -ne $state -and $state.Pid -eq $PID) {
+        $state.Phase = "failed"
+        $state.UpdatedAt = (Get-Date).ToString("o")
+        $state | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+    }
     break
 }
 
 if ($QueuedWorker) {
+    $deployAttemptedAtValue = if ([string]::IsNullOrWhiteSpace($DeployAttemptedAt)) { (Get-Date).ToString("o") } else { $DeployAttemptedAt }
+    $sourceProjectValue = if ([string]::IsNullOrWhiteSpace($SourceProject)) { $repoRoot } else { $SourceProject }
+    Write-Host "Source project: $sourceProjectValue"
+    Write-Host "Time of attempted deploy: $deployAttemptedAtValue"
     Write-DeployState -ProcessId $PID -Phase "waiting"
     $lastBlocker = ""
     while ($true) {

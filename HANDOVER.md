@@ -154,7 +154,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.p
 git diff --check
 ```
 
-`deploy-live-mod.ps1` clean-syncs repo-managed files to `C:\Games\Starsector\mods\Weapons Procurement`. If the live jar is locked by Starsector, it stages the built files and starts a minimized visible queued worker that publishes after the lock clears.
+`deploy-live-mod.ps1` clean-syncs repo-managed files to `C:\Games\Starsector\mods\Weapons Procurement`. If the live jar is locked by Starsector, it stages the built files and starts a minimized visible no-activate queued worker that publishes after the lock clears.
+
+Deploy diagnostics:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status -CleanStaleStaging
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badges.ps1 -Status
+```
+
+`-Status` does not build or deploy. `-CheckOnly -RequireCurrent` is the cheap source/live clean-package parity check. Stale staging cleanup is scoped to this repo, target, and deploy workflow.
 
 For docs-only edits, `validate-doc-links.ps1` and `git diff --check` are usually sufficient.
 

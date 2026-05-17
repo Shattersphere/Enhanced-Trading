@@ -4,7 +4,7 @@ Repo-local instructions for Weapons Procurement. These override the workspace-le
 
 ## Project Root
 
-- Repo: `D:\Sean Mods\Weapons Procurement`
+- Repo: `D:\Sean Mods\Enhanced Trading`
 - Game: Starsector `0.98a`
 - Live clean-package target: `C:\Games\Starsector\mods\Weapons Procurement`
 - Runtime jar: `jars/weapons-procurement.jar`
@@ -58,10 +58,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 ## Deploy Policy
 
 - Use `tools/deploy-live-mod.ps1`; do not hand-copy runtime files unless explicitly asked.
+- Use `tools/deploy-live-mod.ps1 -Status` for a no-build deploy queue/status/blocker/staging report.
+- Use `tools/deploy-live-mod.ps1 -CheckOnly -RequireCurrent` when you need cheap source/live clean-package parity without deploying.
+- Use `tools/deploy-live-mod.ps1 -Status -CleanStaleStaging` only for scoped cleanup of inactive deploy staging directories.
 - Clean deploys reject jars containing optional patched-badge classes by default. Use `-AllowPrivateBadgeJar` only for an intentional private patched-badge deploy.
 - Deploy runtime changes that affect jar code, `mod_info.json`, `data/`, `graphics/`, Luna settings, generated assets, or package metadata.
 - Do not deploy docs-only changes unless the user asks or release packaging requires mirrored docs.
-- If deployment is blocked by a running Starsector process or locked artifact, do not kill the process. The deploy script stages the built files and queues a waiting background deploy.
+- If deployment is blocked by a running Starsector process or locked artifact, do not kill the process. The deploy script stages the built files and queues a minimized visible no-activate waiting deploy.
+- Use `tools/deploy-private-badges.ps1 -Status` for the private patched-badge queue/core-jar blocker report before rerunning the private deploy wrapper.
 - Validate the live artifact with `tools/validate-live-gui-classes.ps1` after runtime deploys.
 
 ## Public Release Policy

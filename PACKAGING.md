@@ -41,6 +41,16 @@ git diff --check
 
 `tools\deploy-live-mod.ps1` performs a clean sync of repo-managed clean-package files by default. If Starsector is locking the live jar, it stages the built files and queues a background deploy for after the lock clears. Use `-NoClean` only for local debugging when intentionally preserving extra live files.
 
+Useful deploy diagnostics:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status -CleanStaleStaging
+```
+
+`-Status` reports queue state, `Deploy Status.txt`, blockers, scoped staging, and clean-package manifest parity without building or deploying. `-CheckOnly -RequireCurrent` fails if the live clean-package surface is stale. Staging cleanup is explicit and scoped to this deploy workflow.
+
 For documentation-only changes:
 
 ```powershell
@@ -61,6 +71,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badge
 The wrapper builds `build.ps1 -PrivateBadge`, verifies that the jar contains the private helper/config/updater classes, refreshes the embedded core helper through the cargo stack patcher, validates the patch, and deploys with `-AllowPrivateBadgeJar`.
 
 If Starsector is running, the deploy step may queue. In that case, close Starsector and let the queued deploy finish before judging the badge behavior in game.
+
+For private badge deploy state only:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badges.ps1 -Status
+```
 
 ## Trade Rollback Fault Validation
 

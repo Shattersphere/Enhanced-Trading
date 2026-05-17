@@ -2,11 +2,17 @@ param(
     [string]$StarsectorDir = $env:STARSECTOR_DIRECTORY,
     [switch]$NoClean,
     [switch]$AllowPrivateBadgeJar,
+    [switch]$CheckOnly,
+    [switch]$Status,
+    [switch]$CleanStaleStaging,
+    [switch]$RequireCurrent,
     [switch]$QueuedWorker,
     [string]$StagingRoot = "",
     [string]$SourceProject = "",
     [string]$DeployAttemptedAt = "",
-    [int]$PollSeconds = 5
+    [int]$PollSeconds = 5,
+    [int]$StagingRetentionCount = 2,
+    [int]$StagingMinAgeMinutes = 10
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,9 +24,7 @@ if ([string]::IsNullOrWhiteSpace($StarsectorDir)) {
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $deployRoot = Join-Path $StarsectorDir "mods\Weapons Procurement"
 $stateRoot = Join-Path $repoRoot ".agent-deploy"
-$stageRootBase = Join-Path $stateRoot "staged"
-$stateFile = Join-Path $stateRoot "deploy-live-mod.json"
-$logFile = Join-Path $stateRoot "deploy-live-mod.log"
+$deployName = "deploy-live-mod"
 
 if (-not (Test-Path -LiteralPath $repoRoot)) {
     throw "Repository root not found: $repoRoot"
@@ -61,6 +65,23 @@ function Get-DeployCommit {
     return "unknown"
 }
 
+function Get-StableHash {
+    param([string]$Value)
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($Value.ToLowerInvariant())
+        $hash = $sha.ComputeHash($bytes)
+        return (($hash | ForEach-Object { $_.ToString("x2") }) -join "").Substring(0, 16)
+    } finally {
+        $sha.Dispose()
+    }
+}
+
+function Get-DeployScopeHash {
+    $scope = "$($repoRoot.ToLowerInvariant())|$($deployRoot.ToLowerInvariant())|$($deployName.ToLowerInvariant())"
+    return Get-StableHash -Value $scope
+}
+
 function Get-DeployStatusTimestamp {
     return (Get-Date -Format "d/M/yy h:mmtt").ToLowerInvariant()
 }
@@ -91,6 +112,101 @@ function Write-DeployStatus {
 
 function Get-RelativeDeployItems {
     return $script:items
+}
+
+function Get-DeployItemManifest {
+    param(
+        [string]$Root,
+        [switch]$SourceSide
+    )
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    foreach ($item in (Get-RelativeDeployItems)) {
+        $path = Join-Path $Root $item
+        $sourcePath = Join-Path $repoRoot $item
+        $optional = $optionalItems -contains $item
+
+        if ($optional -and -not (Test-Path -LiteralPath $sourcePath)) {
+            continue
+        }
+        if (-not (Test-Path -LiteralPath $path)) {
+            $kind = if ($SourceSide) { "MISSING_SOURCE" } else { "MISSING_LIVE" }
+            $lines.Add("$kind`t$item")
+            continue
+        }
+
+        $deployItem = Get-Item -LiteralPath $path -Force
+        if (-not $deployItem.PSIsContainer) {
+            $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $deployItem.FullName).Hash
+            $lines.Add("FILE`t$item`t$hash")
+            continue
+        }
+
+        Get-ChildItem -LiteralPath $deployItem.FullName -File -Recurse -Force | Sort-Object FullName | ForEach-Object {
+            $relativePath = $_.FullName.Substring($deployItem.FullName.Length).TrimStart("\", "/")
+            $entryLabel = Join-Path $item $relativePath
+            $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash
+            $lines.Add("FILE`t$entryLabel`t$hash")
+        }
+    }
+    return @($lines | Sort-Object)
+}
+
+function Get-ManifestHash {
+    param([string[]]$Lines)
+    $text = ($Lines | Sort-Object) -join "`n"
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($text)
+        $hash = $sha.ComputeHash($bytes)
+        return (($hash | ForEach-Object { $_.ToString("x2") }) -join "")
+    } finally {
+        $sha.Dispose()
+    }
+}
+
+function Get-DeployContentReport {
+    $repoManifest = @(Get-DeployItemManifest -Root $repoRoot -SourceSide)
+    $liveManifest = @(Get-DeployItemManifest -Root $deployRoot)
+    $repoMissing = @($repoManifest | Where-Object { $_.StartsWith("MISSING_SOURCE`t", [System.StringComparison]::Ordinal) })
+    $liveMissing = @($liveManifest | Where-Object { $_.StartsWith("MISSING_LIVE`t", [System.StringComparison]::Ordinal) })
+    $repoHash = Get-ManifestHash -Lines $repoManifest
+    $liveHash = Get-ManifestHash -Lines $liveManifest
+    $diff = @(Compare-Object -ReferenceObject $repoManifest -DifferenceObject $liveManifest)
+
+    $state = if ($repoMissing.Count -gt 0) {
+        "unknown because required deploy source items are missing."
+    } elseif ($liveMissing.Count -gt 0) {
+        "stale because live deploy items are missing."
+    } elseif ($repoHash -eq $liveHash) {
+        "current because repo and live deploy manifests match."
+    } else {
+        "stale because repo and live deploy manifests differ."
+    }
+
+    [pscustomobject]@{
+        RepoManifestHash = $repoHash
+        LiveManifestHash = $liveHash
+        RepoEntryCount = $repoManifest.Count
+        LiveEntryCount = $liveManifest.Count
+        RepoMissingCount = $repoMissing.Count
+        LiveMissingCount = $liveMissing.Count
+        DifferenceCount = $diff.Count
+        LiveState = $state
+    }
+}
+
+function Write-DeployContentReport {
+    param([object]$Report)
+
+    Write-Host "Repo deploy manifest SHA-256: $($Report.RepoManifestHash)"
+    Write-Host "Live deploy manifest SHA-256: $($Report.LiveManifestHash)"
+    Write-Host "Repo deploy manifest entries: $($Report.RepoEntryCount)"
+    Write-Host "Live deploy manifest entries: $($Report.LiveEntryCount)"
+    Write-Host "Repo missing deploy entries: $($Report.RepoMissingCount)"
+    Write-Host "Live missing deploy entries: $($Report.LiveMissingCount)"
+    Write-Host "Deploy manifest differences: $($Report.DifferenceCount)"
+    Write-Host "The live deploy target is $($Report.LiveState)"
 }
 
 function Get-ZipEntryNames {
@@ -255,6 +371,162 @@ function New-DeployStaging {
     return $stageRoot
 }
 
+function Assert-SafeStagingDirectory {
+    param([System.IO.DirectoryInfo]$Directory)
+
+    $resolvedBase = [System.IO.Path]::GetFullPath($stageRootBase).TrimEnd("\", "/")
+    $resolvedDirectory = [System.IO.Path]::GetFullPath($Directory.FullName).TrimEnd("\", "/")
+    if (!$resolvedDirectory.StartsWith("$resolvedBase\", [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to clean staging directory outside scoped staging root: $resolvedDirectory"
+    }
+}
+
+function Test-QueuedDeployWorkerActive {
+    param([object]$State)
+
+    if ($null -eq $State -or $null -eq $State.Pid) {
+        return $false
+    }
+    if ([string]::Equals([string]$State.Phase, "completed", [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $false
+    }
+    if ([string]::Equals([string]$State.Phase, "failed", [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $false
+    }
+
+    $process = Get-Process -Id ([int]$State.Pid) -ErrorAction SilentlyContinue
+    if ($null -eq $process) {
+        return $false
+    }
+
+    $scriptPath = [string]$State.ScriptPath
+    if (![string]::IsNullOrWhiteSpace($scriptPath)) {
+        $commandLine = ""
+        try {
+            $commandLine = [string](Get-CimInstance Win32_Process -Filter "ProcessId = $([int]$State.Pid)" -ErrorAction Stop).CommandLine
+        } catch {
+        }
+        if ($commandLine.IndexOf($scriptPath, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+            return $false
+        }
+    }
+    return $true
+}
+
+function Get-ScopedStagingDirectories {
+    if (-not (Test-Path -LiteralPath $stageRootBase)) {
+        return @()
+    }
+    return @(Get-ChildItem -LiteralPath $stageRootBase -Directory -ErrorAction SilentlyContinue | Sort-Object LastWriteTimeUtc -Descending)
+}
+
+function Get-StaleStagingCandidates {
+    param(
+        [object]$State,
+        [int]$RetentionCount,
+        [int]$MinAgeMinutes
+    )
+
+    if ($RetentionCount -lt 0) {
+        throw "StagingRetentionCount must be >= 0."
+    }
+    if ($MinAgeMinutes -lt 0) {
+        throw "StagingMinAgeMinutes must be >= 0."
+    }
+
+    $activeStagingRoot = ""
+    if ((Test-QueuedDeployWorkerActive -State $State) -and ![string]::IsNullOrWhiteSpace([string]$State.StagingRoot)) {
+        $activeStagingRoot = [System.IO.Path]::GetFullPath([string]$State.StagingRoot).TrimEnd("\", "/")
+    }
+
+    $nowUtc = (Get-Date).ToUniversalTime()
+    $inactive = New-Object System.Collections.Generic.List[System.IO.DirectoryInfo]
+    foreach ($directory in @(Get-ScopedStagingDirectories)) {
+        Assert-SafeStagingDirectory -Directory $directory
+        $resolvedDirectory = [System.IO.Path]::GetFullPath($directory.FullName).TrimEnd("\", "/")
+        if (![string]::IsNullOrWhiteSpace($activeStagingRoot) -and [string]::Equals($resolvedDirectory, $activeStagingRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+        $ageMinutes = ($nowUtc - $directory.LastWriteTimeUtc).TotalMinutes
+        if ($ageMinutes -lt $MinAgeMinutes) {
+            continue
+        }
+        [void]$inactive.Add($directory)
+    }
+    return @($inactive | Sort-Object LastWriteTimeUtc -Descending | Select-Object -Skip $RetentionCount)
+}
+
+function Remove-StaleStagingDirectories {
+    param([System.IO.DirectoryInfo[]]$Candidates)
+
+    $removed = 0
+    foreach ($candidate in $Candidates) {
+        Assert-SafeStagingDirectory -Directory $candidate
+        Write-Host "Removing stale staging directory: $($candidate.FullName)"
+        Remove-Item -LiteralPath $candidate.FullName -Recurse -Force
+        $removed++
+    }
+    return $removed
+}
+
+function Write-DeployQueueReport {
+    param([object]$ContentReport)
+
+    if ($CleanStaleStaging) {
+        Write-Host "Deploy status and stale staging cleanup."
+    } else {
+        Write-Host "Deploy status only; no files were modified."
+    }
+    Write-Host "Source project: $repoRoot"
+    Write-Host "Deploy target: $deployRoot"
+    Write-Host "Deploy name: $deployName"
+    Write-Host "Deploy scope hash: $deployScopeHash"
+    Write-Host "Deploy state file: $stateFile"
+    Write-Host "Deploy status file: $deployStatusFile"
+
+    $state = Read-DeployState
+    if ($null -eq $state) {
+        Write-Host "Deploy queue state: none"
+    } else {
+        Write-Host "Deploy queue state: present"
+        Write-Host "Deploy queue active: $(Test-QueuedDeployWorkerActive -State $state)"
+        Write-Host "Deploy queue runId: $($state.RunId)"
+        Write-Host "Deploy queue phase: $($state.Phase)"
+        Write-Host "Deploy queue pid: $($state.Pid)"
+        Write-Host "Deploy queue updated: $($state.UpdatedAt)"
+        if (![string]::IsNullOrWhiteSpace([string]$state.StagingRoot)) {
+            Write-Host "Deploy queue staging root: $($state.StagingRoot)"
+        }
+    }
+
+    if (Test-Path -LiteralPath $deployStatusFile) {
+        Write-Host "Deploy Status.txt:"
+        Get-Content -LiteralPath $deployStatusFile | ForEach-Object { Write-Host "  $_" }
+    } else {
+        Write-Host "Deploy Status.txt: missing"
+    }
+
+    $blocker = Get-DeployBlocker
+    if ([string]::IsNullOrWhiteSpace($blocker)) {
+        Write-Host "Current deploy blocker: none"
+    } else {
+        Write-Host "Current deploy blocker: $blocker"
+    }
+
+    $staging = @(Get-ScopedStagingDirectories)
+    $candidates = @(Get-StaleStagingCandidates -State $state -RetentionCount $StagingRetentionCount -MinAgeMinutes $StagingMinAgeMinutes)
+    Write-Host "Scoped staging directories: $($staging.Count)"
+    Write-Host "Stale staging cleanup candidates: $($candidates.Count)"
+    Write-Host "Stale staging retention count: $StagingRetentionCount"
+    Write-Host "Stale staging minimum age minutes: $StagingMinAgeMinutes"
+    if ($CleanStaleStaging) {
+        $removed = Remove-StaleStagingDirectories -Candidates $candidates
+        Write-Host "Stale staging directories removed: $removed"
+    }
+
+    Write-DeployContentReport -Report $ContentReport
+}
+
 function Publish-StagedDeploy {
     param([string]$StageRoot)
 
@@ -275,15 +547,21 @@ function Publish-StagedDeploy {
     }
 }
 
-function Read-DeployState {
-    if (-not (Test-Path -LiteralPath $stateFile)) {
+function Read-DeployStateFile {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
         return $null
     }
     try {
-        return Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
+        return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
     } catch {
         return $null
     }
+}
+
+function Read-DeployState {
+    return Read-DeployStateFile -Path $stateFile
 }
 
 function Write-DeployState {
@@ -299,6 +577,8 @@ function Write-DeployState {
     [pscustomobject]@{
         RunId = $RunId
         Pid = $ProcessId
+        DeployName = $deployName
+        DeployScopeHash = $deployScopeHash
         ScriptPath = $PSCommandPath
         RepoRoot = $repoRoot
         DeployRoot = $deployRoot
@@ -308,8 +588,10 @@ function Write-DeployState {
     } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $stateFile -Encoding UTF8
 }
 
-function Stop-OlderQueuedDeploy {
-    $state = Read-DeployState
+function Stop-OlderQueuedDeployFromStateFile {
+    param([string]$Path)
+
+    $state = Read-DeployStateFile -Path $Path
     if ($null -eq $state -or $null -eq $state.Pid) {
         return
     }
@@ -331,7 +613,14 @@ function Stop-OlderQueuedDeploy {
         return
     }
     Stop-Process -Id $oldPid -Force
-    Write-DeployLog "Cancelled older queued deploy pid=$oldPid."
+    Write-DeployLog "Cancelled older queued deploy pid=$oldPid state=$Path."
+}
+
+function Stop-OlderQueuedDeploy {
+    Stop-OlderQueuedDeployFromStateFile -Path $stateFile
+    if (![string]::Equals($legacyStateFile, $stateFile, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Stop-OlderQueuedDeployFromStateFile -Path $legacyStateFile
+    }
 }
 
 function ConvertTo-ProcessArgument {
@@ -459,9 +748,44 @@ function Start-QueuedDeploy {
 }
 
 $deployStatusFile = Join-Path $repoRoot "Deploy Status.txt"
+$deployScopeHash = Get-DeployScopeHash
+$stageRootBase = Join-Path $stateRoot "staged-$deployName-$deployScopeHash"
+$stateFile = Join-Path $stateRoot "$deployName-$deployScopeHash.latest.json"
+$legacyStateFile = Join-Path $stateRoot "deploy-live-mod.json"
+$logFile = Join-Path $stateRoot "$deployName-$deployScopeHash.log"
 $deployCommit = Get-DeployCommit -RepoRoot $repoRoot
+
+if ($CheckOnly -and $Status) {
+    throw "Use either -CheckOnly or -Status, not both."
+}
+if ($CleanStaleStaging -and -not $Status) {
+    throw "Use -Status -CleanStaleStaging to clean stale deploy staging directories."
+}
+if (($CheckOnly -or $Status) -and $QueuedWorker) {
+    throw "Status and check-only modes are foreground diagnostics; do not combine them with -QueuedWorker."
+}
+if ($CheckOnly -or $Status) {
+    $contentReport = Get-DeployContentReport
+    if ($CheckOnly) {
+        Write-Host "Deploy check only; no files were modified."
+        Write-DeployContentReport -Report $contentReport
+    } else {
+        Write-DeployQueueReport -ContentReport $contentReport
+    }
+    if ($RequireCurrent -and !$contentReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "The live deploy target is not current: $($contentReport.LiveState)"
+    }
+    exit 0
+}
+
 trap {
     Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "error" -Message $_.Exception.Message
+    $state = Read-DeployState
+    if ($null -ne $state -and $state.Pid -eq $PID) {
+        $state.Phase = "failed"
+        $state.UpdatedAt = (Get-Date).ToString("o")
+        $state | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+    }
     break
 }
 

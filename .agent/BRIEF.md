@@ -1,6 +1,6 @@
 # Weapons Procurement Brief
 
-Last updated: 2026-05-17
+Last updated: 2026-05-18
 
 ## Current State
 
@@ -13,7 +13,7 @@ The source tree is fully migrated to Gradle/Kotlin. `build.ps1` remains the norm
 ## Known-Good Source State
 
 - Current branch: `main`
-- Last pushed baseline before this brief update: `ab67cb4` (`Split trade packages by ownership`)
+- Last source baseline before this deploy-maintenance pass: `fbabe8e` (`Centralize stock review row layouts`)
 - Version in `mod_info.json`: `0.2.0`
 
 ## Commands
@@ -44,7 +44,9 @@ git diff --check
 
 - Live mod folder: `C:\Games\Starsector\mods\Weapons Procurement`
 - Deploy command: `tools/deploy-live-mod.ps1`
-- The deploy script clean-syncs repo-managed clean-package files, or stages and queues a background deploy if the live jar is locked.
+- The deploy script clean-syncs repo-managed clean-package files, or stages and queues a minimized visible no-activate deploy if the live jar is locked.
+- Use `tools/deploy-live-mod.ps1 -Status` for queue/status/blocker/staging diagnostics, `-CheckOnly -RequireCurrent` for cheap source/live clean-package parity, and `-Status -CleanStaleStaging` for scoped stale staging cleanup.
+- Use `tools/deploy-private-badges.ps1 -Status` for the private patched-badge queue and core-jar blocker report.
 - Docs-only changes normally do not need deploy.
 
 ## Current Risks

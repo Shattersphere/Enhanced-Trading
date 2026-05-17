@@ -17,7 +17,7 @@ Search tags: `deploy-live-mod`, `rollback`, `wp.debug.failTradeStep`, `validate-
 - Forced rollback testing remains the key outstanding runtime proof.
 - Patched badge validation is separate from clean popup validation.
 - Restart Starsector after class/helper/jar changes because stale classloader state can survive hot-copying.
-- Live deploy stages files and queues a hidden worker when Starsector locks the jar; treat queued deploys as pending until live parity passes.
+- Live deploy stages files and queues a minimized visible no-activate worker when Starsector locks the jar; treat queued deploys as pending until live parity passes.
 - Reset dangerous debug/fault settings to `none` before normal play or packaging.
 
 ## Index
@@ -50,6 +50,17 @@ git diff --check
 ```
 
 If `deploy-live-mod.ps1` reports a queued deploy, close Starsector and wait for the background worker to publish the staged files. Then rerun `validate-live-gui-classes.ps1`.
+
+Deploy troubleshooting commands:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status -CleanStaleStaging
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badges.ps1 -Status
+```
+
+`-Status` is the no-build/no-deploy report for queue state, `Deploy Status.txt`, blockers, scoped staging, and manifest parity. Use cleanup only through `-Status -CleanStaleStaging`.
 
 For docs-only edits, normally use:
 
