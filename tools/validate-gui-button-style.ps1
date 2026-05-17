@@ -317,6 +317,11 @@ $actionRowRendererText = Get-Content -LiteralPath $stockReviewActionRowRendererP
 $actionRowButtonsText = Get-Content -LiteralPath $stockReviewActionRowButtonsPath -Raw
 if ($actionControlsText -notmatch "class StockReviewActionRef" -or
     $actionControlsText -notmatch "class StockReviewButtonDefinition" -or
+    $actionControlsText -notmatch "fun interface StockReviewButtonValue" -or
+    $actionControlsText -notmatch "fun <C> static\(" -or
+    $actionControlsText -notmatch "fun <C> staticWithEnabled" -or
+    $actionControlsText -notmatch "fun <C> dynamic" -or
+    $actionControlsText -notmatch "fun <C> constant" -or
     $actionControlsText -notmatch "StockReviewActionGuards\.requireGroup" -or
     $rowSpecText -notmatch "fun action\(value: StockReviewActionRef\?\)" -or
     $listRowText -notmatch "StockReviewActionRef\.rowExpansion" -or
@@ -336,7 +341,12 @@ if ($footerSpecText -match "StockReviewActionGroup" -or
     $footerSpecText -notmatch "StockReviewFooterButtons\.left" -or
     $footerSpecText -notmatch "StockReviewFooterButtons\.right" -or
     $footerButtonsText -notmatch "StockReviewButtonDefinition" -or
+    $footerButtonsText -notmatch "object StockReviewFooterButtonPolicies" -or
     $footerButtonsText -notmatch "class StockReviewFooterButtonSet" -or
+    $footerButtonsText -notmatch "StockReviewButtonDefinition\.staticWithEnabled" -or
+    $footerButtonsText -notmatch "StockReviewButtonDefinition\.static" -or
+    $footerButtonsText -match "StockReviewButtonDefinition\.alwaysEnabled" -or
+    $footerButtonsText -match "context: StockReviewFooterContext ->" -or
     $footerButtonsText -notmatch "fun left\(" -or
     $footerButtonsText -notmatch "fun right\(" -or
     $footerButtonsText -notmatch "buttonSet\(kind\)" -or
@@ -349,6 +359,11 @@ if ($actionRowRendererText -match "StockReviewActionGroup" -or
     $actionRowRendererText -notmatch "StockReviewActionRowButtons\.build\(" -or
     $actionRowRendererText -notmatch "modeSpec\.actionRowKind" -or
     $actionRowButtonsText -notmatch "StockReviewButtonDefinition" -or
+    $actionRowButtonsText -notmatch "object StockReviewActionRowButtonPolicies" -or
+    $actionRowButtonsText -notmatch "StockReviewButtonDefinition\.dynamic" -or
+    $actionRowButtonsText -notmatch "StockReviewButtonDefinition\.static" -or
+    $actionRowButtonsText -match "StockReviewButtonDefinition\.alwaysEnabled" -or
+    $actionRowButtonsText -match "\{ context ->" -or
     $actionRowButtonsText -notmatch "class StockReviewActionRowButtonSet" -or
     $actionRowButtonsText -notmatch "buttonSet\(kind\)" -or
     $actionRowButtonsText -notmatch "StockReviewActionRowKind\.TRADE_CONTROLS" -or

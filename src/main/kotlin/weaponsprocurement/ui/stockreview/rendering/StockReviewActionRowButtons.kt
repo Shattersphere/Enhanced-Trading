@@ -9,6 +9,7 @@ import weaponsprocurement.ui.stockreview.controls.StockReviewActionButtonFactory
 import weaponsprocurement.ui.stockreview.controls.StockReviewButtonDefinition
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
+import java.awt.Color
 import java.util.ArrayList
 
 class StockReviewActionRowContext(
@@ -16,67 +17,120 @@ class StockReviewActionRowContext(
     @JvmField val state: StockReviewState,
 )
 
+object StockReviewActionRowButtonPolicies {
+    @JvmStatic
+    fun sortLabel(context: StockReviewActionRowContext): String = "Sort: ${context.snapshot.getSortMode().label}"
+
+    @JvmStatic
+    fun sourceLabel(context: StockReviewActionRowContext): String = "Source: ${context.snapshot.getSourceMode().label}"
+
+    @JvmStatic
+    fun blackMarketLabel(context: StockReviewActionRowContext): String =
+        "Black Market: ${StockReviewUiText.onOff(context.snapshot.isIncludeBlackMarket())}"
+
+    @JvmStatic
+    fun filtersLabel(context: StockReviewActionRowContext): String = "Filters: ${context.state.getActiveFilterCount()}"
+
+    @JvmStatic
+    fun alwaysEnabled(context: StockReviewActionRowContext): Boolean = true
+
+    @JvmStatic
+    fun blackMarketEnabled(context: StockReviewActionRowContext): Boolean =
+        context.snapshot.getSourceMode().supportsBlackMarketToggle()
+
+    @JvmStatic
+    fun actionBackground(context: StockReviewActionRowContext): Color = StockReviewStyle.ACTION_BACKGROUND
+
+    @JvmStatic
+    fun cycleSortMode(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.cycleSortMode()
+
+    @JvmStatic
+    fun cycleSourceMode(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.cycleSourceMode()
+
+    @JvmStatic
+    fun toggleBlackMarket(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.toggleBlackMarket()
+
+    @JvmStatic
+    fun openFilters(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.openFilters()
+
+    @JvmStatic
+    fun sortTooltip(context: StockReviewActionRowContext): String = StockReviewTooltips.sort(context.snapshot.getSortMode())
+
+    @JvmStatic
+    fun sourceTooltip(context: StockReviewActionRowContext): String = StockReviewTooltips.source(context.snapshot.getSourceMode())
+
+    @JvmStatic
+    fun blackMarketTooltip(context: StockReviewActionRowContext): String =
+        "Include black-market stock for Local and Sector Market source modes. Fixer's Market controls its own virtual stock."
+
+    @JvmStatic
+    fun filtersTooltip(context: StockReviewActionRowContext): String = "Open the weapon filter list."
+}
+
 class StockReviewActionRowButtons private constructor() {
     companion object {
-        internal val SORT = StockReviewButtonDefinition.alwaysEnabled<StockReviewActionRowContext>(
+        internal val SORT = StockReviewButtonDefinition.dynamic(
             "sort",
             StockReviewActionGroup.SOURCE_TRANSITIONS,
             StockReviewStyle.SORT_BUTTON_WIDTH,
-            { context -> "Sort: ${context.snapshot.getSortMode().label}" },
-            { StockReviewAction.cycleSortMode() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { context -> StockReviewTooltips.sort(context.snapshot.getSortMode()) },
+            StockReviewActionRowButtonPolicies::sortLabel,
+            StockReviewActionRowButtonPolicies::cycleSortMode,
+            StockReviewActionRowButtonPolicies::alwaysEnabled,
+            StockReviewActionRowButtonPolicies::actionBackground,
+            StockReviewActionRowButtonPolicies::sortTooltip,
         )
 
-        internal val SOURCE = StockReviewButtonDefinition.alwaysEnabled<StockReviewActionRowContext>(
+        internal val SOURCE = StockReviewButtonDefinition.dynamic(
             "source",
             StockReviewActionGroup.SOURCE_TRANSITIONS,
             StockReviewStyle.SOURCE_BUTTON_WIDTH,
-            { context -> "Source: ${context.snapshot.getSourceMode().label}" },
-            { StockReviewAction.cycleSourceMode() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { context -> StockReviewTooltips.source(context.snapshot.getSourceMode()) },
+            StockReviewActionRowButtonPolicies::sourceLabel,
+            StockReviewActionRowButtonPolicies::cycleSourceMode,
+            StockReviewActionRowButtonPolicies::alwaysEnabled,
+            StockReviewActionRowButtonPolicies::actionBackground,
+            StockReviewActionRowButtonPolicies::sourceTooltip,
         )
 
-        internal val BLACK_MARKET = StockReviewButtonDefinition<StockReviewActionRowContext>(
+        internal val BLACK_MARKET = StockReviewButtonDefinition.dynamic(
             "black-market",
             StockReviewActionGroup.SOURCE_TRANSITIONS,
             StockReviewStyle.BLACK_MARKET_BUTTON_WIDTH,
-            { context -> "Black Market: ${StockReviewUiText.onOff(context.snapshot.isIncludeBlackMarket())}" },
-            { StockReviewAction.toggleBlackMarket() },
-            { context -> context.snapshot.getSourceMode().supportsBlackMarketToggle() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { "Include black-market stock for Local and Sector Market source modes. Fixer's Market controls its own virtual stock." },
+            StockReviewActionRowButtonPolicies::blackMarketLabel,
+            StockReviewActionRowButtonPolicies::toggleBlackMarket,
+            StockReviewActionRowButtonPolicies::blackMarketEnabled,
+            StockReviewActionRowButtonPolicies::actionBackground,
+            StockReviewActionRowButtonPolicies::blackMarketTooltip,
         )
 
-        internal val FILTERS = StockReviewButtonDefinition.alwaysEnabled<StockReviewActionRowContext>(
+        internal val FILTERS = StockReviewButtonDefinition.dynamic(
             "filters",
             StockReviewActionGroup.FILTERS,
             StockReviewStyle.FILTER_BUTTON_WIDTH,
-            { context -> "Filters: ${context.state.getActiveFilterCount()}" },
-            { StockReviewAction.openFilters() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { "Open the weapon filter list." },
+            StockReviewActionRowButtonPolicies::filtersLabel,
+            StockReviewActionRowButtonPolicies::openFilters,
+            StockReviewActionRowButtonPolicies::alwaysEnabled,
+            StockReviewActionRowButtonPolicies::actionBackground,
+            StockReviewActionRowButtonPolicies::filtersTooltip,
         )
 
-        internal val COLORS = StockReviewButtonDefinition.alwaysEnabled<StockReviewActionRowContext>(
+        internal val COLORS = StockReviewButtonDefinition.static<StockReviewActionRowContext>(
             "colors",
             StockReviewActionGroup.DEBUG_MODE,
             StockReviewStyle.COLOR_BUTTON_WIDTH,
-            { "Colors" },
-            { StockReviewAction.openColorDebug() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { "Open the color debug menu." },
+            "Colors",
+            StockReviewAction.openColorDebug(),
+            StockReviewStyle.ACTION_BACKGROUND,
+            "Open the color debug menu.",
         )
 
-        internal val SHIPS = StockReviewButtonDefinition.alwaysEnabled<StockReviewActionRowContext>(
+        internal val SHIPS = StockReviewButtonDefinition.static<StockReviewActionRowContext>(
             "ships",
             StockReviewActionGroup.DEBUG_MODE,
             StockReviewStyle.COLOR_BUTTON_WIDTH,
-            { "Ships" },
-            { StockReviewAction.openShipCatalogDebug() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { "Open the developer-only Fixer ship catalog diagnostic view." },
+            "Ships",
+            StockReviewAction.openShipCatalogDebug(),
+            StockReviewStyle.ACTION_BACKGROUND,
+            "Open the developer-only Fixer ship catalog diagnostic view.",
         )
 
         @JvmStatic

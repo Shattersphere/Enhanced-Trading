@@ -7,6 +7,16 @@ import weaponsprocurement.ui.stockreview.controls.StockReviewActionButtonFactory
 import weaponsprocurement.ui.stockreview.controls.StockReviewButtonDefinition
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
+import java.awt.Color
+
+object StockReviewFooterButtonPolicies {
+    @JvmStatic
+    fun hasPendingTrades(context: StockReviewFooterContext): Boolean = context.hasPendingTrades()
+
+    @JvmStatic
+    fun canConfirmTrades(context: StockReviewFooterContext): Boolean =
+        context.hasPendingTrades() && context.tradeContext.canConfirm()
+}
 
 class StockReviewFooterButtons private constructor() {
     companion object {
@@ -14,7 +24,7 @@ class StockReviewFooterButtons private constructor() {
             "color-confirm",
             StockReviewActionGroup.DEBUG_MODE,
             "Confirm",
-            { StockReviewAction.debugConfirm() },
+            StockReviewAction.debugConfirm(),
             StockReviewStyle.CONFIRM_BUTTON,
             "Apply the color and return to the trade screen.",
         )
@@ -23,7 +33,7 @@ class StockReviewFooterButtons private constructor() {
             "color-apply",
             StockReviewActionGroup.DEBUG_MODE,
             "Apply",
-            { StockReviewAction.debugApply() },
+            StockReviewAction.debugApply(),
             StockReviewStyle.SAVE_BUTTON,
             "Apply the color without closing the debug menu.",
         )
@@ -32,7 +42,7 @@ class StockReviewFooterButtons private constructor() {
             "color-restore",
             StockReviewActionGroup.DEBUG_MODE,
             "Restore",
-            { StockReviewAction.debugRestore() },
+            StockReviewAction.debugRestore(),
             StockReviewStyle.LOAD_BUTTON,
             "Restore the selected color to its default value.",
         )
@@ -41,7 +51,7 @@ class StockReviewFooterButtons private constructor() {
             "color-cancel",
             StockReviewActionGroup.NAVIGATION,
             "Cancel",
-            { StockReviewAction.goBack() },
+            StockReviewAction.goBack(),
             StockReviewStyle.CANCEL_BUTTON,
             "Return without applying additional changes.",
         )
@@ -50,7 +60,7 @@ class StockReviewFooterButtons private constructor() {
             "filter-confirm",
             StockReviewActionGroup.NAVIGATION,
             "Confirm",
-            { StockReviewAction.goBack() },
+            StockReviewAction.goBack(),
             StockReviewStyle.CONFIRM_BUTTON,
             "Return to the trade screen with the current filters.",
         )
@@ -59,7 +69,7 @@ class StockReviewFooterButtons private constructor() {
             "filter-reset",
             StockReviewActionGroup.FILTERS,
             "Reset",
-            { StockReviewAction.resetFilters() },
+            StockReviewAction.resetFilters(),
             StockReviewStyle.LOAD_BUTTON,
             "Clear every active filter.",
         )
@@ -68,7 +78,7 @@ class StockReviewFooterButtons private constructor() {
             "filter-cancel",
             StockReviewActionGroup.NAVIGATION,
             "Cancel",
-            { StockReviewAction.goBack() },
+            StockReviewAction.goBack(),
             StockReviewStyle.CANCEL_BUTTON,
             "Return to the trade screen.",
         )
@@ -77,69 +87,69 @@ class StockReviewFooterButtons private constructor() {
             "go-back",
             StockReviewActionGroup.NAVIGATION,
             "Go Back",
-            { StockReviewAction.goBack() },
+            StockReviewAction.goBack(),
             StockReviewStyle.CANCEL_BUTTON,
             "Return to the trade screen.",
         )
 
-        private val REVIEW_CONFIRM = StockReviewButtonDefinition(
+        private val REVIEW_CONFIRM = StockReviewButtonDefinition.staticWithEnabled<StockReviewFooterContext>(
             "review-confirm",
             StockReviewActionGroup.CONFIRMED_EXECUTION,
             StockReviewStyle.FOOTER_BUTTON_WIDTH,
-            { "Confirm Trades" },
-            { StockReviewAction.confirmPurchase() },
-            { context: StockReviewFooterContext -> context.hasPendingTrades() && context.tradeContext.canConfirm() },
-            { StockReviewStyle.CONFIRM_BUTTON },
-            { "Execute the queued buys and sells." },
+            "Confirm Trades",
+            StockReviewAction.confirmPurchase(),
+            StockReviewFooterButtonPolicies::canConfirmTrades,
+            StockReviewStyle.CONFIRM_BUTTON,
+            "Execute the queued buys and sells.",
         )
 
         private val REVIEW_BACK = footer(
             "review-back",
             StockReviewActionGroup.NAVIGATION,
             "Go Back",
-            { StockReviewAction.goBack() },
+            StockReviewAction.goBack(),
             StockReviewStyle.CANCEL_BUTTON,
             "Return to the trade screen without executing trades.",
         )
 
-        private val TRADE_REVIEW = StockReviewButtonDefinition(
+        private val TRADE_REVIEW = StockReviewButtonDefinition.staticWithEnabled<StockReviewFooterContext>(
             "trade-review",
             StockReviewActionGroup.NAVIGATION,
             StockReviewStyle.FOOTER_BUTTON_WIDTH,
-            { "Review Trades" },
-            { StockReviewAction.reviewPurchase() },
-            { context: StockReviewFooterContext -> context.hasPendingTrades() },
-            { StockReviewStyle.CONFIRM_BUTTON },
-            { "Review the queued trades before confirming them." },
+            "Review Trades",
+            StockReviewAction.reviewPurchase(),
+            StockReviewFooterButtonPolicies::hasPendingTrades,
+            StockReviewStyle.CONFIRM_BUTTON,
+            "Review the queued trades before confirming them.",
         )
 
         private val PURCHASE_ALL = bulk(
             "purchase-all-until-sufficient",
             StockReviewActionGroup.BULK_SUFFICIENT_PURCHASE,
             "Purchase All Until Sufficient",
-            { StockReviewAction.purchaseAllUntilSufficient() },
+            StockReviewAction.purchaseAllUntilSufficient(),
             StockReviewStyle.BUY_BUTTON,
-            { StockReviewTooltips.purchaseAllUntilSufficient() },
+            StockReviewTooltips.purchaseAllUntilSufficient(),
         )
 
         private val SELL_ALL = bulk(
             "sell-all-until-sufficient",
             StockReviewActionGroup.BULK_SUFFICIENT_SALE,
             "Sell All Until Sufficient",
-            { StockReviewAction.sellAllUntilSufficient() },
+            StockReviewAction.sellAllUntilSufficient(),
             StockReviewStyle.SELL_BUTTON,
-            { StockReviewTooltips.sellAllUntilSufficient() },
+            StockReviewTooltips.sellAllUntilSufficient(),
         )
 
-        private val RESET_ALL = StockReviewButtonDefinition(
+        private val RESET_ALL = StockReviewButtonDefinition.staticWithEnabled<StockReviewFooterContext>(
             "reset-all-trades",
             StockReviewActionGroup.SOURCE_TRANSITIONS,
             StockReviewStyle.RESET_ALL_BUTTON_WIDTH,
-            { "Reset All Trades" },
-            { StockReviewAction.resetAllTrades() },
-            { context: StockReviewFooterContext -> context.hasPendingTrades() },
-            { StockReviewStyle.ACTION_BACKGROUND },
-            { "Clear every queued buy and sell." },
+            "Reset All Trades",
+            StockReviewAction.resetAllTrades(),
+            StockReviewFooterButtonPolicies::hasPendingTrades,
+            StockReviewStyle.ACTION_BACKGROUND,
+            "Clear every queued buy and sell.",
         )
 
         @JvmStatic
@@ -177,35 +187,35 @@ class StockReviewFooterButtons private constructor() {
             id: String,
             group: StockReviewActionGroup,
             label: String,
-            action: (StockReviewFooterContext) -> StockReviewAction,
-            fill: java.awt.Color,
+            action: StockReviewAction,
+            fill: Color,
             tooltip: String,
         ): StockReviewButtonDefinition<StockReviewFooterContext> =
-            StockReviewButtonDefinition.alwaysEnabled(
+            StockReviewButtonDefinition.static(
                 id,
                 group,
                 StockReviewStyle.FOOTER_BUTTON_WIDTH,
-                { label },
+                label,
                 action,
-                { fill },
-                { tooltip },
+                fill,
+                tooltip,
             )
 
         private fun bulk(
             id: String,
             group: StockReviewActionGroup,
             label: String,
-            action: (StockReviewFooterContext) -> StockReviewAction,
-            fill: java.awt.Color,
-            tooltip: (StockReviewFooterContext) -> String,
+            action: StockReviewAction,
+            fill: Color,
+            tooltip: String,
         ): StockReviewButtonDefinition<StockReviewFooterContext> =
-            StockReviewButtonDefinition.alwaysEnabled(
+            StockReviewButtonDefinition.static(
                 id,
                 group,
                 StockReviewStyle.BULK_BUTTON_WIDTH,
-                { label },
+                label,
                 action,
-                { fill },
+                fill,
                 tooltip,
             )
 

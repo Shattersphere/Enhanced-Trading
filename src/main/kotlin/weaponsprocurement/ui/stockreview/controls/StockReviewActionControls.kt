@@ -7,31 +7,103 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
 import java.awt.Color
 
+fun interface StockReviewButtonValue<C, T> {
+    fun resolve(context: C): T
+}
+
 class StockReviewButtonDefinition<C>(
     @JvmField val id: String,
     @JvmField val group: StockReviewActionGroup,
     @JvmField val width: Float,
-    private val label: (C) -> String?,
-    private val action: (C) -> StockReviewAction,
-    private val enabled: (C) -> Boolean,
-    private val fillColor: (C) -> Color,
-    private val tooltip: (C) -> String?,
+    private val label: StockReviewButtonValue<C, String?>,
+    private val action: StockReviewButtonValue<C, StockReviewAction>,
+    private val enabled: StockReviewButtonValue<C, Boolean>,
+    private val fillColor: StockReviewButtonValue<C, Color>,
+    private val tooltip: StockReviewButtonValue<C, String?>,
 ) {
     fun build(context: C, factory: StockReviewActionButtonFactory): WimGuiButtonSpec<StockReviewAction> =
-        factory.button(group, width, label.invoke(context), action.invoke(context), enabled.invoke(context), fillColor.invoke(context), tooltip.invoke(context))
+        factory.button(
+            group,
+            width,
+            label.resolve(context),
+            action.resolve(context),
+            enabled.resolve(context),
+            fillColor.resolve(context),
+            tooltip.resolve(context),
+        )
 
     companion object {
         @JvmStatic
-        fun <C> alwaysEnabled(
+        fun <C> static(
             id: String,
             group: StockReviewActionGroup,
             width: Float,
-            label: (C) -> String?,
-            action: (C) -> StockReviewAction,
-            fillColor: (C) -> Color,
-            tooltip: (C) -> String?,
+            label: String,
+            action: StockReviewAction,
+            fillColor: Color,
+            tooltip: String,
         ): StockReviewButtonDefinition<C> =
-            StockReviewButtonDefinition(id, group, width, label, action, { true }, fillColor, tooltip)
+            StockReviewButtonDefinition(
+                id,
+                group,
+                width,
+                constant(label),
+                constant(action),
+                constant(true),
+                constant(fillColor),
+                constant(tooltip),
+            )
+
+        @JvmStatic
+        fun <C> staticWithEnabled(
+            id: String,
+            group: StockReviewActionGroup,
+            width: Float,
+            label: String,
+            action: StockReviewAction,
+            enabled: StockReviewButtonValue<C, Boolean>,
+            fillColor: Color,
+            tooltip: String,
+        ): StockReviewButtonDefinition<C> =
+            StockReviewButtonDefinition(
+                id,
+                group,
+                width,
+                constant(label),
+                constant(action),
+                enabled,
+                constant(fillColor),
+                constant(tooltip),
+            )
+
+        @JvmStatic
+        fun <C> dynamic(
+            id: String,
+            group: StockReviewActionGroup,
+            width: Float,
+            label: StockReviewButtonValue<C, String?>,
+            action: StockReviewButtonValue<C, StockReviewAction>,
+            enabled: StockReviewButtonValue<C, Boolean>,
+            fillColor: StockReviewButtonValue<C, Color>,
+            tooltip: StockReviewButtonValue<C, String?>,
+        ): StockReviewButtonDefinition<C> =
+            StockReviewButtonDefinition(id, group, width, label, action, enabled, fillColor, tooltip)
+
+        @JvmStatic
+        fun <C> constant(value: String?): StockReviewButtonValue<C, String?> =
+            StockReviewButtonValue { value }
+
+        @JvmStatic
+        fun <C> constant(value: StockReviewAction): StockReviewButtonValue<C, StockReviewAction> =
+            StockReviewButtonValue { value }
+
+        @JvmStatic
+        fun <C> constant(value: Boolean): StockReviewButtonValue<C, Boolean> =
+            StockReviewButtonValue { value }
+
+        @JvmStatic
+        fun <C> constant(value: Color): StockReviewButtonValue<C, Color> =
+            StockReviewButtonValue { value }
     }
 }
 
