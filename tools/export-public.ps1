@@ -57,7 +57,8 @@ $excludeSourceSuffixes = @(
     "src/weaponsprocurement/extensions/WeaponsProcurementExtensions.java",
     "src/privateBadge/java/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java",
     "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementBadgeConfig.kt",
-    "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementCountUpdater.kt"
+    "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementCountUpdater.kt",
+    "src/privateBadge/kotlin/weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.kt"
 )
 
 function Copy-RepoFile {

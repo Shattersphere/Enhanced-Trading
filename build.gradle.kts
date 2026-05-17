@@ -207,7 +207,9 @@ tasks.register<Jar>("privateBadgeJar") {
     dependsOn("validateLocalBuildEnvironment", "classes", "privateBadgeClasses")
     archiveFileName.set("weapons-procurement.jar")
     destinationDirectory.set(layout.projectDirectory.dir("jars"))
-    from(sourceSets["main"].output)
+    from(sourceSets["main"].output) {
+        exclude("weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap*")
+    }
     from(sourceSets["privateBadge"].output)
 }
 

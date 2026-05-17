@@ -180,7 +180,8 @@ function Assert-PrivateBadgeJar {
     $required = @(
         "weaponsprocurement/internal/WeaponsProcurementBadgeHelper.class",
         "weaponsprocurement/internal/WeaponsProcurementBadgeConfig.class",
-        "weaponsprocurement/internal/WeaponsProcurementCountUpdater.class"
+        "weaponsprocurement/internal/WeaponsProcurementCountUpdater.class",
+        "weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.class"
     )
 
     $missing = @($required | Where-Object { $entries -notcontains $_ })
