@@ -64,7 +64,7 @@ class StockReviewTradeRowCells private constructor() {
         @JvmStatic
         fun addWorstCaseTradeRow(rows: MutableList<WimGuiListRow<StockReviewAction>>) {
             val cells = WimGuiRowCell.of(
-                WimGuiRowCell.info("Storage: 99+", StockReviewStyle.STOCK_CELL_WIDTH, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.STORAGE),
+                WimGuiRowCell.info("Storage: 99+ [-99+]", StockReviewStyle.STOCK_CELL_WIDTH, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.STORAGE),
                 WimGuiRowCell.info("Price: 99,999+${CreditFormat.CREDIT_SYMBOL}", StockReviewStyle.PRICE_CELL_WIDTH, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PRICE),
                 WimGuiRowCell.info("Selling: 99+ [999,999+${CreditFormat.CREDIT_SYMBOL}]", StockReviewStyle.PLAN_CELL_WIDTH, StockReviewStyle.PLAN_NEGATIVE, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PLAN),
                 WimGuiRowCell.standardAction("-10", StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(10)),
@@ -76,7 +76,7 @@ class StockReviewTradeRowCells private constructor() {
             )
             rows.add(
                 StockReviewListRow.item(
-                    "Suzuki-Clapteryon Thermal Prokector... (+)",
+                    "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector [Observed/Very Rare] (+)",
                     cells,
                     StockReviewAction.debugNoop(),
                     "Worst-case row-width test sample. It does not affect trades.",

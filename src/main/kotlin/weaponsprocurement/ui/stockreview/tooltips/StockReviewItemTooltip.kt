@@ -3,6 +3,7 @@ package weaponsprocurement.ui.stockreview.tooltips
 import weaponsprocurement.ui.WimGuiStyle
 import weaponsprocurement.ui.WimGuiText
 import weaponsprocurement.ui.WimGuiTooltip
+import weaponsprocurement.ui.WimGuiPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.rendering.StockReviewWeaponIconPlugin
@@ -12,7 +13,6 @@ import com.fs.starfarer.api.campaign.CargoStackAPI
 import com.fs.starfarer.api.combat.DamageType
 import com.fs.starfarer.api.combat.WeaponAPI
 import com.fs.starfarer.api.graphics.SpriteAPI
-import com.fs.starfarer.api.impl.codex.CodexDataV2
 import com.fs.starfarer.api.loading.Description
 import com.fs.starfarer.api.loading.FighterWingSpecAPI
 import com.fs.starfarer.api.loading.ProjectileWeaponSpecAPI
@@ -55,13 +55,12 @@ class StockReviewItemTooltip private constructor(
                 )
             }
         } else {
-            setCodexEntry(tooltip, CodexDataV2.getWeaponEntryId(record.itemId))
             addPaddedWeaponTooltip(tooltip)
         }
     }
 
     private fun addPaddedWeaponTooltip(tooltip: TooltipMakerAPI) {
-        val panel = Global.getSettings().createCustom(WIDTH, TOOLTIP_LAYOUT_HEIGHT, BaseCustomUIPanelPlugin())
+        val panel = Global.getSettings().createCustom(WIDTH, TOOLTIP_LAYOUT_HEIGHT, WimGuiPanelPlugin(TOOLTIP_BACKGROUND, TOOLTIP_BORDER))
         val content = panel.createUIElement(CONTENT_WIDTH, TOOLTIP_LAYOUT_HEIGHT, false)
         content.setParaFontDefault()
         content.setParaFontColor(textColor())
@@ -99,7 +98,6 @@ class StockReviewItemTooltip private constructor(
 
     private fun createWingTooltip(tooltip: TooltipMakerAPI) {
         val spec: FighterWingSpecAPI = record.wingSpec ?: return
-        setCodexEntry(tooltip, CodexDataV2.getFighterEntryId(record.itemId))
         tooltip.addSectionHeading(
             "Fighter LPC",
             StockReviewStyle.HEADING_BACKGROUND,
@@ -416,6 +414,8 @@ class StockReviewItemTooltip private constructor(
         private const val GRID_WIDTH = CONTENT_WIDTH - ICON_LEFT - ICON_SIZE - ICON_GRID_GAP - 8f
         private const val GRID_LABEL_WIDTH = 188f
         private val VANILLA_SECTION = Color(9, 78, 88, 225)
+        private val TOOLTIP_BACKGROUND = Color(0, 0, 0, 255)
+        private val TOOLTIP_BORDER = Color(115, 145, 150, 255)
         private val TOOLTIP_TEXT = Color(215, 215, 215, 255)
         private val TOOLTIP_MUTED = Color(175, 175, 175, 255)
         private const val DESCRIPTION_MAX_LINES = 4
@@ -596,12 +596,6 @@ class StockReviewItemTooltip private constructor(
         private fun mutedColor(): Color = TOOLTIP_MUTED
 
         private fun highlightColor(): Color = Misc.getHighlightColor()
-
-        private fun setCodexEntry(tooltip: TooltipMakerAPI, entryId: String?) {
-            if (hasText(entryId)) {
-                tooltip.setCodexEntryId(entryId)
-            }
-        }
 
         private fun truncateDescription(text: String?): String? {
             if (!hasText(text)) {

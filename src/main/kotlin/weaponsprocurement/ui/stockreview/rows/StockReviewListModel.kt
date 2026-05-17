@@ -245,8 +245,8 @@ object StockReviewListModel {
         }
         val typeLabel = if (StockItemType.WING == itemType) "Wing Types" else "Weapon Types"
         return category.label +
-            " [$typeLabel: $itemTypes | " +
-            "Selling: ${maxOf(0, selling)} | " +
+            " [$typeLabel: $itemTypes, " +
+            "Selling: ${maxOf(0, selling)}, " +
             "Buying: ${maxOf(0, buying)}]"
     }
 }

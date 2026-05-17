@@ -9,7 +9,7 @@ import java.awt.Color
 
 class StockReviewStyle private constructor() {
     companion object {
-        const val SHOW_WIDTH_TEST_ROWS = false
+        const val SHOW_WIDTH_TEST_ROWS = true
 
         private const val FALLBACK_WIDTH = 1180f
         private const val FALLBACK_HEIGHT = 640f
@@ -68,7 +68,8 @@ class StockReviewStyle private constructor() {
         @JvmField var REVIEW_LIST_HEIGHT = Math.max(ROW_HEIGHT + 2f * SMALL_PAD, REVIEW_SUMMARY_TOP - SECTION_GAP - REVIEW_LIST_TOP)
         const val TEXT_TOP_PAD = WimGuiStyle.TEXT_TOP_PAD
         const val TEXT_LEFT_PAD = WimGuiStyle.TEXT_LEFT_PAD
-        const val WEAPON_INDENT = 18f
+        const val ROW_ICON_INDENT = ACTION_BUTTON_HEIGHT + BUTTON_GAP
+        const val WEAPON_INDENT = ROW_ICON_INDENT
         const val SECTION_INDENT = 2f * WEAPON_INDENT
         const val DETAIL_INDENT = 3f * WEAPON_INDENT
         const val DATA_INDENT = 4f * WEAPON_INDENT
