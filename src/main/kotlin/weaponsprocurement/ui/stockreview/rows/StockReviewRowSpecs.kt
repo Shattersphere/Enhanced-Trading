@@ -19,15 +19,16 @@ object StockReviewRowSpecs {
         tooltip: String?,
         indent: Float = 0f,
     ): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .buttonFillColor(textColor)
-            .indent(indent)
-            .action(action?.let { StockReviewActionRef.rowExpansion(it) })
-            .alignment(Alignment.LMID)
-            .topGap(topGap)
-            .tooltip(tooltip)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            buttonFillColor = textColor,
+            indent = indent,
+            actionRef = action?.let { StockReviewActionRef.rowExpansion(it) },
+            alignment = Alignment.LMID,
+            topGap = topGap,
+            tooltip = tooltip,
+        )
 
     @JvmStatic
     fun filterHeading(
@@ -60,16 +61,17 @@ object StockReviewRowSpecs {
         topGap: Boolean,
         tooltip: String?,
     ): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .buttonFillColor(StockReviewStyle.HEADING_BACKGROUND)
-            .indent(indent)
-            .action(action?.let { StockReviewActionRef.rowExpansion(it) })
-            .alignment(Alignment.LMID)
-            .topGap(topGap)
-            .rightReserveWidth(rightReserveWidth)
-            .tooltip(tooltip)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            buttonFillColor = StockReviewStyle.HEADING_BACKGROUND,
+            indent = indent,
+            actionRef = action?.let { StockReviewActionRef.rowExpansion(it) },
+            alignment = Alignment.LMID,
+            topGap = topGap,
+            rightReserveWidth = rightReserveWidth,
+            tooltip = tooltip,
+        )
 
     @JvmStatic
     fun filter(
@@ -80,17 +82,18 @@ object StockReviewRowSpecs {
         tooltip: String?,
     ): StockReviewRowSpec {
         val fill = if (active) StockReviewStyle.FILTER_ACTIVE else StockReviewStyle.ROW_BACKGROUND
-        return StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .fillColor(fill)
-            .buttonFillColor(fill)
-            .borderColor(StockReviewStyle.ROW_BORDER)
-            .indent(if (active) 0f else StockReviewStyle.WEAPON_INDENT)
-            .action(action?.let { StockReviewActionRef.filters(it) })
-            .alignment(Alignment.LMID)
-            .topGap(topGap)
-            .tooltip(tooltip)
-            .build()
+        return StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            fillColor = fill,
+            buttonFillColor = fill,
+            borderColor = StockReviewStyle.ROW_BORDER,
+            indent = if (active) 0f else StockReviewStyle.WEAPON_INDENT,
+            actionRef = action?.let { StockReviewActionRef.filters(it) },
+            alignment = Alignment.LMID,
+            topGap = topGap,
+            tooltip = tooltip,
+        )
     }
 
     @JvmStatic
@@ -103,19 +106,20 @@ object StockReviewRowSpecs {
         indent: Float,
         icon: StockReviewRowIcon?,
     ): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .fillColor(StockReviewStyle.ROW_BACKGROUND)
-            .buttonFillColor(StockReviewStyle.CELL_BACKGROUND)
-            .borderColor(StockReviewStyle.ROW_BORDER)
-            .indent(indent)
-            .action(action)
-            .alignment(Alignment.LMID)
-            .cells(cells)
-            .tooltip(tooltip)
-            .tooltipCreator(tooltipCreator)
-            .icon(icon)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            fillColor = StockReviewStyle.ROW_BACKGROUND,
+            buttonFillColor = StockReviewStyle.CELL_BACKGROUND,
+            borderColor = StockReviewStyle.ROW_BORDER,
+            indent = indent,
+            actionRef = action,
+            alignment = Alignment.LMID,
+            cells = cells,
+            tooltip = tooltip,
+            tooltipCreator = tooltipCreator,
+            icon = icon,
+        )
 
     @JvmStatic
     fun labelText(spec: StockReviewDetailRowSpec): StockReviewRowSpec {
@@ -125,11 +129,12 @@ object StockReviewRowSpecs {
         )
         val labelWidth = componentWidth * 0.65f
         val valueWidth = componentWidth - labelWidth
-        return StockReviewRowSpec.builder("")
-            .textColor(StockReviewStyle.TEXT)
-            .indent(spec.indent)
-            .alignment(Alignment.LMID)
-            .cells(
+        return StockReviewRowSpec.create(
+            label = "",
+            textColor = StockReviewStyle.TEXT,
+            indent = spec.indent,
+            alignment = Alignment.LMID,
+            cells =
                 WimGuiRowCell.of(
                     WimGuiRowCell.infoWithBorder<StockReviewAction>(
                         spec.label,
@@ -148,53 +153,56 @@ object StockReviewRowSpecs {
                         StockReviewStyle.ROW_BORDER,
                     ),
                 ),
-            )
-            .topGap(spec.topGap)
-            .cellGapOverride(0f)
-            .rightReserveWidth(spec.layout.detailRightReserveWidth)
-            .tooltip(spec.tooltip)
-            .build()
+            topGap = spec.topGap,
+            cellGapOverride = 0f,
+            rightReserveWidth = spec.layout.detailRightReserveWidth,
+            tooltip = spec.tooltip,
+        )
     }
 
     @JvmStatic
     fun form(label: String?, cells: List<WimGuiRowCell<StockReviewAction>>?): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .fillColor(StockReviewStyle.ROW_BACKGROUND)
-            .buttonFillColor(StockReviewStyle.ROW_BACKGROUND)
-            .borderColor(StockReviewStyle.ROW_BORDER)
-            .alignment(Alignment.LMID)
-            .cells(cells)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            fillColor = StockReviewStyle.ROW_BACKGROUND,
+            buttonFillColor = StockReviewStyle.ROW_BACKGROUND,
+            borderColor = StockReviewStyle.ROW_BORDER,
+            alignment = Alignment.LMID,
+            cells = cells,
+        )
 
     @JvmStatic
     fun empty(label: String?): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.MUTED)
-            .alignment(Alignment.LMID)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.MUTED,
+            alignment = Alignment.LMID,
+        )
 
     @JvmStatic
     fun scroll(label: String?, action: StockReviewAction?): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.SCROLL)
-            .fillColor(StockReviewStyle.HEADING_BACKGROUND)
-            .buttonFillColor(StockReviewStyle.HEADING_BACKGROUND)
-            .action(action?.let { StockReviewActionRef.scroll(it) })
-            .alignment(Alignment.MID)
-            .tooltip("Move the list by one visible page.")
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.SCROLL,
+            fillColor = StockReviewStyle.HEADING_BACKGROUND,
+            buttonFillColor = StockReviewStyle.HEADING_BACKGROUND,
+            actionRef = action?.let { StockReviewActionRef.scroll(it) },
+            alignment = Alignment.MID,
+            tooltip = "Move the list by one visible page.",
+        )
 
     @JvmStatic
     fun reviewMissing(label: String?): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .fillColor(StockReviewStyle.ROW_BACKGROUND)
-            .buttonFillColor(StockReviewStyle.ROW_BACKGROUND)
-            .borderColor(StockReviewStyle.ROW_BORDER)
-            .indent(StockReviewStyle.WEAPON_INDENT)
-            .alignment(Alignment.LMID)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            fillColor = StockReviewStyle.ROW_BACKGROUND,
+            buttonFillColor = StockReviewStyle.ROW_BACKGROUND,
+            borderColor = StockReviewStyle.ROW_BORDER,
+            indent = StockReviewStyle.WEAPON_INDENT,
+            alignment = Alignment.LMID,
+        )
 
     private fun groupedHeading(
         label: String?,
@@ -203,13 +211,14 @@ object StockReviewRowSpecs {
         topGap: Boolean,
         tooltip: String?,
     ): StockReviewRowSpec =
-        StockReviewRowSpec.builder(label)
-            .textColor(StockReviewStyle.TEXT)
-            .fillColor(StockReviewStyle.HEADING_BACKGROUND)
-            .buttonFillColor(StockReviewStyle.HEADING_BACKGROUND)
-            .action(action?.let { StockReviewActionRef.of(requireNotNull(actionGroup), it) })
-            .alignment(Alignment.LMID)
-            .topGap(topGap)
-            .tooltip(tooltip)
-            .build()
+        StockReviewRowSpec.create(
+            label = label,
+            textColor = StockReviewStyle.TEXT,
+            fillColor = StockReviewStyle.HEADING_BACKGROUND,
+            buttonFillColor = StockReviewStyle.HEADING_BACKGROUND,
+            actionRef = action?.let { StockReviewActionRef.of(requireNotNull(actionGroup), it) },
+            alignment = Alignment.LMID,
+            topGap = topGap,
+            tooltip = tooltip,
+        )
 }

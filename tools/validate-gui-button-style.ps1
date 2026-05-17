@@ -333,8 +333,12 @@ if ($actionControlsText -notmatch "class StockReviewActionRef" -or
     $actionControlsText -notmatch "fun <C> dynamic" -or
     $actionControlsText -notmatch "fun <C> constant" -or
     $actionControlsText -notmatch "StockReviewActionGuards\.requireGroup" -or
-    $rowSpecText -notmatch "fun action\(value: StockReviewActionRef\?\)" -or
+    $rowSpecText -notmatch "fun create\(" -or
+    $rowSpecText -match "class Builder" -or
+    $rowSpecText -match "fun builder\(" -or
     $rowSpecsText -notmatch "object StockReviewRowSpecs" -or
+    $rowSpecsText -notmatch "StockReviewRowSpec\.create" -or
+    $rowSpecsText -match "StockReviewRowSpec\.builder" -or
     $rowSpecsText -notmatch "StockReviewActionRef\.rowExpansion" -or
     $rowSpecsText -notmatch "StockReviewActionRef\.filters" -or
     $rowSpecsText -notmatch "StockReviewActionRef\.scroll" -or

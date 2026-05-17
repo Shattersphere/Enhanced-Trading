@@ -27,38 +27,25 @@ class StockReviewRowSpec private constructor(
     @JvmField val tooltipCreator: TooltipMakerAPI.TooltipCreator?,
     @JvmField val icon: StockReviewRowIcon?,
 ) {
-    class Builder(private val label: String?) {
-        private var textColor: Color? = StockReviewStyle.TEXT
-        private var fillColor: Color? = null
-        private var buttonFillColor: Color? = null
-        private var borderColor: Color? = null
-        private var indent: Float = 0f
-        private var actionRef: StockReviewActionRef? = null
-        private var alignment: Alignment? = Alignment.LMID
-        private var cells: List<WimGuiRowCell<StockReviewAction>>? = null
-        private var topGap: Boolean = false
-        private var cellGapOverride: Float? = null
-        private var rightReserveWidth: Float = 0f
-        private var tooltip: String? = null
-        private var tooltipCreator: TooltipMakerAPI.TooltipCreator? = null
-        private var icon: StockReviewRowIcon? = null
-
-        fun textColor(value: Color?) = apply { textColor = value }
-        fun fillColor(value: Color?) = apply { fillColor = value }
-        fun buttonFillColor(value: Color?) = apply { buttonFillColor = value }
-        fun borderColor(value: Color?) = apply { borderColor = value }
-        fun indent(value: Float) = apply { indent = value }
-        fun action(value: StockReviewActionRef?) = apply { actionRef = value }
-        fun alignment(value: Alignment?) = apply { alignment = value }
-        fun cells(value: List<WimGuiRowCell<StockReviewAction>>?) = apply { cells = value }
-        fun topGap(value: Boolean) = apply { topGap = value }
-        fun cellGapOverride(value: Float?) = apply { cellGapOverride = value }
-        fun rightReserveWidth(value: Float) = apply { rightReserveWidth = value }
-        fun tooltip(value: String?) = apply { tooltip = value }
-        fun tooltipCreator(value: TooltipMakerAPI.TooltipCreator?) = apply { tooltipCreator = value }
-        fun icon(value: StockReviewRowIcon?) = apply { icon = value }
-
-        fun build(): StockReviewRowSpec = StockReviewRowSpec(
+    companion object {
+        @JvmStatic
+        fun create(
+            label: String?,
+            textColor: Color? = StockReviewStyle.TEXT,
+            fillColor: Color? = null,
+            buttonFillColor: Color? = null,
+            borderColor: Color? = null,
+            indent: Float = 0f,
+            actionRef: StockReviewActionRef? = null,
+            alignment: Alignment? = Alignment.LMID,
+            cells: List<WimGuiRowCell<StockReviewAction>>? = null,
+            topGap: Boolean = false,
+            cellGapOverride: Float? = null,
+            rightReserveWidth: Float = 0f,
+            tooltip: String? = null,
+            tooltipCreator: TooltipMakerAPI.TooltipCreator? = null,
+            icon: StockReviewRowIcon? = null,
+        ): StockReviewRowSpec = StockReviewRowSpec(
             label,
             textColor,
             fillColor,
@@ -76,10 +63,5 @@ class StockReviewRowSpec private constructor(
             tooltipCreator,
             icon,
         )
-    }
-
-    companion object {
-        @JvmStatic
-        fun builder(label: String?): Builder = Builder(label)
     }
 }
