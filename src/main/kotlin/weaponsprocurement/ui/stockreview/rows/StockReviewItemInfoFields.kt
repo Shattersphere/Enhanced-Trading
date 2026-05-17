@@ -21,11 +21,13 @@ class StockReviewItemInfoField private constructor(
         if (!shouldShow(value)) {
             return null
         }
-        return StockReviewDetailRows.itemInfo(
-            label.invoke(record),
-            value,
-            layout,
-            tooltip.invoke(record),
+        return StockReviewDetailRows.fromSpec(
+            StockReviewDetailRowSpec.itemInfo(
+                label.invoke(record),
+                value,
+                layout,
+                tooltip.invoke(record),
+            ),
         )
     }
 

@@ -13,7 +13,7 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class StockReviewTradeSummaryField(
+class StockReviewTradeSummaryField private constructor(
     @JvmField val label: String,
     @JvmField val value: String,
     @JvmField val valueFill: Color,
@@ -34,6 +34,67 @@ class StockReviewTradeSummaryField(
             tooltip,
         )
     }
+
+    companion object {
+        @JvmStatic
+        fun warning(value: String): StockReviewTradeSummaryField =
+            StockReviewTradeSummaryField(
+                "Warning",
+                value,
+                if (value == "None") StockReviewStyle.CELL_BACKGROUND else StockReviewStyle.PRESET_SCOPE_BUTTON,
+                "Most recent trade warning for credits or cargo capacity.",
+            )
+
+        @JvmStatic
+        fun tariffsPaid(value: String, markupPaid: Long): StockReviewTradeSummaryField =
+            StockReviewTradeSummaryField(
+                "Tariffs Paid",
+                value,
+                if (markupPaid > 0) StockReviewStyle.CANCEL_BUTTON else StockReviewStyle.CELL_BACKGROUND,
+                StockReviewTooltips.tariffs(),
+            )
+
+        @JvmStatic
+        fun creditsAvailable(value: String, netCost: Long): StockReviewTradeSummaryField =
+            StockReviewTradeSummaryField(
+                "Credits Available",
+                value,
+                creditDeltaFill(netCost),
+                "Current credits plus the signed change from queued trades.",
+            )
+
+        @JvmStatic
+        fun cargoSpaceAvailable(value: String, cargoDelta: Float): StockReviewTradeSummaryField =
+            StockReviewTradeSummaryField(
+                "Cargo Space Available",
+                value,
+                cargoDeltaFill(cargoDelta),
+                "Current cargo space plus the signed cargo change from queued trades.",
+            )
+
+        private fun creditDeltaFill(netCost: Long): Color {
+            if (netCost == StockReviewQuoteBook.PRICE_UNAVAILABLE.toLong()) {
+                return StockReviewStyle.CANCEL_BUTTON
+            }
+            if (netCost > 0) {
+                return StockReviewStyle.CANCEL_BUTTON
+            }
+            if (netCost < 0) {
+                return StockReviewStyle.CONFIRM_BUTTON
+            }
+            return StockReviewStyle.CELL_BACKGROUND
+        }
+
+        private fun cargoDeltaFill(cargoDelta: Float): Color {
+            if (cargoDelta > 0.01f) {
+                return StockReviewStyle.CANCEL_BUTTON
+            }
+            if (cargoDelta < -0.01f) {
+                return StockReviewStyle.CONFIRM_BUTTON
+            }
+            return StockReviewStyle.CELL_BACKGROUND
+        }
+    }
 }
 
 object StockReviewTradeSummaryFields {
@@ -43,30 +104,10 @@ object StockReviewTradeSummaryFields {
         val cargoDelta = tradeContext.totalCargoSpaceDelta()
         val warning = state?.getTradeWarning() ?: "None"
         return listOf(
-            StockReviewTradeSummaryField(
-                "Warning",
-                warning,
-                if (warning == "None") StockReviewStyle.CELL_BACKGROUND else StockReviewStyle.PRESET_SCOPE_BUTTON,
-                "Most recent trade warning for credits or cargo capacity.",
-            ),
-            StockReviewTradeSummaryField(
-                "Tariffs Paid",
-                tariffsPaidLabel(tradeContext),
-                if (tradeContext.totalMarkupPaid() > 0) StockReviewStyle.CANCEL_BUTTON else StockReviewStyle.CELL_BACKGROUND,
-                StockReviewTooltips.tariffs(),
-            ),
-            StockReviewTradeSummaryField(
-                "Credits Available",
-                creditsAvailableLabel(tradeContext.credits(), netCost),
-                creditDeltaFill(netCost),
-                "Current credits plus the signed change from queued trades.",
-            ),
-            StockReviewTradeSummaryField(
-                "Cargo Space Available",
-                cargoAvailableLabel(tradeContext.cargoSpaceLeft(), cargoDelta),
-                cargoDeltaFill(cargoDelta),
-                "Current cargo space plus the signed cargo change from queued trades.",
-            ),
+            StockReviewTradeSummaryField.warning(warning),
+            StockReviewTradeSummaryField.tariffsPaid(tariffsPaidLabel(tradeContext), tradeContext.totalMarkupPaid()),
+            StockReviewTradeSummaryField.creditsAvailable(creditsAvailableLabel(tradeContext.credits(), netCost), netCost),
+            StockReviewTradeSummaryField.cargoSpaceAvailable(cargoAvailableLabel(tradeContext.cargoSpaceLeft(), cargoDelta), cargoDelta),
         )
     }
 
@@ -103,26 +144,4 @@ object StockReviewTradeSummaryFields {
 
     private fun signedCargo(delta: Float): String = (if (delta >= 0f) "+" else "-") + formatCargo(abs(delta))
 
-    private fun creditDeltaFill(netCost: Long): Color {
-        if (netCost == StockReviewQuoteBook.PRICE_UNAVAILABLE.toLong()) {
-            return StockReviewStyle.CANCEL_BUTTON
-        }
-        if (netCost > 0) {
-            return StockReviewStyle.CANCEL_BUTTON
-        }
-        if (netCost < 0) {
-            return StockReviewStyle.CONFIRM_BUTTON
-        }
-        return StockReviewStyle.CELL_BACKGROUND
-    }
-
-    private fun cargoDeltaFill(cargoDelta: Float): Color {
-        if (cargoDelta > 0.01f) {
-            return StockReviewStyle.CANCEL_BUTTON
-        }
-        if (cargoDelta < -0.01f) {
-            return StockReviewStyle.CONFIRM_BUTTON
-        }
-        return StockReviewStyle.CELL_BACKGROUND
-    }
 }

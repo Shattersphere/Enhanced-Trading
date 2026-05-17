@@ -71,6 +71,7 @@ $stockReviewSectionRowAppendersPath = Join-Path $kotlinGuiDir "stockreview\rows\
 $stockReviewItemInfoRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoRows.kt"
 $stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowLayout.kt"
 $stockReviewDetailRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewDetailRows.kt"
+$stockReviewDetailRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewDetailRowSpec.kt"
 $stockReviewSourceAllocationRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewSourceAllocationRows.kt"
 $stockReviewCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewCellGroup.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
@@ -95,7 +96,7 @@ $stockReviewLegacyHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\St
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -303,6 +304,7 @@ if ($listEmptyRowsText -notmatch "object StockReviewListEmptyRows" -or
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
 $detailRowsText = Get-Content -LiteralPath $stockReviewDetailRowsPath -Raw
+$detailRowSpecText = Get-Content -LiteralPath $stockReviewDetailRowSpecPath -Raw
 $sourceAllocationRowsText = Get-Content -LiteralPath $stockReviewSourceAllocationRowsPath -Raw
 $cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
 $itemInfoFieldsText = Get-Content -LiteralPath $stockReviewItemInfoFieldsPath -Raw
@@ -402,7 +404,8 @@ if ($itemTypeHeadingRowsText -notmatch "object StockReviewItemTypeHeadingRows" -
     throw "Stock-review heading labels/actions/tooltips must route through focused heading owners."
 }
 if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
-    $itemInfoFieldsText -notmatch "StockReviewDetailRows\.itemInfo" -or
+    $itemInfoFieldsText -notmatch "StockReviewDetailRows\.fromSpec" -or
+    $itemInfoFieldsText -notmatch "StockReviewDetailRowSpec\.itemInfo" -or
     $itemInfoFieldsText -notmatch "WEAPON_BASIC_FIELDS" -or
     $itemInfoFieldsText -notmatch "WING_BASIC_FIELDS" -or
     $itemInfoFieldsText -notmatch "WEAPON_ADVANCED_FIELDS" -or
@@ -417,13 +420,18 @@ if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
     $itemInfoRowsText -match "isPositiveValue") {
     throw "Stock-review Basic/Advanced detail fields must be declared in StockReviewItemInfoFields."
 }
-if ($detailRowsText -notmatch "object StockReviewDetailRows" -or
+if ($detailRowSpecText -notmatch "class StockReviewDetailRowSpec" -or
+    $detailRowSpecText -notmatch "fun itemInfo" -or
+    $detailRowSpecText -notmatch "fun sourceAllocation" -or
+    $detailRowsText -notmatch "object StockReviewDetailRows" -or
+    $detailRowsText -notmatch "fun fromSpec" -or
     $detailRowsText -notmatch "fun itemInfo" -or
     $detailRowsText -notmatch "fun sourceAllocation" -or
     $sourceAllocationRowsText -notmatch "object StockReviewSourceAllocationRows" -or
     $sourceAllocationRowsText -notmatch "Purchase Source" -or
     $sourceAllocationRowsText -notmatch "Unavailable" -or
-    $sourceAllocationRowsText -notmatch "StockReviewDetailRows\.sourceAllocation" -or
+    $sourceAllocationRowsText -notmatch "StockReviewDetailRows\.fromSpec" -or
+    $sourceAllocationRowsText -notmatch "StockReviewDetailRowSpec\.sourceAllocation" -or
     $reviewItemRowsText -notmatch "StockReviewSourceAllocationRows\.add" -or
     $reviewItemRowsText -match "addSourceAllocationRows" -or
     $reviewItemRowsText -match "sourceLabel" -or
@@ -434,6 +442,10 @@ if ($tradeSummaryRendererText -notmatch "StockReviewTradeSummaryFields\.build" -
     $tradeSummaryRendererText -match "addSummaryRow" -or
     $tradeSummaryRendererText -match "tariffsPaidLabel" -or
     $tradeSummaryFieldsText -notmatch "class StockReviewTradeSummaryField" -or
+    $tradeSummaryFieldsText -notmatch "fun warning" -or
+    $tradeSummaryFieldsText -notmatch "fun tariffsPaid" -or
+    $tradeSummaryFieldsText -notmatch "fun creditsAvailable" -or
+    $tradeSummaryFieldsText -notmatch "fun cargoSpaceAvailable" -or
     $tradeSummaryFieldsText -notmatch "object StockReviewTradeSummaryFields" -or
     $tradeSummaryFieldsText -notmatch "Tariffs Paid" -or
     $tradeSummaryFieldsText -notmatch '\[\$percent%\]' -or
@@ -446,9 +458,17 @@ if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokect
 if ($cellGroupText -notmatch "Storage: 99\+ \[-99\+\]" -or
     $cellGroupText -notmatch "MAX_UNIT_PRICE = 99999" -or
     $cellGroupText -notmatch "MAX_TRANSACTION_CREDITS = 999999" -or
-    $tradeCellsText -notmatch "StockReviewCellGroup\.debugPriceLabel\(\)" -or
-    $tradeCellsText -notmatch "StockReviewCellGroup\.debugPlanLabel\(\)") {
+    $cellGroupText -notmatch "fun storageLabel" -or
+    $cellGroupText -notmatch "fun unitPriceLabel" -or
+    $cellGroupText -notmatch "fun planLabel" -or
+    $tradeCellsText -notmatch "StockReviewCellGroup\.debugPrice\(layout\)" -or
+    $tradeCellsText -notmatch "StockReviewCellGroup\.debugPlan\(layout\)" -or
+    $tradeCellsText -notmatch "StockReviewCellGroup\.debugControlCells\(\)") {
     throw "Stock-review worst-case weapon debug row must exercise capped storage, price, and plan labels."
+}
+$rawTradeCellConstructionHits = @((Get-Item -LiteralPath $stockReviewTradeCellsPath) | Select-String -Pattern "WimGuiRowCell\.info|StockReviewActionCells\.standard")
+if ($rawTradeCellConstructionHits.Count -gt 0) {
+    throw "Stock-review trade/review row cells must route cell creation through StockReviewCellGroup. Hits:`n$($rawTradeCellConstructionHits -join "`n")"
 }
 if ($itemRowFrameText -notmatch "\.indent\(layout\.itemIndent\)" -or
     $worstCaseItemRowsText -notmatch "StockReviewItemRowFrame\.build" -or

@@ -115,9 +115,9 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 - `StockReview*HeadingRows`: focused item-type, stock-category, trade-group, filter, and item-detail heading policies.
 - `StockReviewFilterRows` / `StockReviewFilterGroupSections`: filter-mode active rows, available rows, group visibility, and group expansion flow.
 - `StockReviewItemInfoRows` / `StockReviewItemInfoFields`: Basic/Advanced item detail section flow and named field definitions.
-- `StockReviewDetailRows` / `StockReviewSourceAllocationRows`: shared label/value detail-row geometry and review purchase-source allocation rows.
-- `StockReviewCellGroup` / `StockReviewTradeRowCells`: stock/price/plan/action widths, capped labels, debug extrema, and cell factories.
-- `StockReviewTradeSummaryRenderer` / `StockReviewTradeSummaryFields`: footer summary rendering and named summary field definitions.
+- `StockReviewDetailRowSpec` / `StockReviewDetailRows` / `StockReviewSourceAllocationRows`: shared label/value detail-row specs, geometry, and review purchase-source allocation rows.
+- `StockReviewCellGroup` / `StockReviewTradeRowCells`: stock/price/plan/action widths, capped labels, debug extrema, and centralized trade/review cell factories.
+- `StockReviewTradeSummaryRenderer` / `StockReviewTradeSummaryFields`: footer summary rendering plus named summary field factories/fill policies.
 - `StockReviewFooterRenderer` / `StockReviewFooterSpec` / `StockReviewFooterButtonSet`: footer layout, explicit footer button-set selection, named button policies, and mode-specific footer button definitions.
 - `StockReviewModeController`: review/filter/color-debug modes.
 - `StockReviewUiController`: source/sort/filter/expansion/reset/navigation actions.

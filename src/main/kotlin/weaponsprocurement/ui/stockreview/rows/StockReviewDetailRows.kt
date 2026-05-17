@@ -5,6 +5,17 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 
 object StockReviewDetailRows {
     @JvmStatic
+    fun fromSpec(spec: StockReviewDetailRowSpec): WimGuiListRow<StockReviewAction> =
+        StockReviewListRow.labelTextIndented(
+            spec.label,
+            spec.value,
+            spec.layout,
+            spec.indent,
+            spec.topGap,
+            spec.tooltip,
+        )
+
+    @JvmStatic
     fun labelValue(
         label: String?,
         value: String?,
@@ -13,7 +24,7 @@ object StockReviewDetailRows {
         topGap: Boolean,
         tooltip: String?,
     ): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.labelTextIndented(label, value, layout, indent, topGap, tooltip)
+        fromSpec(StockReviewDetailRowSpec.labelValue(label, value, layout, indent, topGap, tooltip))
 
     @JvmStatic
     fun itemInfo(
@@ -22,7 +33,7 @@ object StockReviewDetailRows {
         layout: StockReviewRowLayout,
         tooltip: String?,
     ): WimGuiListRow<StockReviewAction> =
-        labelValue(label, value, layout, layout.dataIndent, false, tooltip)
+        fromSpec(StockReviewDetailRowSpec.itemInfo(label, value, layout, tooltip))
 
     @JvmStatic
     fun sourceAllocation(
@@ -31,5 +42,5 @@ object StockReviewDetailRows {
         layout: StockReviewRowLayout,
         topGap: Boolean,
     ): WimGuiListRow<StockReviewAction> =
-        labelValue(label, value, layout, layout.dataIndent, topGap, null)
+        fromSpec(StockReviewDetailRowSpec.sourceAllocation(label, value, layout, topGap))
 }

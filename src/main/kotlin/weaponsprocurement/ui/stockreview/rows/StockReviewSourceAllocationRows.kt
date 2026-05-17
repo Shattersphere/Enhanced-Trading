@@ -26,22 +26,23 @@ object StockReviewSourceAllocationRows {
     ): List<WimGuiListRow<StockReviewAction>> {
         val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
         if (allocations.isEmpty()) {
-            rows.add(StockReviewDetailRows.sourceAllocation(FALLBACK_SOURCE_LABEL, UNAVAILABLE_VALUE, layout, true))
+            rows.add(sourceAllocationRow(FALLBACK_SOURCE_LABEL, UNAVAILABLE_VALUE, layout, true))
             return rows
         }
         for (i in allocations.indices) {
             val allocation = allocations[i]
-            rows.add(
-                StockReviewDetailRows.sourceAllocation(
-                    sourceLabel(allocation),
-                    allocationSummary(allocation),
-                    layout,
-                    i == 0,
-                ),
-            )
+            rows.add(sourceAllocationRow(sourceLabel(allocation), allocationSummary(allocation), layout, i == 0))
         }
         return rows
     }
+
+    private fun sourceAllocationRow(
+        label: String?,
+        value: String?,
+        layout: StockReviewRowLayout,
+        topGap: Boolean,
+    ): WimGuiListRow<StockReviewAction> =
+        StockReviewDetailRows.fromSpec(StockReviewDetailRowSpec.sourceAllocation(label, value, layout, topGap))
 
     private fun sourceLabel(allocation: StockReviewSellerAllocation): String =
         if (allocation.submarketName.isNullOrEmpty()) FALLBACK_SOURCE_LABEL else allocation.submarketName
