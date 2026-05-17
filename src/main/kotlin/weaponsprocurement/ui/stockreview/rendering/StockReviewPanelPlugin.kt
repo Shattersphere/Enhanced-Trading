@@ -91,6 +91,7 @@ class StockReviewPanelPlugin(
             modes.isReviewMode(),
             modes.isFilterMode(),
             modes.isColorDebugMode(),
+            modes.isShipCatalogDebugMode(),
             modes.getColorDebugTargetIndex(),
             modes.currentColorDebugDraft(),
             modes.isColorDebugPersistent(),

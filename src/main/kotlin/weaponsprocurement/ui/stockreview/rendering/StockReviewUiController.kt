@@ -28,6 +28,11 @@ class StockReviewUiController(
             host.requestContentRebuild()
             return
         }
+        if (modes.isShipCatalogDebugMode()) {
+            modes.leaveShipCatalogDebug(state)
+            host.requestContentRebuild()
+            return
+        }
         if (modes.isFilterMode()) {
             modes.leaveFilters(state)
             host.requestContentRebuild()
@@ -127,6 +132,11 @@ class StockReviewUiController(
             host.requestContentRebuild()
             return true
         }
+        if (StockReviewAction.Type.OPEN_SHIP_CATALOG_DEBUG == type) {
+            modes.enterShipCatalogDebug(state)
+            host.requestContentRebuild()
+            return true
+        }
         if (handleColorDebugAction(action)) {
             return true
         }
@@ -199,6 +209,11 @@ class StockReviewUiController(
     private fun handleGoBack() {
         if (modes.isColorDebugMode()) {
             modes.leaveColorDebug(state)
+            host.requestContentRebuild()
+            return
+        }
+        if (modes.isShipCatalogDebugMode()) {
+            modes.leaveShipCatalogDebug(state)
             host.requestContentRebuild()
             return
         }

@@ -6,8 +6,11 @@ import java.awt.Color
 class StockReviewModeController(private var reviewMode: Boolean) {
     private var filterMode = false
     private var colorDebugMode = false
+    private var shipCatalogDebugMode = false
     private var colorDebugReturnToReview = false
     private var colorDebugReturnScrollOffset = 0
+    private var shipCatalogReturnToReview = false
+    private var shipCatalogReturnScrollOffset = 0
     private var colorDebugPersistent = false
     private var colorDebugTargetIndex = 0
     private var colorDebugDraft: Color? = null
@@ -19,6 +22,8 @@ class StockReviewModeController(private var reviewMode: Boolean) {
 
     fun isColorDebugMode(): Boolean = colorDebugMode
 
+    fun isShipCatalogDebugMode(): Boolean = shipCatalogDebugMode
+
     fun isColorDebugPersistent(): Boolean = colorDebugPersistent
 
     fun getColorDebugTargetIndex(): Int = colorDebugTargetIndex
@@ -26,10 +31,11 @@ class StockReviewModeController(private var reviewMode: Boolean) {
     fun getRevision(): Int = revision
 
     fun enterFilters(state: StockReviewState) {
-        val changed = !filterMode || reviewMode || colorDebugMode || state.getListScrollOffset() != 0
+        val changed = !filterMode || reviewMode || colorDebugMode || shipCatalogDebugMode || state.getListScrollOffset() != 0
         filterMode = true
         reviewMode = false
         colorDebugMode = false
+        shipCatalogDebugMode = false
         state.setListScrollOffset(0)
         markChangedIf(changed)
     }
@@ -43,12 +49,13 @@ class StockReviewModeController(private var reviewMode: Boolean) {
 
     fun enterColorDebug(state: StockReviewState) {
         val previousDraft = colorDebugDraft?.rgb
-        val changed = !colorDebugMode || reviewMode || filterMode || state.getListScrollOffset() != 0 || previousDraft == null
+        val changed = !colorDebugMode || reviewMode || filterMode || shipCatalogDebugMode || state.getListScrollOffset() != 0 || previousDraft == null
         colorDebugReturnToReview = reviewMode
         colorDebugReturnScrollOffset = state.getListScrollOffset()
         colorDebugMode = true
         reviewMode = false
         filterMode = false
+        shipCatalogDebugMode = false
         state.setListScrollOffset(0)
         ensureColorDebugDraft()
         markChangedIf(changed || previousDraft != colorDebugDraft?.rgb)
@@ -61,6 +68,28 @@ class StockReviewModeController(private var reviewMode: Boolean) {
         colorDebugMode = false
         reviewMode = colorDebugReturnToReview
         state.setListScrollOffset(colorDebugReturnScrollOffset)
+        markChangedIf(changed)
+    }
+
+    fun enterShipCatalogDebug(state: StockReviewState) {
+        val changed = !shipCatalogDebugMode || reviewMode || filterMode || colorDebugMode || state.getListScrollOffset() != 0
+        shipCatalogReturnToReview = reviewMode
+        shipCatalogReturnScrollOffset = state.getListScrollOffset()
+        shipCatalogDebugMode = true
+        reviewMode = false
+        filterMode = false
+        colorDebugMode = false
+        state.setListScrollOffset(0)
+        markChangedIf(changed)
+    }
+
+    fun leaveShipCatalogDebug(state: StockReviewState) {
+        val changed = shipCatalogDebugMode ||
+            reviewMode != shipCatalogReturnToReview ||
+            state.getListScrollOffset() != shipCatalogReturnScrollOffset
+        shipCatalogDebugMode = false
+        reviewMode = shipCatalogReturnToReview
+        state.setListScrollOffset(shipCatalogReturnScrollOffset)
         markChangedIf(changed)
     }
 

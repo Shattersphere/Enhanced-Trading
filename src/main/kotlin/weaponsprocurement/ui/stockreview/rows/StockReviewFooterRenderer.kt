@@ -25,10 +25,15 @@ class StockReviewFooterRenderer private constructor() {
             reviewMode: Boolean,
             filterMode: Boolean,
             colorDebugMode: Boolean,
+            shipCatalogDebugMode: Boolean,
             buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
         ) {
             if (colorDebugMode) {
                 renderColorDebugFooter(root, buttons)
+                return
+            }
+            if (shipCatalogDebugMode) {
+                renderShipCatalogDebugFooter(root, buttons)
                 return
             }
             if (filterMode) {
@@ -69,6 +74,19 @@ class StockReviewFooterRenderer private constructor() {
                     footerButton("Reset", StockReviewAction.resetFilters(), true, StockReviewStyle.LOAD_BUTTON, "Clear every active filter."),
                 ),
                 footerButton("Cancel", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return to the trade screen."),
+                buttons,
+            )
+        }
+
+        private fun renderShipCatalogDebugFooter(root: CustomPanelAPI, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>) {
+            WimGuiModalFooter.addLeftButtonRow(
+                root,
+                StockReviewStyle.MODAL,
+                StockReviewStyle.ACTION_BUTTON_HEIGHT,
+                StockReviewStyle.BUTTON_GAP,
+                WimGuiButtonSpecs.of(
+                    footerButton("Go Back", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return to the trade screen."),
+                ),
                 buttons,
             )
         }

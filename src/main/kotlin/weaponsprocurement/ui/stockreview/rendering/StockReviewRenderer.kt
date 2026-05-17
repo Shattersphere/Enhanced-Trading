@@ -16,6 +16,7 @@ import weaponsprocurement.ui.stockreview.rows.StockReviewFooterRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
 import weaponsprocurement.ui.stockreview.rows.StockReviewReviewListModel
+import weaponsprocurement.ui.stockreview.rows.StockReviewShipCatalogDebugRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewTradeSummaryRenderer
 import weaponsprocurement.ui.stockreview.state.StockReviewFilterListModel
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -23,6 +24,7 @@ import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import com.fs.starfarer.api.ui.CustomPanelAPI
+import weaponsprocurement.config.WeaponsProcurementConfig
 import weaponsprocurement.stock.item.StockSourceMode
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
@@ -47,15 +49,16 @@ class StockReviewRenderer :
         reviewMode: Boolean,
         filterMode: Boolean,
         colorDebugMode: Boolean,
+        shipCatalogDebugMode: Boolean,
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
-        if (filterMode || colorDebugMode) {
-            renderHeader(root, snapshot, state, reviewMode, filterMode, colorDebugMode, colorDebugTargetIndex, colorDebugDraft)
+        if (filterMode || colorDebugMode || shipCatalogDebugMode) {
+            renderHeader(root, snapshot, state, reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode, colorDebugTargetIndex, colorDebugDraft)
         }
-        if (!reviewMode && !filterMode && !colorDebugMode) {
+        if (!reviewMode && !filterMode && !colorDebugMode && !shipCatalogDebugMode) {
             renderActionRow(root, snapshot, state, buttons)
         }
         val model = renderModel(
@@ -67,15 +70,16 @@ class StockReviewRenderer :
             reviewMode,
             filterMode,
             colorDebugMode,
+            shipCatalogDebugMode,
             colorDebugTargetIndex,
             colorDebugDraft,
             colorDebugPersistent,
         )
         val result = renderRows(root, model.rows, state, model.listSpec, buttons)
-        if (!filterMode && !colorDebugMode) {
+        if (!filterMode && !colorDebugMode && !shipCatalogDebugMode) {
             StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, reviewMode)
         }
-        StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, reviewMode, filterMode, colorDebugMode, buttons)
+        StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode, buttons)
         return result
     }
 
@@ -88,6 +92,7 @@ class StockReviewRenderer :
         reviewMode: Boolean,
         filterMode: Boolean,
         colorDebugMode: Boolean,
+        shipCatalogDebugMode: Boolean,
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
@@ -99,6 +104,7 @@ class StockReviewRenderer :
             reviewMode,
             filterMode,
             colorDebugMode,
+            shipCatalogDebugMode,
             colorDebugTargetIndex,
             colorKey(colorDebugDraft),
             colorDebugPersistent,
@@ -115,6 +121,9 @@ class StockReviewRenderer :
         val listSpec: WimGuiModalListSpec
         if (colorDebugMode) {
             rows = StockReviewColorDebugRows.build(colorDebugTargetIndex, colorDebugDraft, colorDebugPersistent)
+            listSpec = StockReviewStyle.LIST
+        } else if (shipCatalogDebugMode) {
+            rows = StockReviewShipCatalogDebugRows.build()
             listSpec = StockReviewStyle.LIST
         } else if (filterMode) {
             rows = StockReviewFilterListModel.build(state)
@@ -139,11 +148,14 @@ class StockReviewRenderer :
         reviewMode: Boolean,
         filterMode: Boolean,
         colorDebugMode: Boolean,
+        shipCatalogDebugMode: Boolean,
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
     ) {
         val title = if (colorDebugMode) {
             "Debug Colors"
+        } else if (shipCatalogDebugMode) {
+            "Ship Catalog Debug"
         } else if (filterMode) {
             "Filters"
         } else if (reviewMode) {
@@ -153,6 +165,8 @@ class StockReviewRenderer :
         }
         val status = if (colorDebugMode) {
             colorStatusLine(colorDebugTargetIndex, colorDebugDraft)
+        } else if (shipCatalogDebugMode) {
+            "Developer-only Fixer ship catalog candidate view"
         } else if (filterMode) {
             filterStatusLine(state)
         } else {
@@ -220,6 +234,17 @@ class StockReviewRenderer :
                     StockReviewStyle.ACTION_BACKGROUND,
                     "Open the color debug menu.",
                 ),
+                if (WeaponsProcurementConfig.isDebugShipCatalogViewEnabled()) {
+                    buttonFactory.enabledButton(
+                        StockReviewStyle.COLOR_BUTTON_WIDTH,
+                        "Ships",
+                        StockReviewAction.openShipCatalogDebug(),
+                        StockReviewStyle.ACTION_BACKGROUND,
+                        "Open the developer-only Fixer ship catalog diagnostic view.",
+                    )
+                } else {
+                    null
+                },
             ),
             buttons,
         )
@@ -292,6 +317,7 @@ class StockReviewRenderer :
         val reviewMode: Boolean,
         val filterMode: Boolean,
         val colorDebugMode: Boolean,
+        val shipCatalogDebugMode: Boolean,
         val colorDebugTargetIndex: Int,
         val colorDebugDraftRgb: Int,
         val colorDebugPersistent: Boolean,
@@ -303,6 +329,7 @@ class StockReviewRenderer :
                 reviewMode == other.reviewMode &&
                 filterMode == other.filterMode &&
                 colorDebugMode == other.colorDebugMode &&
+                shipCatalogDebugMode == other.shipCatalogDebugMode &&
                 colorDebugTargetIndex == other.colorDebugTargetIndex &&
                 colorDebugDraftRgb == other.colorDebugDraftRgb &&
                 colorDebugPersistent == other.colorDebugPersistent

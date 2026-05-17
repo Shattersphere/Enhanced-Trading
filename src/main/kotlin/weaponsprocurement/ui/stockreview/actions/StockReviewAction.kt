@@ -37,6 +37,7 @@ class StockReviewAction private constructor(
         TOGGLE_FILTER,
         RESET_FILTERS,
         OPEN_COLOR_DEBUG,
+        OPEN_SHIP_CATALOG_DEBUG,
         DEBUG_CYCLE_TARGET,
         DEBUG_TOGGLE_PERSISTENCE,
         DEBUG_ADJUST_RED,
@@ -148,6 +149,10 @@ class StockReviewAction private constructor(
         @JvmStatic
         fun openColorDebug(): StockReviewAction =
             StockReviewAction(Type.OPEN_COLOR_DEBUG, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun openShipCatalogDebug(): StockReviewAction =
+            StockReviewAction(Type.OPEN_SHIP_CATALOG_DEBUG, null, null, null, null, null, null, null, 0)
 
         @JvmStatic
         fun debugCycleTarget(delta: Int): StockReviewAction =
