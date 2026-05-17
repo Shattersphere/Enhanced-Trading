@@ -1,13 +1,11 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewFilter
 import weaponsprocurement.ui.stockreview.state.StockReviewFilters
 import weaponsprocurement.ui.stockreview.state.StockReviewState
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.stock.item.StockCategory
 import weaponsprocurement.stock.item.StockItemType
@@ -15,7 +13,6 @@ import weaponsprocurement.stock.item.StockSourceMode
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
-import java.util.Locale
 
 object StockReviewListModel {
     @JvmStatic
@@ -72,12 +69,7 @@ object StockReviewListModel {
         val count = snapshot?.getCount(itemType) ?: 0
         val expanded = state.isExpanded(itemType)
         rows.add(
-            StockReviewListRow.filterHeading(
-                WimGuiToggleHeading.countedLabel(itemType.sectionLabel, count, expanded),
-                StockReviewAction.toggle(itemType),
-                topGap,
-                "Show or hide ${itemType.sectionLabel.lowercase(Locale.US)}.",
-            ),
+            StockReviewGroupRows.itemTypeHeading(itemType, count, expanded, topGap),
         )
         if (!expanded) {
             return count
@@ -102,15 +94,14 @@ object StockReviewListModel {
     ): Int {
         val records = filteredRecords(snapshot?.getRecords(itemType, category), state.getActiveFilters())
         val expanded = state.isExpanded(itemType, category)
-        val label = WimGuiToggleHeading.label(categoryHeading(itemType, category, records, tradeContext), expanded)
         rows.add(
-            StockReviewListRow.categoryIndented(
-                label,
+            StockReviewGroupRows.stockCategoryHeading(
+                categoryHeading(itemType, category, records, tradeContext),
+                itemType,
+                category,
                 color,
-                StockReviewAction.toggle(itemType, category),
+                expanded,
                 topGap,
-                StockReviewTooltips.category(category),
-                StockReviewStyle.WEAPON_INDENT,
             ),
         )
         if (!expanded) {

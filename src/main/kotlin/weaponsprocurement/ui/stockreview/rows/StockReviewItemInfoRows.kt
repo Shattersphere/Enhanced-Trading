@@ -3,8 +3,6 @@ package weaponsprocurement.ui.stockreview.rows
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
-import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.stock.item.WeaponStockRecord
 import java.util.Locale
@@ -22,158 +20,96 @@ object StockReviewItemInfoRows {
         state: StockReviewState?,
         layout: StockReviewRowLayout,
     ) {
-        add(rows, record, state, layout.rightBlockWidth, layout.listWidth, layout.infoIndent, layout.dataIndent)
-    }
-
-    @JvmStatic
-    fun add(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        record: WeaponStockRecord,
-        state: StockReviewState?,
-        rightReserveWidth: Float,
-    ) {
-        add(
-            rows,
-            record,
-            state,
-            rightReserveWidth,
-            StockReviewStyle.LIST_WIDTH,
-            StockReviewStyle.SECTION_INDENT,
-            StockReviewStyle.DETAIL_INDENT,
-        )
-    }
-
-    @JvmStatic
-    fun add(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        record: WeaponStockRecord,
-        state: StockReviewState?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-    ) {
-        add(
-            rows,
-            record,
-            state,
-            rightReserveWidth,
-            listWidth,
-            StockReviewStyle.SECTION_INDENT,
-            StockReviewStyle.DETAIL_INDENT,
-        )
-    }
-
-    @JvmStatic
-    fun add(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        record: WeaponStockRecord,
-        state: StockReviewState?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        infoIndent: Float,
-        dataIndent: Float,
-    ) {
         val basicExpanded = isInfoSectionExpanded(state, record, "basic")
-        rows.add(infoHeading("Basic Info", record, "basic", basicExpanded, infoIndent, rightReserveWidth))
+        rows.add(infoHeading("Basic Info", record, "basic", basicExpanded, layout))
         if (basicExpanded) {
-            addBasicInfo(rows, record, rightReserveWidth, listWidth, dataIndent)
+            addBasicInfo(rows, record, layout)
         }
         if (record.isWing()) {
             return
         }
         val advancedExpanded = isInfoSectionExpanded(state, record, "advanced")
-        rows.add(infoHeading("Advanced Info", record, "advanced", advancedExpanded, infoIndent, rightReserveWidth))
+        rows.add(infoHeading("Advanced Info", record, "advanced", advancedExpanded, layout))
         if (advancedExpanded) {
-            addAdvancedInfo(rows, record, rightReserveWidth, listWidth, dataIndent)
+            addAdvancedInfo(rows, record, layout)
         }
     }
 
     private fun addBasicInfo(
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
         record: WeaponStockRecord,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        dataIndent: Float,
+        layout: StockReviewRowLayout,
     ) {
-        addRequiredDataRow(rows, "Desired", record.desiredCount.toString(), rightReserveWidth, listWidth, dataIndent)
+        addRequiredDataRow(rows, "Desired", record.desiredCount.toString(), layout)
         addDataRow(
             rows,
             "Availability",
             record.fixerAvailabilityLabel,
-            rightReserveWidth,
-            listWidth,
-            dataIndent,
+            layout,
             record.fixerAvailabilityDetails,
         )
-        addDataRow(rows, "Rarity", record.fixerRarityLabel, rightReserveWidth, listWidth, dataIndent, record.fixerRarityDetails)
+        addDataRow(rows, "Rarity", record.fixerRarityLabel, layout, record.fixerRarityDetails)
         if (record.isWing()) {
-            addDataRow(rows, "Primary Role", record.typeLabel, rightReserveWidth, listWidth, dataIndent)
-            addRequiredDataRow(rows, "Size", "WING", rightReserveWidth, listWidth, dataIndent)
-            addDataRow(rows, "Fighters", record.wingFighterCountLabel, rightReserveWidth, listWidth, dataIndent)
-            addDataRow(rows, "OP", record.wingOpCostLabel, rightReserveWidth, listWidth, dataIndent)
-            addDataRow(rows, "Range", record.rangeLabel, rightReserveWidth, listWidth, dataIndent)
-            addDataRow(rows, "Refit(Sec)", record.wingRefitTimeLabel, rightReserveWidth, listWidth, dataIndent)
+            addDataRow(rows, "Primary Role", record.typeLabel, layout)
+            addRequiredDataRow(rows, "Size", "WING", layout)
+            addDataRow(rows, "Fighters", record.wingFighterCountLabel, layout)
+            addDataRow(rows, "OP", record.wingOpCostLabel, layout)
+            addDataRow(rows, "Range", record.rangeLabel, layout)
+            addDataRow(rows, "Refit(Sec)", record.wingRefitTimeLabel, layout)
             return
         }
-        addDataRow(rows, "Primary Role", record.primaryRoleLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Size", record.sizeLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Type", record.typeLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "OP", record.opCostLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Range", record.rangeLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Refire(Sec)", record.refireSecondsLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Damage", record.damageLabel, rightReserveWidth, listWidth, dataIndent)
+        addDataRow(rows, "Primary Role", record.primaryRoleLabel, layout)
+        addDataRow(rows, "Size", record.sizeLabel, layout)
+        addDataRow(rows, "Type", record.typeLabel, layout)
+        addDataRow(rows, "OP", record.opCostLabel, layout)
+        addDataRow(rows, "Range", record.rangeLabel, layout)
+        addDataRow(rows, "Refire(Sec)", record.refireSecondsLabel, layout)
+        addDataRow(rows, "Damage", record.damageLabel, layout)
         addDataRow(
             rows,
             if (record.hasDifferentSustainedDamagePerSecond()) "Damage/Sec (sustained)" else "Damage/Sec",
             record.sustainedDamagePerSecondLabel,
-            rightReserveWidth,
-            listWidth,
-            dataIndent,
+            layout,
         )
         addDataRow(
             rows,
             if (record.hasDifferentSustainedFluxPerSecond()) "Flux/Sec (sustained)" else "Flux/Sec",
             record.sustainedFluxPerSecondLabel,
-            rightReserveWidth,
-            listWidth,
-            dataIndent,
+            layout,
         )
-        addDataRow(rows, "Flux/Damage", record.fluxPerDamageLabel, rightReserveWidth, listWidth, dataIndent)
-        addPositiveDataRow(rows, "EMP", record.empLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Max Ammo", record.maxAmmoLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Sec / Reload", record.secPerReloadLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Ammo Gain", record.ammoGainLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Accuracy", record.accuracyLabel, rightReserveWidth, listWidth, dataIndent)
+        addDataRow(rows, "Flux/Damage", record.fluxPerDamageLabel, layout)
+        addPositiveDataRow(rows, "EMP", record.empLabel, layout)
+        addDataRow(rows, "Max Ammo", record.maxAmmoLabel, layout)
+        addDataRow(rows, "Sec / Reload", record.secPerReloadLabel, layout)
+        addDataRow(rows, "Ammo Gain", record.ammoGainLabel, layout)
+        addDataRow(rows, "Accuracy", record.accuracyLabel, layout)
     }
 
     private fun addAdvancedInfo(
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
         record: WeaponStockRecord,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        dataIndent: Float,
+        layout: StockReviewRowLayout,
     ) {
         addPositiveDataRow(
             rows,
             if (record.hasDifferentSustainedEmpPerSecond()) "EMP/Second (sustained)" else "EMP/Second",
             record.sustainedEmpPerSecondLabel,
-            rightReserveWidth,
-            listWidth,
-            dataIndent,
+            layout,
         )
-        addPositiveDataRow(rows, "Flux/EMP", record.fluxPerEmpLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Beam DPS", record.beamDpsLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Charge Up", record.beamChargeUpLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Charge Down", record.beamChargeDownLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Burst Delay", record.burstDelayLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Turn Rate/Second", record.turnRateLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Min Spread", record.minSpreadLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Max Spread", record.maxSpreadLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Spread / Shot", record.spreadPerShotLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Spread Decay", record.spreadDecayLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Proj. Speed", record.projectileSpeedLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Launch Speed", record.launchSpeedLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Flight Time", record.flightTimeLabel, rightReserveWidth, listWidth, dataIndent)
-        addDataRow(rows, "Guided", record.guidedLabel, rightReserveWidth, listWidth, dataIndent)
+        addPositiveDataRow(rows, "Flux/EMP", record.fluxPerEmpLabel, layout)
+        addDataRow(rows, "Beam DPS", record.beamDpsLabel, layout)
+        addDataRow(rows, "Charge Up", record.beamChargeUpLabel, layout)
+        addDataRow(rows, "Charge Down", record.beamChargeDownLabel, layout)
+        addDataRow(rows, "Burst Delay", record.burstDelayLabel, layout)
+        addDataRow(rows, "Turn Rate/Second", record.turnRateLabel, layout)
+        addDataRow(rows, "Min Spread", record.minSpreadLabel, layout)
+        addDataRow(rows, "Max Spread", record.maxSpreadLabel, layout)
+        addDataRow(rows, "Spread / Shot", record.spreadPerShotLabel, layout)
+        addDataRow(rows, "Spread Decay", record.spreadDecayLabel, layout)
+        addDataRow(rows, "Proj. Speed", record.projectileSpeedLabel, layout)
+        addDataRow(rows, "Launch Speed", record.launchSpeedLabel, layout)
+        addDataRow(rows, "Flight Time", record.flightTimeLabel, layout)
+        addDataRow(rows, "Guided", record.guidedLabel, layout)
     }
 
     private fun infoHeading(
@@ -181,12 +117,11 @@ object StockReviewItemInfoRows {
         record: WeaponStockRecord,
         section: String,
         expanded: Boolean,
-        indent: Float,
-        rightReserveWidth: Float,
+        layout: StockReviewRowLayout,
     ): WimGuiListRow<StockReviewAction> = StockReviewListRow.nestedHeading(
         WimGuiToggleHeading.label(label, expanded),
-        indent,
-        rightReserveWidth,
+        layout.infoIndent,
+        layout.rightBlockWidth,
         StockReviewAction.toggleItem(infoSectionKey(record, section)),
         false,
         "Show or hide ${label.lowercase(Locale.US)} rows.",
@@ -201,33 +136,27 @@ object StockReviewItemInfoRows {
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
         label: String,
         value: String?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        indent: Float,
+        layout: StockReviewRowLayout,
     ) {
-        rows.add(dataRow(label, value, rightReserveWidth, listWidth, indent))
+        rows.add(dataRow(label, value, layout))
     }
 
     private fun addDataRow(
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
         label: String,
         value: String?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        indent: Float,
-    ) = addDataRow(rows, label, value, rightReserveWidth, listWidth, indent, null)
+        layout: StockReviewRowLayout,
+    ) = addDataRow(rows, label, value, layout, null)
 
     private fun addDataRow(
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
         label: String,
         value: String?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        indent: Float,
+        layout: StockReviewRowLayout,
         tooltip: String?,
     ) {
         if (isMeaningful(value)) {
-            rows.add(dataRow(label, value, rightReserveWidth, listWidth, indent, tooltip))
+            rows.add(dataRow(label, value, layout, tooltip))
         }
     }
 
@@ -235,37 +164,31 @@ object StockReviewItemInfoRows {
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
         label: String,
         value: String?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        indent: Float,
+        layout: StockReviewRowLayout,
     ) {
         if (isPositiveValue(value)) {
-            rows.add(dataRow(label, value, rightReserveWidth, listWidth, indent))
+            rows.add(dataRow(label, value, layout))
         }
     }
 
     private fun dataRow(
         label: String,
         value: String?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        indent: Float,
-    ): WimGuiListRow<StockReviewAction> = dataRow(label, value, rightReserveWidth, listWidth, indent, null)
+        layout: StockReviewRowLayout,
+    ): WimGuiListRow<StockReviewAction> = dataRow(label, value, layout, null)
 
     private fun dataRow(
         label: String,
         value: String?,
-        rightReserveWidth: Float,
-        listWidth: Float,
-        indent: Float,
+        layout: StockReviewRowLayout,
         tooltip: String?,
     ): WimGuiListRow<StockReviewAction> = StockReviewListRow.labelTextIndented(
         label,
         value,
-        indent,
+        layout.dataIndent,
         false,
-        rightReserveWidth + StockReviewStyle.TEXT_LEFT_PAD,
-        listWidth,
+        layout.detailRightReserveWidth,
+        layout.listWidth,
         tooltip,
     )
 

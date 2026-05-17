@@ -19,6 +19,7 @@ import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
 import weaponsprocurement.ui.stockreview.rows.StockReviewReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewShipCatalogDebugRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewTradeSummaryRenderer
+import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import weaponsprocurement.ui.stockreview.state.StockReviewFilterListModel
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
@@ -56,10 +57,11 @@ class StockReviewRenderer :
         colorDebugPersistent: Boolean,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
-        if (filterMode || colorDebugMode || shipCatalogDebugMode) {
-            renderHeader(root, snapshot, state, reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode, colorDebugTargetIndex, colorDebugDraft)
+        val modeSpec = StockReviewModeSpec.resolve(reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode)
+        if (modeSpec.showHeader) {
+            renderHeader(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
         }
-        if (!reviewMode && !filterMode && !colorDebugMode && !shipCatalogDebugMode) {
+        if (modeSpec.showTradeActionRow) {
             renderActionRow(root, snapshot, state, buttons)
         }
         val model = renderModel(
@@ -68,19 +70,16 @@ class StockReviewRenderer :
             pendingTrades,
             pendingTradeRevision,
             modeRevision,
-            reviewMode,
-            filterMode,
-            colorDebugMode,
-            shipCatalogDebugMode,
+            modeSpec,
             colorDebugTargetIndex,
             colorDebugDraft,
             colorDebugPersistent,
         )
         val result = renderRows(root, model.rows, state, model.listSpec, buttons)
-        if (!filterMode && !colorDebugMode && !shipCatalogDebugMode) {
+        if (modeSpec.showSummary) {
             StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, model.rowLayout)
         }
-        StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode, buttons)
+        StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, modeSpec, buttons)
         return result
     }
 
@@ -90,10 +89,7 @@ class StockReviewRenderer :
         pendingTrades: List<StockReviewPendingTrade>,
         pendingTradeRevision: Int,
         modeRevision: Int,
-        reviewMode: Boolean,
-        filterMode: Boolean,
-        colorDebugMode: Boolean,
-        shipCatalogDebugMode: Boolean,
+        modeSpec: StockReviewModeSpec,
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
@@ -102,10 +98,7 @@ class StockReviewRenderer :
             state.getContentRevision(),
             pendingTradeRevision,
             modeRevision,
-            reviewMode,
-            filterMode,
-            colorDebugMode,
-            shipCatalogDebugMode,
+            modeSpec.screenMode,
             colorDebugTargetIndex,
             colorKey(colorDebugDraft),
             colorDebugPersistent,
@@ -118,25 +111,15 @@ class StockReviewRenderer :
         }
 
         val tradeContext = StockReviewTradeContext(snapshot, pendingTrades)
-        val rowLayout = StockReviewRowLayout.forReviewMode(reviewMode)
-        val rows: List<WimGuiListRow<StockReviewAction>>
-        val listSpec: WimGuiModalListSpec
-        if (colorDebugMode) {
-            rows = StockReviewColorDebugRows.build(colorDebugTargetIndex, colorDebugDraft, colorDebugPersistent)
-            listSpec = StockReviewStyle.LIST
-        } else if (shipCatalogDebugMode) {
-            rows = StockReviewShipCatalogDebugRows.build()
-            listSpec = StockReviewStyle.LIST
-        } else if (filterMode) {
-            rows = StockReviewFilterListModel.build(state)
-            listSpec = StockReviewStyle.FILTER_LIST
-        } else if (reviewMode) {
-            rows = StockReviewReviewListModel.build(snapshot, pendingTrades, state, tradeContext, rowLayout)
-            listSpec = StockReviewStyle.REVIEW_LIST
-        } else {
-            rows = StockReviewListModel.build(snapshot, state, tradeContext, rowLayout)
-            listSpec = StockReviewStyle.TRADE_LIST
+        val rowLayout = modeSpec.rowLayout
+        val rows: List<WimGuiListRow<StockReviewAction>> = when (modeSpec.screenMode) {
+            StockReviewScreenMode.COLOR_DEBUG -> StockReviewColorDebugRows.build(colorDebugTargetIndex, colorDebugDraft, colorDebugPersistent)
+            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> StockReviewShipCatalogDebugRows.build()
+            StockReviewScreenMode.FILTERS -> StockReviewFilterListModel.build(state)
+            StockReviewScreenMode.REVIEW -> StockReviewReviewListModel.build(snapshot, pendingTrades, state, tradeContext, rowLayout)
+            StockReviewScreenMode.TRADE -> StockReviewListModel.build(snapshot, state, tradeContext, rowLayout)
         }
+        val listSpec = modeSpec.listSpec
 
         val built = RenderModel(snapshot, key, tradeContext, rowLayout, rows, listSpec)
         cachedModel = built
@@ -147,36 +130,27 @@ class StockReviewRenderer :
         root: CustomPanelAPI,
         snapshot: WeaponStockSnapshot,
         state: StockReviewState,
-        reviewMode: Boolean,
-        filterMode: Boolean,
-        colorDebugMode: Boolean,
-        shipCatalogDebugMode: Boolean,
+        modeSpec: StockReviewModeSpec,
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
     ) {
-        val title = if (colorDebugMode) {
-            "Debug Colors"
-        } else if (shipCatalogDebugMode) {
-            "Ship Catalog Debug"
-        } else if (filterMode) {
-            "Filters"
-        } else if (reviewMode) {
-            "Review Trades"
-        } else {
-            "Make Trades"
+        val title = when (modeSpec.screenMode) {
+            StockReviewScreenMode.COLOR_DEBUG -> "Debug Colors"
+            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> "Ship Catalog Debug"
+            StockReviewScreenMode.FILTERS -> "Filters"
+            StockReviewScreenMode.REVIEW -> "Review Trades"
+            StockReviewScreenMode.TRADE -> "Make Trades"
         }
-        val status = if (colorDebugMode) {
-            colorStatusLine(colorDebugTargetIndex, colorDebugDraft)
-        } else if (shipCatalogDebugMode) {
-            "Developer-only Fixer ship catalog candidate view"
-        } else if (filterMode) {
-            filterStatusLine(state)
-        } else {
-            statusLine(snapshot, state)
+        val status = when (modeSpec.screenMode) {
+            StockReviewScreenMode.COLOR_DEBUG -> colorStatusLine(colorDebugTargetIndex, colorDebugDraft)
+            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> "Developer-only Fixer ship catalog candidate view"
+            StockReviewScreenMode.FILTERS -> filterStatusLine(state)
+            StockReviewScreenMode.REVIEW,
+            StockReviewScreenMode.TRADE -> statusLine(snapshot, state)
         }
         WimGuiModalHeader.addTitleStatusHeader(
             root,
-            StockReviewStyle.modalFor(reviewMode, filterMode, colorDebugMode),
+            modeSpec.modal,
             StockReviewStyle.HEADER_HEIGHT,
             title,
             status,
@@ -316,10 +290,7 @@ class StockReviewRenderer :
         val stateRevision: Int,
         val pendingTradeRevision: Int,
         val modeRevision: Int,
-        val reviewMode: Boolean,
-        val filterMode: Boolean,
-        val colorDebugMode: Boolean,
-        val shipCatalogDebugMode: Boolean,
+        val screenMode: StockReviewScreenMode,
         val colorDebugTargetIndex: Int,
         val colorDebugDraftRgb: Int,
         val colorDebugPersistent: Boolean,
@@ -328,10 +299,7 @@ class StockReviewRenderer :
             stateRevision == other.stateRevision &&
                 pendingTradeRevision == other.pendingTradeRevision &&
                 modeRevision == other.modeRevision &&
-                reviewMode == other.reviewMode &&
-                filterMode == other.filterMode &&
-                colorDebugMode == other.colorDebugMode &&
-                shipCatalogDebugMode == other.shipCatalogDebugMode &&
+                screenMode == other.screenMode &&
                 colorDebugTargetIndex == other.colorDebugTargetIndex &&
                 colorDebugDraftRgb == other.colorDebugDraftRgb &&
                 colorDebugPersistent == other.colorDebugPersistent

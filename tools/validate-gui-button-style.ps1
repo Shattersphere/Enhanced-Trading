@@ -43,10 +43,11 @@ $stockReviewListModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockRevie
 $stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewReviewListModel.kt"
 $stockReviewItemRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemRows.kt"
 $stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowLayout.kt"
+$stockReviewCellGroupPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewCellGroup.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -74,13 +75,15 @@ if (-not $listModelText.Contains('" [$typeLabel: $itemTypes, "') -or
     throw "Stock-review category headings must use comma-separated type/selling/buying summaries."
 }
 $itemRowsText = Get-Content -LiteralPath $stockReviewItemRowsPath -Raw
-if ($itemRowsText -notmatch "layout\.itemIndent,\s*StockReviewRowIcon\.item\(record\)" -or
+if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
+    $itemRowsText -notmatch "StockReviewRowIcon\.item\(record\)" -or
     $rowLayoutText -notmatch "StockReviewStyle\.WEAPON_INDENT") {
     throw "Main stock-review item rows must start at the category indent; the icon supplies the next visual indent."
 }
 
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
-if ($itemRowsText -notmatch "layout\.itemIndent,\s*StockReviewRowIcon\.item\(record\)" -or
+if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
+    $itemRowsText -notmatch "StockReviewRowIcon\.item\(record\)" -or
     $rowLayoutText -notmatch "fun review\(\): StockReviewRowLayout") {
     throw "Review stock-review item rows must use the same icon-indent model as the main trade screen."
 }
@@ -91,15 +94,18 @@ if ($reviewModelText -notmatch "SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup\.B
 }
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
-if ($itemRowsText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
+$cellGroupText = Get-Content -LiteralPath $stockReviewCellGroupPath -Raw
+if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
     throw "Stock-review worst-case weapon debug row label is missing."
 }
-if ($tradeCellsText -notmatch "Storage: 99\+ \[-99\+\]" -or
-    $tradeCellsText -notmatch "Price: 99,999\+" -or
-    $tradeCellsText -notmatch "Selling: 99\+ \[999,999\+") {
+if ($cellGroupText -notmatch "Storage: 99\+ \[-99\+\]" -or
+    $cellGroupText -notmatch "MAX_UNIT_PRICE = 99999" -or
+    $cellGroupText -notmatch "MAX_TRANSACTION_CREDITS = 999999" -or
+    $tradeCellsText -notmatch "StockReviewCellGroup\.debugPriceLabel\(\)" -or
+    $tradeCellsText -notmatch "StockReviewCellGroup\.debugPlanLabel\(\)") {
     throw "Stock-review worst-case weapon debug row must exercise capped storage, price, and plan labels."
 }
-if ($itemRowsText -notmatch "layout\.itemIndent" -or
+if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or
     $rowLayoutText -notmatch "StockReviewStyle\.WEAPON_INDENT") {
     throw "Stock-review worst-case weapon debug row must use the same icon-indent model as real weapon rows."
 }

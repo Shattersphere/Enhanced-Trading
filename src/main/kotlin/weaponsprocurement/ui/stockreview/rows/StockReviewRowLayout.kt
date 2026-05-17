@@ -7,8 +7,17 @@ enum class StockReviewRowMode {
     REVIEW,
 }
 
+enum class StockReviewScreenMode {
+    TRADE,
+    REVIEW,
+    FILTERS,
+    COLOR_DEBUG,
+    SHIP_CATALOG_DEBUG,
+}
+
 class StockReviewRowLayout private constructor(
     @JvmField val mode: StockReviewRowMode,
+    @JvmField val screenMode: StockReviewScreenMode,
     @JvmField val listWidth: Float,
     @JvmField val stockCellWidth: Float,
     @JvmField val priceCellWidth: Float,
@@ -46,6 +55,7 @@ class StockReviewRowLayout private constructor(
         @JvmStatic
         fun trade(): StockReviewRowLayout = StockReviewRowLayout(
             StockReviewRowMode.TRADE,
+            StockReviewScreenMode.TRADE,
             StockReviewStyle.LIST_WIDTH,
             StockReviewStyle.STOCK_CELL_WIDTH,
             StockReviewStyle.PRICE_CELL_WIDTH,
@@ -63,6 +73,7 @@ class StockReviewRowLayout private constructor(
         @JvmStatic
         fun review(): StockReviewRowLayout = StockReviewRowLayout(
             StockReviewRowMode.REVIEW,
+            StockReviewScreenMode.REVIEW,
             StockReviewStyle.REVIEW_LIST_WIDTH,
             StockReviewStyle.STOCK_CELL_WIDTH,
             StockReviewStyle.PRICE_CELL_WIDTH,
@@ -80,5 +91,9 @@ class StockReviewRowLayout private constructor(
         @JvmStatic
         fun forReviewMode(reviewMode: Boolean): StockReviewRowLayout =
             if (reviewMode) review() else trade()
+
+        @JvmStatic
+        fun forScreenMode(screenMode: StockReviewScreenMode): StockReviewRowLayout =
+            if (screenMode == StockReviewScreenMode.REVIEW) review() else trade()
     }
 }

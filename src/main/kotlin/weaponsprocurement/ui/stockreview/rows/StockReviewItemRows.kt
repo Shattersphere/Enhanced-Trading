@@ -16,8 +16,6 @@ import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 
 object StockReviewItemRows {
-    private const val WORST_CASE_LABEL = "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector [Observed/Very Rare] (+)"
-
     @JvmStatic
     fun addTradeRow(
         rows: MutableList<WimGuiListRow<StockReviewAction>>,
@@ -79,12 +77,13 @@ object StockReviewItemRows {
         layout: StockReviewRowLayout,
     ) {
         rows.add(
-            StockReviewListRow.item(
-                WORST_CASE_LABEL,
+            itemRow(
+                StockReviewCellGroup.DEBUG_WORST_CASE_LABEL,
                 StockReviewTradeRowCells.worstCaseCells(layout),
                 StockReviewAction.debugNoop(),
                 "Worst-case row-width test sample. It does not affect trades.",
-                layout.itemIndent,
+                null,
+                layout,
             ),
         )
     }
@@ -131,17 +130,39 @@ object StockReviewItemRows {
     ) {
         val itemTooltip = StockReviewTooltips.itemDataToggle(record)
         rows.add(
-            StockReviewListRow.item(
+            itemRow(
                 label,
                 cells,
                 action,
                 itemTooltip,
                 StockReviewItemTooltip.forRecord(record, itemTooltip),
-                layout.itemIndent,
+                layout,
                 StockReviewRowIcon.item(record),
             ),
         )
     }
+
+    private fun itemRow(
+        label: String,
+        cells: List<WimGuiRowCell<StockReviewAction>>,
+        action: StockReviewAction,
+        tooltip: String?,
+        tooltipCreator: com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator?,
+        layout: StockReviewRowLayout,
+        icon: StockReviewRowIcon? = null,
+    ): WimGuiListRow<StockReviewAction> = StockReviewListRow.fromSpec(
+        StockReviewRowSpec.builder(label)
+            .fillColor(StockReviewStyle.ROW_BACKGROUND)
+            .buttonFillColor(StockReviewStyle.CELL_BACKGROUND)
+            .borderColor(StockReviewStyle.ROW_BORDER)
+            .indent(layout.itemIndent)
+            .action(action)
+            .cells(cells)
+            .tooltip(tooltip)
+            .tooltipCreator(tooltipCreator)
+            .icon(icon)
+            .build(),
+    )
 
     private fun sourceLabel(allocation: StockReviewSellerAllocation): String =
         if (allocation.submarketName.isNullOrEmpty()) "Purchase Source" else allocation.submarketName

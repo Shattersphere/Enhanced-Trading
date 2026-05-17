@@ -43,6 +43,7 @@ $includeFiles = @(
     "data/config/weapons_procurement_market_blacklist.json",
     "data/config/weapons_procurement_stock.json",
     "tools/deploy-live-mod.ps1",
+    "tools/lib/Deploy.Common.ps1",
     "tools/analyze-trade-rollback-diagnostics.ps1",
     "tools/validate-doc-links.ps1",
     "tools/validate-gui-button-style.ps1",
@@ -58,7 +59,8 @@ $excludeSourceSuffixes = @(
     "src/privateBadge/java/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java",
     "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementBadgeConfig.kt",
     "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementCountUpdater.kt",
-    "src/privateBadge/kotlin/weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.kt"
+    "src/privateBadge/kotlin/weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.kt",
+    "src/main/kotlin/weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.kt"
 )
 
 function Copy-RepoFile {
@@ -215,47 +217,16 @@ if (Test-Path -LiteralPath $publicPackaging) {
 
 $publicDeployScript = Join-Path $resolvedOutput "tools/deploy-live-mod.ps1"
 if (Test-Path -LiteralPath $publicDeployScript) {
-    $deployLines = Get-Content -LiteralPath $publicDeployScript
-    $publicDeployLines = New-Object System.Collections.Generic.List[string]
-    $skippingJarBoundary = $false
-    $skippingPrivateBadgeArgument = $false
-    foreach ($line in $deployLines) {
-        if ($line -match '^\s*\[switch\]\$AllowPrivateBadgeJar,') {
-            continue
-        }
-        if ($line -match '^function Get-ZipEntryNames\s*\{') {
-            $publicDeployLines.Add("function Assert-DeployJarBoundary {")
-            $publicDeployLines.Add("    param([string]`$BaseRoot)")
-            $publicDeployLines.Add("")
-            $publicDeployLines.Add("    `$jarPath = Join-Path `$BaseRoot `"jars\weapons-procurement.jar`"")
-            $publicDeployLines.Add("    if (-not (Test-Path -LiteralPath `$jarPath)) {")
-            $publicDeployLines.Add("        throw `"Deploy jar not found: `$jarPath`"")
-            $publicDeployLines.Add("    }")
-            $publicDeployLines.Add("}")
-            $publicDeployLines.Add("")
-            $skippingJarBoundary = $true
-            continue
-        }
-        if ($skippingJarBoundary) {
-            if ($line -match '^function Assert-DeployRoot\s*\{') {
-                $skippingJarBoundary = $false
-                $publicDeployLines.Add($line)
-            }
-            continue
-        }
-        if ($line -match '^\s*if \(\$AllowPrivateBadgeJar\) \{') {
-            $skippingPrivateBadgeArgument = $true
-            continue
-        }
-        if ($skippingPrivateBadgeArgument) {
-            if ($line -match '^\s*\}') {
-                $skippingPrivateBadgeArgument = $false
-            }
-            continue
-        }
-        $publicDeployLines.Add($line)
+    $deployText = Get-Content -LiteralPath $publicDeployScript -Raw
+    if ($deployText.IndexOf("PRIVATE_DEPLOY_BOUNDARY_START", [System.StringComparison]::Ordinal) -lt 0) {
+        throw "Public deploy export boundary markers are missing from tools/deploy-live-mod.ps1."
     }
-    Set-Content -LiteralPath $publicDeployScript -Value ($publicDeployLines -join [Environment]::NewLine) -NoNewline
+    $deployText = [regex]::Replace(
+        $deployText,
+        "(?ms)\r?\n?\s*# PRIVATE_DEPLOY_BOUNDARY_START\r?\n.*?\r?\n\s*# PRIVATE_DEPLOY_BOUNDARY_END\r?\n?",
+        "`r`n"
+    )
+    Set-Content -LiteralPath $publicDeployScript -Value $deployText -NoNewline
 }
 
 $srcRoot = Join-Path $repoRoot "src"
@@ -321,6 +292,21 @@ if (Test-Path -LiteralPath $publicPluginKt) {
         $pluginText,
         "(?m)^\s*private const val BADGE_UPDATER_CLASS.*\r?\n",
         ""
+    )
+    $pluginText = [regex]::Replace(
+        $pluginText,
+        "(?m)^\s*private const val KEY_PATCHED_BADGES_ENABLED.*\r?\n",
+        ""
+    )
+    $pluginText = [regex]::Replace(
+        $pluginText,
+        "(?m)^\s*private const val KEY_BADGE_COUNTS_READY.*\r?\n",
+        ""
+    )
+    $pluginText = [regex]::Replace(
+        $pluginText,
+        "(?ms)\r?\n    private fun registerOptionalPrivateScript\(.*?\r?\n    private fun hasScript",
+        "`r`n    private fun hasScript"
     )
     $pluginText = [regex]::Replace(
         $pluginText,

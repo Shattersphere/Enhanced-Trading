@@ -104,10 +104,13 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 `StockReviewPanelPlugin` is lifecycle/context orchestration. Keep domain work in focused controllers/renderers:
 
 - `StockReviewRenderer`: shell/header/body/footer composition.
+- `StockReviewModeSpec` / `StockReviewLayoutContext`: mode selection and screen-level modal/list/summary layout.
 - `StockReviewListModel`: main trade rows.
 - `StockReviewReviewListModel`: review rows.
+- `StockReviewListRow` / `StockReviewRowSpec`: shared row construction path for labels, cells, icons, actions, reserves, and tooltips.
+- `StockReviewGroupRows`: shared stock/review group headings.
 - `StockReviewItemInfoRows`: basic/advanced item data rows.
-- `StockReviewTradeRowCells`: storage/price/plan/action cells.
+- `StockReviewCellGroup` / `StockReviewTradeRowCells`: stock/price/plan/action widths, capped labels, debug extrema, and cell factories.
 - `StockReviewFooterRenderer`: mode-specific footers.
 - `StockReviewModeController`: review/filter/color-debug modes.
 - `StockReviewUiController`: source/sort/filter/expansion/reset/navigation actions.
@@ -154,7 +157,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.p
 git diff --check
 ```
 
-`deploy-live-mod.ps1` clean-syncs repo-managed files to `C:\Games\Starsector\mods\Weapons Procurement`. If the live jar is locked by Starsector, it stages the built files and starts a minimized visible no-activate queued worker that publishes after the lock clears.
+`deploy-live-mod.ps1` clean-syncs repo-managed files to `C:\Games\Starsector\mods\Weapons Procurement`. If the live jar is locked by Starsector, it stages the built files and starts a minimized visible no-activate queued worker that publishes after the lock clears. Shared deploy/status/zip/state/process helpers live in `tools/lib/Deploy.Common.ps1`; keep deploy entrypoint flags stable and put reusable helper changes there first.
 
 Deploy diagnostics:
 
@@ -166,6 +169,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badge
 ```
 
 `-Status` does not build or deploy. `-CheckOnly -RequireCurrent` is the cheap source/live clean-package parity check. Stale staging cleanup is scoped to this repo, target, and deploy workflow.
+
+`tools/export-public.ps1` includes the shared deploy helper module and strips private deploy behavior through explicit `PRIVATE_DEPLOY_BOUNDARY` markers in `tools/deploy-live-mod.ps1`. Do not reintroduce function-name-based public deploy surgery.
 
 For docs-only edits, `validate-doc-links.ps1` and `git diff --check` are usually sufficient.
 

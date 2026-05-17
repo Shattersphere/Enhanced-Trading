@@ -1,7 +1,6 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -11,7 +10,6 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
 import java.util.ArrayList
-import java.util.Locale
 
 class StockReviewReviewListModel private constructor() {
     companion object {
@@ -57,15 +55,15 @@ class StockReviewReviewListModel private constructor() {
             tradeGroup: StockReviewTradeGroup,
         ) {
             val expanded = state.isExpanded(tradeGroup)
-            val label = WimGuiToggleHeading.countedLabel(tradeGroup.label, groupTrades.size, expanded)
             val headingColor: Color = if (StockReviewTradeGroup.BUYING == tradeGroup) StockReviewStyle.CONFIRM_BUTTON else StockReviewStyle.CANCEL_BUTTON
             rows.add(
-                StockReviewListRow.category(
-                    label,
+                StockReviewGroupRows.reviewGroupHeading(
+                    tradeGroup.label,
+                    groupTrades.size,
+                    expanded,
                     headingColor,
                     StockReviewAction.toggle(tradeGroup),
                     StockReviewTradeGroup.SELLING == tradeGroup,
-                    "Show or hide queued ${tradeGroup.label.lowercase(Locale.US)} trades.",
                 ),
             )
             if (!expanded) {

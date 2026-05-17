@@ -41,6 +41,8 @@ git diff --check
 
 `tools\deploy-live-mod.ps1` performs a clean sync of repo-managed clean-package files by default. If Starsector is locking the live jar, it stages the built files and queues a background deploy for after the lock clears. Use `-NoClean` only for local debugging when intentionally preserving extra live files.
 
+Shared deploy helper behavior for status files, queue state, zip inspection, replaceability checks, and no-activate queued workers lives in `tools\lib\Deploy.Common.ps1`.
+
 Useful deploy diagnostics:
 
 ```powershell

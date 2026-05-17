@@ -61,6 +61,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 - Use `tools/deploy-live-mod.ps1 -Status` for a no-build deploy queue/status/blocker/staging report.
 - Use `tools/deploy-live-mod.ps1 -CheckOnly -RequireCurrent` when you need cheap source/live clean-package parity without deploying.
 - Use `tools/deploy-live-mod.ps1 -Status -CleanStaleStaging` only for scoped cleanup of inactive deploy staging directories.
+- Shared deploy helpers live in `tools/lib/Deploy.Common.ps1`; preserve deploy script CLI/output compatibility and centralize reusable status, queue, zip, state, process, and no-activate worker behavior there.
 - Clean deploys reject jars containing optional patched-badge classes by default. Use `-AllowPrivateBadgeJar` only for an intentional private patched-badge deploy.
 - Deploy runtime changes that affect jar code, `mod_info.json`, `data/`, `graphics/`, Luna settings, generated assets, or package metadata.
 - Do not deploy docs-only changes unless the user asks or release packaging requires mirrored docs.
@@ -73,6 +74,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 - Private repo work happens here; public output for `Shattersphere-Mods` must be curated, not mirrored.
 - Read `.agent/PUBLIC_RELEASE.md` before any public export, public repo sync, package prep, or release-facing docs change.
 - Public output must exclude `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local paths, deploy queues, and optional patched-badge/bytecode material unless explicitly approved.
+- Public deploy export removes private deploy behavior through explicit `PRIVATE_DEPLOY_BOUNDARY` markers in `tools/deploy-live-mod.ps1`; do not use brittle function-name surgery in `tools/export-public.ps1`.
 - Public changelog entries must stay user-facing and must not mention agents, private docs, local paths, or private experiments.
 
 ## Durable Docs

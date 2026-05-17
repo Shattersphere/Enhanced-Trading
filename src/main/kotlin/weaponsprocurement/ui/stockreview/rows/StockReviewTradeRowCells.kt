@@ -96,18 +96,18 @@ class StockReviewTradeRowCells private constructor() {
         @JvmStatic
         fun worstCaseCells(layout: StockReviewRowLayout): List<WimGuiRowCell<StockReviewAction>> {
             val cells = ArrayList<WimGuiRowCell<StockReviewAction>>()
-            cells.add(WimGuiRowCell.info("Storage: 99+ [-99+]", layout.stockCellWidth, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.STORAGE))
-            if (layout.hasPriceCell) {
-                cells.add(WimGuiRowCell.info("Price: 99,999+${CreditFormat.CREDIT_SYMBOL}", layout.priceCellWidth, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PRICE))
+            cells.add(WimGuiRowCell.info(StockReviewCellGroup.DEBUG_STORAGE_LABEL, StockReviewCellGroup.stockWidth(layout), StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.STORAGE))
+            if (StockReviewCellGroup.hasPrice(layout)) {
+                cells.add(WimGuiRowCell.info(StockReviewCellGroup.debugPriceLabel(), StockReviewCellGroup.priceWidth(layout), StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PRICE))
             }
-            cells.add(WimGuiRowCell.info("Selling: 99+ [999,999+${CreditFormat.CREDIT_SYMBOL}]", layout.planCellWidth, StockReviewStyle.PLAN_NEGATIVE, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PLAN))
-            if (layout.hasTradeControls) {
-                cells.add(WimGuiRowCell.standardAction("-10", StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(10)))
-                cells.add(WimGuiRowCell.standardAction("-1", StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(1)))
-                cells.add(WimGuiRowCell.standardAction("+1", StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, StockReviewStyle.BUY_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.increasePlan(1)))
-                cells.add(WimGuiRowCell.standardAction("+10", StockReviewStyle.TRADE_STEP_BUTTON_WIDTH, StockReviewStyle.BUY_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.increasePlan(10)))
-                cells.add(WimGuiRowCell.standardAction("Sufficient", StockReviewStyle.SUFFICIENT_BUTTON_WIDTH, StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, "Adjust the queued trade quantity so that your stock of this item just meets the sufficiency threshold (99)."))
-                cells.add(WimGuiRowCell.standardAction("Reset", StockReviewStyle.RESET_BUTTON_WIDTH, StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugNoop(), true, StockReviewTooltips.resetPlan()))
+            cells.add(WimGuiRowCell.info(StockReviewCellGroup.debugPlanLabel(), StockReviewCellGroup.planWidth(layout), StockReviewStyle.PLAN_NEGATIVE, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PLAN))
+            if (StockReviewCellGroup.hasControls(layout)) {
+                cells.add(WimGuiRowCell.standardAction("-10", StockReviewCellGroup.stepWidth(), StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(10)))
+                cells.add(WimGuiRowCell.standardAction("-1", StockReviewCellGroup.stepWidth(), StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.decreasePlan(1)))
+                cells.add(WimGuiRowCell.standardAction("+1", StockReviewCellGroup.stepWidth(), StockReviewStyle.BUY_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.increasePlan(1)))
+                cells.add(WimGuiRowCell.standardAction("+10", StockReviewCellGroup.stepWidth(), StockReviewStyle.BUY_BUTTON, StockReviewAction.debugNoop(), true, StockReviewTooltips.increasePlan(10)))
+                cells.add(WimGuiRowCell.standardAction("Sufficient", StockReviewCellGroup.sufficientWidth(), StockReviewStyle.SELL_BUTTON, StockReviewAction.debugNoop(), true, "Adjust the queued trade quantity so that your stock of this item just meets the sufficiency threshold (99)."))
+                cells.add(WimGuiRowCell.standardAction("Reset", StockReviewCellGroup.resetWidth(), StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugNoop(), true, StockReviewTooltips.resetPlan()))
             }
             return cells
         }
@@ -130,7 +130,7 @@ class StockReviewTradeRowCells private constructor() {
         @JvmStatic
         fun plan(planQuantity: Int, transactionCost: Long, layout: StockReviewRowLayout): WimGuiRowCell<StockReviewAction> {
             val quantity = cappedCount(abs(planQuantity))
-            val total = cappedCredits(transactionCost, 999999)
+            val total = cappedCredits(transactionCost, StockReviewCellGroup.MAX_TRANSACTION_CREDITS)
             val label = if (planQuantity > 0) {
                 "Buying: $quantity [$total]"
             } else if (planQuantity < 0) {
@@ -153,7 +153,7 @@ class StockReviewTradeRowCells private constructor() {
             if (unitPrice == StockReviewQuoteBook.PRICE_UNAVAILABLE) {
                 return WimGuiRowCell.info("Price: ?", layout.priceCellWidth, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PRICE)
             }
-            return WimGuiRowCell.info("Price: ${cappedCredits(unitPrice.toLong(), 99999)}", layout.priceCellWidth, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PRICE)
+            return WimGuiRowCell.info("Price: ${cappedCredits(unitPrice.toLong(), StockReviewCellGroup.MAX_UNIT_PRICE)}", layout.priceCellWidth, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PRICE)
         }
 
         @JvmStatic
@@ -170,12 +170,13 @@ class StockReviewTradeRowCells private constructor() {
             return "Storage: ${cappedCount(ownedCount)} [${signedCappedCount(planQuantity)}]"
         }
 
-        private fun cappedCount(value: Int): String = if (value >= 99) "99+" else Math.max(0, value).toString()
+        private fun cappedCount(value: Int): String =
+            if (value >= StockReviewCellGroup.MAX_DISPLAY_COUNT) "${StockReviewCellGroup.MAX_DISPLAY_COUNT}+" else Math.max(0, value).toString()
 
         private fun signedCappedCount(value: Int): String {
             val sign = if (value > 0) "+" else if (value < 0) "-" else ""
             val absolute = abs(value)
-            return sign + if (absolute >= 99) "99+" else absolute.toString()
+            return sign + if (absolute >= StockReviewCellGroup.MAX_DISPLAY_COUNT) "${StockReviewCellGroup.MAX_DISPLAY_COUNT}+" else absolute.toString()
         }
 
         private fun cappedCredits(credits: Long, cap: Int): String {

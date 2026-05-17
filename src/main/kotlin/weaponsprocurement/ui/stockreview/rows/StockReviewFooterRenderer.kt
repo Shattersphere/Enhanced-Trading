@@ -6,6 +6,7 @@ import weaponsprocurement.ui.WimGuiButtonSpecs
 import weaponsprocurement.ui.WimGuiModalFooter
 import weaponsprocurement.ui.WimGuiSemanticButtonFactory
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.rendering.StockReviewModeSpec
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
@@ -22,29 +23,16 @@ class StockReviewFooterRenderer private constructor() {
             root: CustomPanelAPI,
             tradeContext: StockReviewTradeContext,
             pendingTrades: List<StockReviewPendingTrade>?,
-            reviewMode: Boolean,
-            filterMode: Boolean,
-            colorDebugMode: Boolean,
-            shipCatalogDebugMode: Boolean,
+            modeSpec: StockReviewModeSpec,
             buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
         ) {
-            if (colorDebugMode) {
-                renderColorDebugFooter(root, buttons)
-                return
+            when (modeSpec.screenMode) {
+                StockReviewScreenMode.COLOR_DEBUG -> renderColorDebugFooter(root, buttons)
+                StockReviewScreenMode.SHIP_CATALOG_DEBUG -> renderShipCatalogDebugFooter(root, buttons)
+                StockReviewScreenMode.FILTERS -> renderFilterFooter(root, buttons)
+                StockReviewScreenMode.REVIEW -> renderReviewFooter(root, tradeContext, pendingTrades, buttons)
+                StockReviewScreenMode.TRADE -> renderTradeFooter(root, pendingTrades, buttons)
             }
-            if (shipCatalogDebugMode) {
-                renderShipCatalogDebugFooter(root, buttons)
-                return
-            }
-            if (filterMode) {
-                renderFilterFooter(root, buttons)
-                return
-            }
-            if (reviewMode) {
-                renderReviewFooter(root, tradeContext, pendingTrades, buttons)
-                return
-            }
-            renderTradeFooter(root, pendingTrades, buttons)
         }
 
         private fun renderColorDebugFooter(root: CustomPanelAPI, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>) {

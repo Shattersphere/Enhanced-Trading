@@ -10,6 +10,25 @@ import java.awt.Color
 
 object StockReviewListRow {
     @JvmStatic
+    fun fromSpec(spec: StockReviewRowSpec): WimGuiListRow<StockReviewAction> = WimGuiListRow(
+        spec.label,
+        spec.textColor,
+        spec.fillColor,
+        spec.buttonFillColor,
+        spec.borderColor,
+        spec.indent,
+        spec.action,
+        spec.alignment,
+        spec.cells,
+        spec.topGap,
+        spec.cellGapOverride,
+        spec.rightReserveWidth,
+        spec.tooltip,
+        spec.tooltipCreator,
+        spec.icon,
+    )
+
+    @JvmStatic
     fun category(label: String?, textColor: Color?, action: StockReviewAction?, topGap: Boolean): WimGuiListRow<StockReviewAction> =
         category(label, textColor, action, topGap, null)
 
@@ -463,22 +482,21 @@ object StockReviewListRow {
         tooltip: String?,
         tooltipCreator: TooltipMakerAPI.TooltipCreator?,
         icon: StockReviewRowIcon?,
-    ): WimGuiListRow<StockReviewAction> = WimGuiListRow(
-        label,
-        textColor,
-        fillColor,
-        buttonFillColor,
-        borderColor,
-        indent,
-        action,
-        alignment,
-        cells,
-        topGap,
-        null,
-        0f,
-        tooltip,
-        tooltipCreator,
-        icon,
+    ): WimGuiListRow<StockReviewAction> = fromSpec(
+        StockReviewRowSpec.builder(label)
+            .textColor(textColor)
+            .fillColor(fillColor)
+            .buttonFillColor(buttonFillColor)
+            .borderColor(borderColor)
+            .indent(indent)
+            .action(action)
+            .alignment(alignment)
+            .cells(cells)
+            .topGap(topGap)
+            .tooltip(tooltip)
+            .tooltipCreator(tooltipCreator)
+            .icon(icon)
+            .build(),
     )
 
     private fun row(
@@ -511,19 +529,20 @@ object StockReviewListRow {
         cellGapOverride: Float?,
         rightReserveWidth: Float,
         tooltip: String?,
-    ): WimGuiListRow<StockReviewAction> = WimGuiListRow(
-        label,
-        textColor,
-        fillColor,
-        buttonFillColor,
-        borderColor,
-        indent,
-        action,
-        alignment,
-        cells,
-        topGap,
-        cellGapOverride,
-        rightReserveWidth,
-        tooltip,
+    ): WimGuiListRow<StockReviewAction> = fromSpec(
+        StockReviewRowSpec.builder(label)
+            .textColor(textColor)
+            .fillColor(fillColor)
+            .buttonFillColor(buttonFillColor)
+            .borderColor(borderColor)
+            .indent(indent)
+            .action(action)
+            .alignment(alignment)
+            .cells(cells)
+            .topGap(topGap)
+            .cellGapOverride(cellGapOverride)
+            .rightReserveWidth(rightReserveWidth)
+            .tooltip(tooltip)
+            .build(),
     )
 }

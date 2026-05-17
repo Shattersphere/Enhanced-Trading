@@ -45,8 +45,10 @@ git diff --check
 - Live mod folder: `C:\Games\Starsector\mods\Weapons Procurement`
 - Deploy command: `tools/deploy-live-mod.ps1`
 - The deploy script clean-syncs repo-managed clean-package files, or stages and queues a minimized visible no-activate deploy if the live jar is locked.
+- Shared deploy/status/state/zip/process helpers live in `tools/lib/Deploy.Common.ps1`; keep `deploy-live-mod.ps1` and `deploy-private-badges.ps1` command-line behavior stable.
 - Use `tools/deploy-live-mod.ps1 -Status` for queue/status/blocker/staging diagnostics, `-CheckOnly -RequireCurrent` for cheap source/live clean-package parity, and `-Status -CleanStaleStaging` for scoped stale staging cleanup.
 - Use `tools/deploy-private-badges.ps1 -Status` for the private patched-badge queue and core-jar blocker report.
+- Public export strips private clean-deploy behavior through explicit `PRIVATE_DEPLOY_BOUNDARY` markers in `tools/deploy-live-mod.ps1`; do not couple export to deploy helper function names.
 - Docs-only changes normally do not need deploy.
 
 ## Current Risks
