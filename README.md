@@ -1,6 +1,6 @@
 # Weapons Procurement
 
-Weapons Procurement adds a stock review and trade-planning popup for Starsector markets and storage dialogs.
+Weapons Procurement adds a stock review and trade-planning popup for Starsector market dialogs and market-backed storage dialogs.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ Weapons Procurement adds a stock review and trade-planning popup for Starsector 
 
 ## Main Workflow (Clean Path)
 
-1. Open a market or storage interaction dialog.
+1. Open a market interaction dialog, or a storage interaction that is backed by the current market.
 2. Press `F8` to open the popup.
 3. Queue buys/sells per item.
 4. Open `Review Trades`.
@@ -43,7 +43,7 @@ Release notes are tracked in [CHANGELOG.md](CHANGELOG.md).
 ## Troubleshooting
 
 - Popup does not open:
-  - ensure you are inside an active market/storage dialog;
+  - ensure you are inside an active market dialog or market-backed storage dialog;
   - ensure source/filter settings are not hiding all rows.
 - No rows visible:
   - check source mode and filters;

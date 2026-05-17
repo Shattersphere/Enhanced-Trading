@@ -31,18 +31,19 @@ class StockReviewTooltips private constructor() {
 
         @JvmStatic
         fun source(mode: StockSourceMode?): String {
+            val pendingPlanWarning = " Source mode changes require no queued trades; reset or confirm the current plan first."
             val resolved = mode ?: StockSourceMode.LOCAL
             if (StockSourceMode.SECTOR == resolved) {
                 return "Buy from the Sector Market. Includes weapons and fighter LPCs currently being sold by any market in the sector. Purchased items are removed from the appropriate market inventory. Selling while this source is active uses the current local legal buyer; black-market selling is disabled in remote source modes. Prices are " +
                     oneDecimal(WeaponsProcurementConfig.sectorMarketPriceMultiplier()) +
-                    "x normal due to the difficulty of procuring items from across the sector."
+                    "x normal due to the difficulty of procuring items from across the sector.$pendingPlanWarning"
             }
             if (StockSourceMode.FIXERS == resolved) {
                 return "Buy from the Fixer's Market. Includes every weapon or fighter LPC that could normally appear for sale in the sector, excluding REDACTED items and similar special cases. Selling while this source is active uses the current local legal buyer; black-market selling is disabled in remote source modes. Prices are " +
                     oneDecimal(WeaponsProcurementConfig.fixersMarketPriceMultiplier()) +
-                    "x normal due to the difficulty of procuring items that may not be in stock anywhere."
+                    "x normal due to the difficulty of procuring items that may not be in stock anywhere.$pendingPlanWarning"
             }
-            return "Buy from local markets. Includes weapons and fighter LPCs from the local open market, black market, and other eligible local markets, such as faction markets, if you meet their requirements. Purchased items are removed from the appropriate market inventory. Sold items are deposited into either the open market or black market, depending on whether black-market transactions are enabled."
+            return "Buy from local markets. Includes weapons and fighter LPCs from the local open market, black market, and other eligible local markets, such as faction markets, if you meet their requirements. Purchased items are removed from the appropriate market inventory. Sold items are deposited into either the open market or black market, depending on whether black-market transactions are enabled.$pendingPlanWarning"
         }
 
         @JvmStatic
@@ -91,11 +92,11 @@ class StockReviewTooltips private constructor() {
 
         @JvmStatic
         fun purchaseAllUntilSufficient(): String =
-            "Queue purchases from cheapest to most expensive until your stock reaches the sufficiency threshold, or until you run out of money, cargo space, or available items to buy."
+            "Queue purchases for rows matching the active filters, from cheapest to most expensive, until your stock reaches the sufficiency threshold or you run out of money, cargo space, or available items to buy."
 
         @JvmStatic
         fun sellAllUntilSufficient(): String =
-            "Queue sales until you have sold as many items as possible without reducing stock below the sufficiency threshold."
+            "Queue sales for rows matching the active filters until you have sold as many items as possible without reducing stock below the sufficiency threshold."
 
         @JvmStatic
         fun filterHeading(group: StockReviewFilterGroup): String =

@@ -6,6 +6,8 @@ import weaponsprocurement.stock.item.StockCategory
 import weaponsprocurement.stock.item.StockItemType
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
+import weaponsprocurement.ui.stockreview.state.StockReviewFilter
+import weaponsprocurement.ui.stockreview.state.StockReviewFilters
 import java.util.ArrayList
 
 class StockReviewTradePlanner private constructor() {
@@ -27,17 +29,17 @@ class StockReviewTradePlanner private constructor() {
         private const val MATCH_GENERIC_BUY = 2
 
         @JvmStatic
-        fun visibleTradeableRecords(snapshot: WeaponStockSnapshot?, category: StockCategory?): List<WeaponStockRecord> {
+        fun tradeableRecords(snapshot: WeaponStockSnapshot?, category: StockCategory?): List<WeaponStockRecord> {
             val result = ArrayList<WeaponStockRecord>()
             if (snapshot == null || category == null) {
                 return result
             }
-            addVisibleTradeableRecords(result, snapshot.getRecords(category))
+            addTradeableRecords(result, snapshot.getRecords(category))
             return result
         }
 
         @JvmStatic
-        fun visibleTradeableRecords(
+        fun tradeableRecords(
             snapshot: WeaponStockSnapshot?,
             itemType: StockItemType?,
             category: StockCategory?,
@@ -46,37 +48,46 @@ class StockReviewTradePlanner private constructor() {
             if (snapshot == null || category == null) {
                 return result
             }
-            addVisibleTradeableRecords(result, snapshot.getRecords(itemType, category))
+            addTradeableRecords(result, snapshot.getRecords(itemType, category))
             return result
         }
 
         @JvmStatic
-        fun visibleTradeableRecords(snapshot: WeaponStockSnapshot?): List<WeaponStockRecord> {
+        fun tradeableRecords(snapshot: WeaponStockSnapshot?): List<WeaponStockRecord> {
             val result = ArrayList<WeaponStockRecord>()
             if (snapshot == null) {
                 return result
             }
             for (category in StockCategory.values()) {
-                addVisibleTradeableRecords(result, snapshot.getRecords(category))
+                addTradeableRecords(result, snapshot.getRecords(category))
             }
             return result
         }
 
         @JvmStatic
-        fun visibleBuyableRecords(snapshot: WeaponStockSnapshot?): List<WeaponStockRecord> {
+        fun buyableRecords(snapshot: WeaponStockSnapshot?): List<WeaponStockRecord> {
             val result = ArrayList<WeaponStockRecord>()
             if (snapshot == null) {
                 return result
             }
             for (category in StockCategory.values()) {
-                addVisibleBuyableRecords(result, snapshot.getRecords(category))
+                addBuyableRecords(result, snapshot.getRecords(category))
             }
             return result
         }
 
         @JvmStatic
-        fun cheapestFirstVisibleBuyableRecords(snapshot: WeaponStockSnapshot?): List<WeaponStockRecord> {
-            val result = visibleBuyableRecords(snapshot)
+        fun filteredTradeableRecords(
+            snapshot: WeaponStockSnapshot?,
+            activeFilters: Set<StockReviewFilter>?,
+        ): List<WeaponStockRecord> = filteredRecords(tradeableRecords(snapshot), activeFilters)
+
+        @JvmStatic
+        fun cheapestFirstFilteredBuyableRecords(
+            snapshot: WeaponStockSnapshot?,
+            activeFilters: Set<StockReviewFilter>?,
+        ): List<WeaponStockRecord> {
+            val result = filteredRecords(buyableRecords(snapshot), activeFilters)
             return result.sortedWith(CheapestBuyRecordComparator(snapshot))
         }
 
@@ -148,7 +159,23 @@ class StockReviewTradePlanner private constructor() {
             return trade.isBuy() && trade.submarketId == null
         }
 
-        private fun addVisibleBuyableRecords(result: MutableList<WeaponStockRecord>, records: List<WeaponStockRecord>?) {
+        private fun filteredRecords(
+            records: List<WeaponStockRecord>,
+            activeFilters: Set<StockReviewFilter>?,
+        ): List<WeaponStockRecord> {
+            if (StockReviewFilters.count(activeFilters) <= 0) {
+                return records
+            }
+            val result = ArrayList<WeaponStockRecord>()
+            for (record in records) {
+                if (StockReviewFilters.matches(record, activeFilters)) {
+                    result.add(record)
+                }
+            }
+            return result
+        }
+
+        private fun addBuyableRecords(result: MutableList<WeaponStockRecord>, records: List<WeaponStockRecord>?) {
             if (records == null) {
                 return
             }
@@ -159,7 +186,7 @@ class StockReviewTradePlanner private constructor() {
             }
         }
 
-        private fun addVisibleTradeableRecords(result: MutableList<WeaponStockRecord>, records: List<WeaponStockRecord>?) {
+        private fun addTradeableRecords(result: MutableList<WeaponStockRecord>, records: List<WeaponStockRecord>?) {
             if (records == null) {
                 return
             }

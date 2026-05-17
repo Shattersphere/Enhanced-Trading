@@ -4,7 +4,7 @@ Last updated: 2026-05-18
 
 ## Current State
 
-Weapons Procurement is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market/storage dialogs.
+Weapons Procurement is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market dialogs or market-backed storage dialogs.
 
 The primary product path is the clean `F8` popup. The patched cargo-cell badge path is optional, advanced-use, and isolated from the clean popup.
 

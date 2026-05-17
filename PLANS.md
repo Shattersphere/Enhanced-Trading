@@ -4,7 +4,7 @@
 
 The repo is in release-prep shape for the clean popup path:
 
-- `F8` stock-review popup works from market/storage dialogs.
+- `F8` stock-review popup works from market dialogs and market-backed storage dialogs.
 - Optional dialog entry exists and defaults off.
 - Weapons and fighter LPCs share the same stock/review/trade flow.
 - Local, Sector Market, and Fixer's Market source modes exist.

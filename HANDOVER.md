@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Weapons Procurement is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market or storage dialogs.
+Weapons Procurement is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market dialogs or market-backed storage dialogs.
 
 The primary public path is the clean popup:
 
-- open a market/storage dialog;
+- open a market dialog or market-backed storage dialog;
 - press `F8`, or enable the optional market-dialog entry in LunaLib;
 - queue buys/sells;
 - review and confirm trades.

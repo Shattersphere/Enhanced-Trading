@@ -26,6 +26,7 @@ class StockReviewSourceTransitionController(
         fun updateTradeWarning(explicitWarning: String?)
         fun rebuildSnapshot()
         fun requestContentRebuild()
+        fun postMessage(message: String?)
     }
 
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
@@ -48,6 +49,11 @@ class StockReviewSourceTransitionController(
     }
 
     fun cycleSourceMode() {
+        if (!pendingTrades.isEmpty()) {
+            host.postMessage("Reset or confirm queued trades before changing source mode.")
+            host.requestContentRebuild()
+            return
+        }
         state.cycleSourceMode()
         pendingTrades.clear()
         localMarketIntent.clear()

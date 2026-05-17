@@ -73,14 +73,14 @@ class StockReviewHotkeyScript : EveryFrameScript {
             }
             val host = WimGuiCampaignDialogHost.current()
             if (!host.hasDialog()) {
-                host.addMessage("Weapon Stock Review requires an active market/storage dialog.")
+                host.addMessage("Weapon Stock Review requires an active market dialog or market-backed storage dialog.")
                 return
             }
 
             WeaponsProcurementConfig.refreshAndPublishSettings()
             val market = host.getCurrentMarket()
             if (!canOpenAtCurrentMarket(market)) {
-                host.addMessage("Weapon Stock Review requires an active market or storage dialog.")
+                host.addMessage("Weapon Stock Review requires an active market dialog or market-backed storage dialog.")
                 return
             }
             try {
