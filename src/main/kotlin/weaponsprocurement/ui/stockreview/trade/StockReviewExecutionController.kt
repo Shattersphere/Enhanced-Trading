@@ -158,6 +158,17 @@ class StockReviewExecutionController(
                 stockSources(trade.itemKey, trade.submarketId),
             )
         }
+        if (trade.submarketId != null) {
+            return purchaseService.buyItemFromLocalSource(
+                sector,
+                market,
+                record.itemType,
+                record.itemId,
+                trade.submarketId,
+                trade.quantity,
+                state.isIncludeBlackMarket(),
+            )
+        }
         return purchaseService.buyCheapestItem(
             sector,
             market,

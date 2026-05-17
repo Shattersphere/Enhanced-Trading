@@ -34,7 +34,7 @@ class StockReviewStyle private constructor() {
         const val FILTER_BUTTON_WIDTH = 108f
         const val COLOR_BUTTON_WIDTH = 82f
         const val BUTTON_GAP = 5f
-        const val STOCK_CELL_WIDTH = 156f
+        const val STOCK_CELL_WIDTH = 148f
         const val INVENTORY_CELL_WIDTH = 102f
         const val PLAN_CELL_WIDTH = 184f
         const val PRICE_CELL_WIDTH = 120f

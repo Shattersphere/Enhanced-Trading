@@ -68,7 +68,7 @@ class StockReviewReviewListModel private constructor() {
             if (!expanded) {
                 return
             }
-            if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup.SELLING == tradeGroup) {
+            if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup.BUYING == tradeGroup) {
                 addWorstCaseReviewRow(rows)
             }
             for (trade in groupTrades) {

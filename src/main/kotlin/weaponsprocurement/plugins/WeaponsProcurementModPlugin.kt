@@ -36,11 +36,13 @@ class WeaponsProcurementModPlugin : BaseModPlugin() {
         val rawClass = try {
             loadScriptClass(className)
         } catch (_: ClassNotFoundException) {
+            disableOptionalPrivateBadges()
             LOG.info("$logName optional private script not present")
             return
         }
 
         if (!EveryFrameScript::class.java.isAssignableFrom(rawClass)) {
+            disableOptionalPrivateBadges()
             LOG.warn("$logName optional private script does not implement EveryFrameScript: $className")
             return
         }
@@ -54,8 +56,14 @@ class WeaponsProcurementModPlugin : BaseModPlugin() {
             sector.addTransientScript(scriptClass.getDeclaredConstructor().newInstance())
             LOG.info("$logName registered")
         } catch (ex: Exception) {
+            disableOptionalPrivateBadges()
             LOG.warn("$logName optional private script registration failed", ex)
         }
+    }
+
+    private fun disableOptionalPrivateBadges() {
+        System.setProperty(KEY_PATCHED_BADGES_ENABLED, "false")
+        System.setProperty(KEY_BADGE_COUNTS_READY, "false")
     }
 
     @Throws(ClassNotFoundException::class)
@@ -82,5 +90,7 @@ class WeaponsProcurementModPlugin : BaseModPlugin() {
     companion object {
         private val LOG: Logger = Logger.getLogger(WeaponsProcurementModPlugin::class.java)
         private const val BADGE_UPDATER_CLASS = "weaponsprocurement.internal.WeaponsProcurementCountUpdater"
+        private const val KEY_PATCHED_BADGES_ENABLED = "wp.config.patchedBadgesEnabled"
+        private const val KEY_BADGE_COUNTS_READY = "wp.counts.ready"
     }
 }

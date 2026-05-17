@@ -4,9 +4,11 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
+import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketRebalancer
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
+import weaponsprocurement.stock.item.WeaponStockSnapshot
 class StockReviewUiController(
     private val state: StockReviewState,
     private val modes: StockReviewModeController,
@@ -15,6 +17,7 @@ class StockReviewUiController(
 ) {
     interface Host {
         fun currentMaxScrollOffset(): Int
+        fun snapshot(): WeaponStockSnapshot?
         fun updateTradeWarning(explicitWarning: String?)
         fun rebuildSnapshot()
         fun requestContentRebuild()
@@ -90,9 +93,20 @@ class StockReviewUiController(
                 host.requestContentRebuild()
                 return true
             }
+            val previousSnapshot = host.snapshot()
+            val previousTrades = ArrayList(pendingTrades.asList())
             state.toggleBlackMarket()
-            resetTradeStateForSourceChange()
+            clearSourceWarningAndReviewMode()
             host.rebuildSnapshot()
+            pendingTrades.replaceWith(
+                StockReviewLocalMarketRebalancer.rebalanceBlackMarketToggle(
+                    previousSnapshot,
+                    host.snapshot(),
+                    previousTrades,
+                    state.isIncludeBlackMarket(),
+                ),
+            )
+            StockReviewTradeWarnings.clear(state)
             host.requestContentRebuild()
             return true
         }
@@ -228,6 +242,10 @@ class StockReviewUiController(
 
     private fun resetTradeStateForSourceChange() {
         pendingTrades.clear()
+        clearSourceWarningAndReviewMode()
+    }
+
+    private fun clearSourceWarningAndReviewMode() {
         StockReviewTradeWarnings.clear(state)
         modes.setReviewMode(false)
     }

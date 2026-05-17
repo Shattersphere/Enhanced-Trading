@@ -36,7 +36,7 @@ class WeaponsProcurementBadgeHelper private constructor() {
             }
 
             if (id.isNullOrEmpty()) {
-                return TOTAL_ERR
+                return null
             }
 
             val playerCount = readCount(kind, id, true)
@@ -49,7 +49,7 @@ class WeaponsProcurementBadgeHelper private constructor() {
                     else -> TOTAL_ERR
                 }
             } else {
-                TOTAL_ERR
+                null
             }
         }
 

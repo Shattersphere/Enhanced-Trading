@@ -23,6 +23,18 @@ class StockPurchaseService {
         return buyItem(sector, market, itemType, itemId, null, requestedQuantity, includeBlackMarket)
     }
 
+    fun buyItemFromLocalSource(
+        sector: SectorAPI?,
+        market: MarketAPI?,
+        itemType: StockItemType,
+        itemId: String?,
+        sourceId: String?,
+        requestedQuantity: Int,
+        includeBlackMarket: Boolean,
+    ): PurchaseResult {
+        return buyItem(sector, market, itemType, itemId, localSubmarketId(sourceId), requestedQuantity, includeBlackMarket)
+    }
+
     fun sellItemToMarket(
         sector: SectorAPI?,
         market: MarketAPI?,
@@ -183,6 +195,13 @@ class StockPurchaseService {
         if (validation != null) return validation
 
         return StockPurchaseExecutor.buyPlan(LOG, cargo, checkedMarket, itemType, checkedItemId, plan, "", "buy from local market")
+    }
+
+    private fun localSubmarketId(sourceId: String?): String? {
+        if (sourceId.isNullOrEmpty()) return null
+        val separator = sourceId.lastIndexOf('|')
+        if (separator < 0 || separator >= sourceId.length - 1) return sourceId
+        return sourceId.substring(separator + 1)
     }
 
     class PurchaseResult private constructor(

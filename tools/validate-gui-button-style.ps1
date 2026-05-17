@@ -58,7 +58,7 @@ if ($styleText -notmatch "const val ROW_ICON_INDENT = ACTION_BUTTON_HEIGHT \+ BU
     $styleText -notmatch "const val WEAPON_INDENT = ROW_ICON_INDENT") {
     throw "Stock-review weapon indent must match the rendered row icon footprint."
 }
-if ($styleText -notmatch "const val STOCK_CELL_WIDTH = 156f" -or
+if ($styleText -notmatch "const val STOCK_CELL_WIDTH = 148f" -or
     $styleText -notmatch "const val REVIEW_STOCK_CELL_WIDTH = STOCK_CELL_WIDTH") {
     throw "Stock-review storage cells must be wide enough for the capped worst-case storage label in trade and review screens."
 }
@@ -76,6 +76,10 @@ if ($listModelText -notmatch "StockReviewStyle\.WEAPON_INDENT,\s*StockReviewRowI
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
 if ($reviewModelText -notmatch "StockReviewStyle\.WEAPON_INDENT,\s*StockReviewRowIcon\.item\(record\)") {
     throw "Review stock-review item rows must use the same icon-indent model as the main trade screen."
+}
+if ($reviewModelText -notmatch "SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup\.BUYING == tradeGroup" -or
+    $reviewModelText -notmatch "Storage: 99\+ \[-99\+\]") {
+    throw "Review stock-review worst-case debug row must be visible in the buying group and exercise capped storage labels."
 }
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
