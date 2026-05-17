@@ -340,6 +340,34 @@ function Remove-StaleStagingDirectories {
     return $removed
 }
 
+function Read-DeployState {
+    return Read-DeployStateFile -Path $stateFile
+}
+
+function Write-DeployState {
+    param(
+        [string]$RunId,
+        [int]$ProcessId,
+        [string]$StageRoot,
+        [string]$Phase
+    )
+    if (-not (Test-Path -LiteralPath $stateRoot)) {
+        New-Item -ItemType Directory -Force -Path $stateRoot | Out-Null
+    }
+    [pscustomobject]@{
+        RunId = $RunId
+        Pid = $ProcessId
+        DeployName = $deployName
+        DeployScopeHash = $deployScopeHash
+        ScriptPath = $PSCommandPath
+        RepoRoot = $repoRoot
+        DeployRoot = $deployRoot
+        StagingRoot = $StageRoot
+        Phase = $Phase
+        UpdatedAt = (Get-Date).ToString("o")
+    } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+}
+
 function Write-DeployQueueReport {
     param([object]$ContentReport)
 
@@ -355,7 +383,7 @@ function Write-DeployQueueReport {
     Write-Host "Deploy state file: $stateFile"
     Write-Host "Deploy status file: $deployStatusFile"
 
-    $state = Read-DeployState
+    $state = Read-DeployStateFile -Path $stateFile
     if ($null -eq $state) {
         Write-Host "Deploy queue state: none"
     } else {
@@ -416,34 +444,6 @@ function Publish-StagedDeploy {
         }
         Replace-DeployItem -Source $source -Target $target
     }
-}
-
-function Read-DeployState {
-    return Read-DeployStateFile -Path $stateFile
-}
-
-function Write-DeployState {
-    param(
-        [string]$RunId,
-        [int]$ProcessId,
-        [string]$StageRoot,
-        [string]$Phase
-    )
-    if (-not (Test-Path -LiteralPath $stateRoot)) {
-        New-Item -ItemType Directory -Force -Path $stateRoot | Out-Null
-    }
-    [pscustomobject]@{
-        RunId = $RunId
-        Pid = $ProcessId
-        DeployName = $deployName
-        DeployScopeHash = $deployScopeHash
-        ScriptPath = $PSCommandPath
-        RepoRoot = $repoRoot
-        DeployRoot = $deployRoot
-        StagingRoot = $StageRoot
-        Phase = $Phase
-        UpdatedAt = (Get-Date).ToString("o")
-    } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $stateFile -Encoding UTF8
 }
 
 function Stop-OlderQueuedDeployFromStateFile {
@@ -532,10 +532,13 @@ if ($CheckOnly -or $Status) {
 }
 
 trap {
-    if (-not ($CheckOnly -or $Status)) {
+    if ((-not ($CheckOnly -or $Status)) -and ![string]::IsNullOrWhiteSpace($deployStatusFile)) {
         Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "error" -Message $_.Exception.Message
     }
-    $state = Read-DeployState
+    $state = $null
+    if (![string]::IsNullOrWhiteSpace($stateFile)) {
+        $state = Read-DeployStateFile -Path $stateFile
+    }
     if ($null -ne $state -and $state.Pid -eq $PID) {
         $state.Phase = "failed"
         $state.UpdatedAt = (Get-Date).ToString("o")
