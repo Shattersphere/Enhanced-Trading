@@ -67,11 +67,13 @@ $stockReviewStockCategoryHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\
 $stockReviewTradeGroupHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeGroupHeadingRows.kt"
 $stockReviewFilterHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFilterHeadingRows.kt"
 $stockReviewItemDetailHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemDetailHeadingRows.kt"
+$stockReviewFilterRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFilterRows.kt"
+$stockReviewFilterGroupSectionsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFilterGroupSections.kt"
 $stockReviewLegacyHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewHeadingRows.kt"
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -127,6 +129,8 @@ $stockCategoryHeadingRowsText = Get-Content -LiteralPath $stockReviewStockCatego
 $tradeGroupHeadingRowsText = Get-Content -LiteralPath $stockReviewTradeGroupHeadingRowsPath -Raw
 $filterHeadingRowsText = Get-Content -LiteralPath $stockReviewFilterHeadingRowsPath -Raw
 $itemDetailHeadingRowsText = Get-Content -LiteralPath $stockReviewItemDetailHeadingRowsPath -Raw
+$filterRowsText = Get-Content -LiteralPath $stockReviewFilterRowsPath -Raw
+$filterGroupSectionsText = Get-Content -LiteralPath $stockReviewFilterGroupSectionsPath -Raw
 if ($itemTypeSectionsText -notmatch "class StockReviewItemTypeSection" -or
     $itemTypeSectionsText -notmatch "object StockReviewItemTypeSections" -or
     $itemTypeSectionsText -notmatch "StockReviewItemTypeSection\(StockItemType\.WEAPON, false\)" -or
@@ -175,6 +179,29 @@ if ($tradeGroupSectionsText -notmatch "class StockReviewTradeGroupSection" -or
     $reviewModelText -match "reviewTradesForGroup" -or
     $reviewModelText -match "StockReviewListSection\.builder") {
     throw "Stock-review review-group order, trade splitting, top gaps, headings, and debug-row policy must live in StockReviewTradeGroupSections."
+}
+$filterListModelText = Get-Content -LiteralPath (Join-Path $kotlinGuiDir "stockreview\state\StockReviewFilterListModel.kt") -Raw
+if ($filterRowsText -notmatch "object StockReviewFilterRows" -or
+    $filterRowsText -notmatch "fun addActive" -or
+    $filterRowsText -notmatch "fun available" -or
+    $filterRowsText -notmatch "StockReviewListRow\.filter" -or
+    $filterRowsText -notmatch "StockReviewTooltips\.filter" -or
+    $filterGroupSectionsText -notmatch "class StockReviewFilterGroupSection" -or
+    $filterGroupSectionsText -notmatch "object StockReviewFilterGroupSections" -or
+    $filterGroupSectionsText -notmatch "fun addGroups" -or
+    $filterGroupSectionsText -notmatch "fun shouldShow" -or
+    $filterGroupSectionsText -notmatch "StockSourceMode\.FIXERS" -or
+    $filterGroupSectionsText -notmatch "StockReviewFilters\.activeInGroup" -or
+    $filterGroupSectionsText -notmatch "StockReviewFilterHeadingRows\.filterGroup" -or
+    $filterGroupSectionsText -notmatch "StockReviewFilterRows\.available" -or
+    $filterListModelText -notmatch "StockReviewFilterRows\.addActive" -or
+    $filterListModelText -notmatch "StockReviewFilterGroupSections\.addGroups" -or
+    $filterListModelText -match "StockReviewListRow\.filter" -or
+    $filterListModelText -match "StockReviewFilterHeadingRows" -or
+    $filterListModelText -match "StockReviewTooltips" -or
+    $filterListModelText -match "StockSourceMode\.FIXERS" -or
+    $filterListModelText -match "activeInGroup") {
+    throw "Stock-review filter rows, group visibility, active rows, and available rows must route through StockReviewFilterRows and StockReviewFilterGroupSections."
 }
 $itemRowsText = Get-Content -LiteralPath $stockReviewItemRowsPath -Raw
 if ($itemRowsText -notmatch "\.indent\(layout\.itemIndent\)" -or

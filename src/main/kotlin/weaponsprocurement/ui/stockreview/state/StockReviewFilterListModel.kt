@@ -2,10 +2,8 @@ package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.rows.StockReviewFilterHeadingRows
-import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
-import weaponsprocurement.stock.item.StockSourceMode
+import weaponsprocurement.ui.stockreview.rows.StockReviewFilterGroupSections
+import weaponsprocurement.ui.stockreview.rows.StockReviewFilterRows
 import java.util.ArrayList
 
 class StockReviewFilterListModel private constructor() {
@@ -14,72 +12,9 @@ class StockReviewFilterListModel private constructor() {
         fun build(state: StockReviewState): List<WimGuiListRow<StockReviewAction>> {
             val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
             val active = state.getActiveFilters()
-            if (active.isNotEmpty()) {
-                for (filter in StockReviewFilter.values()) {
-                    if (active.contains(filter)) {
-                        rows.add(
-                            StockReviewListRow.filter(
-                                filter.label,
-                                true,
-                                StockReviewAction.toggleFilter(filter),
-                                false,
-                                StockReviewTooltips.filter(filter, true),
-                            ),
-                        )
-                    }
-                }
-            }
-            for (group in StockReviewFilterGroup.values()) {
-                if (!shouldShowGroup(state, group, active)) {
-                    continue
-                }
-                addGroup(rows, state, group, active.isNotEmpty() || group.ordinal > 0)
-            }
+            StockReviewFilterRows.addActive(rows, active)
+            StockReviewFilterGroupSections.addGroups(rows, state, active)
             return rows
-        }
-
-        private fun shouldShowGroup(
-            state: StockReviewState,
-            group: StockReviewFilterGroup,
-            activeFilters: Set<StockReviewFilter>,
-        ): Boolean {
-            if (group.weaponOnly) return true
-            if (StockSourceMode.FIXERS == state.getSourceMode()) return true
-            return StockReviewFilters.activeInGroup(activeFilters, group).isNotEmpty()
-        }
-
-        private fun addGroup(
-            rows: MutableList<WimGuiListRow<StockReviewAction>>,
-            state: StockReviewState,
-            group: StockReviewFilterGroup,
-            topGap: Boolean,
-        ) {
-            val expanded = state.isExpanded(group)
-            val activeInGroup = StockReviewFilters.activeInGroup(state.getActiveFilters(), group)
-            rows.add(
-                StockReviewFilterHeadingRows.filterGroup(group, activeInGroup.size, expanded, topGap),
-            )
-            if (!expanded) {
-                return
-            }
-            for (filter in StockReviewFilter.values()) {
-                if (group != filter.group) {
-                    continue
-                }
-                val active = state.isFilterActive(filter)
-                if (active) {
-                    continue
-                }
-                rows.add(
-                    StockReviewListRow.filter(
-                        filter.label,
-                        false,
-                        StockReviewAction.toggleFilter(filter),
-                        false,
-                        StockReviewTooltips.filter(filter, false),
-                    ),
-                )
-            }
         }
     }
 }
