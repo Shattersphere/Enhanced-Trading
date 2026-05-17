@@ -113,7 +113,7 @@ class StockReviewTradeContext(
 
     fun totalMarkupPaid(): Long = portfolioQuote.totalMarkupPaid()
 
-    fun averageBuyMultiplier(): Float = portfolioQuote.averageBuyMultiplier()
+    fun totalBuyCost(): Long = portfolioQuote.totalBuyCost()
 
     fun credits(): Float = creditsValue
 

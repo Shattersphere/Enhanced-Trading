@@ -41,10 +41,12 @@ if ($controlsText -notmatch "(Color|val) hover = .*colors(\?|\.)\.hover|val hove
 $stockReviewStylePath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewStyle.kt"
 $stockReviewListModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListModel.kt"
 $stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewReviewListModel.kt"
+$stockReviewItemRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemRows.kt"
+$stockReviewRowLayoutPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowLayout.kt"
 $stockReviewTradeCellsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeRowCells.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewItemRowsPath, $stockReviewRowLayoutPath, $stockReviewTradeCellsPath, $stockReviewTooltipPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -58,8 +60,10 @@ if ($styleText -notmatch "const val ROW_ICON_INDENT = ACTION_BUTTON_HEIGHT \+ BU
     $styleText -notmatch "const val WEAPON_INDENT = ROW_ICON_INDENT") {
     throw "Stock-review weapon indent must match the rendered row icon footprint."
 }
+$rowLayoutText = Get-Content -LiteralPath $stockReviewRowLayoutPath -Raw
 if ($styleText -notmatch "const val STOCK_CELL_WIDTH = 148f" -or
-    $styleText -notmatch "const val REVIEW_STOCK_CELL_WIDTH = STOCK_CELL_WIDTH") {
+    $rowLayoutText -notmatch "StockReviewStyle\.STOCK_CELL_WIDTH" -or
+    $rowLayoutText -notmatch "fun review\(\): StockReviewRowLayout") {
     throw "Stock-review storage cells must be wide enough for the capped worst-case storage label in trade and review screens."
 }
 
@@ -69,21 +73,25 @@ if (-not $listModelText.Contains('" [$typeLabel: $itemTypes, "') -or
     $listModelText.Contains('"Selling: ${maxOf(0, selling)} | "')) {
     throw "Stock-review category headings must use comma-separated type/selling/buying summaries."
 }
-if ($listModelText -notmatch "StockReviewStyle\.WEAPON_INDENT,\s*StockReviewRowIcon\.item\(record\)") {
+$itemRowsText = Get-Content -LiteralPath $stockReviewItemRowsPath -Raw
+if ($itemRowsText -notmatch "layout\.itemIndent,\s*StockReviewRowIcon\.item\(record\)" -or
+    $rowLayoutText -notmatch "StockReviewStyle\.WEAPON_INDENT") {
     throw "Main stock-review item rows must start at the category indent; the icon supplies the next visual indent."
 }
 
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
-if ($reviewModelText -notmatch "StockReviewStyle\.WEAPON_INDENT,\s*StockReviewRowIcon\.item\(record\)") {
+if ($itemRowsText -notmatch "layout\.itemIndent,\s*StockReviewRowIcon\.item\(record\)" -or
+    $rowLayoutText -notmatch "fun review\(\): StockReviewRowLayout") {
     throw "Review stock-review item rows must use the same icon-indent model as the main trade screen."
 }
 if ($reviewModelText -notmatch "SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup\.BUYING == tradeGroup" -or
-    $reviewModelText -notmatch "Storage: 99\+ \[-99\+\]") {
+    $reviewModelText -notmatch "StockReviewItemRows\.addWorstCaseRow\(rows, layout\)" -or
+    $rowLayoutText -notmatch "fun review\(\): StockReviewRowLayout") {
     throw "Review stock-review worst-case debug row must be visible in the buying group and exercise capped storage labels."
 }
 
 $tradeCellsText = Get-Content -LiteralPath $stockReviewTradeCellsPath -Raw
-if ($tradeCellsText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
+if ($itemRowsText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {
     throw "Stock-review worst-case weapon debug row label is missing."
 }
 if ($tradeCellsText -notmatch "Storage: 99\+ \[-99\+\]" -or
@@ -91,7 +99,8 @@ if ($tradeCellsText -notmatch "Storage: 99\+ \[-99\+\]" -or
     $tradeCellsText -notmatch "Selling: 99\+ \[999,999\+") {
     throw "Stock-review worst-case weapon debug row must exercise capped storage, price, and plan labels."
 }
-if ($tradeCellsText -notmatch "StockReviewStyle\.WEAPON_INDENT") {
+if ($itemRowsText -notmatch "layout\.itemIndent" -or
+    $rowLayoutText -notmatch "StockReviewStyle\.WEAPON_INDENT") {
     throw "Stock-review worst-case weapon debug row must use the same icon-indent model as real weapon rows."
 }
 

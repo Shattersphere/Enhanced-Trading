@@ -15,6 +15,7 @@ import weaponsprocurement.ui.stockreview.rows.StockReviewColorDebugRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewFooterRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
+import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
 import weaponsprocurement.ui.stockreview.rows.StockReviewReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewShipCatalogDebugRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewTradeSummaryRenderer
@@ -77,7 +78,7 @@ class StockReviewRenderer :
         )
         val result = renderRows(root, model.rows, state, model.listSpec, buttons)
         if (!filterMode && !colorDebugMode && !shipCatalogDebugMode) {
-            StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, reviewMode)
+            StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, model.rowLayout)
         }
         StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, reviewMode, filterMode, colorDebugMode, shipCatalogDebugMode, buttons)
         return result
@@ -117,6 +118,7 @@ class StockReviewRenderer :
         }
 
         val tradeContext = StockReviewTradeContext(snapshot, pendingTrades)
+        val rowLayout = StockReviewRowLayout.forReviewMode(reviewMode)
         val rows: List<WimGuiListRow<StockReviewAction>>
         val listSpec: WimGuiModalListSpec
         if (colorDebugMode) {
@@ -129,14 +131,14 @@ class StockReviewRenderer :
             rows = StockReviewFilterListModel.build(state)
             listSpec = StockReviewStyle.FILTER_LIST
         } else if (reviewMode) {
-            rows = StockReviewReviewListModel.build(snapshot, pendingTrades, state, tradeContext)
+            rows = StockReviewReviewListModel.build(snapshot, pendingTrades, state, tradeContext, rowLayout)
             listSpec = StockReviewStyle.REVIEW_LIST
         } else {
-            rows = StockReviewListModel.build(snapshot, state, tradeContext)
+            rows = StockReviewListModel.build(snapshot, state, tradeContext, rowLayout)
             listSpec = StockReviewStyle.TRADE_LIST
         }
 
-        val built = RenderModel(snapshot, key, tradeContext, rows, listSpec)
+        val built = RenderModel(snapshot, key, tradeContext, rowLayout, rows, listSpec)
         cachedModel = built
         return built
     }
@@ -339,6 +341,7 @@ class StockReviewRenderer :
         private val snapshot: WeaponStockSnapshot,
         private val key: RenderModelKey,
         val tradeContext: StockReviewTradeContext,
+        val rowLayout: StockReviewRowLayout,
         val rows: List<WimGuiListRow<StockReviewAction>>,
         val listSpec: WimGuiModalListSpec,
     ) {

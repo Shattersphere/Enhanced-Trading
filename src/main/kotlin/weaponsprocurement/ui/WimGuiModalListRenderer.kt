@@ -88,7 +88,6 @@ class WimGuiModalListRenderer private constructor() {
                 spec.actionHeight,
                 spec.rowHorizontalPad,
                 spec.buttonGap,
-                spec.textLeftPad,
                 spec.minLabelWidth,
                 spec.rowBorder,
                 buttons,

@@ -45,10 +45,7 @@ class StockReviewPortfolioQuote {
         return Math.max(0L, totalBuyCost - totalBaseBuyCost)
     }
 
-    fun averageBuyMultiplier(): Float {
-        if (totalBaseBuyCost <= 0) return 1f
-        return totalBuyCost.toFloat() / totalBaseBuyCost.toFloat()
-    }
+    fun totalBuyCost(): Long = if (priceUnavailable) 0L else totalBuyCost
 
     fun totalBuyQuantity(): Int = totalBuyQuantityValue
 

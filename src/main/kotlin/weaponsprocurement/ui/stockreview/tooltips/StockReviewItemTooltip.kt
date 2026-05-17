@@ -475,8 +475,7 @@ class StockReviewItemTooltip private constructor(
             val label = parent.createUIElement(labelWidth, height, false)
             label.setParaFontDefault()
             label.setParaFontColor(color)
-            val maxChars = WimGuiText.estimatedChars(labelWidth)
-            val line: LabelAPI = label.addPara(tooltipFormat(WimGuiText.fit(text, maxChars)), 0f, color)
+            val line: LabelAPI = label.addPara(tooltipFormat(WimGuiText.fitToWidth(text, label, labelWidth)), 0f, color)
             line.setAlignment(alignment)
             parent.addUIElement(label).inTL(labelX, y + WimGuiStyle.TEXT_TOP_PAD)
         }

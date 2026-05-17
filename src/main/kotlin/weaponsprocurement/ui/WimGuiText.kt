@@ -1,5 +1,6 @@
 package weaponsprocurement.ui
 
+import com.fs.starfarer.api.ui.TooltipMakerAPI
 import java.util.Locale
 
 object WimGuiText {
@@ -9,6 +10,19 @@ object WimGuiText {
 
     @JvmStatic
     fun fit(text: String?, maxVisibleChars: Int): String = truncateLineToFit(text ?: "", maxVisibleChars, 10)
+
+    @JvmStatic
+    fun fitToWidth(text: String?, element: TooltipMakerAPI, availableWidth: Float): String {
+        val normalized = text?.trim() ?: ""
+        if (normalized.isEmpty() || availableWidth <= 0f) {
+            return ""
+        }
+        return try {
+            truncateMeasuredLineToFit(normalized, maxOf(1f, availableWidth), element)
+        } catch (_: RuntimeException) {
+            fit(normalized, estimatedChars(availableWidth))
+        }
+    }
 
     @JvmStatic
     fun estimatedChars(width: Float): Int = estimatedChars(width, 0f, WimGuiStyle.TEXT_APPROX_CHAR_WIDTH)
@@ -285,6 +299,70 @@ object WimGuiText {
         }
         return join(kept) + " ..."
     }
+
+    private fun truncateMeasuredLineToFit(text: String, availableWidth: Float, element: TooltipMakerAPI): String {
+        if (fitsMeasured(text, availableWidth, element)) {
+            return text
+        }
+        val suffix = toggleSuffix(text)
+        if (suffix != null) {
+            val body = text.substring(0, text.length - suffix.length).trimEnd()
+            val suffixWidth = element.computeStringWidth(suffix)
+            val bodyWidth = availableWidth - suffixWidth
+            if (bodyWidth > element.computeStringWidth("...")) {
+                val fittedBody = truncateMeasuredPrefix(body, bodyWidth, element)
+                val candidate = "$fittedBody$suffix"
+                if (fitsMeasured(candidate, availableWidth, element)) {
+                    return candidate
+                }
+            }
+        }
+        return truncateMeasuredPrefix(text, availableWidth, element)
+    }
+
+    private fun truncateMeasuredPrefix(text: String, availableWidth: Float, element: TooltipMakerAPI): String {
+        val ellipsis = "..."
+        if (text.isEmpty() || availableWidth <= 0f) {
+            return ""
+        }
+        if (fitsMeasured(ellipsis, availableWidth, element)) {
+            var low = 0
+            var high = text.length
+            while (low < high) {
+                val mid = (low + high + 1) / 2
+                val candidate = text.substring(0, mid).trimEnd() + ellipsis
+                if (fitsMeasured(candidate, availableWidth, element)) {
+                    low = mid
+                } else {
+                    high = mid - 1
+                }
+            }
+            return if (low <= 0) ellipsis else text.substring(0, low).trimEnd() + ellipsis
+        }
+
+        var low = 0
+        var high = text.length
+        while (low < high) {
+            val mid = (low + high + 1) / 2
+            val candidate = text.substring(0, mid)
+            if (fitsMeasured(candidate, availableWidth, element)) {
+                low = mid
+            } else {
+                high = mid - 1
+            }
+        }
+        return text.substring(0, maxOf(0, low))
+    }
+
+    private fun fitsMeasured(text: String, availableWidth: Float, element: TooltipMakerAPI): Boolean =
+        element.computeStringWidth(text) <= availableWidth + 0.5f
+
+    private fun toggleSuffix(text: String): String? =
+        when {
+            text.endsWith(" (+)") -> " (+)"
+            text.endsWith(" (-)") -> " (-)"
+            else -> null
+        }
 
     private fun nonBlankWords(text: String?): List<String> {
         if (text == null || text.trim().isEmpty()) {

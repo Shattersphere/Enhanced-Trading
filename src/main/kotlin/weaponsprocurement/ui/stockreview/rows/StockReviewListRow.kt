@@ -199,7 +199,28 @@ object StockReviewListRow {
         indent: Float,
         topGap: Boolean,
     ): WimGuiListRow<StockReviewAction> =
-        labelTextIndented(label, value, indent, topGap, StockReviewStyle.TRADE_ROW_RIGHT_BLOCK_WIDTH)
+        labelTextIndented(label, value, StockReviewRowLayout.trade(), indent, topGap)
+
+    @JvmStatic
+    fun labelTextIndented(
+        label: String?,
+        value: String?,
+        layout: StockReviewRowLayout,
+        indent: Float,
+        topGap: Boolean,
+    ): WimGuiListRow<StockReviewAction> =
+        labelTextIndented(label, value, layout, indent, topGap, null)
+
+    @JvmStatic
+    fun labelTextIndented(
+        label: String?,
+        value: String?,
+        layout: StockReviewRowLayout,
+        indent: Float,
+        topGap: Boolean,
+        tooltip: String?,
+    ): WimGuiListRow<StockReviewAction> =
+        labelTextIndented(label, value, indent, topGap, layout.detailRightReserveWidth, layout.listWidth, tooltip)
 
     @JvmStatic
     fun labelTextIndented(

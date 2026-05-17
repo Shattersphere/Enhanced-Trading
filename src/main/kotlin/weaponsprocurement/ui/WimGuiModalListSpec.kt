@@ -13,7 +13,6 @@ class WimGuiModalListSpec(
     @JvmField val rowGap: Float,
     @JvmField val rowHorizontalPad: Float,
     @JvmField val buttonGap: Float,
-    @JvmField val textLeftPad: Float,
     @JvmField val minLabelWidth: Float,
     @JvmField val panelFill: Color,
     @JvmField val panelBorder: Color,

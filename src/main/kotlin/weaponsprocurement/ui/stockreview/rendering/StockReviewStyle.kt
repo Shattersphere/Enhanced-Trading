@@ -42,9 +42,6 @@ class StockReviewStyle private constructor() {
         const val SUFFICIENT_BUTTON_WIDTH = 82f
         const val RESET_BUTTON_WIDTH = 58f
         const val TRADE_CONTROL_BLOCK_WIDTH = 4f * TRADE_STEP_BUTTON_WIDTH + SUFFICIENT_BUTTON_WIDTH + RESET_BUTTON_WIDTH + 5f * BUTTON_GAP
-        const val TRADE_ROW_RIGHT_BLOCK_WIDTH = STOCK_CELL_WIDTH + PRICE_CELL_WIDTH + PLAN_CELL_WIDTH + TRADE_CONTROL_BLOCK_WIDTH + 3f * BUTTON_GAP
-        const val REVIEW_STOCK_CELL_WIDTH = STOCK_CELL_WIDTH
-        const val REVIEW_ROW_RIGHT_BLOCK_WIDTH = REVIEW_STOCK_CELL_WIDTH + PLAN_CELL_WIDTH + BUTTON_GAP
         @JvmField var REVIEW_WIDTH = compactWidth(REVIEW_TARGET_WIDTH)
         @JvmField var REVIEW_HEIGHT = compactHeight(REVIEW_TARGET_HEIGHT)
         @JvmField var FILTER_WIDTH = compactWidth(FILTER_TARGET_WIDTH)
@@ -246,7 +243,6 @@ class StockReviewStyle private constructor() {
             ROW_GAP,
             SMALL_PAD,
             BUTTON_GAP,
-            TEXT_LEFT_PAD,
             80f,
             PANEL_BACKGROUND,
             PANEL_BORDER,

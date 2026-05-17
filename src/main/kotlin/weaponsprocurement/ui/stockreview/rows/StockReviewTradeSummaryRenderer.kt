@@ -16,11 +16,11 @@ import kotlin.math.roundToInt
 class StockReviewTradeSummaryRenderer private constructor() {
     companion object {
         @JvmStatic
-        fun render(root: CustomPanelAPI, tradeContext: StockReviewTradeContext, state: StockReviewState?, reviewMode: Boolean) {
+        fun render(root: CustomPanelAPI, tradeContext: StockReviewTradeContext, state: StockReviewState?, layout: StockReviewRowLayout) {
             val netCost = tradeContext.totalCost()
             val cargoDelta = tradeContext.totalCargoSpaceDelta()
-            val width = if (reviewMode) StockReviewStyle.REVIEW_LIST_WIDTH else StockReviewStyle.LIST_WIDTH
-            var rowY = StockReviewStyle.summaryTop(reviewMode)
+            val width = layout.listWidth
+            var rowY = StockReviewStyle.summaryTop(StockReviewRowMode.REVIEW == layout.mode)
             val warning = state?.getTradeWarning() ?: "None"
             addSummaryRow(root, width, rowY, "Warning", warning, if (warning == "None") StockReviewStyle.CELL_BACKGROUND else StockReviewStyle.PRESET_SCOPE_BUTTON, "Most recent trade warning for credits or cargo capacity.")
             rowY += StockReviewStyle.ROW_HEIGHT + StockReviewStyle.SUMMARY_ROW_GAP
@@ -75,11 +75,13 @@ class StockReviewTradeSummaryRenderer private constructor() {
 
         private fun tariffsPaidLabel(tradeContext: StockReviewTradeContext): String {
             val markup = tradeContext.totalMarkupPaid()
-            val multiplier = tradeContext.averageBuyMultiplier()
-            if (markup <= 0) {
-                return "${StockReviewFormat.credits(0)} [avg 1.0x]"
+            val totalBuyCost = tradeContext.totalBuyCost()
+            val percent = if (markup <= 0 || totalBuyCost <= 0) {
+                0
+            } else {
+                Math.round(markup.toDouble() * 100.0 / totalBuyCost.toDouble()).toInt()
             }
-            return "${StockReviewFormat.credits(markup)} [avg ${String.format(Locale.US, "%.1fx", multiplier)}]"
+            return "${StockReviewFormat.credits(markup)} [$percent%]"
         }
 
         private fun signedCredits(delta: Long): String = (if (delta >= 0) "+" else "-") + StockReviewFormat.credits(delta)

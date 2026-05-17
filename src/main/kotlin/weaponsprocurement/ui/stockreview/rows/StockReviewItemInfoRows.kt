@@ -12,15 +12,17 @@ import java.util.Locale
 object StockReviewItemInfoRows {
     @JvmStatic
     fun add(rows: MutableList<WimGuiListRow<StockReviewAction>>, record: WeaponStockRecord, state: StockReviewState?) {
-        add(
-            rows,
-            record,
-            state,
-            StockReviewStyle.TRADE_ROW_RIGHT_BLOCK_WIDTH,
-            StockReviewStyle.LIST_WIDTH,
-            StockReviewStyle.DETAIL_INDENT,
-            StockReviewStyle.DATA_INDENT,
-        )
+        add(rows, record, state, StockReviewRowLayout.trade())
+    }
+
+    @JvmStatic
+    fun add(
+        rows: MutableList<WimGuiListRow<StockReviewAction>>,
+        record: WeaponStockRecord,
+        state: StockReviewState?,
+        layout: StockReviewRowLayout,
+    ) {
+        add(rows, record, state, layout.rightBlockWidth, layout.listWidth, layout.infoIndent, layout.dataIndent)
     }
 
     @JvmStatic

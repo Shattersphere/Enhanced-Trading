@@ -17,7 +17,6 @@ class WimGuiListRowRenderer private constructor() {
             actionHeight: Float,
             horizontalPad: Float,
             buttonGap: Float,
-            textLeftPad: Float,
             minLabelWidth: Float,
             defaultBorder: Color,
             buttons: MutableList<WimGuiButtonBinding<A>>,
@@ -35,7 +34,7 @@ class WimGuiListRowRenderer private constructor() {
             val cellBlockWidth = WimGuiRowCell.totalWidth(row.getCells(), cellGap)
             val reservedBlockWidth = Math.max(cellBlockWidth, row.rightReserveWidth())
             val labelLeft = row.getIndent()
-            val labelWidth = Math.max(minLabelWidth, width - labelLeft - reservedBlockWidth - textLeftPad)
+            val labelWidth = Math.max(minLabelWidth, width - labelLeft - reservedBlockWidth)
             if (row.getMainAction() != null) {
                 addMainAction(rowPanel, row, labelLeft, labelWidth, actionHeight, buttonGap, defaultBorder, buttons)
             } else {
@@ -67,9 +66,10 @@ class WimGuiListRowRenderer private constructor() {
             val icon = row.getIcon()
             if (icon != null) {
                 val iconSize = actionHeight
+                val iconSlotWidth = iconSize + buttonGap
                 addRowIcon(rowPanel, icon, labelLeft, 0f, iconSize)
-                buttonLeft += iconSize + buttonGap
-                buttonWidth = Math.max(8f, labelWidth - iconSize - buttonGap)
+                buttonLeft += iconSlotWidth
+                buttonWidth = Math.max(8f, labelWidth - iconSlotWidth)
             }
             WimGuiControls.addBoundButton(
                 rowPanel,

@@ -1,14 +1,12 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewFilter
 import weaponsprocurement.ui.stockreview.state.StockReviewFilters
 import weaponsprocurement.ui.stockreview.state.StockReviewState
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewItemTooltip
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.stock.item.StockCategory
@@ -25,6 +23,14 @@ object StockReviewListModel {
         snapshot: WeaponStockSnapshot?,
         state: StockReviewState?,
         tradeContext: StockReviewTradeContext,
+    ): List<WimGuiListRow<StockReviewAction>> = build(snapshot, state, tradeContext, StockReviewRowLayout.trade())
+
+    @JvmStatic
+    fun build(
+        snapshot: WeaponStockSnapshot?,
+        state: StockReviewState?,
+        tradeContext: StockReviewTradeContext,
+        layout: StockReviewRowLayout,
     ): List<WimGuiListRow<StockReviewAction>> {
         val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
         if (state == null) {
@@ -32,8 +38,8 @@ object StockReviewListModel {
             return rows
         }
         var displayed = 0
-        displayed += addItemType(rows, snapshot, state, tradeContext, StockItemType.WEAPON, false)
-        displayed += addItemType(rows, snapshot, state, tradeContext, StockItemType.WING, true)
+        displayed += addItemType(rows, snapshot, state, tradeContext, layout, StockItemType.WEAPON, false)
+        displayed += addItemType(rows, snapshot, state, tradeContext, layout, StockItemType.WING, true)
         if (displayed == 0) {
             rows.add(StockReviewListRow.empty(emptyStateMessage(snapshot, state)))
         }
@@ -59,6 +65,7 @@ object StockReviewListModel {
         snapshot: WeaponStockSnapshot?,
         state: StockReviewState,
         tradeContext: StockReviewTradeContext,
+        layout: StockReviewRowLayout,
         itemType: StockItemType,
         topGap: Boolean,
     ): Int {
@@ -76,9 +83,9 @@ object StockReviewListModel {
             return count
         }
         var displayed = 0
-        displayed += addCategory(rows, snapshot, state, tradeContext, itemType, StockCategory.NO_STOCK, StockReviewStyle.NO_STOCK, false)
-        displayed += addCategory(rows, snapshot, state, tradeContext, itemType, StockCategory.INSUFFICIENT, StockReviewStyle.INSUFFICIENT, true)
-        displayed += addCategory(rows, snapshot, state, tradeContext, itemType, StockCategory.SUFFICIENT, StockReviewStyle.SUFFICIENT, true)
+        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.NO_STOCK, StockReviewStyle.NO_STOCK, false)
+        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.INSUFFICIENT, StockReviewStyle.INSUFFICIENT, true)
+        displayed += addCategory(rows, snapshot, state, tradeContext, layout, itemType, StockCategory.SUFFICIENT, StockReviewStyle.SUFFICIENT, true)
         return displayed
     }
 
@@ -87,6 +94,7 @@ object StockReviewListModel {
         snapshot: WeaponStockSnapshot?,
         state: StockReviewState,
         tradeContext: StockReviewTradeContext,
+        layout: StockReviewRowLayout,
         itemType: StockItemType,
         category: StockCategory,
         color: Color,
@@ -109,107 +117,12 @@ object StockReviewListModel {
             return records.size
         }
         if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && StockItemType.WEAPON == itemType && StockCategory.NO_STOCK == category) {
-            addWorstCaseTestRow(rows)
+            StockReviewItemRows.addWorstCaseRow(rows, layout)
         }
         for (record in records) {
-            addWeapon(rows, record, state, tradeContext)
+            StockReviewItemRows.addTradeRow(rows, record, state, tradeContext, layout)
         }
         return records.size
-    }
-
-    private fun addWeapon(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        record: WeaponStockRecord,
-        state: StockReviewState,
-        tradeContext: StockReviewTradeContext,
-    ) {
-        val expanded = state.isItemExpanded(record.itemKey)
-        val label = WimGuiToggleHeading.label(record.displayNameWithFixerMarker, expanded)
-        val planQuantity = tradeContext.netQuantityForItem(record.itemKey)
-        val sellRemaining = tradeContext.negativeAdjustmentRemaining(record, Int.MAX_VALUE)
-        val transactionCost = tradeContext.transactionCostForItem(record.itemKey)
-        val buyStepQuantity = tradeContext.positiveAdjustmentRemaining(record, 10)
-        val sellStepQuantity = minOf(10, sellRemaining)
-        val sufficientDelta = tradeContext.deltaToSufficient(record)
-        val cells = WimGuiRowCell.of(
-            StockReviewTradeRowCells.storage(record.storageCount, planQuantity, StockReviewStyle.STOCK_CELL_WIDTH),
-            StockReviewTradeRowCells.unitPrice(tradeContext.unitPriceForItem(record)),
-            StockReviewTradeRowCells.plan(planQuantity, transactionCost),
-            StockReviewTradeRowCells.step(
-                "-",
-                sellStepQuantity,
-                StockReviewStyle.SELL_BUTTON,
-                StockReviewAction.adjustPlan(record.itemKey, -sellStepQuantity),
-                StockReviewTooltips.decreasePlan(sellStepQuantity),
-            ),
-            WimGuiRowCell.standardAction(
-                "-1",
-                StockReviewStyle.TRADE_STEP_BUTTON_WIDTH,
-                StockReviewStyle.SELL_BUTTON,
-                StockReviewAction.adjustPlan(record.itemKey, -1),
-                sellRemaining >= 1,
-                StockReviewTooltips.decreasePlan(1),
-            ),
-            WimGuiRowCell.standardAction(
-                "+1",
-                StockReviewStyle.TRADE_STEP_BUTTON_WIDTH,
-                StockReviewStyle.BUY_BUTTON,
-                StockReviewAction.adjustPlan(record.itemKey, 1),
-                tradeContext.positiveAdjustmentRemaining(record, 1) >= 1,
-                StockReviewTooltips.increasePlan(1),
-            ),
-            StockReviewTradeRowCells.step(
-                "+",
-                buyStepQuantity,
-                StockReviewStyle.BUY_BUTTON,
-                StockReviewAction.adjustPlan(record.itemKey, buyStepQuantity),
-                StockReviewTooltips.increasePlan(buyStepQuantity),
-            ),
-            WimGuiRowCell.standardAction(
-                "Sufficient",
-                StockReviewStyle.SUFFICIENT_BUTTON_WIDTH,
-                if (sufficientDelta < 0) StockReviewStyle.SELL_BUTTON else StockReviewStyle.BUY_BUTTON,
-                StockReviewAction.adjustToSufficient(record.itemKey, sufficientDelta),
-                sufficientDelta != 0,
-                StockReviewTooltips.sufficient(record),
-            ),
-            WimGuiRowCell.standardAction(
-                "Reset",
-                StockReviewStyle.RESET_BUTTON_WIDTH,
-                StockReviewStyle.ACTION_BACKGROUND,
-                StockReviewAction.resetPlan(record.itemKey),
-                planQuantity != 0,
-                StockReviewTooltips.resetPlan(),
-            ),
-        )
-        val itemTooltip = StockReviewTooltips.itemDataToggle(record)
-        rows.add(
-            StockReviewListRow.item(
-                label,
-                cells,
-                StockReviewAction.toggleItem(record.itemKey),
-                itemTooltip,
-                StockReviewItemTooltip.forRecord(record, itemTooltip),
-                StockReviewStyle.WEAPON_INDENT,
-                StockReviewRowIcon.item(record),
-            ),
-        )
-        if (!expanded) {
-            return
-        }
-        StockReviewItemInfoRows.add(
-            rows,
-            record,
-            state,
-            StockReviewStyle.TRADE_ROW_RIGHT_BLOCK_WIDTH,
-            StockReviewStyle.LIST_WIDTH,
-            StockReviewStyle.DETAIL_INDENT,
-            StockReviewStyle.DATA_INDENT,
-        )
-    }
-
-    private fun addWorstCaseTestRow(rows: MutableList<WimGuiListRow<StockReviewAction>>) {
-        StockReviewTradeRowCells.addWorstCaseTradeRow(rows)
     }
 
     private fun filteredRecords(

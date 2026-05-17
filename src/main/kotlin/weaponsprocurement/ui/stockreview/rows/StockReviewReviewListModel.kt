@@ -1,20 +1,13 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
-import weaponsprocurement.ui.WimGuiRowCell
 import weaponsprocurement.ui.WimGuiToggleHeading
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewItemTooltip
-import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
-import weaponsprocurement.ui.stockreview.trade.StockReviewSellerAllocation
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
-import com.fs.starfarer.api.ui.Alignment
-import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
 import java.util.ArrayList
@@ -28,6 +21,15 @@ class StockReviewReviewListModel private constructor() {
             pendingTrades: List<StockReviewPendingTrade>?,
             state: StockReviewState,
             tradeContext: StockReviewTradeContext,
+        ): List<WimGuiListRow<StockReviewAction>> = build(snapshot, pendingTrades, state, tradeContext, StockReviewRowLayout.review())
+
+        @JvmStatic
+        fun build(
+            snapshot: WeaponStockSnapshot,
+            pendingTrades: List<StockReviewPendingTrade>?,
+            state: StockReviewState,
+            tradeContext: StockReviewTradeContext,
+            layout: StockReviewRowLayout,
         ): List<WimGuiListRow<StockReviewAction>> {
             val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
             if (pendingTrades.isNullOrEmpty()) {
@@ -40,8 +42,8 @@ class StockReviewReviewListModel private constructor() {
                 rows.add(StockReviewListRow.empty("No trades are planned."))
                 return rows
             }
-            addReviewGroup(rows, snapshot, buying, state, tradeContext, StockReviewTradeGroup.BUYING)
-            addReviewGroup(rows, snapshot, selling, state, tradeContext, StockReviewTradeGroup.SELLING)
+            addReviewGroup(rows, snapshot, buying, state, tradeContext, layout, StockReviewTradeGroup.BUYING)
+            addReviewGroup(rows, snapshot, selling, state, tradeContext, layout, StockReviewTradeGroup.SELLING)
             return rows
         }
 
@@ -51,6 +53,7 @@ class StockReviewReviewListModel private constructor() {
             groupTrades: List<StockReviewPendingTrade>,
             state: StockReviewState,
             tradeContext: StockReviewTradeContext,
+            layout: StockReviewRowLayout,
             tradeGroup: StockReviewTradeGroup,
         ) {
             val expanded = state.isExpanded(tradeGroup)
@@ -69,112 +72,11 @@ class StockReviewReviewListModel private constructor() {
                 return
             }
             if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && StockReviewTradeGroup.BUYING == tradeGroup) {
-                addWorstCaseReviewRow(rows)
+                StockReviewItemRows.addWorstCaseRow(rows, layout)
             }
             for (trade in groupTrades) {
-                addReviewTrade(rows, snapshot, trade, state, tradeContext)
+                StockReviewItemRows.addReviewRow(rows, snapshot, trade, state, tradeContext, layout)
             }
-        }
-
-        private fun addReviewTrade(
-            rows: MutableList<WimGuiListRow<StockReviewAction>>,
-            snapshot: WeaponStockSnapshot,
-            trade: StockReviewPendingTrade,
-            state: StockReviewState,
-            tradeContext: StockReviewTradeContext,
-        ) {
-            val record: WeaponStockRecord? = snapshot.getRecord(trade.itemKey)
-            if (record == null) {
-                rows.add(StockReviewListRow.review(trade.itemKey))
-                return
-            }
-            val expanded = state.isItemExpanded(record.itemKey)
-            val cost = tradeContext.transactionCostForLine(trade.itemKey, trade.submarketId)
-            val cells = WimGuiRowCell.of(
-                StockReviewTradeRowCells.storage(record.storageCount, trade.quantity, StockReviewStyle.REVIEW_STOCK_CELL_WIDTH),
-                StockReviewTradeRowCells.plan(trade.quantity, cost),
-            )
-            val itemTooltip = StockReviewTooltips.itemDataToggle(record)
-            rows.add(
-                StockReviewListRow.item(
-                    WimGuiToggleHeading.label(record.displayNameWithFixerMarker, expanded),
-                    cells,
-                    StockReviewAction.toggleItem(record.itemKey),
-                    itemTooltip,
-                    StockReviewItemTooltip.forRecord(record, itemTooltip),
-                    StockReviewStyle.WEAPON_INDENT,
-                    StockReviewRowIcon.item(record),
-                ),
-            )
-            if (!expanded) {
-                return
-            }
-            StockReviewItemInfoRows.add(
-                rows,
-                record,
-                state,
-                StockReviewStyle.REVIEW_ROW_RIGHT_BLOCK_WIDTH,
-                StockReviewStyle.REVIEW_LIST_WIDTH,
-                StockReviewStyle.DETAIL_INDENT,
-                StockReviewStyle.DATA_INDENT,
-            )
-            if (trade.isBuy()) {
-                addSourceAllocationRows(rows, tradeContext.sellerAllocations(trade))
-            }
-        }
-
-        private fun addSourceAllocationRows(
-            rows: MutableList<WimGuiListRow<StockReviewAction>>,
-            allocations: List<StockReviewSellerAllocation>,
-        ) {
-            if (allocations.isEmpty()) {
-                rows.add(
-                    StockReviewListRow.labelTextIndented(
-                        "Purchase Source",
-                        "Unavailable",
-                        StockReviewStyle.DATA_INDENT,
-                        true,
-                        StockReviewStyle.REVIEW_ROW_RIGHT_BLOCK_WIDTH,
-                        StockReviewStyle.REVIEW_LIST_WIDTH,
-                    ),
-                )
-                return
-            }
-            for (i in allocations.indices) {
-                val allocation = allocations[i]
-                rows.add(
-                    StockReviewListRow.labelTextIndented(
-                        sourceLabel(allocation),
-                        allocationSummary(allocation),
-                        StockReviewStyle.DATA_INDENT,
-                        i == 0,
-                        StockReviewStyle.REVIEW_ROW_RIGHT_BLOCK_WIDTH,
-                        StockReviewStyle.REVIEW_LIST_WIDTH,
-                    ),
-                )
-            }
-        }
-
-        private fun sourceLabel(allocation: StockReviewSellerAllocation): String =
-            if (allocation.submarketName.isNullOrEmpty()) "Purchase Source" else allocation.submarketName
-
-        private fun allocationSummary(allocation: StockReviewSellerAllocation): String =
-            allocation.quantity.toString() + " / " + StockReviewFormat.credits(allocation.cost)
-
-        private fun addWorstCaseReviewRow(rows: MutableList<WimGuiListRow<StockReviewAction>>) {
-            val cells = WimGuiRowCell.of(
-                WimGuiRowCell.info<StockReviewAction>("Storage: 99+ [-99+]", StockReviewStyle.REVIEW_STOCK_CELL_WIDTH, StockReviewStyle.CELL_BACKGROUND, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.STORAGE),
-                WimGuiRowCell.info<StockReviewAction>("Selling: 99+ [999,999+\u00a2]", StockReviewStyle.PLAN_CELL_WIDTH, StockReviewStyle.PLAN_NEGATIVE, StockReviewStyle.TEXT, Alignment.LMID, StockReviewTooltips.PLAN),
-            )
-            rows.add(
-                StockReviewListRow.item(
-                    "Suzuki-Clapteryon Thermal Prokector... (+)",
-                    cells,
-                    StockReviewAction.debugNoop(),
-                    "Worst-case review-row width test sample. It does not affect trades.",
-                    StockReviewStyle.WEAPON_INDENT,
-                ),
-            )
         }
 
         private fun reviewTradesForGroup(
