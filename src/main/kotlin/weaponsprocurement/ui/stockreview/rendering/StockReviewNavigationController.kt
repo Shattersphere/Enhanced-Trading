@@ -1,0 +1,73 @@
+package weaponsprocurement.ui.stockreview.rendering
+
+import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
+import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
+import weaponsprocurement.ui.stockreview.state.StockReviewModeController
+import weaponsprocurement.ui.stockreview.state.StockReviewState
+import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
+import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
+
+class StockReviewNavigationController(
+    private val state: StockReviewState,
+    private val modes: StockReviewModeController,
+    private val pendingTrades: StockReviewPendingTrades,
+    private val host: Host,
+) {
+    interface Host {
+        fun requestContentRebuild()
+        fun reopen(review: Boolean)
+        fun requestClose()
+    }
+
+    private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
+        StockReviewActionHandlerGroup.one("review screen", Type.REVIEW_PURCHASE) {
+            openReviewIfNeeded()
+        },
+        StockReviewActionHandlerGroup.one("back navigation", Type.GO_BACK) {
+            goBack()
+        },
+    )
+
+    fun handle(action: StockReviewAction?): Boolean = dispatcher.handle(action)
+
+    fun closeRequested() {
+        if (leaveTransientMode()) {
+            return
+        }
+        if (modes.isReviewMode()) {
+            state.setListScrollOffset(0)
+            host.reopen(false)
+            return
+        }
+        host.requestClose()
+    }
+
+    private fun openReviewIfNeeded() {
+        if (pendingTrades.isEmpty()) {
+            return
+        }
+        state.setListScrollOffset(0)
+        state.setExpanded(StockReviewTradeGroup.BUYING, true)
+        state.setExpanded(StockReviewTradeGroup.SELLING, true)
+        host.reopen(true)
+    }
+
+    private fun goBack() {
+        if (leaveTransientMode()) {
+            return
+        }
+        state.setListScrollOffset(0)
+        host.reopen(false)
+    }
+
+    private fun leaveTransientMode(): Boolean {
+        if (!modes.leaveTransientMode(state)) {
+            return false
+        }
+        host.requestContentRebuild()
+        return true
+    }
+}

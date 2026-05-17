@@ -14,26 +14,25 @@ class StockReviewUiController(
     private val localMarketIntent: StockReviewLocalMarketIntent,
     private val host: Host,
 ) {
+    private val rowExpansion = StockReviewRowExpansionController(state, host)
     private val sourceTransitions = StockReviewSourceTransitionController(state, modes, pendingTrades, localMarketIntent, host)
-    private val actionDispatcher = StockReviewUiActionDispatcher(state, modes, pendingTrades, sourceTransitions, host)
+    private val scroll = StockReviewScrollController(state, host)
+    private val filters = StockReviewFilterActionController(state, modes, host)
+    private val debugMode = StockReviewDebugModeController(state, modes, host)
+    private val navigation = StockReviewNavigationController(state, modes, pendingTrades, host)
+    private val actionDispatcher = StockReviewUiActionDispatcher(rowExpansion, sourceTransitions, scroll, filters, debugMode, navigation)
 
-    interface Host : StockReviewSourceTransitionController.Host {
-        fun currentMaxScrollOffset(): Int
-        fun reopen(review: Boolean)
-        fun requestClose()
+    interface Host :
+        StockReviewRowExpansionController.Host,
+        StockReviewSourceTransitionController.Host,
+        StockReviewScrollController.Host,
+        StockReviewFilterActionController.Host,
+        StockReviewDebugModeController.Host,
+        StockReviewNavigationController.Host {
     }
 
     fun handleCloseRequested() {
-        if (modes.leaveTransientMode(state)) {
-            host.requestContentRebuild()
-            return
-        }
-        if (modes.isReviewMode()) {
-            state.setListScrollOffset(0)
-            host.reopen(false)
-            return
-        }
-        host.requestClose()
+        navigation.closeRequested()
     }
 
     fun handle(action: StockReviewAction?): Boolean = actionDispatcher.handle(action)
