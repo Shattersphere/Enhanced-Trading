@@ -107,6 +107,7 @@ class StockReviewPanelPlugin(
 
     override fun onRebuildFailed(t: Throwable) {
         LOG.error("WP_STOCK_REVIEW rebuild failed", t)
+        reportMessage("Weapon Stock Review failed to render. Check starsector.log.")
     }
 
     override fun handle(action: StockReviewAction) {

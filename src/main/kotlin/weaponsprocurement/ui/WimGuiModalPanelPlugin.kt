@@ -17,6 +17,7 @@ abstract class WimGuiModalPanelPlugin<A>(
     private var root: CustomPanelAPI? = null
     private var callbacks: CustomVisualDialogDelegate.DialogCallbacks? = null
     private var listBounds: WimGuiListBounds? = initialListBounds
+    private var initializing = false
 
     init {
         modalInput.setListBounds(initialListBounds)
@@ -26,8 +27,13 @@ abstract class WimGuiModalPanelPlugin<A>(
         root = panel
         this.callbacks = callbacks
         modalInput.setRoot(panel)
-        onInit()
-        rebuildContent()
+        initializing = true
+        try {
+            onInit()
+            rebuildContent()
+        } finally {
+            initializing = false
+        }
     }
 
     override fun processInput(events: List<InputEventAPI>) {
@@ -58,7 +64,16 @@ abstract class WimGuiModalPanelPlugin<A>(
 
     protected fun rebuildContent() {
         val currentRoot = root
-        if (currentRoot == null || !canRenderContent()) {
+        if (currentRoot == null) {
+            return
+        }
+        if (!canRenderContent()) {
+            val failure = IllegalStateException("Modal content is not available after initialization.")
+            onRebuildFailed(failure)
+            close()
+            if (initializing) {
+                throw failure
+            }
             return
         }
         try {
@@ -73,6 +88,9 @@ abstract class WimGuiModalPanelPlugin<A>(
         } catch (t: RuntimeException) {
             onRebuildFailed(t)
             close()
+            if (initializing) {
+                throw t
+            }
         }
     }
 

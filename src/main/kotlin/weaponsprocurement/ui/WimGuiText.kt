@@ -25,6 +25,9 @@ object WimGuiText {
     }
 
     @JvmStatic
+    fun paraFormat(text: String?): String = text?.replace("%", "%%") ?: ""
+
+    @JvmStatic
     fun estimatedChars(width: Float): Int = estimatedChars(width, 0f, WimGuiStyle.TEXT_APPROX_CHAR_WIDTH)
 
     @JvmStatic

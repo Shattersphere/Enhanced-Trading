@@ -303,7 +303,7 @@ object WimGuiControls {
         val label = parent.createUIElement(labelWidth, height, false)
         label.setParaFontDefault()
         label.setParaFontColor(color)
-        val line = label.addPara(WimGuiText.fitToWidth(text, label, labelWidth), 0f, color)
+        val line = label.addPara(WimGuiText.paraFormat(WimGuiText.fitToWidth(text, label, labelWidth)), 0f, color)
         line.setAlignment(alignment)
         parent.addUIElement(label).inTL(labelX, y + WimGuiStyle.TEXT_TOP_PAD)
     }
@@ -373,7 +373,7 @@ object WimGuiControls {
         val label = parent.createUIElement(labelWidth, layout.rowHeight, false)
         label.setParaFontDefault()
         label.setParaFontColor(color)
-        val line = label.addPara(layout.wrappedText, 0f, color)
+        val line = label.addPara(WimGuiText.paraFormat(layout.wrappedText), 0f, color)
         line.setAlignment(alignment)
         parent.addUIElement(label).inTL(labelX, y + WimGuiStyle.TEXT_TOP_PAD)
         return layout
