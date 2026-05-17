@@ -294,6 +294,4 @@ if ($deployQueued) {
 
 Restore-CleanRepoJar
 
-if ($QueuedWorker) {
-    Write-DeployState -ProcessId $PID -Phase "completed"
-}
+Write-DeployState -ProcessId $PID -Phase "completed"
