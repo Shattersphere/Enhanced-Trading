@@ -48,8 +48,6 @@ object WeaponsProcurementConfig {
     private const val MIN_DESIRED_WEAPON_COUNT = 0
     private const val MAX_DESIRED_WEAPON_COUNT = 999
     private const val MAX_CONFIG_LOGS = 10
-    private val INITIAL_DEBUG_TRADE_FAILURE_STEP = System.getProperty(KEY_DEBUG_TRADE_FAILURE_STEP, "")
-
     private var configLogs = 0
     private var configErrorLogged = false
 
@@ -191,15 +189,23 @@ object WeaponsProcurementConfig {
     fun isDebugShipCatalogViewEnabled(): Boolean =
         System.getProperty(KEY_DEBUG_SHIP_CATALOG_VIEW, "false").toBoolean()
 
+    @JvmStatic
+    fun debugTradeFailureStep(): String = normalizeDebugTradeFailureStep(System.getProperty(KEY_DEBUG_TRADE_FAILURE_STEP, ""))
+
     private fun readDesiredWeaponCount(settingId: String, defaultValue: Int): Int {
         val value = readDoubleSetting(settingId) ?: return defaultValue
         return clamp(Math.round(value.toFloat()), MIN_DESIRED_WEAPON_COUNT, MAX_DESIRED_WEAPON_COUNT)
     }
 
-    private fun readDebugTradeFailureStep(): String {
-        val value = INITIAL_DEBUG_TRADE_FAILURE_STEP?.trim() ?: ""
+    private fun readDebugTradeFailureStep(): String = debugTradeFailureStep()
+
+    private fun normalizeDebugTradeFailureStep(rawValue: String?): String {
+        val value = rawValue?.trim() ?: ""
         if (value.isEmpty() || value.equals("none", ignoreCase = true)) {
             return ""
+        }
+        if (value == "*") {
+            return value
         }
         if (value.equals("after-source-removal", ignoreCase = true) ||
             value.equals("after-player-cargo-remove", ignoreCase = true) ||

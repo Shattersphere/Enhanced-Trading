@@ -97,6 +97,8 @@ Trade money totals use `long` via `TradeMoney`; fail closed if a plan is too lar
 
 Transaction callbacks should be post-commit side effects. Do not fire `SubmarketPlugin.reportPlayerMarketTransaction(...)` before rollbackable cargo and credit mutations have succeeded.
 
+Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use `tools/analyze-trade-rollback-diagnostics.ps1` after an in-game forced-failure run to verify restored cargo counts and credits instead of relying only on visual inspection.
+
 ## GUI Architecture
 
 `StockReviewPanelPlugin` is lifecycle/context orchestration. Keep domain work in focused controllers/renderers:
@@ -160,7 +162,8 @@ For docs-only edits, `validate-doc-links.ps1` and `git diff --check` are usually
 
 Static/build validation is not in-game proof. The remaining high-value runtime check is rollback fault validation:
 
-- set LunaLib `DEV ONLY: force trade rollback failure` to each failure step;
+- start Starsector with JVM property `wp.debug.failTradeStep` set to each failure step;
 - test local buy, local sell, Sector Market buy, Fixer's Market buy, and mixed sell-then-buy plans;
 - confirm WP-touched cargo counts and player credits return to pre-confirm values;
+- run `tools/analyze-trade-rollback-diagnostics.ps1 -RequirePass` on the resulting log;
 - reset the setting to `none` before normal play or packaging.

@@ -73,3 +73,16 @@ If Starsector is running, the deploy step may queue. In that case, close Starsec
 - `after-credit-mutation`
 
 Use it only for manual validation, then remove the property or set it to `none` before normal play or packaging. Test local buy, local sell, Sector Market buy, Fixer's Market buy, and mixed sell-then-buy plans, and confirm player cargo, touched market cargo, and credits return to their pre-confirm values after the forced failure.
+
+After a forced-failure run, use the analyzer to summarize the structured rollback log lines:
+
+```powershell
+$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -RequirePass
+```
+
+For the full rollback matrix, require every supported failure step before treating the pass as complete:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass
+```

@@ -45,6 +45,7 @@ Public output should include only files needed for users/contributors to build a
 - user-facing build/package docs that do not mention private paths, agents, archives, or badge/bytecode systems;
 - public-safe `.github/workflows/` if it does not require private paths or badge-only validators;
 - normal build scripts required for public contributors.
+- public-safe diagnostic analyzers for clean GUI runtime troubleshooting.
 
 ## Public Exclude Surface
 

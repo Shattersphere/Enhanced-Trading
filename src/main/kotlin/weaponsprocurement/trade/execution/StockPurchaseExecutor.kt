@@ -14,6 +14,7 @@ import weaponsprocurement.trade.plan.TradeMoney
 import weaponsprocurement.trade.quote.CreditFormat
 import java.util.ArrayList
 import java.util.IdentityHashMap
+import java.util.Locale
 
 class StockPurchaseExecutor private constructor() {
     companion object {
@@ -215,7 +216,7 @@ class StockPurchaseExecutor private constructor() {
         }
 
         private fun maybeFail(step: String) {
-            val requested = System.getProperty(WeaponsProcurementConfig.KEY_DEBUG_TRADE_FAILURE_STEP, "")
+            val requested = WeaponsProcurementConfig.debugTradeFailureStep()
             if (step.equals(requested, ignoreCase = true) || "*" == requested) {
                 throw RuntimeException("WP debug forced trade failure at $step")
             }
@@ -230,13 +231,28 @@ class StockPurchaseExecutor private constructor() {
             t: Throwable,
             journal: MutationJournal?,
         ): StockPurchaseService.PurchaseResult {
-            val rollback = journal?.rollback(itemType, itemId) ?: "rollback=none"
+            val report = journal?.rollback(itemType, itemId) ?: RollbackReport.none()
             log.error(
                 "WP_STOCK_REVIEW trade execution failed operation=" + operation +
                     " item=" + itemType.key(itemId) +
                     " quantity=" + quantity +
-                    " " + rollback,
+                    " " + report.legacySummary(),
                 t,
+            )
+            log.info(
+                "WP_STOCK_REVIEW_ROLLBACK status=" + report.status +
+                    " operation=" + sanitizeToken(operation) +
+                    " item=" + itemType.key(itemId) +
+                    " quantity=" + quantity +
+                    " failedStep=" + failureStepToken() +
+                    " restoredCargos=" + report.restoredCargos +
+                    " failedCargos=" + report.failedCargos +
+                    " creditsRestored=" + report.creditsRestored +
+                    " countsRestored=" + report.countsRestored +
+                    " creditsBefore=" + formatFloat(report.creditsBefore) +
+                    " creditsAtFailure=" + formatFloat(report.creditsAtFailure) +
+                    " creditsAfterRollback=" + formatFloat(report.creditsAfterRollback) +
+                    " touched=" + report.touchedSummary(),
             )
             return StockPurchaseService.PurchaseResult.failure("Trade failed during execution. Check starsector.log.")
         }
@@ -266,6 +282,26 @@ class StockPurchaseExecutor private constructor() {
         private fun safe(value: String?): String {
             return if (value.isNullOrEmpty()) "?" else value
         }
+
+        private fun failureStepToken(): String {
+            val configured = WeaponsProcurementConfig.debugTradeFailureStep()
+            return if (configured.isBlank()) "none" else configured
+        }
+
+        private fun sanitizeToken(value: String?): String {
+            val raw = value?.trim() ?: ""
+            if (raw.isEmpty()) return "unknown"
+            val result = StringBuilder()
+            for (ch in raw) {
+                result.append(if (ch.isLetterOrDigit() || ch == '-' || ch == '_' || ch == ':' || ch == '.') ch else '_')
+            }
+            return result.toString()
+        }
+
+        private fun formatFloat(value: Float): String {
+            if (value.isNaN() || value.isInfinite()) return "nan"
+            return String.format(Locale.US, "%.2f", value)
+        }
     }
 
     private class MutationJournal(
@@ -284,7 +320,7 @@ class StockPurchaseExecutor private constructor() {
             snapshots.add(snapshot)
         }
 
-        fun rollback(itemType: StockItemType, itemId: String): String {
+        fun rollback(itemType: StockItemType, itemId: String): RollbackReport {
             var restored = 0
             var failed = 0
             for (snapshot in snapshots) {
@@ -297,6 +333,7 @@ class StockPurchaseExecutor private constructor() {
                     failed++
                 }
             }
+            val creditsAtFailure = playerCargo?.credits?.get() ?: 0f
             var creditsRestored = false
             try {
                 if (playerCargo != null) {
@@ -305,27 +342,25 @@ class StockPurchaseExecutor private constructor() {
                 }
             } catch (_: Throwable) {
             }
-            return "rollback=attempted restoredCargos=" + restored +
-                " failedCargos=" + failed +
-                " creditsRestored=" + creditsRestored +
-                " touched=" + describe()
+            val creditsAfterRollback = playerCargo?.credits?.get() ?: creditsAtFailure
+            return RollbackReport(
+                restored,
+                failed,
+                creditsRestored,
+                countsRestored(),
+                creditsBefore,
+                creditsAtFailure,
+                creditsAfterRollback,
+                ArrayList(snapshots),
+            )
         }
 
-        private fun describe(): String {
-            val result = StringBuilder()
-            for (i in snapshots.indices) {
-                if (i > 0) result.append(",")
-                val snapshot = snapshots[i]
-                result.append(snapshot.itemCountBefore)
-                    .append("[")
-                    .append(snapshot.label)
-                    .append("]")
-                    .append("->")
-                    .append(if (snapshot.itemCountAtFailure < 0) "?" else snapshot.itemCountAtFailure.toString())
-                    .append("->")
-                    .append(if (snapshot.itemCountAfterRollback < 0) "?" else snapshot.itemCountAfterRollback.toString())
+        private fun countsRestored(): Boolean {
+            if (snapshots.isEmpty()) return true
+            for (snapshot in snapshots) {
+                if (snapshot.itemCountAfterRollback != snapshot.itemCountBefore) return false
             }
-            return result.toString()
+            return true
         }
     }
 
@@ -339,6 +374,56 @@ class StockPurchaseExecutor private constructor() {
         val itemCountBefore: Int = StockItemCargo.itemCount(cargo, itemType, itemId)
         var itemCountAtFailure: Int = -1
         var itemCountAfterRollback: Int = -1
+    }
+
+    private class RollbackReport(
+        val restoredCargos: Int,
+        val failedCargos: Int,
+        val creditsRestored: Boolean,
+        val countsRestored: Boolean,
+        val creditsBefore: Float,
+        val creditsAtFailure: Float,
+        val creditsAfterRollback: Float,
+        private val snapshots: List<CargoSnapshot>,
+    ) {
+        val status: String
+            get() = if (failedCargos == 0 && creditsRestored && countsRestored) "PASS" else "FAIL"
+
+        fun legacySummary(): String =
+            "rollback=attempted restoredCargos=" + restoredCargos +
+                " failedCargos=" + failedCargos +
+                " creditsRestored=" + creditsRestored +
+                " countsRestored=" + countsRestored +
+                " touched=" + touchedSummary()
+
+        fun touchedSummary(): String {
+            if (snapshots.isEmpty()) return "none"
+            val result = StringBuilder()
+            for (i in snapshots.indices) {
+                if (i > 0) result.append(";")
+                val snapshot = snapshots[i]
+                result.append(sanitizeLabel(snapshot.label))
+                    .append(":")
+                    .append(snapshot.itemCountBefore)
+                    .append(">")
+                    .append(if (snapshot.itemCountAtFailure < 0) "?" else snapshot.itemCountAtFailure.toString())
+                    .append(">")
+                    .append(if (snapshot.itemCountAfterRollback < 0) "?" else snapshot.itemCountAfterRollback.toString())
+            }
+            return result.toString()
+        }
+
+        companion object {
+            fun none(): RollbackReport = RollbackReport(0, 0, false, false, 0f, 0f, 0f, emptyList())
+
+            private fun sanitizeLabel(label: String): String {
+                val result = StringBuilder()
+                for (ch in label) {
+                    result.append(if (ch.isLetterOrDigit() || ch == '-' || ch == '_' || ch == ':' || ch == '.') ch else '_')
+                }
+                return result.toString()
+            }
+        }
     }
 
     private class TransactionReportLine(

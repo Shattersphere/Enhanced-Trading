@@ -43,6 +43,7 @@ $includeFiles = @(
     "data/config/weapons_procurement_market_blacklist.json",
     "data/config/weapons_procurement_stock.json",
     "tools/deploy-live-mod.ps1",
+    "tools/analyze-trade-rollback-diagnostics.ps1",
     "tools/validate-doc-links.ps1",
     "tools/validate-gui-button-style.ps1",
     "tools/validate-jar-classes.ps1",
@@ -199,6 +200,62 @@ if ($badLinks.Count -gt 0) {
 
 Write-Host "Documentation link validation passed."
 '@ | Set-Content -LiteralPath $publicDocValidator -NoNewline
+
+$publicPackaging = Join-Path $resolvedOutput "PACKAGING.md"
+if (Test-Path -LiteralPath $publicPackaging) {
+    $packagingText = Get-Content -LiteralPath $publicPackaging -Raw
+    $packagingText = [regex]::Replace(
+        $packagingText,
+        "(?ms)\r?\n## Private Patched Badges\r?\n.*?(?=\r?\n## Trade Rollback Fault Validation)",
+        "`r`n"
+    )
+    Set-Content -LiteralPath $publicPackaging -Value $packagingText -NoNewline
+}
+
+$publicDeployScript = Join-Path $resolvedOutput "tools/deploy-live-mod.ps1"
+if (Test-Path -LiteralPath $publicDeployScript) {
+    $deployLines = Get-Content -LiteralPath $publicDeployScript
+    $publicDeployLines = New-Object System.Collections.Generic.List[string]
+    $skippingJarBoundary = $false
+    $skippingPrivateBadgeArgument = $false
+    foreach ($line in $deployLines) {
+        if ($line -match '^\s*\[switch\]\$AllowPrivateBadgeJar,') {
+            continue
+        }
+        if ($line -match '^function Get-ZipEntryNames\s*\{') {
+            $publicDeployLines.Add("function Assert-DeployJarBoundary {")
+            $publicDeployLines.Add("    param([string]`$BaseRoot)")
+            $publicDeployLines.Add("")
+            $publicDeployLines.Add("    `$jarPath = Join-Path `$BaseRoot `"jars\weapons-procurement.jar`"")
+            $publicDeployLines.Add("    if (-not (Test-Path -LiteralPath `$jarPath)) {")
+            $publicDeployLines.Add("        throw `"Deploy jar not found: `$jarPath`"")
+            $publicDeployLines.Add("    }")
+            $publicDeployLines.Add("}")
+            $publicDeployLines.Add("")
+            $skippingJarBoundary = $true
+            continue
+        }
+        if ($skippingJarBoundary) {
+            if ($line -match '^function Assert-DeployRoot\s*\{') {
+                $skippingJarBoundary = $false
+                $publicDeployLines.Add($line)
+            }
+            continue
+        }
+        if ($line -match '^\s*if \(\$AllowPrivateBadgeJar\) \{') {
+            $skippingPrivateBadgeArgument = $true
+            continue
+        }
+        if ($skippingPrivateBadgeArgument) {
+            if ($line -match '^\s*\}') {
+                $skippingPrivateBadgeArgument = $false
+            }
+            continue
+        }
+        $publicDeployLines.Add($line)
+    }
+    Set-Content -LiteralPath $publicDeployScript -Value ($publicDeployLines -join [Environment]::NewLine) -NoNewline
+}
 
 $srcRoot = Join-Path $repoRoot "src"
 $sources = Get-ChildItem -LiteralPath $srcRoot -Recurse -File |

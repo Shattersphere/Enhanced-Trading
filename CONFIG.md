@@ -96,6 +96,19 @@ Accepted test values are:
 
 Leave the property unset, empty, or `none` for normal play and public packages.
 
+When a forced trade failure is triggered, the mod logs a structured `WP_STOCK_REVIEW_ROLLBACK` line with pass/fail status, restored cargo counts, restored credits, and touched cargo snapshots. Analyze those lines with:
+
+```powershell
+$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -RequirePass
+```
+
+To require specific forced-failure evidence:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-add -RequirePass
+```
+
 ### Ship catalog diagnostic dump
 
 For a local validation run, start Starsector with the JVM system property `wp.debug.shipCatalog`.
@@ -111,11 +124,13 @@ This diagnostic is intentionally read-only. It scans live mothballed market ship
 Analyze the resulting log with:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-ship-catalog-diagnostics.ps1 -LogPath "C:\Games\Starsector\starsector-core\starsector.log"
+$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-ship-catalog-diagnostics.ps1
 ```
 
 To require specific hull evidence:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-ship-catalog-diagnostics.ps1 -LogPath "C:\Games\Starsector\starsector-core\starsector.log" -ExpectHull paragon,onslaught
+$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-ship-catalog-diagnostics.ps1 -ExpectHull paragon,onslaught
 ```

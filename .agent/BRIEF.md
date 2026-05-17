@@ -50,6 +50,7 @@ git diff --check
 ## Current Risks
 
 - Runtime rollback fault validation still needs in-game evidence.
+- Rollback diagnostics now emit structured `WP_STOCK_REVIEW_ROLLBACK` records; use `tools/analyze-trade-rollback-diagnostics.ps1` after a forced-failure run to verify restored cargo counts and credits.
 - Starsector classloading can keep stale jar/class state until restart.
 - Luna settings, data/config files, graphics, and metadata matter; jar parity alone is not sufficient for data-heavy changes.
 - The optional bytecode-patched badge path is high-risk and should remain advanced/private unless explicitly approved for a release target.

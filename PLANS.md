@@ -98,10 +98,12 @@ Still open:
 
 Validate the trade rollback fault hook in game.
 
+Diagnostic support now emits structured `WP_STOCK_REVIEW_ROLLBACK` log records and includes `tools/analyze-trade-rollback-diagnostics.ps1` for pass/fail summarization.
+
 Steps:
 
-1. Open LunaLib settings.
-2. Set `DEV ONLY: force trade rollback failure` to one failure step.
+1. Start Starsector with JVM property `wp.debug.failTradeStep` set to one failure step.
+2. Open a valid market or storage dialog.
 3. Test each relevant trade mode:
    - local legal buy;
    - local sell;
@@ -116,13 +118,20 @@ Steps:
    - `after-player-cargo-add`;
    - `after-target-cargo-add`;
    - `after-credit-mutation`.
-6. Reset the setting to `none`.
+6. Run:
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass
+   ```
+
+7. Reset the setting to `none`.
 
 Acceptance:
 
 - No GUI crash.
 - Controlled failure message appears.
 - WP-touched item counts and credits are restored.
+- Analyzer reports passing `WP_STOCK_REVIEW_ROLLBACK` evidence for each forced failure step.
 - Successful trades still work after resetting the debug setting.
 
 ## Deferred Until Runtime Evidence
