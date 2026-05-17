@@ -114,6 +114,7 @@ class StockReviewPanelPlugin(
         if (tradeActionDispatcher.handle(action) || ui.handle(action)) {
             return
         }
+        logUnhandledAction(action)
     }
 
     override fun snapshot(): WeaponStockSnapshot? = snapshots.current()
@@ -142,8 +143,24 @@ class StockReviewPanelPlugin(
         reportMessage(message)
     }
 
+    override fun clearLocalMarketIntent() {
+        localMarketIntent.clear()
+    }
+
+    override fun recaptureLocalMarketIntent() {
+        localMarketIntent.captureFromTrades(pendingTrades.asList())
+    }
+
     private fun reportMessage(message: String?) {
         WimGuiCampaignDialogHost.current().addMessage(message)
+    }
+
+    private fun logUnhandledAction(action: StockReviewAction) {
+        if (unhandledActionWarningLogged) {
+            return
+        }
+        unhandledActionWarningLogged = true
+        LOG.warn("WP_STOCK_REVIEW unhandled action type=${action.getType()} group=${action.getGroup().name}")
     }
 
     override fun rebuildSnapshot() {
@@ -180,6 +197,7 @@ class StockReviewPanelPlugin(
 
     companion object {
         private val LOG: Logger = Logger.getLogger(StockReviewPanelPlugin::class.java)
+        private var unhandledActionWarningLogged = false
 
         private fun reviewMode(launchState: StockReviewLaunchState?): Boolean = launchState != null && launchState.isReviewMode()
 

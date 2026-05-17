@@ -190,12 +190,44 @@ function Assert-PrivateBadgeJar {
         throw "Jar is missing private badge bridge classes: $($missing -join ', ')"
     }
 
+    Assert-PrivateBadgeBootstrapClass -Path $Path
+
     $kotlinOnlyHelperEntries = @(
         "weaponsprocurement/internal/WeaponsProcurementBadgeHelper`$Companion.class"
     )
     $stale = @($kotlinOnlyHelperEntries | Where-Object { $entries -contains $_ })
     if ($stale.Count -gt 0) {
         throw "Jar contains Kotlin-compiled embedded helper entries that are unsafe for the core classloader: $($stale -join ', ')"
+    }
+}
+
+function Assert-PrivateBadgeBootstrapClass {
+    param([string]$Path)
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+    try {
+        $entry = $zip.GetEntry("weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.class")
+        if ($null -eq $entry) {
+            throw "Jar is missing private badge bootstrap class."
+        }
+        $stream = $entry.Open()
+        try {
+            $memory = New-Object System.IO.MemoryStream
+            try {
+                $stream.CopyTo($memory)
+                $classText = [System.Text.Encoding]::ASCII.GetString($memory.ToArray())
+                if ($classText.IndexOf("weaponsprocurement/internal/WeaponsProcurementCountUpdater", [System.StringComparison]::Ordinal) -lt 0) {
+                    throw "Private badge bootstrap does not reference WeaponsProcurementCountUpdater; public no-op bootstrap may have been packaged."
+                }
+            } finally {
+                $memory.Dispose()
+            }
+        } finally {
+            $stream.Dispose()
+        }
+    } finally {
+        $zip.Dispose()
     }
 }
 

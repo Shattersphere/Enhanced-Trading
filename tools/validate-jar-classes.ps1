@@ -141,6 +141,7 @@ $requiredClasses = @(
     'weaponsprocurement/stock/item/WeaponStockSnapshotBuilder$CostComparator.class',
     'weaponsprocurement/lifecycle/WeaponsProcurementFixerCatalogUpdater.class',
     'weaponsprocurement/lifecycle/StockReviewHotkeyScript.class',
+    'weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.class',
     'com/fs/starfarer/api/impl/campaign/rulecmd/WP_OpenDialog.class'
 )
 
@@ -240,7 +241,12 @@ $forbiddenClasses = @(
     'weaponsprocurement/core/StockPurchaseService$PurchaseSource.class',
     'weaponsprocurement/core/StockPurchaseService$PurchaseSourcePriceComparator.class',
     'weaponsprocurement/core/StockPurchaseService$SellTarget.class',
-    'weaponsprocurement/core/StockPurchaseService$PurchaseSource$1.class'
+    'weaponsprocurement/core/StockPurchaseService$PurchaseSource$1.class',
+    'weaponsprocurement/internal/WeaponsProcurementBadgeConfig.class',
+    'weaponsprocurement/internal/WeaponsProcurementBadgeConfig$Companion.class',
+    'weaponsprocurement/internal/WeaponsProcurementBadgeHelper.class',
+    'weaponsprocurement/internal/WeaponsProcurementBadgeHelper$Companion.class',
+    'weaponsprocurement/internal/WeaponsProcurementCountUpdater.class'
 )
 
 if (-not (Test-Path -LiteralPath $JarPath)) {

@@ -33,10 +33,13 @@ class StockReviewExecutionController(
         fun requestClose()
         fun refreshVanillaCargoScreen()
         fun postMessage(message: String?)
+        fun clearLocalMarketIntent()
+        fun recaptureLocalMarketIntent()
     }
 
     fun confirmPendingTrades() {
         if (pendingTrades.isEmpty()) {
+            host.clearLocalMarketIntent()
             host.reopen(false)
             return
         }
@@ -80,12 +83,14 @@ class StockReviewExecutionController(
                     reportPurchaseFailure(result)
                 }
                 pendingTrades.removeExecuted(executionOrder, i)
+                host.recaptureLocalMarketIntent()
                 host.rebuildSnapshot()
                 host.requestContentRebuild()
                 return
             }
         }
         pendingTrades.clear()
+        host.clearLocalMarketIntent()
         host.updateTradeWarning(null)
         host.exitReviewMode()
         host.rebuildSnapshot()

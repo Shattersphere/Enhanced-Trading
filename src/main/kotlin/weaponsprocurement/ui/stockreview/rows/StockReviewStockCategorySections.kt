@@ -28,7 +28,8 @@ class StockReviewStockCategorySection private constructor(
         layout: StockReviewRowLayout,
         itemType: StockItemType,
     ): Int {
-        val records = filteredRecords(snapshot?.getRecords(itemType, category), state.getActiveFilters())
+        val allRecords = snapshot?.getRecords(itemType, category) ?: emptyList()
+        val records = filteredRecords(allRecords, state.getActiveFilters())
         val expanded = state.isExpanded(itemType, category)
         return StockReviewListSection.add(
             rows,
@@ -37,7 +38,7 @@ class StockReviewStockCategorySection private constructor(
                 records,
                 expanded,
                 StockReviewStockCategoryHeadingRows.stockCategory(
-                    categoryHeading(itemType, records, tradeContext),
+                    categoryHeading(itemType, records, allRecords, tradeContext),
                     itemType,
                     category,
                     fillColor,
@@ -68,14 +69,15 @@ class StockReviewStockCategorySection private constructor(
 
     private fun categoryHeading(
         itemType: StockItemType,
-        records: List<WeaponStockRecord>?,
+        visibleRecords: List<WeaponStockRecord>?,
+        aggregateRecords: List<WeaponStockRecord>?,
         tradeContext: StockReviewTradeContext?,
     ): String {
-        val itemTypes = records?.size ?: 0
+        val itemTypes = visibleRecords?.size ?: 0
         var selling = 0
         var buying = 0
-        if (records != null && tradeContext != null) {
-            for (record in records) {
+        if (aggregateRecords != null && tradeContext != null) {
+            for (record in aggregateRecords) {
                 selling += tradeContext.pendingSellQuantityForItem(record.itemKey)
                 buying += tradeContext.pendingBuyQuantityForItem(record.itemKey)
             }

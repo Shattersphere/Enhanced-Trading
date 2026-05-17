@@ -13,7 +13,7 @@ class StockReviewActionDispatcher(
 ) {
     fun handle(action: StockReviewAction?): Boolean {
         if (action == null) {
-            return true
+            return false
         }
         for (group in groups) {
             if (group.handle(action)) {
