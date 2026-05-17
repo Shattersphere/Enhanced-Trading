@@ -62,18 +62,30 @@ $stockReviewRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewR
 $stockReviewListRowPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListRow.kt"
 $stockReviewFooterSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFooterSpec.kt"
 $stockReviewFooterButtonsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFooterButtons.kt"
-$stockReviewHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewHeadingRows.kt"
+$stockReviewItemTypeHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemTypeHeadingRows.kt"
+$stockReviewStockCategoryHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewStockCategoryHeadingRows.kt"
+$stockReviewTradeGroupHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeGroupHeadingRows.kt"
+$stockReviewFilterHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewFilterHeadingRows.kt"
+$stockReviewItemDetailHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemDetailHeadingRows.kt"
+$stockReviewLegacyHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewHeadingRows.kt"
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowsPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewTradeCellsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
 }
+if (Test-Path -LiteralPath $stockReviewLegacyHeadingRowsPath) {
+    throw "StockReviewHeadingRows must stay split into focused heading owners."
+}
 
 $stockReviewSourceRoot = Join-Path $kotlinGuiDir "stockreview"
 $stockReviewSourceFiles = @(Get-ChildItem -Path $stockReviewSourceRoot -Recurse -File -Include *.kt)
+$legacyHeadingReferenceHits = @($stockReviewSourceFiles | Select-String -Pattern "StockReviewHeadingRows" -SimpleMatch)
+if ($legacyHeadingReferenceHits.Count -gt 0) {
+    throw "Stock-review heading callers must use focused heading owners. Hits:`n$($legacyHeadingReferenceHits -join "`n")"
+}
 $directStockReviewActionButtonFactoryHits = @($stockReviewSourceFiles |
     Where-Object { $_.FullName -ne $stockReviewActionControlsPath } |
     Select-String -Pattern "WimGuiSemanticButtonFactory<StockReviewAction>" -SimpleMatch)
@@ -110,12 +122,17 @@ $itemTypeSectionsText = Get-Content -LiteralPath $stockReviewItemTypeSectionsPat
 $stockCategorySectionsText = Get-Content -LiteralPath $stockReviewStockCategorySectionsPath -Raw
 $tradeGroupSectionsText = Get-Content -LiteralPath $stockReviewTradeGroupSectionsPath -Raw
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
+$itemTypeHeadingRowsText = Get-Content -LiteralPath $stockReviewItemTypeHeadingRowsPath -Raw
+$stockCategoryHeadingRowsText = Get-Content -LiteralPath $stockReviewStockCategoryHeadingRowsPath -Raw
+$tradeGroupHeadingRowsText = Get-Content -LiteralPath $stockReviewTradeGroupHeadingRowsPath -Raw
+$filterHeadingRowsText = Get-Content -LiteralPath $stockReviewFilterHeadingRowsPath -Raw
+$itemDetailHeadingRowsText = Get-Content -LiteralPath $stockReviewItemDetailHeadingRowsPath -Raw
 if ($itemTypeSectionsText -notmatch "class StockReviewItemTypeSection" -or
     $itemTypeSectionsText -notmatch "object StockReviewItemTypeSections" -or
     $itemTypeSectionsText -notmatch "StockReviewItemTypeSection\(StockItemType\.WEAPON, false\)" -or
     $itemTypeSectionsText -notmatch "StockReviewItemTypeSection\(StockItemType\.WING, true\)" -or
     $itemTypeSectionsText -notmatch "StockReviewStockCategorySections\.ORDERED" -or
-    $itemTypeSectionsText -notmatch "StockReviewHeadingRows\.itemType" -or
+    $itemTypeSectionsText -notmatch "StockReviewItemTypeHeadingRows\.itemType" -or
     $listModelText -notmatch "StockReviewItemTypeSections\.ORDERED" -or
     $listModelText -match "StockItemType\.WEAPON" -or
     $listModelText -match "StockItemType\.WING" -or
@@ -135,6 +152,7 @@ if ($stockCategorySectionsText -notmatch "class StockReviewStockCategorySection"
     $stockCategorySectionsText -notmatch "StockCategory\.SUFFICIENT, StockReviewStyle\.SUFFICIENT, true, false" -or
     $stockCategorySectionsText -notmatch "StockReviewFilters\.matches" -or
     $stockCategorySectionsText -notmatch "includesWorstCaseRow && StockItemType\.WEAPON == itemType" -or
+    $stockCategorySectionsText -notmatch "StockReviewStockCategoryHeadingRows\.stockCategory" -or
     $itemTypeSectionsText -notmatch "StockReviewStockCategorySections\.ORDERED" -or
     $listModelText -match "StockCategory\.NO_STOCK" -or
     $listModelText -match "categoryHeading" -or
@@ -146,7 +164,7 @@ if ($tradeGroupSectionsText -notmatch "class StockReviewTradeGroupSection" -or
     $tradeGroupSectionsText -notmatch "StockReviewTradeGroupSection\(StockReviewTradeGroup\.BUYING, false, true\)" -or
     $tradeGroupSectionsText -notmatch "StockReviewTradeGroupSection\(StockReviewTradeGroup\.SELLING, true, false\)" -or
     $tradeGroupSectionsText -notmatch "StockReviewListSection\.builder\(groupTrades\)" -or
-    $tradeGroupSectionsText -notmatch "StockReviewHeadingRows\.reviewGroup" -or
+    $tradeGroupSectionsText -notmatch "StockReviewTradeGroupHeadingRows\.reviewGroup" -or
     $tradeGroupSectionsText -notmatch "includeWorstCaseRow\(includesWorstCaseRow\)" -or
     $tradeGroupSectionsText -notmatch "fun tradesFrom" -or
     $tradeGroupSectionsText -notmatch "class StockReviewTradeGroupRows" -or
@@ -204,7 +222,6 @@ $rowSpecText = Get-Content -LiteralPath $stockReviewRowSpecPath -Raw
 $listRowText = Get-Content -LiteralPath $stockReviewListRowPath -Raw
 $footerSpecText = Get-Content -LiteralPath $stockReviewFooterSpecPath -Raw
 $footerButtonsText = Get-Content -LiteralPath $stockReviewFooterButtonsPath -Raw
-$headingRowsText = Get-Content -LiteralPath $stockReviewHeadingRowsPath -Raw
 $actionRowRendererText = Get-Content -LiteralPath $stockReviewActionRowRendererPath -Raw
 $actionRowButtonsText = Get-Content -LiteralPath $stockReviewActionRowButtonsPath -Raw
 if ($actionControlsText -notmatch "class StockReviewActionRef" -or
@@ -234,19 +251,30 @@ if ($actionRowRendererText -match "StockReviewActionGroup" -or
     $actionRowButtonsText -notmatch "WeaponsProcurementConfig\.isDebugShipCatalogViewEnabled") {
     throw "Stock-review action-row buttons must be declared in StockReviewActionRowButtons, not inline in StockReviewActionRowRenderer."
 }
-if ($headingRowsText -notmatch "fun itemType" -or
-    $headingRowsText -notmatch "fun stockCategory" -or
-    $headingRowsText -notmatch "fun reviewGroup" -or
-    $headingRowsText -notmatch "fun filterGroup" -or
-    $headingRowsText -notmatch "fun basicInfo" -or
-    $headingRowsText -notmatch "fun advancedInfo" -or
-    $headingRowsText -notmatch "fun itemLabel" -or
-    $listModelText -match "StockReviewGroupRows" -or
-    $reviewModelText -match "StockReviewGroupRows" -or
+if ($itemTypeHeadingRowsText -notmatch "object StockReviewItemTypeHeadingRows" -or
+    $itemTypeHeadingRowsText -notmatch "fun itemType" -or
+    $stockCategoryHeadingRowsText -notmatch "object StockReviewStockCategoryHeadingRows" -or
+    $stockCategoryHeadingRowsText -notmatch "fun stockCategory" -or
+    $tradeGroupHeadingRowsText -notmatch "object StockReviewTradeGroupHeadingRows" -or
+    $tradeGroupHeadingRowsText -notmatch "fun reviewGroup" -or
+    $filterHeadingRowsText -notmatch "object StockReviewFilterHeadingRows" -or
+    $filterHeadingRowsText -notmatch "fun filterGroup" -or
+    $itemDetailHeadingRowsText -notmatch "object StockReviewItemDetailHeadingRows" -or
+    $itemDetailHeadingRowsText -notmatch "fun basicInfo" -or
+    $itemDetailHeadingRowsText -notmatch "fun advancedInfo" -or
+    $itemDetailHeadingRowsText -notmatch "fun itemLabel" -or
+    $itemTypeSectionsText -notmatch "StockReviewItemTypeHeadingRows\.itemType" -or
+    $stockCategorySectionsText -notmatch "StockReviewStockCategoryHeadingRows\.stockCategory" -or
+    $tradeGroupSectionsText -notmatch "StockReviewTradeGroupHeadingRows\.reviewGroup" -or
+    $itemInfoRowsText -notmatch "StockReviewItemDetailHeadingRows\.basicInfo" -or
+    $itemInfoRowsText -notmatch "StockReviewItemDetailHeadingRows\.advancedInfo" -or
+    $itemRowsText -notmatch "StockReviewItemDetailHeadingRows\.itemLabel" -or
     $itemRowsText -match "WimGuiToggleHeading" -or
     $itemRowsText -match "fun infoSectionKey" -or
-    $itemRowsText -match "::info::") {
-    throw "Stock-review heading labels/actions/tooltips must route through StockReviewHeadingRows."
+    $itemRowsText -match "::info::" -or
+    $listModelText -match "StockReviewGroupRows" -or
+    $reviewModelText -match "StockReviewGroupRows") {
+    throw "Stock-review heading labels/actions/tooltips must route through focused heading owners."
 }
 if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
     $itemInfoFieldsText -notmatch "StockReviewDetailRows\.itemInfo" -or

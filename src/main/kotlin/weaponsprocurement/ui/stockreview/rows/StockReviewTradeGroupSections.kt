@@ -39,7 +39,7 @@ class StockReviewTradeGroupSection private constructor(
         StockReviewListSection.builder(groupTrades)
             .expanded(expanded)
             .heading {
-                StockReviewHeadingRows.reviewGroup(
+                StockReviewTradeGroupHeadingRows.reviewGroup(
                     tradeGroup,
                     groupTrades.size,
                     expanded,

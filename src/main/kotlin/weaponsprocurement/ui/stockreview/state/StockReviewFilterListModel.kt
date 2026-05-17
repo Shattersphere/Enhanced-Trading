@@ -2,7 +2,7 @@ package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.rows.StockReviewHeadingRows
+import weaponsprocurement.ui.stockreview.rows.StockReviewFilterHeadingRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltips
 import weaponsprocurement.stock.item.StockSourceMode
@@ -57,7 +57,7 @@ class StockReviewFilterListModel private constructor() {
             val expanded = state.isExpanded(group)
             val activeInGroup = StockReviewFilters.activeInGroup(state.getActiveFilters(), group)
             rows.add(
-                StockReviewHeadingRows.filterGroup(group, activeInGroup.size, expanded, topGap),
+                StockReviewFilterHeadingRows.filterGroup(group, activeInGroup.size, expanded, topGap),
             )
             if (!expanded) {
                 return

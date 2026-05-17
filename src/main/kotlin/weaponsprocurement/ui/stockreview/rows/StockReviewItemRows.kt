@@ -27,7 +27,7 @@ object StockReviewItemRows {
             rows,
             layout,
             record,
-            StockReviewHeadingRows.itemLabel(record, expanded),
+            StockReviewItemDetailHeadingRows.itemLabel(record, expanded),
             StockReviewTradeRowCells.tradeCells(record, tradeContext, layout),
             StockReviewAction.toggleItem(record.itemKey),
         )
@@ -56,7 +56,7 @@ object StockReviewItemRows {
             rows,
             layout,
             record,
-            StockReviewHeadingRows.itemLabel(record, expanded),
+            StockReviewItemDetailHeadingRows.itemLabel(record, expanded),
             StockReviewTradeRowCells.reviewCells(record, trade, tradeContext, layout),
             StockReviewAction.toggleItem(record.itemKey),
         )

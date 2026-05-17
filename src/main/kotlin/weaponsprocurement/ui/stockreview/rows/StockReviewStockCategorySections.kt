@@ -33,7 +33,7 @@ class StockReviewStockCategorySection private constructor(
         return StockReviewListSection.builder(records)
             .expanded(expanded)
             .heading {
-                StockReviewHeadingRows.stockCategory(
+                StockReviewStockCategoryHeadingRows.stockCategory(
                     categoryHeading(itemType, records, tradeContext),
                     itemType,
                     category,

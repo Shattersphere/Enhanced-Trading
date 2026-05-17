@@ -21,7 +21,7 @@ class StockReviewItemTypeSection private constructor(
     ): Int {
         val count = snapshot?.getCount(itemType) ?: 0
         val expanded = state.isExpanded(itemType)
-        StockReviewListSection.addHeading(rows, StockReviewHeadingRows.itemType(itemType, count, expanded, topGap))
+        StockReviewListSection.addHeading(rows, StockReviewItemTypeHeadingRows.itemType(itemType, count, expanded, topGap))
         if (!expanded) {
             return count
         }

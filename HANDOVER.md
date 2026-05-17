@@ -111,7 +111,7 @@ Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use 
 - `StockReviewStockCategorySections`: main-list stock-category order, filters, heading totals, colors, top gaps, and debug-row policy.
 - `StockReviewTradeGroupSections`: review-list trade-group order, trade splitting, headings, top gaps, and debug-row policy.
 - `StockReviewListRow` / `StockReviewRowSpec`: shared row construction path for labels, cells, icons, actions, reserves, and tooltips.
-- `StockReviewHeadingRows`: shared stock, review, filter, and detail toggle heading policies.
+- `StockReview*HeadingRows`: focused item-type, stock-category, trade-group, filter, and item-detail heading policies.
 - `StockReviewItemInfoRows` / `StockReviewItemInfoFields`: Basic/Advanced item detail section flow and named field definitions.
 - `StockReviewDetailRows` / `StockReviewSourceAllocationRows`: shared label/value detail-row geometry and review purchase-source allocation rows.
 - `StockReviewCellGroup` / `StockReviewTradeRowCells`: stock/price/plan/action widths, capped labels, debug extrema, and cell factories.

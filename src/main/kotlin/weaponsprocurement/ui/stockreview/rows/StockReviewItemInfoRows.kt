@@ -18,16 +18,16 @@ object StockReviewItemInfoRows {
         state: StockReviewState?,
         layout: StockReviewRowLayout,
     ) {
-        val basicExpanded = isInfoSectionExpanded(state, StockReviewHeadingRows.basicInfoSectionKey(record))
-        rows.add(StockReviewHeadingRows.basicInfo(record, basicExpanded, layout))
+        val basicExpanded = isInfoSectionExpanded(state, StockReviewItemDetailHeadingRows.basicInfoSectionKey(record))
+        rows.add(StockReviewItemDetailHeadingRows.basicInfo(record, basicExpanded, layout))
         if (basicExpanded) {
             addBasicInfo(rows, record, layout)
         }
         if (record.isWing()) {
             return
         }
-        val advancedExpanded = isInfoSectionExpanded(state, StockReviewHeadingRows.advancedInfoSectionKey(record))
-        rows.add(StockReviewHeadingRows.advancedInfo(record, advancedExpanded, layout))
+        val advancedExpanded = isInfoSectionExpanded(state, StockReviewItemDetailHeadingRows.advancedInfoSectionKey(record))
+        rows.add(StockReviewItemDetailHeadingRows.advancedInfo(record, advancedExpanded, layout))
         if (advancedExpanded) {
             addAdvancedInfo(rows, record, layout)
         }
