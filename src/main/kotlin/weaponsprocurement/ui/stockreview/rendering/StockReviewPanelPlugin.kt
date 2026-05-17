@@ -5,7 +5,6 @@ import weaponsprocurement.ui.WimGuiCampaignDialogHost
 import weaponsprocurement.ui.WimGuiListBounds
 import weaponsprocurement.ui.WimGuiModalPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import weaponsprocurement.ui.stockreview.state.StockReviewLaunchState
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
@@ -13,6 +12,7 @@ import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewExecutionController
 import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketIntent
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
+import weaponsprocurement.ui.stockreview.trade.StockReviewTradeActionDispatcher
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeController
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
 import com.fs.starfarer.api.campaign.SectorAPI
@@ -49,6 +49,7 @@ class StockReviewPanelPlugin(
     private val ui: StockReviewUiController
     private val trades: StockReviewTradeController
     private val execution: StockReviewExecutionController
+    private val tradeActionDispatcher: StockReviewTradeActionDispatcher
     private var snapshot: WeaponStockSnapshot? = null
 
     init {
@@ -60,6 +61,7 @@ class StockReviewPanelPlugin(
         ui = StockReviewUiController(state, modes, pendingTrades, localMarketIntent, this)
         trades = StockReviewTradeController(state, pendingTrades, localMarketIntent, this)
         execution = StockReviewExecutionController(state, pendingTrades, purchaseService, this)
+        tradeActionDispatcher = StockReviewTradeActionDispatcher(trades, execution)
     }
 
     fun isReviewMode(): Boolean = modes.isReviewMode()
@@ -110,32 +112,7 @@ class StockReviewPanelPlugin(
     }
 
     override fun handle(action: StockReviewAction) {
-        val type = action.getType()
-        if (StockReviewAction.Type.ADJUST_PLAN == type) {
-            trades.adjustPendingTrade(action)
-            return
-        }
-        if (StockReviewAction.Type.ADJUST_TO_SUFFICIENT == type) {
-            trades.adjustPendingTrade(action)
-            return
-        }
-        if (StockReviewAction.Type.RESET_PLAN == type) {
-            trades.resetPlan(action.getItemKey())
-            return
-        }
-        if (StockReviewAction.Type.PURCHASE_ALL_UNTIL_SUFFICIENT == type) {
-            trades.purchaseAllUntilSufficient()
-            return
-        }
-        if (StockReviewAction.Type.SELL_ALL_UNTIL_SUFFICIENT == type) {
-            trades.sellAllUntilSufficient()
-            return
-        }
-        if (StockReviewAction.Type.CONFIRM_PURCHASE == type) {
-            execution.confirmPendingTrades()
-            return
-        }
-        if (ui.handle(action)) {
+        if (tradeActionDispatcher.handle(action) || ui.handle(action)) {
             return
         }
     }
