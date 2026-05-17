@@ -23,6 +23,14 @@ class StockReviewActionRowRenderer private constructor() {
             if (modeSpec.actionRowKind != StockReviewActionRowKind.TRADE_CONTROLS) {
                 return
             }
+            val actionButtons = StockReviewActionRowButtons.build(
+                modeSpec.actionRowKind,
+                StockReviewActionRowContext(snapshot, state),
+                BUTTON_FACTORY,
+            )
+            if (actionButtons.isEmpty()) {
+                return
+            }
             WimGuiModalActionRow.add(
                 root,
                 modeSpec.modal,
@@ -30,7 +38,7 @@ class StockReviewActionRowRenderer private constructor() {
                 0f,
                 StockReviewStyle.ACTION_BUTTON_HEIGHT,
                 StockReviewStyle.BUTTON_GAP,
-                StockReviewActionRowButtons.build(StockReviewActionRowContext(snapshot, state), BUTTON_FACTORY),
+                actionButtons,
                 buttons,
             )
         }

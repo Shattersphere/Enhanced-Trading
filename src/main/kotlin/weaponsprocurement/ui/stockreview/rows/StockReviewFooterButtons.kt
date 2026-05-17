@@ -143,36 +143,35 @@ class StockReviewFooterButtons private constructor() {
         )
 
         @JvmStatic
-        fun colorDebugLeft(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): List<WimGuiButtonSpec<StockReviewAction>> =
-            buildList(context, factory, COLOR_CONFIRM, COLOR_APPLY, COLOR_RESTORE)
+        fun left(
+            kind: StockReviewFooterButtonSetKind,
+            context: StockReviewFooterContext,
+            factory: StockReviewActionButtonFactory,
+        ): List<WimGuiButtonSpec<StockReviewAction>> =
+            buttonSet(kind).leftButtons(context, factory)
 
         @JvmStatic
-        fun colorDebugRight(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): WimGuiButtonSpec<StockReviewAction> =
-            COLOR_CANCEL.build(context, factory)
+        fun right(
+            kind: StockReviewFooterButtonSetKind,
+            context: StockReviewFooterContext,
+            factory: StockReviewActionButtonFactory,
+        ): WimGuiButtonSpec<StockReviewAction>? =
+            buttonSet(kind).rightButton(context, factory)
 
-        @JvmStatic
-        fun filtersLeft(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): List<WimGuiButtonSpec<StockReviewAction>> =
-            buildList(context, factory, FILTER_CONFIRM, FILTER_RESET)
+        private fun buttonSet(kind: StockReviewFooterButtonSetKind): StockReviewFooterButtonSet =
+            when (kind) {
+                StockReviewFooterButtonSetKind.COLOR_DEBUG -> COLOR_DEBUG_SET
+                StockReviewFooterButtonSetKind.FILTERS -> FILTERS_SET
+                StockReviewFooterButtonSetKind.SHIP_CATALOG_DEBUG -> SHIP_CATALOG_DEBUG_SET
+                StockReviewFooterButtonSetKind.REVIEW -> REVIEW_SET
+                StockReviewFooterButtonSetKind.TRADE -> TRADE_SET
+            }
 
-        @JvmStatic
-        fun filtersRight(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): WimGuiButtonSpec<StockReviewAction> =
-            FILTER_CANCEL.build(context, factory)
-
-        @JvmStatic
-        fun shipCatalogDebugLeft(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): List<WimGuiButtonSpec<StockReviewAction>> =
-            buildList(context, factory, GO_BACK)
-
-        @JvmStatic
-        fun reviewLeft(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): List<WimGuiButtonSpec<StockReviewAction>> =
-            buildList(context, factory, REVIEW_CONFIRM)
-
-        @JvmStatic
-        fun reviewRight(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): WimGuiButtonSpec<StockReviewAction> =
-            REVIEW_BACK.build(context, factory)
-
-        @JvmStatic
-        fun tradeLeft(context: StockReviewFooterContext, factory: StockReviewActionButtonFactory): List<WimGuiButtonSpec<StockReviewAction>> =
-            buildList(context, factory, TRADE_REVIEW, PURCHASE_ALL, SELL_ALL, RESET_ALL)
+        private val COLOR_DEBUG_SET = StockReviewFooterButtonSet(COLOR_CANCEL, COLOR_CONFIRM, COLOR_APPLY, COLOR_RESTORE)
+        private val FILTERS_SET = StockReviewFooterButtonSet(FILTER_CANCEL, FILTER_CONFIRM, FILTER_RESET)
+        private val SHIP_CATALOG_DEBUG_SET = StockReviewFooterButtonSet(null, GO_BACK)
+        private val REVIEW_SET = StockReviewFooterButtonSet(REVIEW_BACK, REVIEW_CONFIRM)
+        private val TRADE_SET = StockReviewFooterButtonSet(null, TRADE_REVIEW, PURCHASE_ALL, SELL_ALL, RESET_ALL)
 
         private fun footer(
             id: String,
@@ -210,11 +209,22 @@ class StockReviewFooterButtons private constructor() {
                 tooltip,
             )
 
-        private fun buildList(
-            context: StockReviewFooterContext,
-            factory: StockReviewActionButtonFactory,
-            vararg definitions: StockReviewButtonDefinition<StockReviewFooterContext>,
-        ): List<WimGuiButtonSpec<StockReviewAction>> =
-            definitions.map { it.build(context, factory) }
     }
+}
+
+class StockReviewFooterButtonSet(
+    private val rightDefinition: StockReviewButtonDefinition<StockReviewFooterContext>?,
+    private vararg val leftDefinitions: StockReviewButtonDefinition<StockReviewFooterContext>,
+) {
+    fun leftButtons(
+        context: StockReviewFooterContext,
+        factory: StockReviewActionButtonFactory,
+    ): List<WimGuiButtonSpec<StockReviewAction>> =
+        leftDefinitions.map { it.build(context, factory) }
+
+    fun rightButton(
+        context: StockReviewFooterContext,
+        factory: StockReviewActionButtonFactory,
+    ): WimGuiButtonSpec<StockReviewAction>? =
+        rightDefinition?.build(context, factory)
 }

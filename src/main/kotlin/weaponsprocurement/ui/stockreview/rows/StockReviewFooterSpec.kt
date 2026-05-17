@@ -13,6 +13,14 @@ enum class StockReviewFooterLayoutKind {
     LEFT_ROW_AND_RIGHT_BUTTON,
 }
 
+enum class StockReviewFooterButtonSetKind {
+    COLOR_DEBUG,
+    FILTERS,
+    SHIP_CATALOG_DEBUG,
+    REVIEW,
+    TRADE,
+}
+
 class StockReviewFooterContext(
     @JvmField val tradeContext: StockReviewTradeContext,
     @JvmField val pendingTrades: List<StockReviewPendingTrade>?,
@@ -23,68 +31,53 @@ class StockReviewFooterContext(
 class StockReviewFooterSpec private constructor(
     @JvmField val modal: WimGuiModalLayout,
     @JvmField val layoutKind: StockReviewFooterLayoutKind,
-    private val leftButtons: (StockReviewFooterContext) -> List<WimGuiButtonSpec<StockReviewAction>>,
-    private val rightButton: ((StockReviewFooterContext) -> WimGuiButtonSpec<StockReviewAction>)?,
+    @JvmField val buttonSetKind: StockReviewFooterButtonSetKind,
 ) {
-    fun leftButtons(context: StockReviewFooterContext): List<WimGuiButtonSpec<StockReviewAction>> = leftButtons.invoke(context)
+    fun leftButtons(context: StockReviewFooterContext): List<WimGuiButtonSpec<StockReviewAction>> =
+        StockReviewFooterButtons.left(buttonSetKind, context, BUTTON_FACTORY)
 
-    fun rightButton(context: StockReviewFooterContext): WimGuiButtonSpec<StockReviewAction>? = rightButton?.invoke(context)
+    fun rightButton(context: StockReviewFooterContext): WimGuiButtonSpec<StockReviewAction>? =
+        StockReviewFooterButtons.right(buttonSetKind, context, BUTTON_FACTORY)
 
     companion object {
         private val BUTTON_FACTORY = StockReviewActionButtonFactory(StockReviewStyle.ROW_BORDER)
 
         @JvmStatic
-        fun colorDebug(): StockReviewFooterSpec = leftAndRight(
-            StockReviewStyle.MODAL,
-            { context -> StockReviewFooterButtons.colorDebugLeft(context, BUTTON_FACTORY) },
-            { context -> StockReviewFooterButtons.colorDebugRight(context, BUTTON_FACTORY) },
-        )
+        fun colorDebug(): StockReviewFooterSpec =
+            leftAndRight(StockReviewStyle.MODAL, StockReviewFooterButtonSetKind.COLOR_DEBUG)
 
         @JvmStatic
-        fun filters(): StockReviewFooterSpec = leftAndRight(
-            StockReviewStyle.FILTER_MODAL,
-            { context -> StockReviewFooterButtons.filtersLeft(context, BUTTON_FACTORY) },
-            { context -> StockReviewFooterButtons.filtersRight(context, BUTTON_FACTORY) },
-        )
+        fun filters(): StockReviewFooterSpec =
+            leftAndRight(StockReviewStyle.FILTER_MODAL, StockReviewFooterButtonSetKind.FILTERS)
 
         @JvmStatic
-        fun shipCatalogDebug(): StockReviewFooterSpec = leftRow(
-            StockReviewStyle.MODAL,
-            { context -> StockReviewFooterButtons.shipCatalogDebugLeft(context, BUTTON_FACTORY) },
-        )
+        fun shipCatalogDebug(): StockReviewFooterSpec =
+            leftRow(StockReviewStyle.MODAL, StockReviewFooterButtonSetKind.SHIP_CATALOG_DEBUG)
 
         @JvmStatic
-        fun review(): StockReviewFooterSpec = leftAndRight(
-            StockReviewStyle.REVIEW_MODAL,
-            { context -> StockReviewFooterButtons.reviewLeft(context, BUTTON_FACTORY) },
-            { context -> StockReviewFooterButtons.reviewRight(context, BUTTON_FACTORY) },
-        )
+        fun review(): StockReviewFooterSpec =
+            leftAndRight(StockReviewStyle.REVIEW_MODAL, StockReviewFooterButtonSetKind.REVIEW)
 
         @JvmStatic
-        fun trade(): StockReviewFooterSpec = leftRow(
-            StockReviewStyle.MODAL,
-            { context -> StockReviewFooterButtons.tradeLeft(context, BUTTON_FACTORY) },
-        )
+        fun trade(): StockReviewFooterSpec =
+            leftRow(StockReviewStyle.MODAL, StockReviewFooterButtonSetKind.TRADE)
 
         private fun leftRow(
             modal: WimGuiModalLayout,
-            leftButtons: (StockReviewFooterContext) -> List<WimGuiButtonSpec<StockReviewAction>>,
+            buttonSetKind: StockReviewFooterButtonSetKind,
         ): StockReviewFooterSpec = StockReviewFooterSpec(
             modal,
             StockReviewFooterLayoutKind.LEFT_BUTTON_ROW,
-            leftButtons,
-            null,
+            buttonSetKind,
         )
 
         private fun leftAndRight(
             modal: WimGuiModalLayout,
-            leftButtons: (StockReviewFooterContext) -> List<WimGuiButtonSpec<StockReviewAction>>,
-            rightButton: (StockReviewFooterContext) -> WimGuiButtonSpec<StockReviewAction>,
+            buttonSetKind: StockReviewFooterButtonSetKind,
         ): StockReviewFooterSpec = StockReviewFooterSpec(
             modal,
             StockReviewFooterLayoutKind.LEFT_ROW_AND_RIGHT_BUTTON,
-            leftButtons,
-            rightButton,
+            buttonSetKind,
         )
 
     }

@@ -327,20 +327,35 @@ if ($actionControlsText -notmatch "class StockReviewActionRef" -or
 }
 if ($footerSpecText -match "StockReviewActionGroup" -or
     $footerSpecText -match "BUTTON_FACTORY\.button" -or
-    $footerSpecText -notmatch "StockReviewFooterButtons\.tradeLeft" -or
-    $footerSpecText -notmatch "StockReviewFooterButtons\.reviewLeft" -or
+    $footerSpecText -match "\{ context ->" -or
+    $footerSpecText -match "invoke\(context\)" -or
+    $footerSpecText -notmatch "enum class StockReviewFooterButtonSetKind" -or
+    $footerSpecText -notmatch "buttonSetKind: StockReviewFooterButtonSetKind" -or
+    $footerSpecText -notmatch "StockReviewFooterButtonSetKind\.TRADE" -or
+    $footerSpecText -notmatch "StockReviewFooterButtonSetKind\.REVIEW" -or
+    $footerSpecText -notmatch "StockReviewFooterButtons\.left" -or
+    $footerSpecText -notmatch "StockReviewFooterButtons\.right" -or
     $footerButtonsText -notmatch "StockReviewButtonDefinition" -or
+    $footerButtonsText -notmatch "class StockReviewFooterButtonSet" -or
+    $footerButtonsText -notmatch "fun left\(" -or
+    $footerButtonsText -notmatch "fun right\(" -or
+    $footerButtonsText -notmatch "buttonSet\(kind\)" -or
     $footerButtonsText -notmatch "PURCHASE_ALL" -or
     $footerButtonsText -notmatch "RESET_ALL") {
-    throw "Stock-review footer buttons must be declared in StockReviewFooterButtons, not inline in StockReviewFooterSpec."
+    throw "Stock-review footer specs must use explicit button-set kinds, with button definitions declared in StockReviewFooterButtons."
 }
 if ($actionRowRendererText -match "StockReviewActionGroup" -or
     $actionRowRendererText -match "BUTTON_FACTORY\.button" -or
-    $actionRowRendererText -notmatch "StockReviewActionRowButtons\.build" -or
+    $actionRowRendererText -notmatch "StockReviewActionRowButtons\.build\(" -or
+    $actionRowRendererText -notmatch "modeSpec\.actionRowKind" -or
     $actionRowButtonsText -notmatch "StockReviewButtonDefinition" -or
+    $actionRowButtonsText -notmatch "class StockReviewActionRowButtonSet" -or
+    $actionRowButtonsText -notmatch "buttonSet\(kind\)" -or
+    $actionRowButtonsText -notmatch "StockReviewActionRowKind\.TRADE_CONTROLS" -or
+    $actionRowButtonsText -notmatch "StockReviewActionRowKind\.NONE" -or
     $actionRowButtonsText -notmatch "BLACK_MARKET" -or
     $actionRowButtonsText -notmatch "WeaponsProcurementConfig\.isDebugShipCatalogViewEnabled") {
-    throw "Stock-review action-row buttons must be declared in StockReviewActionRowButtons, not inline in StockReviewActionRowRenderer."
+    throw "Stock-review action-row renderers must route through explicit action-row button sets."
 }
 if ($itemTypeHeadingRowsText -notmatch "object StockReviewItemTypeHeadingRows" -or
     $itemTypeHeadingRowsText -notmatch "fun itemType" -or
