@@ -61,12 +61,12 @@ class StockReviewFooterRenderer private constructor() {
         private fun renderFilterFooter(root: CustomPanelAPI, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>) {
             WimGuiModalFooter.addLeftRowAndRightButton(
                 root,
-                StockReviewStyle.MODAL,
+                StockReviewStyle.FILTER_MODAL,
                 StockReviewStyle.ACTION_BUTTON_HEIGHT,
                 StockReviewStyle.BUTTON_GAP,
                 WimGuiButtonSpecs.of(
                     footerButton("Confirm", StockReviewAction.goBack(), true, StockReviewStyle.CONFIRM_BUTTON, "Return to the trade screen with the current filters."),
-                    footerButton("Reset Filters", StockReviewAction.resetFilters(), true, StockReviewStyle.LOAD_BUTTON, "Clear every active filter."),
+                    footerButton("Reset", StockReviewAction.resetFilters(), true, StockReviewStyle.LOAD_BUTTON, "Clear every active filter."),
                 ),
                 footerButton("Cancel", StockReviewAction.goBack(), true, StockReviewStyle.CANCEL_BUTTON, "Return to the trade screen."),
                 buttons,

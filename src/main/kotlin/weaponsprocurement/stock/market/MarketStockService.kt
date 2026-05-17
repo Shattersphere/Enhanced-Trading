@@ -152,16 +152,12 @@ class MarketStockService {
     companion object {
         @JvmStatic
         fun isTradeSubmarket(submarket: SubmarketAPI?, includeBlackMarket: Boolean): Boolean {
-            if (submarket == null) return false
-            val id = submarket.specId
-            if (isNonTradeSubmarket(id)) return false
-            if (!includeBlackMarket && Submarkets.SUBMARKET_BLACK == id) return false
-            return submarket.cargoNullOk != null
+            return StockSubmarketAccess.isTradeEligible(submarket, includeBlackMarket)
         }
 
         @JvmStatic
         fun isNonTradeSubmarket(submarketId: String?): Boolean {
-            return Submarkets.SUBMARKET_STORAGE == submarketId || Submarkets.LOCAL_RESOURCES == submarketId
+            return StockSubmarketAccess.isNonTradeSubmarket(submarketId)
         }
 
         @JvmStatic

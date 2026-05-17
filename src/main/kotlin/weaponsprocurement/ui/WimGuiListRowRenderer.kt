@@ -3,7 +3,7 @@ package weaponsprocurement.ui
 import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowIcon
-import weaponsprocurement.ui.stockreview.rendering.StockReviewWeaponIconPlugin
+import weaponsprocurement.ui.stockreview.rendering.StockReviewPlainIconPlugin
 import java.awt.Color
 
 class WimGuiListRowRenderer private constructor() {
@@ -98,7 +98,7 @@ class WimGuiListRowRenderer private constructor() {
             val panel = parent.createCustomPanel(
                 size,
                 size,
-                StockReviewWeaponIconPlugin(icon.spriteName, icon.motifType),
+                StockReviewPlainIconPlugin(icon.spriteName),
             )
             parent.addComponent(panel).inTL(x, y)
         }

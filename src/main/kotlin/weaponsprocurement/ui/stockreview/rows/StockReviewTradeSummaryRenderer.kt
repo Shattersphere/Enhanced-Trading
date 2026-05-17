@@ -20,7 +20,7 @@ class StockReviewTradeSummaryRenderer private constructor() {
             val netCost = tradeContext.totalCost()
             val cargoDelta = tradeContext.totalCargoSpaceDelta()
             val width = if (reviewMode) StockReviewStyle.REVIEW_LIST_WIDTH else StockReviewStyle.LIST_WIDTH
-            var rowY = StockReviewStyle.SUMMARY_TOP
+            var rowY = StockReviewStyle.summaryTop(reviewMode)
             val warning = state?.getTradeWarning() ?: "None"
             addSummaryRow(root, width, rowY, "Warning", warning, if (warning == "None") StockReviewStyle.CELL_BACKGROUND else StockReviewStyle.PRESET_SCOPE_BUTTON, "Most recent trade warning for credits or cargo capacity.")
             rowY += StockReviewStyle.ROW_HEIGHT + StockReviewStyle.SUMMARY_ROW_GAP

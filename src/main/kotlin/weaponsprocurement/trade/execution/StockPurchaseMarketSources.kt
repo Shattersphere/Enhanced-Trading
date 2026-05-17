@@ -67,6 +67,7 @@ class StockPurchaseMarketSources private constructor() {
                 if (!stock.isPurchasable() || stock.count <= 0) continue
                 val market = findMarket(sector, stock.marketId)
                 val submarket = market?.getSubmarket(stock.submarketId)
+                if (!MarketStockService.isTradeSubmarket(submarket, true)) continue
                 val cargo = submarket?.cargoNullOk
                 val stack = StockItemCargo.itemStack(cargo, itemType, itemId)
                 val liveAvailable = if (stack == null) 0 else Math.round(stack.size)

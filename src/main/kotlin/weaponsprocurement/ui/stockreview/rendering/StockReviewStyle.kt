@@ -15,10 +15,13 @@ class StockReviewStyle private constructor() {
         private const val FALLBACK_HEIGHT = 640f
         private const val MIN_FULLSCREEN_WIDTH = 900f
         private const val MIN_FULLSCREEN_HEIGHT = 520f
-        private const val SCREEN_EDGE_X_MARGIN = 24f
-        private const val SCREEN_EDGE_Y_MARGIN = 34f
+        private const val SCREEN_EDGE_X_MARGIN = 8f
+        private const val SCREEN_EDGE_Y_MARGIN = 24f
+        private const val REVIEW_TARGET_WIDTH = 900f
+        private const val REVIEW_TARGET_HEIGHT = 620f
+        private const val FILTER_TARGET_WIDTH = 510f
 
-        @JvmField val WIDTH = fullscreenWidth()
+        @JvmField var WIDTH = fullscreenWidth()
         const val PAD = 10f
         const val SMALL_PAD = 4f
         const val SECTION_GAP = PAD
@@ -31,7 +34,7 @@ class StockReviewStyle private constructor() {
         const val FILTER_BUTTON_WIDTH = 108f
         const val COLOR_BUTTON_WIDTH = 82f
         const val BUTTON_GAP = 5f
-        const val STOCK_CELL_WIDTH = 104f
+        const val STOCK_CELL_WIDTH = 128f
         const val INVENTORY_CELL_WIDTH = 102f
         const val PLAN_CELL_WIDTH = 184f
         const val PRICE_CELL_WIDTH = 120f
@@ -42,7 +45,9 @@ class StockReviewStyle private constructor() {
         const val TRADE_ROW_RIGHT_BLOCK_WIDTH = STOCK_CELL_WIDTH + PRICE_CELL_WIDTH + PLAN_CELL_WIDTH + TRADE_CONTROL_BLOCK_WIDTH + 3f * BUTTON_GAP
         const val REVIEW_STOCK_CELL_WIDTH = STOCK_CELL_WIDTH
         const val REVIEW_ROW_RIGHT_BLOCK_WIDTH = REVIEW_STOCK_CELL_WIDTH + PLAN_CELL_WIDTH + BUTTON_GAP
-        @JvmField val REVIEW_WIDTH = WIDTH
+        @JvmField var REVIEW_WIDTH = compactWidth(REVIEW_TARGET_WIDTH)
+        @JvmField var REVIEW_HEIGHT = compactHeight(REVIEW_TARGET_HEIGHT)
+        @JvmField var FILTER_WIDTH = compactWidth(FILTER_TARGET_WIDTH)
         const val DEBUG_VALUE_WIDTH = 430f
         const val DEBUG_SAMPLE_WIDTH = 130f
         const val DEBUG_DELTA_BUTTON_WIDTH = 48f
@@ -55,11 +60,12 @@ class StockReviewStyle private constructor() {
         const val SUMMARY_HEIGHT = SUMMARY_ROW_COUNT * ROW_HEIGHT + (SUMMARY_ROW_COUNT - 1) * SUMMARY_ROW_GAP
         const val TRADE_ACTION_ROW_TOP = PAD
         const val TRADE_LIST_TOP = TRADE_ACTION_ROW_TOP + ACTION_BUTTON_HEIGHT + SECTION_GAP
-        const val REVIEW_LIST_TOP = TRADE_LIST_TOP
-        @JvmField val HEIGHT = fullscreenHeight()
-        @JvmField val SUMMARY_TOP = HEIGHT - PAD - ACTION_BUTTON_HEIGHT - SECTION_GAP - SUMMARY_HEIGHT
-        @JvmField val TRADE_LIST_HEIGHT = Math.max(ROW_HEIGHT + 2f * SMALL_PAD, SUMMARY_TOP - SECTION_GAP - TRADE_LIST_TOP)
-        @JvmField val REVIEW_LIST_HEIGHT = TRADE_LIST_HEIGHT
+        const val REVIEW_LIST_TOP = PAD
+        @JvmField var HEIGHT = fullscreenHeight()
+        @JvmField var SUMMARY_TOP = summaryTop(HEIGHT)
+        @JvmField var REVIEW_SUMMARY_TOP = summaryTop(REVIEW_HEIGHT)
+        @JvmField var TRADE_LIST_HEIGHT = Math.max(ROW_HEIGHT + 2f * SMALL_PAD, SUMMARY_TOP - SECTION_GAP - TRADE_LIST_TOP)
+        @JvmField var REVIEW_LIST_HEIGHT = Math.max(ROW_HEIGHT + 2f * SMALL_PAD, REVIEW_SUMMARY_TOP - SECTION_GAP - REVIEW_LIST_TOP)
         const val TEXT_TOP_PAD = WimGuiStyle.TEXT_TOP_PAD
         const val TEXT_LEFT_PAD = WimGuiStyle.TEXT_LEFT_PAD
         const val WEAPON_INDENT = 18f
@@ -72,13 +78,16 @@ class StockReviewStyle private constructor() {
         const val BUTTON_POLL_FRAMES_AFTER_MOUSE_EVENT = 3
         const val REFRESH_VANILLA_CORE_AFTER_PURCHASE = false
 
-        @JvmField val MODAL = WimGuiModalLayout(WIDTH, HEIGHT, PAD, PAD, HEADER_HEIGHT + SMALL_PAD + ACTION_ROW_HEIGHT, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
-        @JvmField val REVIEW_MODAL = WimGuiModalLayout(REVIEW_WIDTH, HEIGHT, PAD, PAD, 0f, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
-        @JvmField val LIST_TOP = MODAL.bodyTop()
-        @JvmField val LIST_HEIGHT = MODAL.bodyHeight()
-        @JvmField val LIST_WIDTH = MODAL.contentWidth()
-        @JvmField val FILTER_LIST_WIDTH = LIST_WIDTH / 4f
-        @JvmField val REVIEW_LIST_WIDTH = REVIEW_MODAL.contentWidth()
+        @JvmField var MODAL = WimGuiModalLayout(WIDTH, HEIGHT, PAD, PAD, HEADER_HEIGHT + SMALL_PAD + ACTION_ROW_HEIGHT, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
+        @JvmField var REVIEW_MODAL = WimGuiModalLayout(REVIEW_WIDTH, REVIEW_HEIGHT, PAD, PAD, 0f, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
+        @JvmField var FILTER_MODAL = WimGuiModalLayout(FILTER_WIDTH, HEIGHT, PAD, PAD, HEADER_HEIGHT, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
+        @JvmField var LIST_TOP = MODAL.bodyTop()
+        @JvmField var LIST_HEIGHT = MODAL.bodyHeight()
+        @JvmField var LIST_WIDTH = MODAL.contentWidth()
+        @JvmField var FILTER_LIST_TOP = FILTER_MODAL.bodyTop()
+        @JvmField var FILTER_LIST_HEIGHT = FILTER_MODAL.bodyHeight()
+        @JvmField var FILTER_LIST_WIDTH = FILTER_MODAL.contentWidth()
+        @JvmField var REVIEW_LIST_WIDTH = REVIEW_MODAL.contentWidth()
 
         // Ported from the accepted ACG GUI palette. Hover colors intentionally
         // equal idle colors because Starsector darkens idle buttons differently.
@@ -189,9 +198,33 @@ class StockReviewStyle private constructor() {
             SCROLL = DEFAULT_TEXT
             TEXT = WHITE_TEXT
             MUTED = WHITE_TEXT
+            refreshLayout()
+        }
+
+        @JvmStatic
+        fun refreshLayout() {
+            WIDTH = fullscreenWidth()
+            HEIGHT = fullscreenHeight()
+            REVIEW_WIDTH = compactWidth(REVIEW_TARGET_WIDTH)
+            REVIEW_HEIGHT = compactHeight(REVIEW_TARGET_HEIGHT)
+            FILTER_WIDTH = compactWidth(FILTER_TARGET_WIDTH)
+            MODAL = WimGuiModalLayout(WIDTH, HEIGHT, PAD, PAD, HEADER_HEIGHT + SMALL_PAD + ACTION_ROW_HEIGHT, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
+            REVIEW_MODAL = WimGuiModalLayout(REVIEW_WIDTH, REVIEW_HEIGHT, PAD, PAD, 0f, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
+            FILTER_MODAL = WimGuiModalLayout(FILTER_WIDTH, HEIGHT, PAD, PAD, HEADER_HEIGHT, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
+            LIST_TOP = MODAL.bodyTop()
+            LIST_HEIGHT = MODAL.bodyHeight()
+            LIST_WIDTH = MODAL.contentWidth()
+            FILTER_LIST_TOP = FILTER_MODAL.bodyTop()
+            FILTER_LIST_HEIGHT = FILTER_MODAL.bodyHeight()
+            FILTER_LIST_WIDTH = FILTER_MODAL.contentWidth()
+            REVIEW_LIST_WIDTH = REVIEW_MODAL.contentWidth()
+            SUMMARY_TOP = summaryTop(HEIGHT)
+            REVIEW_SUMMARY_TOP = summaryTop(REVIEW_HEIGHT)
+            TRADE_LIST_HEIGHT = Math.max(ROW_HEIGHT + 2f * SMALL_PAD, SUMMARY_TOP - SECTION_GAP - TRADE_LIST_TOP)
+            REVIEW_LIST_HEIGHT = Math.max(ROW_HEIGHT + 2f * SMALL_PAD, REVIEW_SUMMARY_TOP - SECTION_GAP - REVIEW_LIST_TOP)
             LIST = listSpec(MODAL, PAD, LIST_TOP, LIST_WIDTH, LIST_HEIGHT)
             TRADE_LIST = listSpec(MODAL, PAD, TRADE_LIST_TOP, LIST_WIDTH, TRADE_LIST_HEIGHT)
-            FILTER_LIST = listSpec(MODAL, PAD, LIST_TOP, FILTER_LIST_WIDTH, LIST_HEIGHT)
+            FILTER_LIST = listSpec(FILTER_MODAL, PAD, FILTER_LIST_TOP, FILTER_LIST_WIDTH, FILTER_LIST_HEIGHT)
             REVIEW_LIST = listSpec(REVIEW_MODAL, PAD, REVIEW_LIST_TOP, REVIEW_LIST_WIDTH, REVIEW_LIST_HEIGHT)
         }
 
@@ -220,13 +253,46 @@ class StockReviewStyle private constructor() {
         )
 
         @JvmStatic
-        fun initialListBounds(): WimGuiListBounds = WimGuiListBounds(0, PAD, TRADE_LIST_TOP, LIST_WIDTH, TRADE_LIST_HEIGHT)
+        fun initialListBounds(): WimGuiListBounds {
+            refreshLayout()
+            return WimGuiListBounds(0, PAD, TRADE_LIST_TOP, LIST_WIDTH, TRADE_LIST_HEIGHT)
+        }
 
         @JvmStatic
         fun initialListBounds(reviewMode: Boolean): WimGuiListBounds =
-            if (reviewMode) WimGuiListBounds(0, PAD, REVIEW_LIST_TOP, REVIEW_LIST_WIDTH, REVIEW_LIST_HEIGHT) else initialListBounds()
+            if (reviewMode) {
+                refreshLayout()
+                WimGuiListBounds(0, PAD, REVIEW_LIST_TOP, REVIEW_LIST_WIDTH, REVIEW_LIST_HEIGHT)
+            } else {
+                initialListBounds()
+            }
 
         @JvmStatic
-        fun widthFor(reviewMode: Boolean): Float = if (reviewMode) REVIEW_WIDTH else WIDTH
+        fun widthFor(reviewMode: Boolean): Float {
+            refreshLayout()
+            return if (reviewMode) REVIEW_WIDTH else WIDTH
+        }
+
+        @JvmStatic
+        fun heightFor(reviewMode: Boolean): Float {
+            refreshLayout()
+            return if (reviewMode) REVIEW_HEIGHT else HEIGHT
+        }
+
+        @JvmStatic
+        fun modalFor(reviewMode: Boolean, filterMode: Boolean, colorDebugMode: Boolean): WimGuiModalLayout {
+            if (filterMode) return FILTER_MODAL
+            if (reviewMode && !colorDebugMode) return REVIEW_MODAL
+            return MODAL
+        }
+
+        @JvmStatic
+        fun summaryTop(reviewMode: Boolean): Float = if (reviewMode) REVIEW_SUMMARY_TOP else SUMMARY_TOP
+
+        private fun summaryTop(height: Float): Float = height - PAD - ACTION_BUTTON_HEIGHT - SECTION_GAP - SUMMARY_HEIGHT
+
+        private fun compactWidth(target: Float): Float = Math.min(fullscreenWidth(), target)
+
+        private fun compactHeight(target: Float): Float = Math.min(fullscreenHeight(), target)
     }
 }

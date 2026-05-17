@@ -103,7 +103,7 @@ class StockReviewReviewListModel private constructor() {
                     itemTooltip,
                     StockReviewItemTooltip.forRecord(record, itemTooltip),
                     StockReviewStyle.SECTION_INDENT,
-                    StockReviewRowIcon.weapon(record),
+                    StockReviewRowIcon.item(record),
                 ),
             )
             if (!expanded) {

@@ -36,11 +36,11 @@ class StockReviewSourceState {
 
     fun isIncludeCurrentMarketStorage(): Boolean = includeCurrentMarketStorage
 
-    fun isIncludeBlackMarket(): Boolean = !getSourceMode().isRemote() && includeBlackMarket
+    fun isIncludeBlackMarket(): Boolean = getSourceMode().supportsBlackMarketToggle() && includeBlackMarket
 
     fun toggleBlackMarket(): Boolean {
         val previous = includeBlackMarket
-        if (getSourceMode().isRemote()) {
+        if (!getSourceMode().supportsBlackMarketToggle()) {
             includeBlackMarket = false
             return previous != includeBlackMarket
         }
@@ -63,7 +63,7 @@ class StockReviewSourceState {
         val previousBlackMarket = includeBlackMarket
         val next = getSourceMode().next()
         sourceMode = next
-        if (next.isRemote()) {
+        if (!next.supportsBlackMarketToggle()) {
             includeBlackMarket = false
         }
         return previousSource != next || previousBlackMarket != includeBlackMarket

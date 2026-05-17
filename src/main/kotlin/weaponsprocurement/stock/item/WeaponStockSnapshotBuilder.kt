@@ -93,7 +93,7 @@ class WeaponStockSnapshotBuilder {
             market,
             ownedSourcePolicy,
             sortMode,
-            if (resolvedSourceMode.isRemote()) false else includeBlackMarket,
+            if (StockSourceMode.FIXERS == resolvedSourceMode) false else includeBlackMarket,
             resolvedSourceMode,
             grouped,
         )
@@ -109,7 +109,7 @@ class WeaponStockSnapshotBuilder {
             return globalWeaponMarketService.collectFixersWeaponStock(sector)
         }
         if (StockSourceMode.SECTOR == sourceMode) {
-            return globalWeaponMarketService.collectSectorWeaponStock(sector)
+            return globalWeaponMarketService.collectSectorWeaponStock(sector, includeBlackMarket)
         }
         return marketStockService.collectCurrentMarketItemStock(market, includeBlackMarket)
     }

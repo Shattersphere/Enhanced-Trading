@@ -81,7 +81,7 @@ class StockReviewUiController(
             return true
         }
         if (StockReviewAction.Type.TOGGLE_BLACK_MARKET == type) {
-            if (state.getSourceMode().isRemote()) {
+            if (!state.getSourceMode().supportsBlackMarketToggle()) {
                 host.requestContentRebuild()
                 return true
             }

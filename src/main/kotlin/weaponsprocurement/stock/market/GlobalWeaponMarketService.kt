@@ -28,8 +28,8 @@ class GlobalWeaponMarketService {
     private var theoreticalCacheKey: String? = null
     private var theoreticalCache: Map<String, TheoreticalSaleIndex.Candidate>? = null
 
-    fun collectSectorWeaponStock(sector: SectorAPI?): MarketStockService.MarketStock {
-        return buildSectorWeaponStock(sector, WeaponsProcurementConfig.sectorMarketPriceMultiplier())
+    fun collectSectorWeaponStock(sector: SectorAPI?, includeBlackMarket: Boolean): MarketStockService.MarketStock {
+        return buildSectorWeaponStock(sector, WeaponsProcurementConfig.sectorMarketPriceMultiplier(), includeBlackMarket)
     }
 
     fun collectFixersWeaponStock(sector: SectorAPI?): MarketStockService.MarketStock {
@@ -43,13 +43,17 @@ class GlobalWeaponMarketService {
      * stock rows are marked up for WP pricing, but keep market/submarket ids so
      * confirmation can drain the actual remote cargo stacks.
      */
-    private fun buildSectorWeaponStock(sector: SectorAPI?, priceMultiplier: Float): MarketStockService.MarketStock {
+    private fun buildSectorWeaponStock(
+        sector: SectorAPI?,
+        priceMultiplier: Float,
+        includeBlackMarket: Boolean,
+    ): MarketStockService.MarketStock {
         val blacklist = WeaponMarketBlacklist.load()
         val builder = MarketStockService.MarketStockBuilder()
         val markets: List<MarketAPI> = sector?.economy?.marketsCopy ?: return builder.build()
 
         for (market in markets) {
-            val stock = marketStockService.collectCurrentMarketItemStock(market, true)
+            val stock = marketStockService.collectCurrentMarketItemStock(market, includeBlackMarket)
             for (itemKey in stock.itemKeys()) {
                 if (blacklist.isBannedFromSector(itemKey)) continue
                 val sources = stock.getSubmarketStocks(itemKey)

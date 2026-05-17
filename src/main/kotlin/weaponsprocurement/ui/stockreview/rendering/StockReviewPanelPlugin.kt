@@ -29,7 +29,7 @@ class StockReviewPanelPlugin(
 ) : WimGuiModalPanelPlugin<StockReviewAction>(
     StockReviewAction::class.java,
     StockReviewStyle.widthFor(reviewMode(launchState)),
-    StockReviewStyle.HEIGHT,
+    StockReviewStyle.heightFor(reviewMode(launchState)),
     StockReviewStyle.BUTTON_POLL_FRAMES_AFTER_MOUSE_EVENT,
     StockReviewStyle.initialListBounds(reviewMode(launchState)),
 ),

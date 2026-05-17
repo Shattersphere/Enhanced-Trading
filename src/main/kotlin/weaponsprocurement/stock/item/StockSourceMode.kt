@@ -12,6 +12,8 @@ enum class StockSourceMode(
 
     fun isRemote(): Boolean = remote
 
+    fun supportsBlackMarketToggle(): Boolean = this != FIXERS
+
     fun next(): StockSourceMode {
         val values = values()
         var current = this

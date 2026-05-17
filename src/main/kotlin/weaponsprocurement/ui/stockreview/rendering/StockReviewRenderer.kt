@@ -160,7 +160,7 @@ class StockReviewRenderer :
         }
         WimGuiModalHeader.addTitleStatusHeader(
             root,
-            StockReviewStyle.MODAL,
+            StockReviewStyle.modalFor(reviewMode, filterMode, colorDebugMode),
             StockReviewStyle.HEADER_HEIGHT,
             title,
             status,
@@ -202,9 +202,9 @@ class StockReviewRenderer :
                     StockReviewStyle.BLACK_MARKET_BUTTON_WIDTH,
                     "Black Market: ${onOff(snapshot.isIncludeBlackMarket())}",
                     StockReviewAction.toggleBlackMarket(),
-                    !snapshot.getSourceMode().isRemote(),
+                    snapshot.getSourceMode().supportsBlackMarketToggle(),
                     StockReviewStyle.ACTION_BACKGROUND,
-                    "Include black-market stock for Local source mode. Remote source modes control their own stock.",
+                    "Include black-market stock for Local and Sector Market source modes. Fixer's Market controls its own virtual stock.",
                 ),
                 buttonFactory.enabledButton(
                     StockReviewStyle.FILTER_BUTTON_WIDTH,

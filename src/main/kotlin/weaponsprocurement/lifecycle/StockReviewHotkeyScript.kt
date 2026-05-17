@@ -152,7 +152,7 @@ class StockReviewHotkeyScript : EveryFrameScript {
                 WimGuiDialogOpener.show(
                     host.getDialog(),
                     StockReviewStyle.widthFor(panelPlugin.isReviewMode()),
-                    StockReviewStyle.HEIGHT,
+                    StockReviewStyle.heightFor(panelPlugin.isReviewMode()),
                     panelPlugin,
                 )
                 DIALOG_TRACKER.markOpen()

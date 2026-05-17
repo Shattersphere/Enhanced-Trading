@@ -7,22 +7,34 @@ import weaponsprocurement.stock.item.WeaponStockRecord
 
 class StockReviewRowIcon private constructor(
     val spriteName: String,
-    val motifType: WeaponAPI.WeaponType?,
 ) {
     companion object {
         @JvmStatic
         fun weapon(spriteName: String?, motifType: WeaponAPI.WeaponType?): StockReviewRowIcon? {
             val resolvedSpriteName = spriteName?.takeIf { WimGuiTooltip.hasText(it) } ?: return null
-            return StockReviewRowIcon(resolvedSpriteName, motifType)
+            return StockReviewRowIcon(resolvedSpriteName)
         }
 
         @JvmStatic
         fun weapon(record: WeaponStockRecord?): StockReviewRowIcon? {
-            if (record == null || record.isWing() || record.spec == null) return null
+            if (record == null || record.spec == null) return null
             return weapon(
                 StockReviewWeaponIconPlugin.spriteName(record.spec),
                 StockReviewWeaponIconPlugin.motifType(record.spec),
             )
+        }
+
+        @JvmStatic
+        fun wing(record: WeaponStockRecord?): StockReviewRowIcon? {
+            val spriteName = record?.wingSpec?.variant?.hullSpec?.spriteName
+            val resolvedSpriteName = spriteName?.takeIf { WimGuiTooltip.hasText(it) } ?: return null
+            return StockReviewRowIcon(resolvedSpriteName)
+        }
+
+        @JvmStatic
+        fun item(record: WeaponStockRecord?): StockReviewRowIcon? {
+            if (record == null) return null
+            return if (record.isWing()) wing(record) else weapon(record)
         }
     }
 }

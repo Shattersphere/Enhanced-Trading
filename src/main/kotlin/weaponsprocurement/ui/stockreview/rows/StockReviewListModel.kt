@@ -191,7 +191,7 @@ object StockReviewListModel {
                 itemTooltip,
                 StockReviewItemTooltip.forRecord(record, itemTooltip),
                 StockReviewStyle.SECTION_INDENT,
-                StockReviewRowIcon.weapon(record),
+                StockReviewRowIcon.item(record),
             ),
         )
         if (!expanded) {
@@ -245,8 +245,8 @@ object StockReviewListModel {
         }
         val typeLabel = if (StockItemType.WING == itemType) "Wing Types" else "Weapon Types"
         return category.label +
-            " [$typeLabel: $itemTypes]" +
-            "[Selling: ${maxOf(0, selling)}]" +
-            "[Buying: ${maxOf(0, buying)}]"
+            " [$typeLabel: $itemTypes | " +
+            "Selling: ${maxOf(0, selling)} | " +
+            "Buying: ${maxOf(0, buying)}]"
     }
 }
