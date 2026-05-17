@@ -19,36 +19,44 @@ class StockReviewColorDebugRows private constructor() {
             val count = "[${Math.max(0, Math.min(targetIndex, targets.size - 1)) + 1}/${targets.size}]"
 
             rows.add(
-                StockReviewListRow.form(
-                    "Samples",
-                    WimGuiRowCell.of(
-                        StockReviewDebugCellGroup.colorSampleInfo("Container", color, "Preview this color as a plain container."),
-                        StockReviewDebugCellGroup.colorSampleButton("Button", color, "Preview this color as a button."),
-                        StockReviewDebugCellGroup.colorSampleButton("Toggle", color, "Preview this color as a toggle heading."),
+                StockReviewListRow.fromSpec(
+                    StockReviewRowSpecs.form(
+                        "Samples",
+                        WimGuiRowCell.of(
+                            StockReviewDebugCellGroup.colorSampleInfo("Container", color, "Preview this color as a plain container."),
+                            StockReviewDebugCellGroup.colorSampleButton("Button", color, "Preview this color as a button."),
+                            StockReviewDebugCellGroup.colorSampleButton("Toggle", color, "Preview this color as a toggle heading."),
+                        ),
                     ),
                 ),
             )
             rows.add(
-                StockReviewListRow.form(
-                    "Variable",
-                    WimGuiRowCell.of(
-                        StockReviewDebugCellGroup.colorValueButton((target?.label ?: "Unknown") + " " + count, StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugCycleTarget(1), "Cycle the color variable being edited."),
+                StockReviewListRow.fromSpec(
+                    StockReviewRowSpecs.form(
+                        "Variable",
+                        WimGuiRowCell.of(
+                            StockReviewDebugCellGroup.colorValueButton((target?.label ?: "Unknown") + " " + count, StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugCycleTarget(1), "Cycle the color variable being edited."),
+                        ),
                     ),
                 ),
             )
             rows.add(
-                StockReviewListRow.form(
-                    "Mode",
-                    WimGuiRowCell.of(
-                        StockReviewDebugCellGroup.colorValueButton(if (persistent) "Permanent" else "Temporary", if (persistent) StockReviewStyle.CONFIRM_BUTTON else StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugTogglePersistence(), "Toggle whether Apply writes the color permanently."),
+                StockReviewListRow.fromSpec(
+                    StockReviewRowSpecs.form(
+                        "Mode",
+                        WimGuiRowCell.of(
+                            StockReviewDebugCellGroup.colorValueButton(if (persistent) "Permanent" else "Temporary", if (persistent) StockReviewStyle.CONFIRM_BUTTON else StockReviewStyle.ACTION_BACKGROUND, StockReviewAction.debugTogglePersistence(), "Toggle whether Apply writes the color permanently."),
+                        ),
                     ),
                 ),
             )
             rows.add(
-                StockReviewListRow.form(
-                    "Preview",
-                    WimGuiRowCell.of(
-                        StockReviewDebugCellGroup.colorPreview(color),
+                StockReviewListRow.fromSpec(
+                    StockReviewRowSpecs.form(
+                        "Preview",
+                        WimGuiRowCell.of(
+                            StockReviewDebugCellGroup.colorPreview(color),
+                        ),
                     ),
                 ),
             )
@@ -65,13 +73,15 @@ class StockReviewColorDebugRows private constructor() {
             plusOne: StockReviewAction,
             plusTen: StockReviewAction,
         ): WimGuiListRow<StockReviewAction> {
-            return StockReviewListRow.form(
-                label,
-                WimGuiRowCell.of(
-                    StockReviewDebugCellGroup.colorDelta("-10", StockReviewStyle.CANCEL_BUTTON, minusTen, "Decrease this channel by 10."),
-                    StockReviewDebugCellGroup.colorDelta("-1", StockReviewStyle.CANCEL_BUTTON, minusOne, "Decrease this channel by 1."),
-                    StockReviewDebugCellGroup.colorDelta("+1", StockReviewStyle.CONFIRM_BUTTON, plusOne, "Increase this channel by 1."),
-                    StockReviewDebugCellGroup.colorDelta("+10", StockReviewStyle.CONFIRM_BUTTON, plusTen, "Increase this channel by 10."),
+            return StockReviewListRow.fromSpec(
+                StockReviewRowSpecs.form(
+                    label,
+                    WimGuiRowCell.of(
+                        StockReviewDebugCellGroup.colorDelta("-10", StockReviewStyle.CANCEL_BUTTON, minusTen, "Decrease this channel by 10."),
+                        StockReviewDebugCellGroup.colorDelta("-1", StockReviewStyle.CANCEL_BUTTON, minusOne, "Decrease this channel by 1."),
+                        StockReviewDebugCellGroup.colorDelta("+1", StockReviewStyle.CONFIRM_BUTTON, plusOne, "Increase this channel by 1."),
+                        StockReviewDebugCellGroup.colorDelta("+10", StockReviewStyle.CONFIRM_BUTTON, plusTen, "Increase this channel by 10."),
+                    ),
                 ),
             )
         }

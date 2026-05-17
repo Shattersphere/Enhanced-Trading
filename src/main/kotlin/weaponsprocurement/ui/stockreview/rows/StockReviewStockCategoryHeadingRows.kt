@@ -19,12 +19,14 @@ object StockReviewStockCategoryHeadingRows {
         expanded: Boolean,
         topGap: Boolean,
     ): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.categoryIndented(
-            WimGuiToggleHeading.label(label, expanded),
-            color,
-            StockReviewAction.toggle(itemType, category),
-            topGap,
-            StockReviewTooltips.category(category),
-            StockReviewStyle.WEAPON_INDENT,
+        StockReviewListRow.fromSpec(
+            StockReviewRowSpecs.category(
+                WimGuiToggleHeading.label(label, expanded),
+                color,
+                StockReviewAction.toggle(itemType, category),
+                topGap,
+                StockReviewTooltips.category(category),
+                StockReviewStyle.WEAPON_INDENT,
+            ),
         )
 }

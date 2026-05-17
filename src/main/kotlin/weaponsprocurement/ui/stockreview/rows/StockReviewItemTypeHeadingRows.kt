@@ -9,10 +9,12 @@ import java.util.Locale
 object StockReviewItemTypeHeadingRows {
     @JvmStatic
     fun itemType(itemType: StockItemType, count: Int, expanded: Boolean, topGap: Boolean): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.filterHeading(
-            WimGuiToggleHeading.countedLabel(itemType.sectionLabel, count, expanded),
-            StockReviewAction.toggle(itemType),
-            topGap,
-            "Show or hide ${itemType.sectionLabel.lowercase(Locale.US)}.",
+        StockReviewListRow.fromSpec(
+            StockReviewRowSpecs.filterHeading(
+                WimGuiToggleHeading.countedLabel(itemType.sectionLabel, count, expanded),
+                StockReviewAction.toggle(itemType),
+                topGap,
+                "Show or hide ${itemType.sectionLabel.lowercase(Locale.US)}.",
+            ),
         )
 }

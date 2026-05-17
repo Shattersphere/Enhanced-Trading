@@ -16,12 +16,14 @@ object StockReviewTradeGroupHeadingRows {
         expanded: Boolean,
         topGap: Boolean,
     ): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.category(
-            WimGuiToggleHeading.countedLabel(tradeGroup.label, count, expanded),
-            color(tradeGroup),
-            StockReviewAction.toggle(tradeGroup),
-            topGap,
-            "Show or hide queued ${tradeGroup.label.lowercase(Locale.US)} trades.",
+        StockReviewListRow.fromSpec(
+            StockReviewRowSpecs.category(
+                WimGuiToggleHeading.countedLabel(tradeGroup.label, count, expanded),
+                color(tradeGroup),
+                StockReviewAction.toggle(tradeGroup),
+                topGap,
+                "Show or hide queued ${tradeGroup.label.lowercase(Locale.US)} trades.",
+            ),
         )
 
     private fun color(tradeGroup: StockReviewTradeGroup): Color =

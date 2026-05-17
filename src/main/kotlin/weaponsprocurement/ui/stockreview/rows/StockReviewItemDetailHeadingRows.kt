@@ -37,12 +37,14 @@ object StockReviewItemDetailHeadingRows {
         expanded: Boolean,
         layout: StockReviewRowLayout,
     ): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.nestedHeading(
-            WimGuiToggleHeading.label(label, expanded),
-            layout.infoIndent,
-            layout.rightBlockWidth,
-            StockReviewAction.toggleItem(infoSectionKey(record, section)),
-            false,
-            "Show or hide ${label.lowercase(Locale.US)} rows.",
+        StockReviewListRow.fromSpec(
+            StockReviewRowSpecs.nestedHeading(
+                WimGuiToggleHeading.label(label, expanded),
+                layout.infoIndent,
+                layout.rightBlockWidth,
+                StockReviewAction.toggleItem(infoSectionKey(record, section)),
+                false,
+                "Show or hide ${label.lowercase(Locale.US)} rows.",
+            ),
         )
 }

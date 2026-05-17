@@ -23,7 +23,7 @@ object StockReviewReviewItemRows {
     ) {
         val record: WeaponStockRecord? = snapshot.getRecord(trade.itemKey)
         if (record == null) {
-            rows.add(StockReviewListRow.review(trade.itemKey))
+            rows.add(StockReviewListRow.fromSpec(StockReviewRowSpecs.reviewMissing(trade.itemKey)))
             return
         }
 

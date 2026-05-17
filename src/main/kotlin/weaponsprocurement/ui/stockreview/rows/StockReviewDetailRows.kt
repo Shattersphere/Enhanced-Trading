@@ -6,14 +6,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 object StockReviewDetailRows {
     @JvmStatic
     fun fromSpec(spec: StockReviewDetailRowSpec): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.labelTextIndented(
-            spec.label,
-            spec.value,
-            spec.layout,
-            spec.indent,
-            spec.topGap,
-            spec.tooltip,
-        )
+        StockReviewListRow.fromSpec(StockReviewRowSpecs.labelText(spec))
 
     @JvmStatic
     fun labelValue(

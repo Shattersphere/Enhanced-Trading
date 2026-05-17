@@ -9,6 +9,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rows.StockReviewFooterRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
+import weaponsprocurement.ui.stockreview.rows.StockReviewRowSpecs
 import weaponsprocurement.ui.stockreview.rows.StockReviewTradeSummaryRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import weaponsprocurement.ui.stockreview.state.StockReviewState
@@ -131,7 +132,7 @@ class StockReviewRenderer :
     )
 
     override fun createScrollRow(label: String, scrollDelta: Int): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.scroll(label, StockReviewAction.scrollList(scrollDelta))
+        StockReviewListRow.fromSpec(StockReviewRowSpecs.scroll(label, StockReviewAction.scrollList(scrollDelta)))
 
     override fun extraGapBefore(row: WimGuiListRow<StockReviewAction>): Float =
         if (row.hasTopGap()) StockReviewStyle.CATEGORY_TOP_GAP else 0f

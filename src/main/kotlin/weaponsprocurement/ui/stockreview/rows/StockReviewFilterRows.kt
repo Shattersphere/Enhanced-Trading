@@ -25,11 +25,13 @@ object StockReviewFilterRows {
     fun available(filter: StockReviewFilter): WimGuiListRow<StockReviewAction> = filter(filter, false)
 
     private fun filter(filter: StockReviewFilter, active: Boolean): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.filter(
-            filter.label,
-            active,
-            StockReviewAction.toggleFilter(filter),
-            false,
-            StockReviewTooltips.filter(filter, active),
+        StockReviewListRow.fromSpec(
+            StockReviewRowSpecs.filter(
+                filter.label,
+                active,
+                StockReviewAction.toggleFilter(filter),
+                false,
+                StockReviewTooltips.filter(filter, active),
+            ),
         )
 }

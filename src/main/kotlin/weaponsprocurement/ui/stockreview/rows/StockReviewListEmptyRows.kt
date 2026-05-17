@@ -11,10 +11,10 @@ object StockReviewListEmptyRows {
 
     @JvmStatic
     fun main(snapshot: WeaponStockSnapshot?, state: StockReviewState?): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.empty(mainMessage(snapshot, state))
+        StockReviewListRow.fromSpec(StockReviewRowSpecs.empty(mainMessage(snapshot, state)))
 
     @JvmStatic
-    fun review(): WimGuiListRow<StockReviewAction> = StockReviewListRow.empty(REVIEW_EMPTY)
+    fun review(): WimGuiListRow<StockReviewAction> = StockReviewListRow.fromSpec(StockReviewRowSpecs.empty(REVIEW_EMPTY))
 
     private fun mainMessage(snapshot: WeaponStockSnapshot?, state: StockReviewState?): String {
         if (snapshot != null && snapshot.getTotalRecords() > 0 && state != null && state.getActiveFilterCount() > 0) {

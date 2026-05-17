@@ -14,10 +14,12 @@ object StockReviewFilterHeadingRows {
         expanded: Boolean,
         topGap: Boolean,
     ): WimGuiListRow<StockReviewAction> =
-        StockReviewListRow.filterControlHeading(
-            WimGuiToggleHeading.countedLabel(group.label, activeCount, expanded),
-            StockReviewAction.toggle(group),
-            topGap,
-            StockReviewTooltips.filterHeading(group),
+        StockReviewListRow.fromSpec(
+            StockReviewRowSpecs.filterControlHeading(
+                WimGuiToggleHeading.countedLabel(group.label, activeCount, expanded),
+                StockReviewAction.toggle(group),
+                topGap,
+                StockReviewTooltips.filterHeading(group),
+            ),
         )
 }
