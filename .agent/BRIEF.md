@@ -13,7 +13,7 @@ The source tree is fully migrated to Gradle/Kotlin. `build.ps1` remains the norm
 ## Known-Good Source State
 
 - Current branch: `main`
-- Last source baseline before this deploy-maintenance pass: `fbabe8e` (`Centralize stock review row layouts`)
+- Recent source baseline before this doc/export cleanup: `e9f6014` (`Make sanity workflow manual only`)
 - Version in `mod_info.json`: `0.2.0`
 
 ## Commands

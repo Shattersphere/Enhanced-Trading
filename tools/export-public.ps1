@@ -47,7 +47,6 @@ $includeFiles = @(
     "tools/analyze-trade-rollback-diagnostics.ps1",
     "tools/validate-doc-links.ps1",
     "tools/validate-gui-button-style.ps1",
-    "tools/validate-jar-classes.ps1",
     "tools/validate-live-gui-classes.ps1"
 )
 
@@ -105,6 +104,27 @@ if (Test-Path -LiteralPath $publicWorkflow) {
         "`r`n"
     )
     Set-Content -LiteralPath $publicWorkflow -Value $workflowText -NoNewline
+}
+$publicDeploy = Join-Path $resolvedOutput "tools/deploy-live-mod.ps1"
+if (Test-Path -LiteralPath $publicDeploy) {
+    $deployText = Get-Content -LiteralPath $publicDeploy -Raw
+    $deployText = [regex]::Replace(
+        $deployText,
+        "(?ms)function Assert-DeployJarBoundary \{.*?\r?\n\}\r?\n\r?\nfunction Assert-DeployRoot",
+        @'
+function Assert-DeployJarBoundary {
+    param([string]$BaseRoot)
+
+    $jarPath = Join-Path $BaseRoot "jars\weapons-procurement.jar"
+    if (-not (Test-Path -LiteralPath $jarPath)) {
+        throw "Deploy jar not found: $jarPath"
+    }
+}
+
+function Assert-DeployRoot
+'@
+    )
+    Set-Content -LiteralPath $publicDeploy -Value $deployText -NoNewline
 }
 $publicBuildWrapper = Join-Path $resolvedOutput "build.ps1"
 @'

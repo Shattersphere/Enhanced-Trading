@@ -2,7 +2,7 @@
 
 Status: private
 Scope: Curating the private Weapons Procurement repo into a public GitHub repo/package for `https://github.com/Shattersphere-Mods`
-Last updated: 2026-05-17
+Last updated: 2026-05-18
 
 Never publish this file. It describes private-to-public export rules for keeping the public mod focused on the procurement GUI and free of private agent/archive material.
 
@@ -10,12 +10,12 @@ Never publish this file. It describes private-to-public export rules for keeping
 
 - Public organization: `Shattersphere-Mods`
 - Intended public product: clean Weapons Procurement GUI only.
-- Private source of truth: `D:\Sean Mods\Weapons Procurement`
+- Private source of truth: `D:\Sean Mods\Enhanced Trading`
 - Public release output must not be a blind mirror of this private repo.
 
 ## Current Public-Release Position
 
-The private repo still contains optional patched badge and bytecode-patcher material. That material can stay private, but the public output must exclude it unless the user explicitly approves a different release strategy.
+Badge ownership now lives in the standalone private `D:\Sean Mods\Weapon Badges` repo. Public Weapons Procurement output must still exclude any badge helper, count bridge, generated badge sprite, or `CargoStackView` patching material if those files are ever accidentally reintroduced.
 
 Before public export, use:
 
@@ -31,7 +31,7 @@ Do not push this private repo wholesale to the public organization.
 
 Public output should include only files needed for users/contributors to build and use the clean procurement GUI:
 
-- `src/` after badge-only Java references are physically removable;
+- `src/`;
 - Gradle wrapper and Kotlin build files required to compile the public source tree;
 - `data/campaign/rules.csv`;
 - public-safe `data/config/LunaSettings.csv`;
@@ -108,7 +108,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 git diff --check
 ```
 
-Private-only validation may still run badge/patcher checks in the private repo.
+Badge/patcher validation belongs in the standalone private `D:\Sean Mods\Weapon Badges` repo, not in Weapons Procurement.
 
 ## Version And Changelog Rules
 
@@ -116,7 +116,7 @@ Private-only validation may still run badge/patcher checks in the private repo.
 - Bump patch version for public release cleanup, packaging validation fixes, or public-safe config corrections.
 - Bump minor version for new user-facing procurement features.
 - Keep `mod_info.json` and `CHANGELOG.md` aligned when bumping.
-- Public changelog entries must not mention Codex, agents, private docs, local paths, or badge/bytecode experiments.
+- Public changelog entries must not mention Codex, agents, private docs, local paths, or private badge/bytecode experiments.
 
 ## Open Work Before First Public Release
 

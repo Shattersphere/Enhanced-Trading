@@ -26,7 +26,7 @@ User-facing docs:
 - `AGENTS.md`: repo-local rules, commands, deploy policy, and knowledge map.
 - `README.md`: install/use summary.
 - `CONFIG.md`: JSON item overrides, blacklists, Luna settings, debug hooks.
-- `PACKAGING.md`: release validation, clean package, optional patched-badge instructions.
+- `PACKAGING.md`: release validation, clean package, and Weapon Badges split note.
 - `CHANGELOG.md`: release notes.
 - `.agent/INDEX.md`: map of active docs and archival reference notes.
 - `.agent/BRIEF.md`: compact current-state handoff.
@@ -135,7 +135,7 @@ Starsector GUI runtime constraints:
 
 ## Weapon Badges Split
 
-Cargo-cell badges moved to the standalone private `D:\Sean Mods\Weapon Badges` mod. Weapons Procurement should not contain badge helper classes, count-updater scripts, generated badge sprites, or `CargoStackView` patching tools.
+Cargo-cell badges moved to the standalone private `D:\Sean Mods\Weapon Badges` mod. Weapons Procurement should not contain badge helper classes, count-updater scripts, generated badge sprites, Luna badge settings, deploy wrappers, or `CargoStackView` patching tools.
 
 ## Build And Validation
 

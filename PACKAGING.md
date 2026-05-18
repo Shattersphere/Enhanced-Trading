@@ -62,7 +62,7 @@ git diff --check
 
 ## Weapon Badges Split
 
-Cargo-cell badges now live in the standalone private `D:\Sean Mods\Weapon Badges` mod. Do not package badge helpers, count bridges, generated badge sprites, or `CargoStackView` patching tools with Weapons Procurement.
+Cargo-cell badges are no longer packaged with Weapons Procurement. Do not package badge helpers, count bridges, generated badge sprites, or core patching tools with this mod.
 
 ## Trade Rollback Fault Validation
 

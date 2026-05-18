@@ -10,31 +10,31 @@ The repo is in release-prep shape for the clean popup path:
 - Local, Sector Market, and Fixer's Market source modes exist.
 - Sector Market drains real remote cargo; Fixer's Market is virtual.
 - Fixer's Market uses runtime theoretical sale capability plus rarity estimates, with observed live/persistent stock used for reference prices and correction.
-- Optional patched cargo-cell badges are private-only and isolated from the clean popup.
+- Cargo-cell badges have moved to the standalone private `D:\Sean Mods\Weapon Badges` mod.
 - Gradle/Kotlin migration and AGC-style package ownership split are complete; `build.ps1` remains the compatibility entry point.
-- Packaging, deploy, live-jar validation, doc-link validation, and GitHub sanity checks exist.
+- Packaging, deploy, live-jar validation, doc-link validation, and a manual-only GitHub sanity workflow exist.
 
 ## Active Work
 
 ### Public Release Separation
 
-Prepare the private repo so a curated public `Shattersphere-Mods` repo/package can contain the clean procurement GUI with no badge/bytecode/private-doc traces.
+Prepare the private repo so a curated public `Shattersphere-Mods` repo/package can contain the procurement GUI with no private-doc traces or standalone badge-mod material.
 
 Completed:
 
-- Badge-only Java files can be omitted while the clean GUI still builds.
-- The clean plugin no longer imports or directly registers badge updater classes.
-- Patched-badge Luna/settings publication moved out of the public-safe config path.
-- Public validation is separated from private patched-badge validation.
+- Badge-only source, assets, patcher tools, build flags, and deploy wrappers moved out to the standalone `D:\Sean Mods\Weapon Badges` mod.
+- The plugin no longer imports or directly registers badge updater classes.
+- Badge Luna/settings publication is no longer part of Weapons Procurement.
 - `tools/export-public.ps1` creates a curated public tree and runs a leak scan.
-- Public README/PACKAGING docs describe only the clean GUI path.
+- Public README/PACKAGING docs describe only the procurement GUI path.
 - `tools/deploy-live-mod.ps1` stages and queues deploys when the live jar is locked.
+- Badge-class rejection checks remain as guardrails against accidentally reintroducing old badge ownership.
 
 Acceptance:
 
-- Public output builds the clean GUI.
-- Public output contains no `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local machine paths, badge sprites, patcher tools, bytecode patch docs, or patched-badge settings.
-- Private repo still retains the optional patched-badge work for personal/advanced use.
+- Public output builds the procurement GUI.
+- Public output contains no `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local machine paths, badge sprites, patcher tools, bytecode patch docs, or badge settings.
+- Weapons Procurement contains no badge helper classes, count-updater scripts, generated badge sprites, or `CargoStackView` patching tools.
 
 Still open:
 
@@ -49,7 +49,6 @@ Completed:
 - Gradle/Kotlin wrapper foundation added while legacy Java still compiles.
 - `build.ps1` delegates to Gradle for compatibility with existing commands.
 - LazyLib is declared as a required dependency for the Kotlin runtime.
-- Optional badge source is physically separated under `src/privateBadge`.
 - `tools/validate-kotlin-migration.ps1` validates build files, dependency declarations, Java migration status, clean jar badge-class exclusion, and public-export boundaries.
 - Core enums/value helpers and low-risk stock/Fixer catalog helpers converted to Kotlin while preserving the `weaponsprocurement.core` Java interop surface.
 - Inventory counts, market stock collection, and market blacklist services converted to Kotlin.
@@ -78,8 +77,6 @@ Completed:
 - Stock-review hotkey script, Fixer catalog updater, stable mod plugin entrypoint, and public-export plugin stripping converted for Kotlin.
 - Luna/settings publication bridge converted to Kotlin while preserving Java-facing static config API.
 - Vanilla-style stock-review item tooltip converted to Kotlin.
-- Private patched-badge config/helper/count-updater source converted to Kotlin.
-- Public export script updated for the Kotlin private-badge source layout.
 - Dialog rule-command entrypoint converted to Kotlin while preserving the `WP_OpenDialog` rules class name.
 - Final no-Java-source migration gate passes for the private repo and public export.
 - Config ownership split into `weaponsprocurement.config`.
@@ -144,10 +141,7 @@ Acceptance:
 
 ## Avoid Unless Reopened Deliberately
 
-- Do not retry late over-icon badge rendering; it caused invisibility/blur regressions.
-- Do not use layered background plus text badge rendering for tiny cargo-cell badges.
-- Do not put campaign-state or LunaLib calls into `WeaponsProcurementBadgeHelper`.
-- Do not reintroduce runtime reflection or raw GL rendering for the badge path.
+- Do not reintroduce badge helper, count bridge, generated badge sprite, or `CargoStackView` patching code to Weapons Procurement. That ownership belongs in `D:\Sean Mods\Weapon Badges`.
 - Do not reintroduce seller-detail rows or source-specific local-buy actions without a deliberate UI design pass.
 - Do not treat build/static validation as proof that custom Starsector UI behavior works in game.
 
@@ -158,8 +152,6 @@ For code or asset changes:
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-total-badges.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-cargo-stack-view-patch.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1

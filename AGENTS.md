@@ -65,7 +65,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 
 - Private repo work happens here; public output for `Shattersphere-Mods` must be curated, not mirrored.
 - Read `.agent/PUBLIC_RELEASE.md` before any public export, public repo sync, package prep, or release-facing docs change.
-- Public output must exclude `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local paths, deploy queues, and optional patched-badge/bytecode material unless explicitly approved.
+- Public output must exclude `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local paths, deploy queues, and standalone badge/bytecode material unless explicitly approved.
 - Public changelog entries must stay user-facing and must not mention agents, private docs, local paths, or private experiments.
 
 ## Durable Docs
@@ -95,10 +95,10 @@ Do not read every archive file at session start. Search first, then open only th
 
 ## Hard Constraints
 
-- Clean `F8` popup is the public/default product. Optional patched badges must remain isolated.
+- Clean `F8` popup is the public/default product. Cargo-cell badge ownership belongs in the standalone `D:\Sean Mods\Weapon Badges` mod.
 - Clean builds use `src/main/kotlin` plus legacy public Java under `src/weaponsprocurement`.
 - Do not ship or commit a prepatched `starfarer_obf.jar`.
-- Do not call Starsector campaign APIs from embedded patched-core badge helpers.
+- Do not reintroduce patched-core badge helpers, count bridges, generated badge sprites, or `CargoStackView` patching tools.
 - Do not reintroduce visible seller-detail/source-specific local buy rows without a design pass.
 - Treat compile success and jar parity as insufficient proof for runtime UI, LunaLib, or campaign behavior.
 - Keep dangerous validation hooks disabled by default.
