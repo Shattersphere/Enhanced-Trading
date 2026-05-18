@@ -19,10 +19,12 @@ enum class StockReviewActionGroup(
         "item plan adjustment",
         StockReviewAction.Type.ADJUST_PLAN,
         StockReviewAction.Type.ADJUST_TO_SUFFICIENT,
+        StockReviewAction.Type.TOGGLE_SHIP_PLAN,
     ),
     PLAN_RESET(
         "item plan reset",
         StockReviewAction.Type.RESET_PLAN,
+        StockReviewAction.Type.RESET_SHIP_PLAN,
     ),
     BULK_SUFFICIENT_PURCHASE(
         "bulk sufficient purchase",
@@ -39,6 +41,7 @@ enum class StockReviewActionGroup(
     SOURCE_TRANSITIONS(
         "source and snapshot transitions",
         StockReviewAction.Type.CYCLE_SORT_MODE,
+        StockReviewAction.Type.TOGGLE_TRADE_KIND,
         StockReviewAction.Type.CYCLE_SOURCE_MODE,
         StockReviewAction.Type.TOGGLE_BLACK_MARKET,
         StockReviewAction.Type.RESET_ALL_TRADES,

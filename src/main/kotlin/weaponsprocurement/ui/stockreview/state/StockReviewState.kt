@@ -19,6 +19,7 @@ class StockReviewState : WimGuiScrollableListState {
     private var initialCredits = -1f
     private var initialCargoCapacity = -1f
     private var contentRevision = 0
+    private var tradeKind = StockReviewTradeKind.ITEMS
 
     constructor(config: StockReviewConfig) {
         expansion = StockReviewExpansionState()
@@ -35,6 +36,7 @@ class StockReviewState : WimGuiScrollableListState {
         initialCredits = source.initialCredits
         initialCargoCapacity = source.initialCargoCapacity
         contentRevision = source.contentRevision
+        tradeKind = source.tradeKind
     }
 
     fun isExpanded(category: StockCategory?): Boolean = expansion.isExpanded(category)
@@ -104,6 +106,25 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun normalizeSourceMode() {
         markContentChangedIf(source.normalizeSourceMode())
+    }
+
+    fun getTradeKind(): StockReviewTradeKind = tradeKind
+
+    fun isShipTrading(): Boolean = tradeKind == StockReviewTradeKind.SHIPS
+
+    fun cycleTradeKind() {
+        tradeKind = tradeKind.next()
+        listScrollOffset = 0
+        markContentChanged()
+    }
+
+    fun setTradeKind(tradeKind: StockReviewTradeKind) {
+        if (this.tradeKind == tradeKind) {
+            return
+        }
+        this.tradeKind = tradeKind
+        listScrollOffset = 0
+        markContentChanged()
     }
 
     fun getContentRevision(): Int = contentRevision

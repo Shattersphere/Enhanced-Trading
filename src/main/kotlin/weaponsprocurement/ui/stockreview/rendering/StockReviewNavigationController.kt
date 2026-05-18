@@ -9,12 +9,14 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
+import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 
 class StockReviewNavigationController(
     private val state: StockReviewState,
     private val modes: StockReviewModeController,
     private val pendingTrades: StockReviewPendingTrades,
+    private val pendingShipTrades: StockReviewPendingShipTrades,
     private val host: Host,
 ) {
     interface Host {
@@ -48,12 +50,17 @@ class StockReviewNavigationController(
     }
 
     private fun openReviewIfNeeded() {
-        if (pendingTrades.isEmpty()) {
+        if (state.isShipTrading() && pendingShipTrades.isEmpty()) {
+            return
+        }
+        if (!state.isShipTrading() && pendingTrades.isEmpty()) {
             return
         }
         state.setListScrollOffset(0)
-        state.setExpanded(StockReviewTradeGroup.BUYING, true)
-        state.setExpanded(StockReviewTradeGroup.SELLING, true)
+        if (!state.isShipTrading()) {
+            state.setExpanded(StockReviewTradeGroup.BUYING, true)
+            state.setExpanded(StockReviewTradeGroup.SELLING, true)
+        }
         host.reopen(true)
     }
 

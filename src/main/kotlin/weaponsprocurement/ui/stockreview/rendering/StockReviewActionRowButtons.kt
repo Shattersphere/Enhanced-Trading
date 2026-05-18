@@ -19,14 +19,18 @@ class StockReviewActionRowContext(
 
 object StockReviewActionRowButtonPolicies {
     @JvmStatic
+    fun tradeKindLabel(context: StockReviewActionRowContext): String = "Trade: ${context.state.getTradeKind().label}"
+
+    @JvmStatic
     fun sortLabel(context: StockReviewActionRowContext): String = "Sort: ${context.snapshot.getSortMode().label}"
 
     @JvmStatic
-    fun sourceLabel(context: StockReviewActionRowContext): String = "Source: ${context.snapshot.getSourceMode().label}"
+    fun sourceLabel(context: StockReviewActionRowContext): String =
+        if (context.state.isShipTrading()) "Source: Local" else "Source: ${context.snapshot.getSourceMode().label}"
 
     @JvmStatic
     fun blackMarketLabel(context: StockReviewActionRowContext): String =
-        "Black Market: ${StockReviewUiText.onOff(context.snapshot.isIncludeBlackMarket())}"
+        "Black Market: ${StockReviewUiText.onOff(context.state.isIncludeBlackMarket())}"
 
     @JvmStatic
     fun filtersLabel(context: StockReviewActionRowContext): String = "Filters: ${context.state.getActiveFilterCount()}"
@@ -36,13 +40,16 @@ object StockReviewActionRowButtonPolicies {
 
     @JvmStatic
     fun blackMarketEnabled(context: StockReviewActionRowContext): Boolean =
-        context.snapshot.getSourceMode().supportsBlackMarketToggle()
+        context.state.isShipTrading() || context.snapshot.getSourceMode().supportsBlackMarketToggle()
 
     @JvmStatic
     fun actionBackground(context: StockReviewActionRowContext): Color = StockReviewStyle.ACTION_BACKGROUND
 
     @JvmStatic
     fun cycleSortMode(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.cycleSortMode()
+
+    @JvmStatic
+    fun toggleTradeKind(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.toggleTradeKind()
 
     @JvmStatic
     fun cycleSourceMode(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.cycleSourceMode()
@@ -57,7 +64,11 @@ object StockReviewActionRowButtonPolicies {
     fun sortTooltip(context: StockReviewActionRowContext): String = StockReviewTooltips.sort(context.snapshot.getSortMode())
 
     @JvmStatic
-    fun sourceTooltip(context: StockReviewActionRowContext): String = StockReviewTooltips.source(context.snapshot.getSourceMode())
+    fun tradeKindTooltip(context: StockReviewActionRowContext): String = "Switch between item trading and local ship trading."
+
+    @JvmStatic
+    fun sourceTooltip(context: StockReviewActionRowContext): String =
+        if (context.state.isShipTrading()) "Ship trading currently uses only the local market." else StockReviewTooltips.source(context.snapshot.getSourceMode())
 
     @JvmStatic
     fun blackMarketTooltip(context: StockReviewActionRowContext): String =
@@ -69,6 +80,17 @@ object StockReviewActionRowButtonPolicies {
 
 class StockReviewActionRowButtons private constructor() {
     companion object {
+        internal val TRADE_KIND = StockReviewButtonDefinition.dynamic(
+            "trade-kind",
+            StockReviewActionGroup.SOURCE_TRANSITIONS,
+            140f,
+            StockReviewActionRowButtonPolicies::tradeKindLabel,
+            StockReviewActionRowButtonPolicies::toggleTradeKind,
+            StockReviewActionRowButtonPolicies::alwaysEnabled,
+            StockReviewActionRowButtonPolicies::actionBackground,
+            StockReviewActionRowButtonPolicies::tradeKindTooltip,
+        )
+
         internal val SORT = StockReviewButtonDefinition.dynamic(
             "sort",
             StockReviewActionGroup.SOURCE_TRANSITIONS,
@@ -173,6 +195,7 @@ class StockReviewActionRowButtonSet private constructor(
         @JvmField val EMPTY = StockReviewActionRowButtonSet(emptyList(), emptyList())
         @JvmField val TRADE_CONTROLS = StockReviewActionRowButtonSet(
             listOf(
+                StockReviewActionRowButtons.TRADE_KIND,
                 StockReviewActionRowButtons.SORT,
                 StockReviewActionRowButtons.SOURCE,
                 StockReviewActionRowButtons.BLACK_MARKET,

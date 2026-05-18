@@ -15,7 +15,7 @@ object StockReviewFooterButtonPolicies {
 
     @JvmStatic
     fun canConfirmTrades(context: StockReviewFooterContext): Boolean =
-        context.hasPendingTrades() && context.tradeContext.canConfirm()
+        context.canConfirm()
 }
 
 class StockReviewFooterButtons private constructor() {
@@ -175,6 +175,7 @@ class StockReviewFooterButtons private constructor() {
                 StockReviewFooterButtonSetKind.SHIP_CATALOG_DEBUG -> SHIP_CATALOG_DEBUG_SET
                 StockReviewFooterButtonSetKind.REVIEW -> REVIEW_SET
                 StockReviewFooterButtonSetKind.TRADE -> TRADE_SET
+                StockReviewFooterButtonSetKind.SHIP_TRADE -> SHIP_TRADE_SET
             }
 
         private val COLOR_DEBUG_SET = StockReviewFooterButtonSet(COLOR_CANCEL, COLOR_CONFIRM, COLOR_APPLY, COLOR_RESTORE)
@@ -182,6 +183,7 @@ class StockReviewFooterButtons private constructor() {
         private val SHIP_CATALOG_DEBUG_SET = StockReviewFooterButtonSet(null, GO_BACK)
         private val REVIEW_SET = StockReviewFooterButtonSet(REVIEW_BACK, REVIEW_CONFIRM)
         private val TRADE_SET = StockReviewFooterButtonSet(null, TRADE_REVIEW, PURCHASE_ALL, SELL_ALL, RESET_ALL)
+        private val SHIP_TRADE_SET = StockReviewFooterButtonSet(null, TRADE_REVIEW, RESET_ALL)
 
         private fun footer(
             id: String,

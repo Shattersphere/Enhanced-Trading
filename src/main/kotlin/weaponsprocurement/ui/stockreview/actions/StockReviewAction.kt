@@ -25,9 +25,12 @@ class StockReviewAction private constructor(
         TOGGLE_TRADE_GROUP,
         TOGGLE_REVIEW_ITEM_GROUP,
         TOGGLE_ITEM,
+        TOGGLE_TRADE_KIND,
         ADJUST_PLAN,
+        TOGGLE_SHIP_PLAN,
         ADJUST_TO_SUFFICIENT,
         RESET_PLAN,
+        RESET_SHIP_PLAN,
         CYCLE_SORT_MODE,
         CYCLE_SOURCE_MODE,
         TOGGLE_BLACK_MARKET,
@@ -97,6 +100,10 @@ class StockReviewAction private constructor(
             StockReviewAction(Type.TOGGLE_ITEM, null, null, null, null, null, null, itemKey, null, 0)
 
         @JvmStatic
+        fun toggleTradeKind(): StockReviewAction =
+            StockReviewAction(Type.TOGGLE_TRADE_KIND, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
         fun buyBest(itemKey: String?, quantity: Int): StockReviewAction = adjustPlan(itemKey, quantity)
 
         @JvmStatic
@@ -104,8 +111,16 @@ class StockReviewAction private constructor(
             StockReviewAction(Type.ADJUST_PLAN, null, null, null, null, null, null, itemKey, null, delta)
 
         @JvmStatic
+        fun toggleShipPlan(recordKey: String?): StockReviewAction =
+            StockReviewAction(Type.TOGGLE_SHIP_PLAN, null, null, null, null, null, null, recordKey, null, 0)
+
+        @JvmStatic
         fun resetPlan(itemKey: String?): StockReviewAction =
             StockReviewAction(Type.RESET_PLAN, null, null, null, null, null, null, itemKey, null, 0)
+
+        @JvmStatic
+        fun resetShipPlan(recordKey: String?): StockReviewAction =
+            StockReviewAction(Type.RESET_SHIP_PLAN, null, null, null, null, null, null, recordKey, null, 0)
 
         @JvmStatic
         fun adjustToSufficient(itemKey: String?, delta: Int): StockReviewAction =

@@ -15,6 +15,11 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeActionDispatcher
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeController
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
+import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipExecutionController
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshotBuilder
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipTradeController
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.ui.CustomPanelAPI
@@ -36,30 +41,40 @@ class StockReviewPanelPlugin(
 ),
     StockReviewUiController.Host,
     StockReviewTradeController.Host,
+    StockReviewShipTradeController.Host,
+    StockReviewShipExecutionController.Host,
     StockReviewExecutionController.Host {
     private val config: StockReviewConfig = StockReviewConfig.load()
     private val state: StockReviewState = launchState?.getState()?.let { StockReviewState(it) } ?: StockReviewState(config)
     private val renderer = StockReviewRenderer()
     private val snapshots = StockReviewSnapshotController(initialMarket, config, state, renderer)
+    private val shipSnapshotBuilder = StockReviewShipSnapshotBuilder()
+    private var currentShipSnapshot: StockReviewShipSnapshot = StockReviewShipSnapshot.EMPTY
     private val purchaseService = StockPurchaseService()
     private val pendingTrades = StockReviewPendingTrades()
+    private val pendingShipTrades = StockReviewPendingShipTrades()
     private val localMarketIntent = StockReviewLocalMarketIntent(launchState?.getLocalBuyIntent())
     private val modes: StockReviewModeController
     private val ui: StockReviewUiController
     private val trades: StockReviewTradeController
+    private val shipTrades: StockReviewShipTradeController
     private val execution: StockReviewExecutionController
+    private val shipExecution: StockReviewShipExecutionController
     private val tradeActionDispatcher: StockReviewTradeActionDispatcher
 
     init {
         if (launchState != null) {
             pendingTrades.replaceWith(launchState.getPendingTrades())
+            pendingShipTrades.replaceWith(launchState.getPendingShipTrades())
             localMarketIntent.seedFromTrades(pendingTrades.asList())
         }
         modes = StockReviewModeController(reviewMode(launchState))
-        ui = StockReviewUiController(state, modes, pendingTrades, localMarketIntent, this)
+        ui = StockReviewUiController(state, modes, pendingTrades, pendingShipTrades, localMarketIntent, this)
         trades = StockReviewTradeController(state, pendingTrades, localMarketIntent, this)
+        shipTrades = StockReviewShipTradeController(pendingShipTrades, this)
         execution = StockReviewExecutionController(state, pendingTrades, purchaseService, this)
-        tradeActionDispatcher = StockReviewTradeActionDispatcher(trades, execution)
+        shipExecution = StockReviewShipExecutionController(pendingShipTrades, this)
+        tradeActionDispatcher = StockReviewTradeActionDispatcher(state, trades, shipTrades, execution, shipExecution)
     }
 
     fun isReviewMode(): Boolean = modes.isReviewMode()
@@ -90,8 +105,11 @@ class StockReviewPanelPlugin(
             content,
             currentSnapshot,
             state,
+            currentShipSnapshot,
             pendingTrades.asList(),
+            pendingShipTrades,
             pendingTrades.getRevision(),
+            pendingShipTrades.getRevision(),
             modes.getRevision(),
             screenMode,
             modes.getColorDebugTargetIndex(),
@@ -119,6 +137,8 @@ class StockReviewPanelPlugin(
 
     override fun snapshot(): WeaponStockSnapshot? = snapshots.current()
 
+    override fun shipSnapshot(): StockReviewShipSnapshot = currentShipSnapshot
+
     override fun updateTradeWarning(explicitWarning: String?) {
         StockReviewTradeWarnings.update(snapshots.current(), state, pendingTrades.asList(), explicitWarning)
     }
@@ -138,6 +158,8 @@ class StockReviewPanelPlugin(
         val host = WimGuiCampaignDialogHost.current()
         return host.getCurrentMarketOr(initialMarket)
     }
+
+    override fun playerFleet() = sector()?.playerFleet
 
     override fun postMessage(message: String?) {
         reportMessage(message)
@@ -165,6 +187,7 @@ class StockReviewPanelPlugin(
 
     override fun rebuildSnapshot() {
         snapshots.rebuild()
+        currentShipSnapshot = shipSnapshotBuilder.build(market(), playerFleet(), state.isIncludeBlackMarket())
     }
 
     override fun exitReviewMode() {
@@ -182,7 +205,7 @@ class StockReviewPanelPlugin(
     override fun requestReopen(review: Boolean) {
         StockReviewHotkeyScript.requestReopen(
             market(),
-            StockReviewLaunchState(state, pendingTrades.asList(), localMarketIntent.asMap(), review),
+            StockReviewLaunchState(state, pendingTrades.asList(), pendingShipTrades.asList(), localMarketIntent.asMap(), review),
         )
     }
 

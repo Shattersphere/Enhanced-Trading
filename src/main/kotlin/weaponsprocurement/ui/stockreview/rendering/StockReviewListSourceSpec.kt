@@ -7,6 +7,8 @@ import weaponsprocurement.ui.stockreview.rows.StockReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
 import weaponsprocurement.ui.stockreview.rows.StockReviewShipCatalogDebugRows
+import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrade
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipReviewListModel
 import weaponsprocurement.ui.stockreview.state.StockReviewFilterListModel
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
@@ -26,6 +28,7 @@ class StockReviewListSourceContext(
     @JvmField val snapshot: WeaponStockSnapshot,
     @JvmField val state: StockReviewState,
     @JvmField val pendingTrades: List<StockReviewPendingTrade>,
+    @JvmField val pendingShipTrades: List<StockReviewPendingShipTrade>,
     @JvmField val tradeContext: StockReviewTradeContext,
     @JvmField val rowLayout: StockReviewRowLayout,
     @JvmField val colorDebugTargetIndex: Int,
@@ -41,7 +44,11 @@ class StockReviewListSourceSpec private constructor(
             StockReviewListSourceKind.TRADE ->
                 StockReviewListModel.build(context.snapshot, context.state, context.tradeContext, context.rowLayout)
             StockReviewListSourceKind.REVIEW ->
-                StockReviewReviewListModel.build(context.snapshot, context.pendingTrades, context.state, context.tradeContext, context.rowLayout)
+                if (context.state.isShipTrading()) {
+                    StockReviewShipReviewListModel.build(context.pendingShipTrades, context.rowLayout)
+                } else {
+                    StockReviewReviewListModel.build(context.snapshot, context.pendingTrades, context.state, context.tradeContext, context.rowLayout)
+                }
             StockReviewListSourceKind.FILTERS ->
                 StockReviewFilterListModel.build(context.state)
             StockReviewListSourceKind.COLOR_DEBUG ->

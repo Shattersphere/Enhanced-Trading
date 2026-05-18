@@ -5,6 +5,8 @@ import weaponsprocurement.ui.WimGuiModalLayout
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.controls.StockReviewActionButtonFactory
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
+import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrade
+import weaponsprocurement.ui.stockreview.state.StockReviewTradeKind
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 
@@ -19,13 +21,20 @@ enum class StockReviewFooterButtonSetKind {
     SHIP_CATALOG_DEBUG,
     REVIEW,
     TRADE,
+    SHIP_TRADE,
 }
 
 class StockReviewFooterContext(
     @JvmField val tradeContext: StockReviewTradeContext,
     @JvmField val pendingTrades: List<StockReviewPendingTrade>?,
+    @JvmField val pendingShipTrades: List<StockReviewPendingShipTrade>?,
+    @JvmField val tradeKind: StockReviewTradeKind,
 ) {
-    fun hasPendingTrades(): Boolean = !pendingTrades.isNullOrEmpty()
+    fun hasPendingTrades(): Boolean =
+        if (tradeKind == StockReviewTradeKind.SHIPS) !pendingShipTrades.isNullOrEmpty() else !pendingTrades.isNullOrEmpty()
+
+    fun canConfirm(): Boolean =
+        if (tradeKind == StockReviewTradeKind.SHIPS) hasPendingTrades() else hasPendingTrades() && tradeContext.canConfirm()
 }
 
 class StockReviewFooterSpec private constructor(
@@ -34,10 +43,17 @@ class StockReviewFooterSpec private constructor(
     @JvmField val buttonSetKind: StockReviewFooterButtonSetKind,
 ) {
     fun leftButtons(context: StockReviewFooterContext): List<WimGuiButtonSpec<StockReviewAction>> =
-        StockReviewFooterButtons.left(buttonSetKind, context, BUTTON_FACTORY)
+        StockReviewFooterButtons.left(effectiveButtonSetKind(context), context, BUTTON_FACTORY)
 
     fun rightButton(context: StockReviewFooterContext): WimGuiButtonSpec<StockReviewAction>? =
-        StockReviewFooterButtons.right(buttonSetKind, context, BUTTON_FACTORY)
+        StockReviewFooterButtons.right(effectiveButtonSetKind(context), context, BUTTON_FACTORY)
+
+    private fun effectiveButtonSetKind(context: StockReviewFooterContext): StockReviewFooterButtonSetKind =
+        if (buttonSetKind == StockReviewFooterButtonSetKind.TRADE && context.tradeKind == StockReviewTradeKind.SHIPS) {
+            StockReviewFooterButtonSetKind.SHIP_TRADE
+        } else {
+            buttonSetKind
+        }
 
     companion object {
         private val BUTTON_FACTORY = StockReviewActionButtonFactory(StockReviewStyle.ROW_BORDER)

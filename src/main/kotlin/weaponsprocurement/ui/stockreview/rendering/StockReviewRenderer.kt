@@ -12,6 +12,10 @@ import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowSpecs
 import weaponsprocurement.ui.stockreview.rows.StockReviewTradeSummaryRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
+import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrade
+import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipGridRenderer
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
@@ -32,8 +36,11 @@ class StockReviewRenderer :
         root: CustomPanelAPI,
         snapshot: WeaponStockSnapshot,
         state: StockReviewState,
+        shipSnapshot: StockReviewShipSnapshot,
         pendingTrades: List<StockReviewPendingTrade>,
+        pendingShipTrades: StockReviewPendingShipTrades,
         pendingTradeRevision: Int,
+        pendingShipTradeRevision: Int,
         modeRevision: Int,
         screenMode: StockReviewScreenMode,
         colorDebugTargetIndex: Int,
@@ -48,11 +55,26 @@ class StockReviewRenderer :
         if (modeSpec.hasTradeActionRow()) {
             StockReviewActionRowRenderer.render(root, snapshot, state, modeSpec, buttons)
         }
+        if (screenMode == StockReviewScreenMode.TRADE && state.isShipTrading()) {
+            val result = StockReviewShipGridRenderer.render(root, shipSnapshot, state, pendingShipTrades, buttons)
+            StockReviewFooterRenderer.render(
+                root,
+                StockReviewTradeContext(snapshot, pendingTrades),
+                state,
+                pendingTrades,
+                pendingShipTrades.asList(),
+                modeSpec,
+                buttons,
+            )
+            return result
+        }
         val model = renderModel(
             snapshot,
             state,
             pendingTrades,
+            pendingShipTrades.asList(),
             pendingTradeRevision,
+            pendingShipTradeRevision,
             modeRevision,
             modeSpec,
             colorDebugTargetIndex,
@@ -60,10 +82,10 @@ class StockReviewRenderer :
             colorDebugPersistent,
         )
         val result = renderRows(root, model.rows, state, model.listSpec, buttons)
-        if (modeSpec.hasTradeSummary()) {
+        if (modeSpec.hasTradeSummary() && !state.isShipTrading()) {
             StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, model.rowLayout)
         }
-        StockReviewFooterRenderer.render(root, model.tradeContext, pendingTrades, modeSpec, buttons)
+        StockReviewFooterRenderer.render(root, model.tradeContext, state, pendingTrades, pendingShipTrades.asList(), modeSpec, buttons)
         return result
     }
 
@@ -71,7 +93,9 @@ class StockReviewRenderer :
         snapshot: WeaponStockSnapshot,
         state: StockReviewState,
         pendingTrades: List<StockReviewPendingTrade>,
+        pendingShipTrades: List<StockReviewPendingShipTrade>,
         pendingTradeRevision: Int,
+        pendingShipTradeRevision: Int,
         modeRevision: Int,
         modeSpec: StockReviewModeSpec,
         colorDebugTargetIndex: Int,
@@ -81,6 +105,7 @@ class StockReviewRenderer :
         val key = RenderModelKey(
             state.getContentRevision(),
             pendingTradeRevision,
+            pendingShipTradeRevision,
             modeRevision,
             modeSpec.screenMode,
             colorDebugTargetIndex,
@@ -101,6 +126,7 @@ class StockReviewRenderer :
                 snapshot,
                 state,
                 pendingTrades,
+                pendingShipTrades,
                 tradeContext,
                 rowLayout,
                 colorDebugTargetIndex,
@@ -144,6 +170,7 @@ class StockReviewRenderer :
     private class RenderModelKey(
         val stateRevision: Int,
         val pendingTradeRevision: Int,
+        val pendingShipTradeRevision: Int,
         val modeRevision: Int,
         val screenMode: StockReviewScreenMode,
         val colorDebugTargetIndex: Int,
@@ -153,6 +180,7 @@ class StockReviewRenderer :
         fun matches(other: RenderModelKey): Boolean =
             stateRevision == other.stateRevision &&
                 pendingTradeRevision == other.pendingTradeRevision &&
+                pendingShipTradeRevision == other.pendingShipTradeRevision &&
                 modeRevision == other.modeRevision &&
                 screenMode == other.screenMode &&
                 colorDebugTargetIndex == other.colorDebugTargetIndex &&
