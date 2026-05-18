@@ -1,6 +1,7 @@
 package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
+import weaponsprocurement.ui.stockreview.trade.StockReviewReviewItemGroup
 import weaponsprocurement.stock.item.StockCategory
 import weaponsprocurement.stock.item.StockItemType
 import java.util.EnumMap
@@ -12,6 +13,8 @@ class StockReviewExpansionState {
     private val expandedByItemType: MutableMap<StockItemType, MutableMap<StockCategory, Boolean>> =
         EnumMap(StockItemType::class.java)
     private val expandedTradeGroups: MutableMap<StockReviewTradeGroup, Boolean> = EnumMap(StockReviewTradeGroup::class.java)
+    private val expandedReviewItemGroups: MutableMap<StockReviewReviewItemGroup, Boolean> =
+        EnumMap(StockReviewReviewItemGroup::class.java)
     private val expandedItems: MutableSet<String> = HashSet()
 
     constructor() {
@@ -23,6 +26,7 @@ class StockReviewExpansionState {
         initializeItemCategoryExpansion()
         expandedTradeGroups[StockReviewTradeGroup.BUYING] = false
         expandedTradeGroups[StockReviewTradeGroup.SELLING] = false
+        initializeReviewItemGroups()
     }
 
     constructor(source: StockReviewExpansionState) {
@@ -30,6 +34,7 @@ class StockReviewExpansionState {
         expandedItemTypes.putAll(source.expandedItemTypes)
         copyItemCategoryExpansion(source.expandedByItemType)
         expandedTradeGroups.putAll(source.expandedTradeGroups)
+        expandedReviewItemGroups.putAll(source.expandedReviewItemGroups)
         expandedItems.addAll(source.expandedItems)
     }
 
@@ -80,6 +85,14 @@ class StockReviewExpansionState {
         return true
     }
 
+    fun isExpanded(reviewItemGroup: StockReviewReviewItemGroup?): Boolean = expandedReviewItemGroups[reviewItemGroup] == true
+
+    fun toggle(reviewItemGroup: StockReviewReviewItemGroup?): Boolean {
+        if (reviewItemGroup == null) return false
+        expandedReviewItemGroups[reviewItemGroup] = !isExpanded(reviewItemGroup)
+        return true
+    }
+
     fun isItemExpanded(itemKey: String?): Boolean = expandedItems.contains(itemKey)
 
     fun toggleItem(itemKey: String?): Boolean {
@@ -101,6 +114,12 @@ class StockReviewExpansionState {
                 byCategory[category] = false
             }
             expandedByItemType[itemType] = byCategory
+        }
+    }
+
+    private fun initializeReviewItemGroups() {
+        for (group in StockReviewReviewItemGroup.values()) {
+            expandedReviewItemGroups[group] = true
         }
     }
 

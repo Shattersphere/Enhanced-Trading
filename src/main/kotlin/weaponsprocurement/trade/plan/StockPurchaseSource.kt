@@ -12,6 +12,7 @@ class StockPurchaseSource(
     @JvmField val cargo: CargoAPI?,
     @JvmField val available: Int,
     @JvmField val unitPrice: Int,
+    @JvmField val baseUnitPrice: Int,
     @JvmField val unitCargoSpace: Float,
 ) {
     constructor(
@@ -19,8 +20,26 @@ class StockPurchaseSource(
         cargo: CargoAPI?,
         available: Int,
         unitPrice: Int,
+        baseUnitPrice: Int,
         unitCargoSpace: Float,
-    ) : this(null, submarket, cargo, available, unitPrice, unitCargoSpace)
+    ) : this(null, submarket, cargo, available, unitPrice, baseUnitPrice, unitCargoSpace)
+
+    constructor(
+        market: MarketAPI?,
+        submarket: SubmarketAPI?,
+        cargo: CargoAPI?,
+        available: Int,
+        unitPrice: Int,
+        unitCargoSpace: Float,
+    ) : this(market, submarket, cargo, available, unitPrice, unitPrice, unitCargoSpace)
+
+    constructor(
+        submarket: SubmarketAPI?,
+        cargo: CargoAPI?,
+        available: Int,
+        unitPrice: Int,
+        unitCargoSpace: Float,
+    ) : this(null, submarket, cargo, available, unitPrice, unitPrice, unitCargoSpace)
 
     companion object {
         @JvmField

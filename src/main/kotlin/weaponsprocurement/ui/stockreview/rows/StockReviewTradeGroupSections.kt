@@ -3,8 +3,10 @@ package weaponsprocurement.ui.stockreview.rows
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
+import weaponsprocurement.ui.stockreview.trade.StockReviewReviewItemGroup
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 import java.util.Collections
@@ -36,22 +38,77 @@ class StockReviewTradeGroupSection private constructor(
         layout: StockReviewRowLayout,
     ) {
         val expanded = state.isExpanded(tradeGroup)
-        StockReviewListSection.add(
+        StockReviewListSection.addHeading(
             rows,
-            layout,
-            StockReviewListSectionSpec(
-                groupTrades,
+            StockReviewTradeGroupHeadingRows.reviewGroup(
+                tradeGroup,
+                groupTrades.size,
                 expanded,
-                StockReviewTradeGroupHeadingRows.reviewGroup(
-                    tradeGroup,
-                    groupTrades.size,
-                    expanded,
-                    topGap,
-                ),
-                includesWorstCaseRow,
-                StockReviewReviewTradeRowAppender(snapshot, state, tradeContext, layout),
+                topGap,
             ),
         )
+        if (!expanded) {
+            return
+        }
+
+        for (itemGroup in StockReviewReviewItemGroup.ORDERED) {
+            addItemGroup(rows, snapshot, groupTrades, state, tradeContext, layout, itemGroup)
+        }
+    }
+
+    private fun addItemGroup(
+        rows: MutableList<WimGuiListRow<StockReviewAction>>,
+        snapshot: WeaponStockSnapshot,
+        groupTrades: List<StockReviewPendingTrade>,
+        state: StockReviewState,
+        tradeContext: StockReviewTradeContext,
+        layout: StockReviewRowLayout,
+        itemGroup: StockReviewReviewItemGroup,
+    ) {
+        val itemGroupTrades = tradesForItemGroup(groupTrades, itemGroup)
+        val expanded = state.isExpanded(itemGroup)
+        StockReviewListSection.addHeading(
+            rows,
+            StockReviewReviewItemGroupHeadingRows.reviewItemGroup(
+                itemGroup,
+                itemGroupTrades.size,
+                expanded,
+                itemGroup != StockReviewReviewItemGroup.WEAPONS,
+                layout,
+            ),
+        )
+        if (!expanded) {
+            return
+        }
+        if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS &&
+            includesWorstCaseRow &&
+            itemGroup == StockReviewReviewItemGroup.WEAPONS
+        ) {
+            StockReviewWorstCaseItemRows.add(rows, layout)
+        }
+        if (itemGroupTrades.isEmpty()) {
+            return
+        }
+        val appender = StockReviewReviewTradeRowAppender(snapshot, state, tradeContext, layout)
+        for (trade in itemGroupTrades) {
+            appender.add(rows, trade)
+        }
+    }
+
+    private fun tradesForItemGroup(
+        groupTrades: List<StockReviewPendingTrade>,
+        itemGroup: StockReviewReviewItemGroup,
+    ): List<StockReviewPendingTrade> {
+        if (itemGroup == StockReviewReviewItemGroup.HULLMODS) {
+            return emptyList()
+        }
+        val result = ArrayList<StockReviewPendingTrade>()
+        for (trade in groupTrades) {
+            if (StockReviewReviewItemGroup.fromItemKey(trade.itemKey) == itemGroup) {
+                result.add(trade)
+            }
+        }
+        return result
     }
 
     private fun matches(trade: StockReviewPendingTrade): Boolean =

@@ -8,4 +8,5 @@ class StockSellTarget(
     @JvmField val submarket: SubmarketAPI,
     @JvmField val cargo: CargoAPI,
     @JvmField val unitPrice: Int,
+    @JvmField val baseUnitPrice: Int,
 )

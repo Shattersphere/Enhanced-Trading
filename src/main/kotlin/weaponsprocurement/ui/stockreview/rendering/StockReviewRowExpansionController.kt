@@ -22,6 +22,7 @@ class StockReviewRowExpansionController(
                 Type.TOGGLE_CATEGORY -> state.toggle(action.getItemType(), action.getCategory())
                 Type.TOGGLE_ITEM_TYPE -> state.toggle(action.getItemType())
                 Type.TOGGLE_TRADE_GROUP -> state.toggle(action.getTradeGroup())
+                Type.TOGGLE_REVIEW_ITEM_GROUP -> state.toggle(action.getReviewItemGroup())
                 Type.TOGGLE_ITEM -> state.toggleItem(action.getItemKey())
                 else -> return@group
             }

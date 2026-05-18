@@ -61,6 +61,7 @@ class StockPurchaseExecutor private constructor() {
                     itemId,
                     quantity,
                     target.unitPrice,
+                    target.baseUnitPrice,
                     false,
                 )
                 reconcileAfterTransactionReport(
@@ -149,6 +150,7 @@ class StockPurchaseExecutor private constructor() {
                             itemId,
                             line.quantity,
                             line.source.unitPrice,
+                            line.source.baseUnitPrice,
                             true,
                         )
                     )
@@ -436,6 +438,7 @@ class StockPurchaseExecutor private constructor() {
         private val itemId: String,
         private val quantity: Int,
         private val unitPrice: Int,
+        private val baseUnitPrice: Int,
         private val buy: Boolean,
     ) {
         fun reportAndReconcile(log: Logger) {
@@ -447,6 +450,7 @@ class StockPurchaseExecutor private constructor() {
                 itemId,
                 quantity,
                 unitPrice,
+                baseUnitPrice,
                 buy,
             )
             if (cargo != null) {

@@ -25,6 +25,7 @@ class StockMarketTransactionReporter private constructor() {
             itemId: String?,
             quantity: Int,
             unitPrice: Int,
+            baseUnitPrice: Int,
             bought: Boolean,
         ) {
             if (market == null || submarket == null || itemId.isNullOrEmpty() || quantity <= 0) return
@@ -57,8 +58,8 @@ class StockMarketTransactionReporter private constructor() {
                         if (StockItemType.WING == itemType) CargoItemType.FIGHTER_CHIP else CargoItemType.WEAPONS,
                         submarket,
                         quantity.toFloat(),
-                        unitPrice.toFloat(),
-                        unitPrice.toFloat(),
+                        baseUnitPrice.toFloat(),
+                        tariffUnitPrice(unitPrice, baseUnitPrice, bought).toFloat(),
                         timestamp(),
                     )
                 )
@@ -83,5 +84,12 @@ class StockMarketTransactionReporter private constructor() {
             val clock = Global.getSector()?.clock
             return clock?.timestamp ?: 0L
         }
+
+        private fun tariffUnitPrice(unitPrice: Int, baseUnitPrice: Int, bought: Boolean): Int =
+            if (bought) {
+                Math.max(0, unitPrice - baseUnitPrice)
+            } else {
+                Math.max(0, baseUnitPrice - unitPrice)
+            }
     }
 }

@@ -12,6 +12,7 @@ enum class StockReviewActionGroup(
         StockReviewAction.Type.TOGGLE_CATEGORY,
         StockReviewAction.Type.TOGGLE_ITEM_TYPE,
         StockReviewAction.Type.TOGGLE_TRADE_GROUP,
+        StockReviewAction.Type.TOGGLE_REVIEW_ITEM_GROUP,
         StockReviewAction.Type.TOGGLE_ITEM,
     ),
     PLAN_ADJUSTMENT(

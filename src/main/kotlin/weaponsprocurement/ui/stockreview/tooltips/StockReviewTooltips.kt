@@ -84,11 +84,11 @@ class StockReviewTooltips private constructor() {
 
         @JvmStatic
         fun tariffs(): String =
-            "Extra credits paid above base item value due to source markup, plus the share of current buy spending that is going to tariffs. Tariffs are much higher on the Sector Market (" +
+            "Extra credits paid above the base buy value due to local tariffs or remote procurement markup. The percent is measured against the pre-tariff, pre-markup buy base. Sector Market (" +
                 oneDecimal(WeaponsProcurementConfig.sectorMarketPriceMultiplier()) +
                 "x) and Fixer's Market (" +
                 oneDecimal(WeaponsProcurementConfig.fixersMarketPriceMultiplier()) +
-                "x)."
+                "x) include procurement markup in this same extra-cost total."
 
         @JvmStatic
         fun purchaseAllUntilSufficient(): String =

@@ -131,11 +131,11 @@ object StockReviewTradeSummaryFields {
 
     private fun tariffsPaidLabel(tradeContext: StockReviewTradeContext): String {
         val markup = tradeContext.totalMarkupPaid()
-        val totalBuyCost = tradeContext.totalBuyCost()
-        val percent = if (markup <= 0 || totalBuyCost <= 0) {
+        val totalBaseBuyCost = tradeContext.totalBaseBuyCost()
+        val percent = if (markup <= 0 || totalBaseBuyCost <= 0) {
             0
         } else {
-            Math.round(markup.toDouble() * 100.0 / totalBuyCost.toDouble()).toInt()
+            Math.round(markup.toDouble() * 100.0 / totalBaseBuyCost.toDouble()).toInt()
         }
         return "${StockReviewFormat.credits(markup)} [$percent%]"
     }

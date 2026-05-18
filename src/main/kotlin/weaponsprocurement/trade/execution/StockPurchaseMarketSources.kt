@@ -45,6 +45,7 @@ class StockPurchaseMarketSources private constructor() {
                                 cargo,
                                 available,
                                 StockItemStacks.unitPrice(submarket, stack),
+                                StockItemStacks.baseUnitPrice(stack),
                                 StockItemStacks.unitCargoSpace(stack),
                             )
                         )
@@ -80,6 +81,7 @@ class StockPurchaseMarketSources private constructor() {
                         cargo,
                         available,
                         stock.unitPrice,
+                        stock.baseUnitPrice,
                         StockItemStacks.unitCargoSpace(stack),
                     )
                 )
@@ -106,7 +108,12 @@ class StockPurchaseMarketSources private constructor() {
                 if (plugin != null && plugin.isIllegalOnSubmarket(playerStack, SubmarketPlugin.TransferAction.PLAYER_SELL)) {
                     continue
                 }
-                val candidate = StockSellTarget(submarket, cargo, StockItemStacks.sellUnitPrice(submarket, playerStack))
+                val candidate = StockSellTarget(
+                    submarket,
+                    cargo,
+                    StockItemStacks.sellUnitPrice(submarket, playerStack),
+                    StockItemStacks.sellBaseUnitPrice(playerStack),
+                )
                 if (plugin != null && plugin.isBlackMarket) {
                     bestBlackMarket = betterSellTarget(bestBlackMarket, candidate)
                 } else {

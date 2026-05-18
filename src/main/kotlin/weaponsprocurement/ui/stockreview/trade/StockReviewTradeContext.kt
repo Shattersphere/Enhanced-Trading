@@ -115,6 +115,8 @@ class StockReviewTradeContext(
 
     fun totalBuyCost(): Long = portfolioQuote.totalBuyCost()
 
+    fun totalBaseBuyCost(): Long = portfolioQuote.totalBaseBuyCost()
+
     fun credits(): Float = creditsValue
 
     fun cargoSpaceLeft(): Float = cargoSpaceLeftValue

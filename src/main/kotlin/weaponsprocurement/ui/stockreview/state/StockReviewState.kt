@@ -2,6 +2,7 @@ package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.ui.WimGuiScroll
 import weaponsprocurement.ui.WimGuiScrollableListState
+import weaponsprocurement.ui.stockreview.trade.StockReviewReviewItemGroup
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 import weaponsprocurement.stock.item.StockCategory
 import weaponsprocurement.stock.item.StockItemType
@@ -54,6 +55,10 @@ class StockReviewState : WimGuiScrollableListState {
     }
     fun setExpanded(tradeGroup: StockReviewTradeGroup?, value: Boolean) {
         markContentChangedIf(expansion.setExpanded(tradeGroup, value))
+    }
+    fun isExpanded(reviewItemGroup: StockReviewReviewItemGroup?): Boolean = expansion.isExpanded(reviewItemGroup)
+    fun toggle(reviewItemGroup: StockReviewReviewItemGroup?) {
+        markContentChangedIf(expansion.toggle(reviewItemGroup))
     }
     fun isItemExpanded(itemKey: String?): Boolean = expansion.isItemExpanded(itemKey)
     fun toggleItem(itemKey: String?) {

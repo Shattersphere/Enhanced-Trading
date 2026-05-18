@@ -8,6 +8,9 @@ import com.fs.starfarer.api.campaign.CargoAPI
 import kotlin.math.max
 
 object StockItemStacks {
+    private const val SETTING_WEAPON_BUY_MULT = "shipWeaponBuyPriceMult"
+    private const val SETTING_WEAPON_SELL_MULT = "shipWeaponSellPriceMult"
+
     @JvmStatic
     fun isVisibleWeaponStack(stack: CargoStackAPI?): Boolean {
         return stack != null && stack.isWeaponStack && stack.weaponSpecIfWeapon != null && stack.size > 0f
@@ -73,21 +76,35 @@ object StockItemStacks {
     fun unitPrice(submarket: SubmarketAPI?, stack: CargoStackAPI?): Int {
         if (stack == null) return 0
         val tariff = tariff(submarket)
-        return max(0, Math.round((stack.baseValuePerUnit * (1f + max(0f, tariff))).toFloat()))
+        return max(0, Math.round(baseUnitPrice(stack) * (1f + max(0f, tariff))))
     }
 
     @JvmStatic
     fun baseUnitPrice(stack: CargoStackAPI?): Int {
         if (stack == null) return 0
-        return max(0, Math.round(stack.baseValuePerUnit.toFloat()))
+        return max(0, Math.round(stack.baseValuePerUnit.toFloat() * marketBuyMultiplier()))
     }
 
     @JvmStatic
     fun sellUnitPrice(submarket: SubmarketAPI?, stack: CargoStackAPI?): Int {
         if (stack == null) return 0
         val tariff = tariff(submarket)
-        return max(0, Math.round((stack.baseValuePerUnit * (1f - max(0f, tariff))).toFloat()))
+        return max(0, Math.round(sellBaseUnitPrice(stack) * (1f - max(0f, tariff))))
     }
+
+    @JvmStatic
+    fun sellBaseUnitPrice(stack: CargoStackAPI?): Int {
+        if (stack == null) return 0
+        return max(0, Math.round(stack.baseValuePerUnit.toFloat() * marketSellMultiplier()))
+    }
+
+    @JvmStatic
+    fun buyTariffUnitPrice(submarket: SubmarketAPI?, stack: CargoStackAPI?): Int =
+        max(0, unitPrice(submarket, stack) - baseUnitPrice(stack))
+
+    @JvmStatic
+    fun sellTariffUnitPrice(submarket: SubmarketAPI?, stack: CargoStackAPI?): Int =
+        max(0, sellBaseUnitPrice(stack) - sellUnitPrice(submarket, stack))
 
     @JvmStatic
     fun unitCargoSpace(stack: CargoStackAPI?): Float {
@@ -125,5 +142,18 @@ object StockItemStacks {
         if (submarket == null) return 0f
         val plugin = submarket.plugin
         return plugin?.tariff ?: submarket.tariff
+    }
+
+    private fun marketBuyMultiplier(): Float = marketMultiplier(SETTING_WEAPON_BUY_MULT)
+
+    private fun marketSellMultiplier(): Float = marketMultiplier(SETTING_WEAPON_SELL_MULT)
+
+    private fun marketMultiplier(settingId: String): Float {
+        return try {
+            val settings = Global.getSettings() ?: return 1f
+            max(0f, settings.getFloat(settingId))
+        } catch (_: RuntimeException) {
+            1f
+        }
     }
 }

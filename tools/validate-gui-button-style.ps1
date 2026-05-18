@@ -214,8 +214,10 @@ if ($tradeGroupSectionsText -notmatch "class StockReviewTradeGroupSection" -or
     $tradeGroupSectionsText -notmatch "object StockReviewTradeGroupSections" -or
     $tradeGroupSectionsText -notmatch "StockReviewTradeGroupSection\(StockReviewTradeGroup\.BUYING, false, true\)" -or
     $tradeGroupSectionsText -notmatch "StockReviewTradeGroupSection\(StockReviewTradeGroup\.SELLING, true, false\)" -or
-    $tradeGroupSectionsText -notmatch "StockReviewListSection\.add" -or
-    $tradeGroupSectionsText -notmatch "StockReviewListSectionSpec" -or
+    $tradeGroupSectionsText -notmatch "StockReviewListSection\.addHeading" -or
+    $tradeGroupSectionsText -notmatch "StockReviewReviewItemGroup\.ORDERED" -or
+    $tradeGroupSectionsText -notmatch "StockReviewReviewItemGroupHeadingRows\.reviewItemGroup" -or
+    $tradeGroupSectionsText -notmatch "fun tradesForItemGroup" -or
     $tradeGroupSectionsText -notmatch "StockReviewReviewTradeRowAppender" -or
     $tradeGroupSectionsText -notmatch "StockReviewTradeGroupHeadingRows\.reviewGroup" -or
     $tradeGroupSectionsText -notmatch "includesWorstCaseRow" -or
@@ -463,7 +465,7 @@ if ($tradeSummaryRendererText -notmatch "StockReviewTradeSummaryFields\.build" -
     $tradeSummaryFieldsText -notmatch "object StockReviewTradeSummaryFields" -or
     $tradeSummaryFieldsText -notmatch "Tariffs Paid" -or
     $tradeSummaryFieldsText -notmatch '\[\$percent%\]' -or
-    $tradeSummaryFieldsText -notmatch "totalBuyCost") {
+    $tradeSummaryFieldsText -notmatch "totalBaseBuyCost") {
     throw "Stock-review footer summary row definitions must live in StockReviewTradeSummaryFields."
 }
 if ($cellGroupText -notmatch "Debug Worst-Case Suzuki-Clapteryon Thermal Prokector") {

@@ -47,6 +47,8 @@ class StockReviewPortfolioQuote {
 
     fun totalBuyCost(): Long = if (priceUnavailable) 0L else totalBuyCost
 
+    fun totalBaseBuyCost(): Long = if (priceUnavailable) 0L else totalBaseBuyCost
+
     fun totalBuyQuantity(): Int = totalBuyQuantityValue
 
     fun costForLine(itemKey: String?, submarketId: String?): Long {

@@ -8,6 +8,7 @@ class WimGuiStyle private constructor() {
         const val TEXT_TOP_PAD = 3f
         const val TEXT_LEFT_PAD = 8f
         const val TEXT_RIGHT_PAD = 8f
+        const val TEXT_FIT_SAFETY_PAD = 6f
         const val TEXT_APPROX_CHAR_WIDTH = 6.8f
         const val TEXT_LINE_HEIGHT = 15f
         const val TEXT_VERTICAL_PADDING = 8f

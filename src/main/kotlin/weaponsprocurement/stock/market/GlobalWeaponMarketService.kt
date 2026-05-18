@@ -13,6 +13,8 @@ import weaponsprocurement.stock.fixer.FixerRarity
 import weaponsprocurement.stock.fixer.ObservedStockIndex
 import weaponsprocurement.stock.fixer.RarityClassifier
 import weaponsprocurement.stock.fixer.TheoreticalSaleIndex
+import weaponsprocurement.stock.item.StockItemStacks
+import weaponsprocurement.stock.item.StockItemType
 import weaponsprocurement.stock.item.SubmarketWeaponStock
 import java.util.ArrayList
 import java.util.Collections
@@ -140,8 +142,9 @@ class GlobalWeaponMarketService {
             val current = references[itemKey]
             if (current == null) {
                 val persistent = persistentObserved[itemKey]
+                val baseUnitPrice = persistent?.baseUnitPrice ?: candidate.baseUnitPrice
                 references[itemKey] = ReferenceItem(
-                    persistent?.baseUnitPrice ?: candidate.baseUnitPrice,
+                    correctedReferenceBaseUnitPrice(itemKey, baseUnitPrice),
                     persistent?.unitCargoSpace ?: candidate.unitCargoSpace,
                     candidate.rarity,
                     if (persistent == null) {
@@ -154,6 +157,13 @@ class GlobalWeaponMarketService {
                 current.rarity = candidate.rarity
             }
         }
+    }
+
+    private fun correctedReferenceBaseUnitPrice(itemKey: String, fallback: Int): Int {
+        val itemType = StockItemType.fromKey(itemKey)
+        val itemId = StockItemType.rawId(itemKey)
+        val corrected = StockItemStacks.referenceBaseUnitPrice(itemType, itemId)
+        return if (corrected > 0) corrected else fallback
     }
 
     private fun theoreticalCandidates(
