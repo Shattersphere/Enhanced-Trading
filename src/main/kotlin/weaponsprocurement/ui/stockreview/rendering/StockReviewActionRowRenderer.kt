@@ -4,6 +4,7 @@ import weaponsprocurement.ui.WimGuiButtonBinding
 import weaponsprocurement.ui.WimGuiModalActionRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.controls.StockReviewActionButtonFactory
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipHullFilterInput
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import com.fs.starfarer.api.ui.CustomPanelAPI
@@ -41,6 +42,9 @@ class StockReviewActionRowRenderer private constructor() {
                 actionButtons,
                 buttons,
             )
+            if (state.isShipTrading()) {
+                StockReviewShipHullFilterInput.render(root, state)
+            }
         }
     }
 }

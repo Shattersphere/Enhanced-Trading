@@ -12,6 +12,7 @@ import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import java.awt.Color
+import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -36,7 +37,7 @@ object StockReviewShipGridRenderer {
     ): WimGuiListBounds {
         val spec = StockReviewStyle.TRADE_LIST
         val panelHeight = shipPanelHeight(spec.panelTop)
-        val records = snapshot.allRecords(state.getSortMode())
+        val records = filterByHullClass(snapshot.allRecords(state.getSortMode()), state.getShipHullFilter())
         val columns = TARGET_COLUMNS
         val cardWidth = (spec.panelWidth - (columns - 1) * CARD_GAP - 2f * spec.rowHorizontalPad) / columns
         val totalRows = ceil(records.size / columns.toFloat()).toInt()
@@ -54,9 +55,14 @@ object StockReviewShipGridRenderer {
         val listPanel = root.createCustomPanel(spec.panelWidth, panelHeight, WimGuiPanelPlugin(spec.panelFill, spec.panelBorder))
         root.addComponent(listPanel).inTL(spec.panelLeft, spec.panelTop)
         if (records.isEmpty()) {
+            val message = if (state.getShipHullFilter().isBlank()) {
+                "No local ships are available to buy or sell with the current market settings."
+            } else {
+                "No ships match the current hull-class filter."
+            }
             WimGuiControls.addLabel(
                 listPanel,
-                "No local ships are available to buy or sell with the current market settings.",
+                message,
                 StockReviewStyle.TEXT,
                 0f,
                 panelHeight * 0.5f - 12f,
@@ -240,5 +246,21 @@ object StockReviewShipGridRenderer {
             TARGET_ROWS * MIN_CARD_HEIGHT + (TARGET_ROWS - 1) * CARD_GAP + 2f * StockReviewStyle.SMALL_PAD,
             footerTop - StockReviewStyle.SECTION_GAP - panelTop,
         )
+    }
+
+    private fun filterByHullClass(records: List<StockReviewShipRecord>, filter: String): List<StockReviewShipRecord> {
+        val tokens = filter.lowercase(Locale.ROOT).split(Regex("\\s+")).filter { it.isNotBlank() }
+        if (tokens.isEmpty()) {
+            return records
+        }
+        return records.filter { record ->
+            val searchable = listOfNotNull(
+                record.member.hullSpec?.hullName,
+                record.member.hullSpec?.nameWithDesignationWithDashClass,
+                record.member.hullSpec?.hullId,
+                record.member.specId,
+            ).joinToString(" ").lowercase(Locale.ROOT)
+            tokens.all { searchable.contains(it) }
+        }
     }
 }

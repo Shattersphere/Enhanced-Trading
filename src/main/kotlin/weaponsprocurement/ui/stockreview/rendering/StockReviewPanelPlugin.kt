@@ -18,11 +18,13 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipExecutionController
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipGridRenderer
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipHullFilterInput
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshotBuilder
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipTradeController
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.fs.starfarer.api.input.InputEventAPI
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import org.apache.log4j.Logger
 import weaponsprocurement.trade.execution.StockPurchaseService
@@ -62,6 +64,7 @@ class StockReviewPanelPlugin(
     private val execution: StockReviewExecutionController
     private val shipExecution: StockReviewShipExecutionController
     private val tradeActionDispatcher: StockReviewTradeActionDispatcher
+    private var shipHullFilterFocused = false
 
     init {
         if (launchState != null) {
@@ -88,6 +91,17 @@ class StockReviewPanelPlugin(
 
     override fun onCloseRequested() {
         ui.handleCloseRequested()
+    }
+
+    override fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean {
+        if (!state.isShipTrading()) {
+            val wasFocused = shipHullFilterFocused
+            shipHullFilterFocused = false
+            return wasFocused
+        }
+        val result = StockReviewShipHullFilterInput.process(events, root, state, shipHullFilterFocused)
+        shipHullFilterFocused = result.focused
+        return result.changed
     }
 
     override fun reportDialogDismissed(option: Int) {

@@ -37,6 +37,10 @@ abstract class WimGuiModalPanelPlugin<A>(
     }
 
     override fun processInput(events: List<InputEventAPI>) {
+        if (handleInput(events, root)) {
+            rebuildContent()
+            return
+        }
         val result = modalInput.processInput(events)
         if (result.isCloseRequested()) {
             onCloseRequested()
@@ -103,6 +107,8 @@ abstract class WimGuiModalPanelPlugin<A>(
     protected open fun onCloseRequested() {
         close()
     }
+
+    protected open fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean = false
 
     protected fun maxScrollOffset(): Int = listBounds?.getMaxScrollOffset() ?: 0
 

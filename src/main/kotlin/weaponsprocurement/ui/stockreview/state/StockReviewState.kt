@@ -20,6 +20,7 @@ class StockReviewState : WimGuiScrollableListState {
     private var initialCargoCapacity = -1f
     private var contentRevision = 0
     private var tradeKind = StockReviewTradeKind.ITEMS
+    private var shipHullFilter = ""
 
     constructor(config: StockReviewConfig) {
         expansion = StockReviewExpansionState()
@@ -37,6 +38,7 @@ class StockReviewState : WimGuiScrollableListState {
         initialCargoCapacity = source.initialCargoCapacity
         contentRevision = source.contentRevision
         tradeKind = source.tradeKind
+        shipHullFilter = source.shipHullFilter
     }
 
     fun isExpanded(category: StockCategory?): Boolean = expansion.isExpanded(category)
@@ -127,6 +129,32 @@ class StockReviewState : WimGuiScrollableListState {
         markContentChanged()
     }
 
+    fun getShipHullFilter(): String = shipHullFilter
+
+    fun setShipHullFilter(value: String?) {
+        val normalized = normalizeShipHullFilter(value)
+        if (shipHullFilter == normalized) {
+            return
+        }
+        shipHullFilter = normalized
+        listScrollOffset = 0
+        markContentChanged()
+    }
+
+    fun appendShipHullFilter(char: Char) {
+        if (shipHullFilter.length >= MAX_SHIP_HULL_FILTER_LENGTH || !isShipHullFilterChar(char)) {
+            return
+        }
+        setShipHullFilter(shipHullFilter + char)
+    }
+
+    fun backspaceShipHullFilter() {
+        if (shipHullFilter.isEmpty()) {
+            return
+        }
+        setShipHullFilter(shipHullFilter.substring(0, shipHullFilter.length - 1))
+    }
+
     fun getContentRevision(): Int = contentRevision
 
     override fun getListScrollOffset(): Int = listScrollOffset
@@ -167,5 +195,17 @@ class StockReviewState : WimGuiScrollableListState {
 
     private fun markContentChangedIf(changed: Boolean) {
         if (changed) markContentChanged()
+    }
+
+    private fun normalizeShipHullFilter(value: String?): String =
+        (value ?: "")
+            .filter(::isShipHullFilterChar)
+            .take(MAX_SHIP_HULL_FILTER_LENGTH)
+
+    private fun isShipHullFilterChar(char: Char): Boolean =
+        char.isLetterOrDigit() || char == ' ' || char == '-' || char == '_' || char == '\'' || char == '.'
+
+    companion object {
+        private const val MAX_SHIP_HULL_FILTER_LENGTH = 40
     }
 }

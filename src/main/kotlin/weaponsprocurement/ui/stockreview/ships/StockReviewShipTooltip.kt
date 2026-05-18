@@ -32,7 +32,6 @@ class StockReviewShipTooltip(
         val panel = Global.getSettings().createCustom(WIDTH, layout.height, WimGuiPanelPlugin(BACKGROUND, null))
         addTitleBlock(panel, layout)
         addShipPreview(panel, layout)
-        addConditionBars(panel, layout)
         addDataBlock(panel, layout)
         addLoadoutBlock(panel, layout)
         tooltip.addCustom(panel, 0f)
@@ -51,15 +50,7 @@ class StockReviewShipTooltip(
             layout.previewHeight,
             StockReviewShipSpritePlugin(member.hullSpec.spriteName, 0.90f, 0.50f, 0.98f),
         )
-        panel.addComponent(preview).inTL(COMBAT_X + COMBAT_WIDTH * 0.5f - PREVIEW_WIDTH * 0.5f, 36f)
-    }
-
-    private fun addConditionBars(panel: CustomPanelAPI, layout: TooltipLayout) {
-        addPanelLabel(panel, "Combat readiness", TEXT, PAD, layout.conditionTop, 230f, 22f, Alignment.LMID)
-        addStatusBar(panel, PAD, layout.conditionTop + 25f, 300f, member.repairTracker?.cr ?: 0f, percent(member.repairTracker?.cr ?: 0f))
-        addPanelLabel(panel, "Hull integrity", TEXT, 380f, layout.conditionTop, 210f, 22f, Alignment.LMID)
-        val repaired = member.repairTracker?.computeRepairednessFraction() ?: 1f
-        addStatusBar(panel, 380f, layout.conditionTop + 25f, 360f, repaired, percent(repaired))
+        panel.addComponent(preview).inTL(COMBAT_X + COMBAT_WIDTH * 0.5f - PREVIEW_WIDTH * 0.5f, PREVIEW_TOP)
     }
 
     private fun addDataBlock(panel: CustomPanelAPI, layout: TooltipLayout) {
@@ -110,12 +101,6 @@ class StockReviewShipTooltip(
         y = addLoadoutLine(panel, "Mounts:", mountsLabel(), y, HIGHLIGHT, layout.mountLines)
         y = addLoadoutLine(panel, "Armaments:", armamentsLabel(), y, HIGHLIGHT, layout.armamentLines)
         addLoadoutLine(panel, "Hull mods:", hullModsLabel(), y, HIGHLIGHT, layout.hullModLines)
-    }
-
-    private fun addStatusBar(panel: CustomPanelAPI, x: Float, y: Float, width: Float, fraction: Float, label: String) {
-        val bar = panel.createCustomPanel(width, 18f, BarPlugin(fraction.coerceIn(0f, 1f)))
-        panel.addComponent(bar).inTL(x, y)
-        addPanelLabel(panel, label, HIGHLIGHT, x + width + 8f, y - 2f, 52f, 22f, Alignment.LMID)
     }
 
     private fun addSectionHeading(panel: CustomPanelAPI, text: String, x: Float, y: Float, width: Float) {
@@ -192,7 +177,7 @@ class StockReviewShipTooltip(
             null
         } ?: return ""
         val paragraphs = description.text1Paras.orEmpty().filter { it.isNotBlank() }
-        return paragraphs.take(2).joinToString("\n\n") { it.trim() }
+        return paragraphs.joinToString("\n\n") { it.trim() }
     }
 
     private fun systemLabel(): String {
@@ -309,7 +294,6 @@ class StockReviewShipTooltip(
 
     private data class TooltipLayout(
         val descriptionText: String,
-        val conditionTop: Float,
         val dataHeadingTop: Float,
         val dataRowsTop: Float,
         val loadoutTop: Float,
@@ -329,8 +313,7 @@ class StockReviewShipTooltip(
                     MAX_DESCRIPTION_LINES,
                 ).size
                 val descriptionBottom = DESCRIPTION_TOP + descriptionLineCount * DESCRIPTION_LINE_HEIGHT
-                val conditionTop = max(170f, descriptionBottom + 22f)
-                val dataHeadingTop = conditionTop + 70f
+                val dataHeadingTop = max(PREVIEW_TOP + PREVIEW_HEIGHT + 12f, descriptionBottom + 22f)
                 val dataRowsTop = dataHeadingTop + SECTION_HEIGHT + 10f
                 val loadoutTop = dataRowsTop + STAT_ROW_HEIGHT * 9f + 24f
                 val systemLines = lineCount(systemLabel(member), 2)
@@ -341,12 +324,11 @@ class StockReviewShipTooltip(
                 val height = (loadoutTop + loadoutHeight + PAD).coerceIn(MIN_HEIGHT, MAX_HEIGHT)
                 return TooltipLayout(
                     description,
-                    conditionTop,
                     dataHeadingTop,
                     dataRowsTop,
                     loadoutTop,
                     height,
-                    max(210f, dataHeadingTop - 46f),
+                    PREVIEW_HEIGHT,
                     systemLines,
                     mountLines,
                     armamentLines,
@@ -365,7 +347,7 @@ class StockReviewShipTooltip(
                     null
                 } ?: return ""
                 val paragraphs = description.text1Paras.orEmpty().filter { it.isNotBlank() }
-                return paragraphs.take(2).joinToString("\n\n") { it.trim() }
+                return paragraphs.joinToString("\n\n") { it.trim() }
             }
 
             private fun systemLabel(member: FleetMemberAPI): String {
@@ -439,37 +421,17 @@ class StockReviewShipTooltip(
         }
     }
 
-    private class BarPlugin(private val fraction: Float) : BaseCustomUIPanelPlugin() {
-        private var position: PositionAPI? = null
-
-        override fun positionChanged(position: PositionAPI?) {
-            this.position = position
-        }
-
-        override fun renderBelow(alphaMult: Float) {
-            val current = position ?: return
-            Misc.renderQuadAlpha(current.x, current.y, current.width, current.height, BAR_BACKGROUND, alphaMult)
-            Misc.renderQuadAlpha(current.x + 2f, current.y + 3f, max(1f, (current.width - 4f) * fraction), current.height - 6f, BAR_FILL, alphaMult)
-        }
-
-        override fun render(alphaMult: Float) {
-            val current = position ?: return
-            Misc.renderQuadAlpha(current.x, current.y, current.width, 1f, BORDER, alphaMult)
-            Misc.renderQuadAlpha(current.x, current.y + current.height - 1f, current.width, 1f, BORDER, alphaMult)
-            Misc.renderQuadAlpha(current.x, current.y, 1f, current.height, BORDER, alphaMult)
-            Misc.renderQuadAlpha(current.x + current.width - 1f, current.y, 1f, current.height, BORDER, alphaMult)
-        }
-    }
-
     companion object {
         private const val WIDTH = 1120f
         private const val MIN_HEIGHT = 610f
-        private const val MAX_HEIGHT = 760f
+        private const val MAX_HEIGHT = 880f
         private const val PAD = 16f
         private const val TOP_TEXT_WIDTH = 790f
         private const val DESCRIPTION_TOP = 86f
         private const val DESCRIPTION_LINE_HEIGHT = 24f
-        private const val MAX_DESCRIPTION_LINES = 4
+        private const val MAX_DESCRIPTION_LINES = 9
+        private const val PREVIEW_TOP = 36f
+        private const val PREVIEW_HEIGHT = 230f
         private const val PREVIEW_WIDTH = 270f
         private const val COMBAT_X = 732f
         private const val COMBAT_WIDTH = 372f
@@ -482,7 +444,5 @@ class StockReviewShipTooltip(
         private val TEXT = Color(218, 226, 228, 255)
         private val TITLE_COLOR = Color(205, 245, 255, 255)
         private val HIGHLIGHT = Misc.getHighlightColor()
-        private val BAR_BACKGROUND = Color(5, 28, 32, 210)
-        private val BAR_FILL = Color(208, 255, 238, 230)
     }
 }
