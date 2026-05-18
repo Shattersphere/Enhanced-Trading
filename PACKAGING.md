@@ -60,25 +60,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.p
 git diff --check
 ```
 
-## Private Patched Badges
+## Weapon Badges Split
 
-The patched cargo-cell badges are a private runtime path. A clean build does not contain the count bridge, so using a patched `starfarer_obf.jar` with a clean live mod jar can leave every badge on the red error sprite.
-
-Use the private deploy wrapper for this path:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badges.ps1 -StarsectorDir "X:\Path\To\Starsector"
-```
-
-The wrapper builds `build.ps1 -PrivateBadge`, verifies that the jar contains the private helper/config/updater classes, refreshes the embedded core helper through the cargo stack patcher, validates the patch, and deploys with `-AllowPrivateBadgeJar`.
-
-If Starsector is running, the deploy step may queue. In that case, close Starsector and let the queued deploy finish before judging the badge behavior in game.
-
-For private badge deploy state only:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badges.ps1 -Status
-```
+Cargo-cell badges now live in the standalone private `D:\Sean Mods\Weapon Badges` mod. Do not package badge helpers, count bridges, generated badge sprites, or `CargoStackView` patching tools with Weapons Procurement.
 
 ## Trade Rollback Fault Validation
 

@@ -11,7 +11,7 @@ The primary public path is the clean popup:
 - queue buys/sells;
 - review and confirm trades.
 
-The optional patched cargo-cell badge path remains isolated and advanced-use only. Do not ship a prepatched `starfarer_obf.jar`.
+Cargo-cell badges are no longer part of this mod; use the standalone private `D:\Sean Mods\Weapon Badges` mod for that path.
 
 ## Current Product Shape
 
@@ -38,7 +38,6 @@ User-facing docs:
 - `WeaponsProcurementModPlugin`: registers transient scripts on game load.
 - `StockReviewHotkeyScript`: opens the `F8` popup from valid campaign dialogs.
 - `WP_OpenDialog` plus `data/campaign/rules.csv`: optional dialog action.
-- `WeaponsProcurementCountUpdater`: private source-set script that publishes optional patched-badge count properties while paused. It is loaded reflectively only by private builds and no-ops unless patched badges are enabled.
 - `WeaponsProcurementFixerCatalogUpdater`: observes safe real market stock over time for Fixer's Market.
 
 ## Core Model
@@ -134,21 +133,9 @@ Starsector GUI runtime constraints:
 - Avoid generated helper/anonymous classes in classloader-sensitive GUI paths unless the live jar validator is updated and in-game entry points are tested.
 - Runtime UI alignment has been fragile. Commit `a02e507` is the known-good reference for nested stock-review indentation and right-edge sizing.
 
-## Optional Patched Badge Path
+## Weapon Badges Split
 
-The patched badge path exists only for exact in-cell vanilla cargo badges.
-
-Rules:
-
-- Badge helpers live under `src/privateBadge/` and are excluded from the clean public Gradle build.
-- Keep patched helpers lookup-only; normal mod code computes state.
-- Do not call Starsector campaign APIs from `WeaponsProcurementBadgeHelper`.
-- Patch only `CargoStackView.renderAtCenter(FFF)V`.
-- Keep patching reversible and refusal-oriented.
-- Validate with `tools/validate-cargo-stack-view-patch.ps1`.
-- Treat bytecode injection as an advanced/private path unless explicitly approved for a release target.
-
-Normal clean popup work must remain independent of this path.
+Cargo-cell badges moved to the standalone private `D:\Sean Mods\Weapon Badges` mod. Weapons Procurement should not contain badge helper classes, count-updater scripts, generated badge sprites, or `CargoStackView` patching tools.
 
 ## Build And Validation
 
@@ -159,8 +146,6 @@ $env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-total-badges.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-cargo-stack-view-patch.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
@@ -175,12 +160,11 @@ Deploy diagnostics:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status -CleanStaleStaging
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-private-badges.ps1 -Status
 ```
 
 `-Status` does not build or deploy. `-CheckOnly -RequireCurrent` is the cheap source/live clean-package parity check. Stale staging cleanup is scoped to this repo, target, and deploy workflow.
 
-`tools/export-public.ps1` includes the shared deploy helper module and strips private deploy behavior through explicit `PRIVATE_DEPLOY_BOUNDARY` markers in `tools/deploy-live-mod.ps1`. Do not reintroduce function-name-based public deploy surgery.
+`tools/export-public.ps1` includes the shared deploy helper module and leak-scans public output.
 
 For docs-only edits, `validate-doc-links.ps1` and `git diff --check` are usually sufficient.
 

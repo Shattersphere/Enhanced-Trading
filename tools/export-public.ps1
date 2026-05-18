@@ -51,18 +51,6 @@ $includeFiles = @(
     "tools/validate-live-gui-classes.ps1"
 )
 
-$excludeSourceSuffixes = @(
-    "src/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java",
-    "src/weaponsprocurement/internal/WeaponsProcurementBadgeConfig.java",
-    "src/weaponsprocurement/internal/WeaponsProcurementCountUpdater.java",
-    "src/weaponsprocurement/extensions/WeaponsProcurementExtensions.java",
-    "src/privateBadge/java/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java",
-    "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementBadgeConfig.kt",
-    "src/privateBadge/kotlin/weaponsprocurement/internal/WeaponsProcurementCountUpdater.kt",
-    "src/privateBadge/kotlin/weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.kt",
-    "src/main/kotlin/weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.kt"
-)
-
 function Copy-RepoFile {
     param([string]$RelativePath)
     $source = Join-Path $repoRoot $RelativePath
@@ -117,21 +105,6 @@ if (Test-Path -LiteralPath $publicWorkflow) {
         "`r`n"
     )
     Set-Content -LiteralPath $publicWorkflow -Value $workflowText -NoNewline
-}
-$publicGradleBuild = Join-Path $resolvedOutput "build.gradle.kts"
-if (Test-Path -LiteralPath $publicGradleBuild) {
-    $gradleText = Get-Content -LiteralPath $publicGradleBuild -Raw
-    $gradleText = [regex]::Replace(
-        $gradleText,
-        "(?ms)\r?\n?// PRIVATE_BADGE_GRADLE_START.*?// PRIVATE_BADGE_GRADLE_END\r?\n?",
-        "`r`n"
-    )
-    $gradleText = [regex]::Replace(
-        $gradleText,
-        "(?m)^\s*java\.exclude\(""privateBadge/\*\*""\)\r?\n",
-        ""
-    )
-    Set-Content -LiteralPath $publicGradleBuild -Value $gradleText -NoNewline
 }
 $publicBuildWrapper = Join-Path $resolvedOutput "build.ps1"
 @'
@@ -204,31 +177,6 @@ if ($badLinks.Count -gt 0) {
 Write-Host "Documentation link validation passed."
 '@ | Set-Content -LiteralPath $publicDocValidator -NoNewline
 
-$publicPackaging = Join-Path $resolvedOutput "PACKAGING.md"
-if (Test-Path -LiteralPath $publicPackaging) {
-    $packagingText = Get-Content -LiteralPath $publicPackaging -Raw
-    $packagingText = [regex]::Replace(
-        $packagingText,
-        "(?ms)\r?\n## Private Patched Badges\r?\n.*?(?=\r?\n## Trade Rollback Fault Validation)",
-        "`r`n"
-    )
-    Set-Content -LiteralPath $publicPackaging -Value $packagingText -NoNewline
-}
-
-$publicDeployScript = Join-Path $resolvedOutput "tools/deploy-live-mod.ps1"
-if (Test-Path -LiteralPath $publicDeployScript) {
-    $deployText = Get-Content -LiteralPath $publicDeployScript -Raw
-    if ($deployText.IndexOf("PRIVATE_DEPLOY_BOUNDARY_START", [System.StringComparison]::Ordinal) -lt 0) {
-        throw "Public deploy export boundary markers are missing from tools/deploy-live-mod.ps1."
-    }
-    $deployText = [regex]::Replace(
-        $deployText,
-        "(?ms)\r?\n?\s*# PRIVATE_DEPLOY_BOUNDARY_START\r?\n.*?\r?\n\s*# PRIVATE_DEPLOY_BOUNDARY_END\r?\n?",
-        "`r`n"
-    )
-    Set-Content -LiteralPath $publicDeployScript -Value $deployText -NoNewline
-}
-
 $srcRoot = Join-Path $repoRoot "src"
 $sources = Get-ChildItem -LiteralPath $srcRoot -Recurse -File |
     Where-Object {
@@ -236,89 +184,7 @@ $sources = Get-ChildItem -LiteralPath $srcRoot -Recurse -File |
     }
 foreach ($source in $sources) {
     $relative = (Get-RelativePath -BasePath $repoRoot -FullPath $source.FullName).Replace("\", "/")
-    if ($relative.StartsWith("src/privateBadge/", [System.StringComparison]::OrdinalIgnoreCase)) {
-        continue
-    }
-    if ($excludeSourceSuffixes -contains $relative) {
-        continue
-    }
     Copy-RepoFile -RelativePath $relative
-}
-
-$publicPlugin = Join-Path $resolvedOutput "src/weaponsprocurement/plugins/WeaponsProcurementModPlugin.java"
-if (Test-Path -LiteralPath $publicPlugin) {
-    $pluginText = Get-Content -LiteralPath $publicPlugin -Raw
-    $hasBadgeUpdaterReference = $pluginText.IndexOf("WeaponsProcurementCountUpdater", [System.StringComparison]::Ordinal) -ge 0
-    $hasBadgeStartMarker = $pluginText.IndexOf("PRIVATE_BADGE_START", [System.StringComparison]::Ordinal) -ge 0
-    $hasBadgeEndMarker = $pluginText.IndexOf("PRIVATE_BADGE_END", [System.StringComparison]::Ordinal) -ge 0
-    if ($hasBadgeUpdaterReference -and (-not $hasBadgeStartMarker -or -not $hasBadgeEndMarker)) {
-        throw "Public export cannot safely strip private badge registration: marker block missing in WeaponsProcurementModPlugin.java"
-    }
-    $pluginText = $pluginText.Replace("import weaponsprocurement.internal.WeaponsProcurementCountUpdater;`r`n", "")
-    $pluginText = $pluginText.Replace("import weaponsprocurement.internal.WeaponsProcurementCountUpdater;`n", "")
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?m)^\s*private static final String BADGE_UPDATER_CLASS.*\r?\n",
-        ""
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?ms)\r?\n        // PRIVATE_BADGE_START.*?        // PRIVATE_BADGE_END\r?\n",
-        "`r`n"
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?ms)\r?\n    private void registerOptionalPrivateScript\(.*?\r?\n    private boolean hasScript",
-        "`r`n    private boolean hasScript"
-    )
-    Set-Content -LiteralPath $publicPlugin -Value $pluginText -NoNewline
-}
-
-$publicPluginKt = Join-Path $resolvedOutput "src/main/kotlin/weaponsprocurement/plugins/WeaponsProcurementModPlugin.kt"
-if (Test-Path -LiteralPath $publicPluginKt) {
-    $pluginText = Get-Content -LiteralPath $publicPluginKt -Raw
-    $hasBadgeUpdaterReference = $pluginText.IndexOf("WeaponsProcurementCountUpdater", [System.StringComparison]::Ordinal) -ge 0
-    $hasBadgeStartMarker = $pluginText.IndexOf("PRIVATE_BADGE_START", [System.StringComparison]::Ordinal) -ge 0
-    $hasBadgeEndMarker = $pluginText.IndexOf("PRIVATE_BADGE_END", [System.StringComparison]::Ordinal) -ge 0
-    if ($hasBadgeUpdaterReference -and (-not $hasBadgeStartMarker -or -not $hasBadgeEndMarker)) {
-        throw "Public export cannot safely strip private badge registration: marker block missing in WeaponsProcurementModPlugin.kt"
-    }
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?ms)\r?\n        // PRIVATE_BADGE_START.*?        // PRIVATE_BADGE_END\r?\n",
-        "`r`n"
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?m)^\s*private const val BADGE_UPDATER_CLASS.*\r?\n",
-        ""
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?m)^\s*private const val KEY_PATCHED_BADGES_ENABLED.*\r?\n",
-        ""
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?m)^\s*private const val KEY_BADGE_COUNTS_READY.*\r?\n",
-        ""
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?ms)\r?\n    private fun registerOptionalPrivateScript\(.*?\r?\n    private fun hasScript",
-        "`r`n    private fun hasScript"
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?ms)\r?\n    private fun registerOptionalPrivateScript\(.*?\r?\n    @Throws",
-        "`r`n    @Throws"
-    )
-    $pluginText = [regex]::Replace(
-        $pluginText,
-        "(?ms)\r?\n    @Throws\(ClassNotFoundException::class\)\r?\n    private fun loadScriptClass\(.*?\r?\n    private fun hasScript",
-        "`r`n    private fun hasScript"
-    )
-    Set-Content -LiteralPath $publicPluginKt -Value $pluginText -NoNewline
 }
 
 $leakTerms = @(
@@ -333,22 +199,11 @@ $leakTerms = @(
     "starfarer_obf",
     "CargoStackView",
     "bytecode",
-    "PRIVATE_BADGE",
-    "privateBadge",
-    "buildPrivateMod",
     "patched badge",
     "patched cargo-cell",
     "WeaponsProcurementBadgeHelper",
     "WeaponsProcurementBadgeConfig",
-    "WeaponsProcurementCountUpdater",
-    "wp_enable_patched_badges",
-    "wp.config.patchedBadgesEnabled",
-    "wp.private.patchedBadgesEnabled",
-    "wp_total_",
-    "tools/patcher",
-    "validate-cargo-stack-view-patch",
-    "validate-total-badges",
-    "generate-total-badges"
+    "WeaponsProcurementCountUpdater"
 )
 
 $scanFiles = Get-ChildItem -LiteralPath $resolvedOutput -Recurse -File |

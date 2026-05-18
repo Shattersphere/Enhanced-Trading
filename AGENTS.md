@@ -41,13 +41,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.p
 git diff --check
 ```
 
-Private patched-badge validation:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-total-badges.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-cargo-stack-view-patch.ps1
-```
-
 Public export check:
 
 ```powershell
@@ -62,11 +55,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 - Use `tools/deploy-live-mod.ps1 -CheckOnly -RequireCurrent` when you need cheap source/live clean-package parity without deploying.
 - Use `tools/deploy-live-mod.ps1 -Status -CleanStaleStaging` only for scoped cleanup of inactive deploy staging directories.
 - Shared deploy helpers live in `tools/lib/Deploy.Common.ps1`; preserve deploy script CLI/output compatibility and centralize reusable status, queue, zip, state, process, and no-activate worker behavior there.
-- Clean deploys reject jars containing optional patched-badge classes by default. Use `-AllowPrivateBadgeJar` only for an intentional private patched-badge deploy.
+- Clean deploys reject jars containing stale badge classes. Badge ownership moved to the standalone `D:\Sean Mods\Weapon Badges` mod.
 - Deploy runtime changes that affect jar code, `mod_info.json`, `data/`, `graphics/`, Luna settings, generated assets, or package metadata.
 - Do not deploy docs-only changes unless the user asks or release packaging requires mirrored docs.
 - If deployment is blocked by a running Starsector process or locked artifact, do not kill the process. The deploy script stages the built files and queues a minimized visible no-activate waiting deploy.
-- Use `tools/deploy-private-badges.ps1 -Status` for the private patched-badge queue/core-jar blocker report before rerunning the private deploy wrapper.
 - Validate the live artifact with `tools/validate-live-gui-classes.ps1` after runtime deploys.
 
 ## Public Release Policy
@@ -74,7 +66,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 - Private repo work happens here; public output for `Shattersphere-Mods` must be curated, not mirrored.
 - Read `.agent/PUBLIC_RELEASE.md` before any public export, public repo sync, package prep, or release-facing docs change.
 - Public output must exclude `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local paths, deploy queues, and optional patched-badge/bytecode material unless explicitly approved.
-- Public deploy export removes private deploy behavior through explicit `PRIVATE_DEPLOY_BOUNDARY` markers in `tools/deploy-live-mod.ps1`; do not use brittle function-name surgery in `tools/export-public.ps1`.
 - Public changelog entries must stay user-facing and must not mention agents, private docs, local paths, or private experiments.
 
 ## Durable Docs
@@ -96,8 +87,7 @@ Do not read every archive file at session start. Search first, then open only th
   Read before trying to match or reuse vanilla cargo/refit weapon hover tooltips.
 - Trade planning, source modes, quote semantics, and transaction side effects: `.agent/archive/deep-dives/trade-and-sources.md`.
   Read before changing Local/Sector/Fixer behavior, pending trades, tariffs, source allocation, or cargo mutation.
-- Optional patched cargo-cell badges and bytecode constraints: `.agent/archive/deep-dives/patched-badges.md`.
-  Read before patcher, badge helper, count bridge, bytecode inspection/injection, or cargo-cell badge work.
+- Optional cargo-cell badges now live in the standalone `D:\Sean Mods\Weapon Badges` repo. Do not add badge helper, count bridge, or bytecode patcher code back to Weapons Procurement.
 - Runtime and release validation procedures: `.agent/archive/deep-dives/runtime-validation.md`.
   Read before release validation, manual in-game testing, rollback fault tests, or live deploy troubleshooting.
 - Public release/export boundary: `.agent/PUBLIC_RELEASE.md`.
@@ -106,7 +96,7 @@ Do not read every archive file at session start. Search first, then open only th
 ## Hard Constraints
 
 - Clean `F8` popup is the public/default product. Optional patched badges must remain isolated.
-- Clean builds use `src/main/kotlin` plus legacy public Java under `src/weaponsprocurement`; private badge builds use `src/privateBadge`.
+- Clean builds use `src/main/kotlin` plus legacy public Java under `src/weaponsprocurement`.
 - Do not ship or commit a prepatched `starfarer_obf.jar`.
 - Do not call Starsector campaign APIs from embedded patched-core badge helpers.
 - Do not reintroduce visible seller-detail/source-specific local buy rows without a design pass.

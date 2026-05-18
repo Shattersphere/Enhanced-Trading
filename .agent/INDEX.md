@@ -9,7 +9,7 @@ Use this map before loading large or historical docs. The active docs stay short
 | `.agent/PUBLIC_RELEASE.md` | Private release checklist | active | Curated public repo/package export rules for `Shattersphere-Mods`. Never publish. | Any public export, package prep, public docs cleanup, version/changelog release prep, or badge-removal sync work. |
 | `README.md` | User docs | active | Player-facing install and usage summary. | Updating user-facing behavior or release packaging. |
 | `CONFIG.md` | User docs | active | Stock JSON, item keys, market blacklists, Luna settings, and debug hook notes. | Changing config schema, settings, blacklists, or item-key behavior. |
-| `PACKAGING.md` | Release docs | active | Release/build/package validation and optional patched-badge packaging. | Preparing releases, deployment, or patcher validation. |
+| `PACKAGING.md` | Release docs | active | Release/build/package validation and the Weapon Badges split note. | Preparing releases or deployment. |
 | `CHANGELOG.md` | Release docs | active | Release notes. | Bumping version or preparing a release. |
 | `HANDOVER.md` | Stable memory | active | Current architecture, stable decisions, validation commands, and runtime caveats. | Changing architecture, entry points, source modes, trade flow, or validation commands. |
 | `PLANS.md` | Active plan | active | Active work and blocked/deferred items only. | Large, risky, planned, or multi-session work. |

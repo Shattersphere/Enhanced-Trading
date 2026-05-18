@@ -59,31 +59,13 @@ Exclude private and agent material:
 - archive/deep-dive/history docs;
 - deploy queues, local logs, backups, build caches, and machine-specific files.
 
-Exclude optional patched badge / bytecode material:
-
-- `src/privateBadge/`;
-- `src/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java`;
-- `src/weaponsprocurement/internal/WeaponsProcurementCountUpdater.java`;
-- any public-safe source references to those classes;
-- `tools/cargo-stack-view-patcher.ps1`;
-- `tools/validate-cargo-stack-view-patch.ps1`;
-- `tools/validate-total-badges.ps1`;
-- `tools/generate-total-badges.ps1`;
-- `tools/patcher/`;
-- `graphics/ui/wp_total_*.png`;
-- badge sprite registry entries in `data/config/settings.json`;
-- Luna setting `wp_enable_patched_badges`;
-- docs mentioning `CargoStackView`, `starfarer_obf.jar`, bytecode injection, patched badges, badge helpers, or badge sprites.
+Cargo-cell badges now live in `D:\Sean Mods\Weapon Badges`. Public Weapons Procurement exports should contain no badge helpers, count bridges, generated badge sprites, or `CargoStackView` patching tools.
 
 ## Required Private-To-Public Transformations
 
 Resolved:
 
-- `WeaponsProcurementModPlugin` uses a generic optional extension hook rather than direct badge updater imports.
-- Badge helpers are physically separated under `src/privateBadge`.
-- The private Gradle badge source set is stripped from public export output.
-- Public config omits `wp_enable_patched_badges`.
-- `data/config/settings.json` is treated as badge-only and omitted from public output.
+- Badge ownership moved to the standalone private `Weapon Badges` mod.
 - Public docs describe only the clean GUI product.
 - `tools/export-public.ps1` curates public output and runs a leak scan.
 
@@ -107,21 +89,9 @@ LESSONS
 Codex
 D:\Sean Mods
 C:\Games\Starsector
-starfarer_obf
-CargoStackView
-bytecode
-patched badge
-patched cargo-cell
 WeaponsProcurementBadgeHelper
+WeaponsProcurementBadgeConfig
 WeaponsProcurementCountUpdater
-wp_enable_patched_badges
-wp.config.patchedBadgesEnabled
-wp.private.patchedBadgesEnabled
-wp_total_
-tools/patcher
-validate-cargo-stack-view-patch
-validate-total-badges
-generate-total-badges
 ```
 
 Some terms such as `agent` may appear inside ordinary words; review matches rather than treating every hit as a failure.

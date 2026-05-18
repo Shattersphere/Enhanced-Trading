@@ -136,19 +136,9 @@ sourceSets {
     named("main") {
         java.setSrcDirs(listOf("src"))
         java.exclude("main/**")
-        java.exclude("privateBadge/**")
         kotlin.srcDirs("src/main/kotlin")
         resources.setSrcDirs(emptyList<String>())
     }
-
-    // PRIVATE_BADGE_GRADLE_START
-    create("privateBadge") {
-        java.srcDirs("src/privateBadge/java")
-        kotlin.srcDirs("src/privateBadge/kotlin")
-        compileClasspath += sourceSets["main"].output + sourceSets["main"].compileClasspath
-        runtimeClasspath += output + compileClasspath
-    }
-    // PRIVATE_BADGE_GRADLE_END
 }
 
 tasks.register("validateLocalBuildEnvironment") {
@@ -201,24 +191,6 @@ tasks.named<Jar>("jar") {
     destinationDirectory.set(layout.projectDirectory.dir("jars"))
     from(sourceSets["main"].output)
 }
-
-// PRIVATE_BADGE_GRADLE_START
-tasks.register<Jar>("privateBadgeJar") {
-    dependsOn("validateLocalBuildEnvironment", "classes", "privateBadgeClasses")
-    archiveFileName.set("weapons-procurement.jar")
-    destinationDirectory.set(layout.projectDirectory.dir("jars"))
-    from(sourceSets["main"].output) {
-        exclude("weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap*")
-    }
-    from(sourceSets["privateBadge"].output)
-}
-
-tasks.register("buildPrivateMod") {
-    group = "build"
-    description = "Builds the private jar including the optional patched-badge source set."
-    dependsOn("privateBadgeJar")
-}
-// PRIVATE_BADGE_GRADLE_END
 
 tasks.register("buildMod") {
     group = "build"

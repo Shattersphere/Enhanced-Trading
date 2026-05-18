@@ -1,9 +1,6 @@
 param(
     [string]$StarsectorDir = $env:STARSECTOR_DIRECTORY,
     [switch]$NoClean,
-    # PRIVATE_DEPLOY_BOUNDARY_START
-    [switch]$AllowPrivateBadgeJar,
-    # PRIVATE_DEPLOY_BOUNDARY_END
     [switch]$CheckOnly,
     [switch]$Status,
     [switch]$CleanStaleStaging,
@@ -145,11 +142,6 @@ function Assert-DeployJarBoundary {
     if (-not (Test-Path -LiteralPath $jarPath)) {
         throw "Deploy jar not found: $jarPath"
     }
-    # PRIVATE_DEPLOY_BOUNDARY_START
-    if ($AllowPrivateBadgeJar) {
-        return
-    }
-
     $privateTerms = @(
         "WeaponsProcurementBadgeHelper",
         "WeaponsProcurementBadgeConfig",
@@ -163,9 +155,8 @@ function Assert-DeployJarBoundary {
         $privateTerms | Where-Object { $entry.IndexOf($_, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 }
     })
     if ($privateEntries.Count -gt 0) {
-        throw "Refusing clean deploy because the jar contains private patched-badge classes. Rebuild clean with build.ps1, or pass -AllowPrivateBadgeJar for an intentional private deploy. Entries: $($privateEntries -join ', ')"
+        throw "Refusing deploy because the jar contains badge classes now owned by the standalone Weapon Badges mod. Entries: $($privateEntries -join ', ')"
     }
-    # PRIVATE_DEPLOY_BOUNDARY_END
 }
 
 function Assert-DeployRoot {
@@ -487,12 +478,6 @@ function Start-QueuedDeploy {
     if ($NoClean) {
         $args += "-NoClean"
     }
-    # PRIVATE_DEPLOY_BOUNDARY_START
-    if ($AllowPrivateBadgeJar) {
-        $args += "-AllowPrivateBadgeJar"
-    }
-    # PRIVATE_DEPLOY_BOUNDARY_END
-
     $argumentLine = ($args | ForEach-Object { ConvertTo-ProcessArgument -Value $_ }) -join " "
     $process = Start-MinimizedNoActivateProcess -FilePath $powerShellPath -ArgumentList $argumentLine
     Write-DeployState -RunId $runId -ProcessId $process.Id -StageRoot $StageRoot -Phase "queued"

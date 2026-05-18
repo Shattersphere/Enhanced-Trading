@@ -1,8 +1,7 @@
 param(
     [string]$JarPath = (Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) "jars") "weapons-procurement.jar"),
     [string]$PublicExportPath = (Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) "build") "public-export"),
-    [switch]$RequireNoJava,
-    [switch]$AllowPrivateBadgeJar
+    [switch]$RequireNoJava
 )
 
 $ErrorActionPreference = "Stop"
@@ -70,13 +69,6 @@ if (Test-Path -LiteralPath $modInfoPath) {
     Add-Failure "mod_info.json is missing"
 }
 
-$privateBadgeRoot = Join-Path $repoRoot "src/privateBadge"
-if (Test-Path -LiteralPath $privateBadgeRoot) {
-    Write-Gate -Status "PASS" -Message "private badge source set root exists"
-} else {
-    Add-Failure "private badge source set root is missing"
-}
-
 $javaSources = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "src") -Recurse -File -Filter *.java -ErrorAction SilentlyContinue)
 if ($RequireNoJava) {
     if ($javaSources.Count -eq 0) {
@@ -122,8 +114,6 @@ if (Test-Path -LiteralPath $JarPath) {
     })
     if ($badgeEntries.Count -eq 0) {
         Write-Gate -Status "PASS" -Message "clean jar has no private badge classes"
-    } elseif ($AllowPrivateBadgeJar) {
-        Write-Gate -Status "SKIP" -Message "private badge jar entries allowed by parameter"
     } else {
         Add-Failure "clean jar contains private badge entries: $($badgeEntries -join ', ')"
     }

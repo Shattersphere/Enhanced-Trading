@@ -141,7 +141,6 @@ $requiredClasses = @(
     'weaponsprocurement/stock/item/WeaponStockSnapshotBuilder$CostComparator.class',
     'weaponsprocurement/lifecycle/WeaponsProcurementFixerCatalogUpdater.class',
     'weaponsprocurement/lifecycle/StockReviewHotkeyScript.class',
-    'weaponsprocurement/plugins/WeaponsProcurementPrivateBadgeBootstrap.class',
     'com/fs/starfarer/api/impl/campaign/rulecmd/WP_OpenDialog.class'
 )
 

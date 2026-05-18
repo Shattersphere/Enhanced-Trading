@@ -1,7 +1,6 @@
 param(
     [string]$StarsectorDir = $env:STARSECTOR_DIRECTORY,
-    [switch]$SkipClean,
-    [switch]$PrivateBadge
+    [switch]$SkipClean
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,12 +14,11 @@ if (-not (Test-Path -LiteralPath $gradleWrapper)) {
     throw "Missing Gradle wrapper at '$gradleWrapper'."
 }
 
-$taskName = if ($PrivateBadge) { "buildPrivateMod" } else { "buildMod" }
 $gradleArgs = @("--no-daemon", "-PstarsectorDir=$StarsectorDir")
 if (-not $SkipClean) {
     $gradleArgs += "clean"
 }
-$gradleArgs += $taskName
+$gradleArgs += "buildMod"
 
 & $gradleWrapper @gradleArgs
 if ($LASTEXITCODE -ne 0) {
