@@ -28,7 +28,7 @@ class StockReviewShipTooltip(
     override fun getTooltipWidth(tooltipParam: Any?): Float = WIDTH
 
     override fun createTooltip(tooltip: TooltipMakerAPI, expanded: Boolean, tooltipParam: Any?) {
-        val panel = Global.getSettings().createCustom(WIDTH, HEIGHT, WimGuiPanelPlugin(BACKGROUND, BORDER))
+        val panel = Global.getSettings().createCustom(WIDTH, HEIGHT, WimGuiPanelPlugin(BACKGROUND, null))
         addTitleBlock(panel)
         addShipPreview(panel)
         addConditionBars(panel)
@@ -38,32 +38,32 @@ class StockReviewShipTooltip(
     }
 
     private fun addTitleBlock(panel: CustomPanelAPI) {
-        addPanelLabel(panel, "${member.shipName}, ${member.hullSpec.nameWithDesignationWithDashClass}", TITLE_COLOR, PAD, 8f, 735f, 28f, Alignment.LMID)
+        addPanelLabel(panel, "${member.shipName}, ${member.hullSpec.nameWithDesignationWithDashClass}", TITLE_COLOR, PAD, 10f, TOP_TEXT_WIDTH, 28f, Alignment.LMID)
         val manufacturer = member.hullSpec.manufacturer?.takeIf { it.isNotBlank() } ?: "Unknown"
-        addRichLine(panel, "Design type: ", manufacturer, PAD, 46f, 735f, 24f)
-        addWrappedPanelLabel(panel, descriptionText(), TEXT, PAD, 78f, 710f, 22f, 4)
+        addRichLine(panel, "Design type: ", manufacturer, PAD, 52f, TOP_TEXT_WIDTH, 24f)
+        addWrappedPanelLabel(panel, descriptionText(), TEXT, PAD, 86f, TOP_TEXT_WIDTH - 18f, 24f, 4)
     }
 
     private fun addShipPreview(panel: CustomPanelAPI) {
         val preview = panel.createCustomPanel(
             270f,
-            245f,
+            260f,
             StockReviewShipSpritePlugin(member.hullSpec.spriteName, 0.93f, 0.52f, 0.98f),
         )
-        panel.addComponent(preview).inTL(778f, 48f)
+        panel.addComponent(preview).inTL(828f, 44f)
     }
 
     private fun addConditionBars(panel: CustomPanelAPI) {
-        addPanelLabel(panel, "Combat readiness", TEXT, PAD, 292f, 185f, 22f, Alignment.LMID)
-        addStatusBar(panel, 176f, 296f, 310f, member.repairTracker?.cr ?: 0f, percent(member.repairTracker?.cr ?: 0f))
-        addPanelLabel(panel, "Hull integrity", TEXT, 500f, 292f, 165f, 22f, Alignment.LMID)
+        addPanelLabel(panel, "Combat readiness", TEXT, PAD, 318f, 230f, 22f, Alignment.LMID)
+        addStatusBar(panel, PAD, 343f, 300f, member.repairTracker?.cr ?: 0f, percent(member.repairTracker?.cr ?: 0f))
+        addPanelLabel(panel, "Hull integrity", TEXT, 380f, 318f, 210f, 22f, Alignment.LMID)
         val repaired = member.repairTracker?.computeRepairednessFraction() ?: 1f
-        addStatusBar(panel, 642f, 296f, 310f, repaired, percent(repaired))
+        addStatusBar(panel, 380f, 343f, 360f, repaired, percent(repaired))
     }
 
     private fun addDataBlock(panel: CustomPanelAPI) {
-        addSectionHeading(panel, "Logistical data", PAD, 348f, 650f)
-        addSectionHeading(panel, "Combat performance", 705f, 348f, 343f)
+        addSectionHeading(panel, "Logistical data", PAD, 388f, 690f)
+        addSectionHeading(panel, "Combat performance", 732f, 388f, 372f)
 
         val logisticsLeft = listOf(
             StatRow("CR per deployment", percent(member.hullSpec.crToDeploy)),
@@ -98,17 +98,17 @@ class StockReviewShipTooltip(
             StatRow("Top speed", integer(member.stats.maxSpeed.modifiedValue)),
         )
 
-        addStatRows(panel, logisticsLeft, PAD, 380f, 330f, 116f)
-        addStatRows(panel, logisticsRight, 355f, 380f, 330f, 128f)
-        addStatRows(panel, combat, 715f, 380f, 323f, 170f)
+        addStatRows(panel, logisticsLeft, PAD, 420f, 326f, 222f)
+        addStatRows(panel, logisticsRight, 356f, 420f, 340f, 224f)
+        addStatRows(panel, combat, 744f, 420f, 346f, 218f)
     }
 
     private fun addLoadoutBlock(panel: CustomPanelAPI) {
-        var y = 592f
-        y = addLoadoutLine(panel, "System:", systemLabel(), y, HIGHLIGHT)
-        y = addLoadoutLine(panel, "Mounts:", mountsLabel(), y, HIGHLIGHT)
-        y = addLoadoutLine(panel, "Armaments:", armamentsLabel(), y, HIGHLIGHT)
-        addLoadoutLine(panel, "Hull mods:", hullModsLabel(), y, HIGHLIGHT)
+        var y = 624f
+        y = addLoadoutLine(panel, "System:", systemLabel(), y, HIGHLIGHT, 2)
+        y = addLoadoutLine(panel, "Mounts:", mountsLabel(), y, HIGHLIGHT, 2)
+        y = addLoadoutLine(panel, "Armaments:", armamentsLabel(), y, HIGHLIGHT, 3)
+        addLoadoutLine(panel, "Hull mods:", hullModsLabel(), y, HIGHLIGHT, 2)
     }
 
     private fun addStatusBar(panel: CustomPanelAPI, x: Float, y: Float, width: Float, fraction: Float, label: String) {
@@ -131,9 +131,9 @@ class StockReviewShipTooltip(
         }
     }
 
-    private fun addLoadoutLine(panel: CustomPanelAPI, label: String, value: String, y: Float, valueColor: Color): Float {
+    private fun addLoadoutLine(panel: CustomPanelAPI, label: String, value: String, y: Float, valueColor: Color, maxLines: Int): Float {
         addPanelLabel(panel, label, TEXT, PAD, y, 116f, LOADOUT_ROW_HEIGHT, Alignment.LMID)
-        val lines = addWrappedPanelLabel(panel, value, valueColor, 132f, y, 900f, LOADOUT_ROW_HEIGHT, 2)
+        val lines = addWrappedPanelLabel(panel, value, valueColor, 132f, y, WIDTH - 132f - PAD, LOADOUT_ROW_HEIGHT, maxLines)
         return y + max(1, lines) * LOADOUT_ROW_HEIGHT
     }
 
@@ -342,12 +342,13 @@ class StockReviewShipTooltip(
     }
 
     companion object {
-        private const val WIDTH = 1080f
-        private const val HEIGHT = 696f
+        private const val WIDTH = 1120f
+        private const val HEIGHT = 800f
         private const val PAD = 16f
+        private const val TOP_TEXT_WIDTH = 790f
         private const val SECTION_HEIGHT = 22f
         private const val STAT_ROW_HEIGHT = 22f
-        private const val LOADOUT_ROW_HEIGHT = 22f
+        private const val LOADOUT_ROW_HEIGHT = 20f
         private val BACKGROUND = Color(0, 0, 0, 245)
         private val BORDER = Color(100, 185, 200, 255)
         private val SECTION = Color(9, 78, 88, 225)

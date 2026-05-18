@@ -13,14 +13,14 @@ import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import java.awt.Color
 import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 object StockReviewShipGridRenderer {
-    private const val CARD_MIN_WIDTH = 300f
-    private const val CARD_HEIGHT = 132f
+    private const val TARGET_COLUMNS = 4
+    private const val TARGET_ROWS = 5
+    private const val MIN_CARD_HEIGHT = 116f
     private const val CARD_GAP = 5f
     private const val CARD_PAD = 6f
     private const val BUTTON_WIDTH = 84f
@@ -35,16 +35,21 @@ object StockReviewShipGridRenderer {
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
         val spec = StockReviewStyle.TRADE_LIST
+        val panelHeight = shipPanelHeight(spec.panelTop)
         val records = snapshot.allRecords(state.getSortMode())
-        val columns = max(1, floor((spec.panelWidth + CARD_GAP) / (CARD_MIN_WIDTH + CARD_GAP)).toInt())
+        val columns = TARGET_COLUMNS
         val cardWidth = (spec.panelWidth - (columns - 1) * CARD_GAP - 2f * spec.rowHorizontalPad) / columns
         val totalRows = ceil(records.size / columns.toFloat()).toInt()
-        val visibleRows = max(1, floor((spec.panelHeight - 2f * spec.rowHorizontalPad) / (CARD_HEIGHT + CARD_GAP)).toInt())
+        val visibleRows = TARGET_ROWS
+        val cardHeight = max(
+            MIN_CARD_HEIGHT,
+            (panelHeight - 2f * spec.rowHorizontalPad - (visibleRows - 1) * CARD_GAP) / visibleRows,
+        )
         val maxOffset = max(0, totalRows - visibleRows)
         val offset = min(state.getListScrollOffset(), maxOffset)
         state.setListScrollOffset(offset)
 
-        val listPanel = root.createCustomPanel(spec.panelWidth, spec.panelHeight, WimGuiPanelPlugin(spec.panelFill, spec.panelBorder))
+        val listPanel = root.createCustomPanel(spec.panelWidth, panelHeight, WimGuiPanelPlugin(spec.panelFill, spec.panelBorder))
         root.addComponent(listPanel).inTL(spec.panelLeft, spec.panelTop)
         if (records.isEmpty()) {
             WimGuiControls.addLabel(
@@ -52,12 +57,12 @@ object StockReviewShipGridRenderer {
                 "No local ships are available to buy or sell with the current market settings.",
                 StockReviewStyle.TEXT,
                 0f,
-                spec.panelHeight * 0.5f - 12f,
+                panelHeight * 0.5f - 12f,
                 spec.panelWidth,
                 StockReviewStyle.ROW_HEIGHT,
                 Alignment.MID,
             )
-            return WimGuiListBounds(0, spec.panelLeft, spec.panelTop, spec.panelWidth, spec.panelHeight)
+            return WimGuiListBounds(0, spec.panelLeft, spec.panelTop, spec.panelWidth, panelHeight)
         }
 
         val startIndex = offset * columns
@@ -67,10 +72,10 @@ object StockReviewShipGridRenderer {
             val row = visibleIndex / columns
             val column = visibleIndex % columns
             val x = spec.rowHorizontalPad + column * (cardWidth + CARD_GAP)
-            val y = spec.rowHorizontalPad + row * (CARD_HEIGHT + CARD_GAP)
-            renderCard(listPanel, records[index], pendingTrades.contains(records[index].key), x, y, cardWidth, buttons)
+            val y = spec.rowHorizontalPad + row * (cardHeight + CARD_GAP)
+            renderCard(listPanel, records[index], pendingTrades.contains(records[index].key), x, y, cardWidth, cardHeight, buttons)
         }
-        return WimGuiListBounds(maxOffset, spec.panelLeft, spec.panelTop, spec.panelWidth, spec.panelHeight)
+        return WimGuiListBounds(maxOffset, spec.panelLeft, spec.panelTop, spec.panelWidth, panelHeight)
     }
 
     private fun renderCard(
@@ -80,15 +85,16 @@ object StockReviewShipGridRenderer {
         x: Float,
         y: Float,
         width: Float,
+        height: Float,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ) {
         val fill = if (queued) queuedFill(record) else StockReviewStyle.PANEL_BACKGROUND
-        val card = parent.createCustomPanel(width, CARD_HEIGHT, WimGuiPanelPlugin(fill, StockReviewStyle.ROW_BORDER))
+        val card = parent.createCustomPanel(width, height, WimGuiPanelPlugin(fill, StockReviewStyle.ROW_BORDER))
         parent.addComponent(card).inTL(x, y)
         val sprite = card.createCustomPanel(
             width,
-            CARD_HEIGHT,
-            StockReviewShipSpritePlugin(record.member.hullSpec?.spriteName, 0.64f, 0.55f, 0.98f),
+            height,
+            StockReviewShipSpritePlugin(record.member.hullSpec?.spriteName, 0.56f, 0.52f, 0.98f),
         )
         card.addComponent(sprite).inTL(0f, 0f)
 
@@ -115,7 +121,7 @@ object StockReviewShipGridRenderer {
             Alignment.RMID,
         )
 
-        val bottomY = CARD_HEIGHT - StockReviewStyle.ACTION_BUTTON_HEIGHT - CARD_PAD
+        val bottomY = height - StockReviewStyle.ACTION_BUTTON_HEIGHT - CARD_PAD
         WimGuiControls.addBoundButton(
             card,
             width - QUESTION_WIDTH - BUTTON_WIDTH - CARD_GAP - CARD_PAD,
@@ -191,5 +197,13 @@ object StockReviewShipGridRenderer {
             else -> "|"
         }
         return bars
+    }
+
+    private fun shipPanelHeight(panelTop: Float): Float {
+        val footerTop = StockReviewStyle.MODAL.footerButtonY(StockReviewStyle.ACTION_BUTTON_HEIGHT)
+        return max(
+            TARGET_ROWS * MIN_CARD_HEIGHT + (TARGET_ROWS - 1) * CARD_GAP + 2f * StockReviewStyle.SMALL_PAD,
+            footerTop - StockReviewStyle.SECTION_GAP - panelTop,
+        )
     }
 }
