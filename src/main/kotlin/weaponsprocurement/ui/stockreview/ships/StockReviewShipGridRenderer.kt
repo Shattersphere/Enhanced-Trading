@@ -20,11 +20,11 @@ import kotlin.math.roundToInt
 
 object StockReviewShipGridRenderer {
     private const val CARD_MIN_WIDTH = 300f
-    private const val CARD_HEIGHT = 190f
-    private const val CARD_GAP = 8f
-    private const val CARD_PAD = 8f
-    private const val BUTTON_WIDTH = 88f
-    private const val QUESTION_WIDTH = 34f
+    private const val CARD_HEIGHT = 132f
+    private const val CARD_GAP = 5f
+    private const val CARD_PAD = 6f
+    private const val BUTTON_WIDTH = 84f
+    private const val QUESTION_WIDTH = 30f
 
     @JvmStatic
     fun render(
@@ -85,29 +85,33 @@ object StockReviewShipGridRenderer {
         val fill = if (queued) queuedFill(record) else StockReviewStyle.PANEL_BACKGROUND
         val card = parent.createCustomPanel(width, CARD_HEIGHT, WimGuiPanelPlugin(fill, StockReviewStyle.ROW_BORDER))
         parent.addComponent(card).inTL(x, y)
-        val sprite = card.createCustomPanel(width, CARD_HEIGHT, StockReviewShipSpritePlugin(record.member.hullSpec?.spriteName))
+        val sprite = card.createCustomPanel(
+            width,
+            CARD_HEIGHT,
+            StockReviewShipSpritePlugin(record.member.hullSpec?.spriteName, 0.64f, 0.55f, 0.98f),
+        )
         card.addComponent(sprite).inTL(0f, 0f)
 
         val title = "${record.displayName()} (${record.member.variant?.designation ?: record.member.hullSpec?.designation ?: ""})"
-        WimGuiControls.addLabel(card, title, StockReviewStyle.TEXT, CARD_PAD, 2f, width - 72f, 20f, Alignment.LMID)
+        WimGuiControls.addLabel(card, title, StockReviewStyle.TEXT, CARD_PAD, 2f, width - 66f, 18f, Alignment.LMID)
         WimGuiControls.addLabel(
             card,
             StockReviewFormat.credits(record.price.finalCredits.toLong()),
             StockReviewStyle.LOAD_BUTTON,
             CARD_PAD,
-            22f,
-            width - 2f * CARD_PAD,
             20f,
+            width - 2f * CARD_PAD,
+            18f,
             Alignment.LMID,
         )
         WimGuiControls.addLabel(
             card,
             hullMarkers(record),
             StockReviewStyle.LOAD_BUTTON,
-            width - 70f,
+            width - 64f,
             2f,
-            62f,
-            20f,
+            58f,
+            18f,
             Alignment.RMID,
         )
 

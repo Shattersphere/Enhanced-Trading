@@ -10,6 +10,8 @@ import java.awt.Color
 class StockReviewShipSpritePlugin(
     private val spriteName: String?,
     private val maxFill: Float = 0.82f,
+    private val centerYFraction: Float = 0.54f,
+    private val alphaScale: Float = 1f,
 ) : BaseCustomUIPanelPlugin() {
     private var position: PositionAPI? = null
 
@@ -22,10 +24,10 @@ class StockReviewShipSpritePlugin(
         renderFittedSprite(
             spriteName,
             current.x + current.width * 0.5f,
-            current.y + current.height * 0.54f,
+            current.y + current.height * centerYFraction,
             current.width * maxFill,
             current.height * maxFill,
-            alphaMult,
+            alphaMult * alphaScale,
         )
     }
 
