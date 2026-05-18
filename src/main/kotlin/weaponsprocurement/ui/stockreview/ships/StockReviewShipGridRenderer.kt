@@ -2,6 +2,7 @@ package weaponsprocurement.ui.stockreview.ships
 
 import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
+import com.fs.starfarer.api.combat.ShipAPI
 import weaponsprocurement.ui.WimGuiButtonBinding
 import weaponsprocurement.ui.WimGuiButtonSpec
 import weaponsprocurement.ui.WimGuiControls
@@ -16,7 +17,6 @@ import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 object StockReviewShipGridRenderer {
     private const val TARGET_COLUMNS = 4
@@ -115,7 +115,7 @@ object StockReviewShipGridRenderer {
         )
         card.addComponent(sprite).inTL(0f, 0f)
 
-        WimGuiControls.addLabel(card, hullClassLabel(record), StockReviewStyle.TEXT, CARD_PAD, 2f, width - 76f, 18f, Alignment.LMID)
+        WimGuiControls.addLabel(card, hullClassLabel(record), StockReviewStyle.TEXT, CARD_PAD, 2f, width - 92f, 18f, Alignment.LMID)
         WimGuiControls.addLabel(
             card,
             StockReviewFormat.credits(record.price.finalCredits.toLong()),
@@ -130,9 +130,9 @@ object StockReviewShipGridRenderer {
             card,
             sizeLabel(record),
             StockReviewStyle.LOAD_BUTTON,
-            width - 82f,
+            width - 88f,
             2f,
-            76f,
+            82f,
             18f,
             Alignment.RMID,
         )
@@ -152,28 +152,41 @@ object StockReviewShipGridRenderer {
                 StockReviewStyle.ACTION_BACKGROUND,
                 StockReviewStyle.ROW_BORDER,
                 "Show ship details.",
-                StockReviewShipTooltip(record.member),
+                StockReviewShipTooltip(record),
             ),
             buttons,
         )
-        WimGuiControls.addBoundButton(
-            card,
-            width - BUTTON_WIDTH - CARD_PAD,
-            bottomY,
-            StockReviewStyle.ACTION_BUTTON_HEIGHT,
-            WimGuiButtonSpec.toggle(
+        if (record.isDebug()) {
+            WimGuiControls.addLabel(
+                card,
+                "Debug",
+                StockReviewStyle.MUTED,
+                width - BUTTON_WIDTH - CARD_PAD,
+                bottomY,
                 BUTTON_WIDTH,
-                actionLabel(record, queued),
-                StockReviewStyle.TEXT,
-                StockReviewAction.toggleShipPlan(record.key),
+                StockReviewStyle.ACTION_BUTTON_HEIGHT,
                 Alignment.MID,
-                actionFill(record, queued),
-                StockReviewStyle.ROW_BORDER,
-                actionTooltip(record, queued),
-                null,
-            ),
-            buttons,
-        )
+            )
+        } else {
+            WimGuiControls.addBoundButton(
+                card,
+                width - BUTTON_WIDTH - CARD_PAD,
+                bottomY,
+                StockReviewStyle.ACTION_BUTTON_HEIGHT,
+                WimGuiButtonSpec.toggle(
+                    BUTTON_WIDTH,
+                    actionLabel(record, queued),
+                    StockReviewStyle.TEXT,
+                    StockReviewAction.toggleShipPlan(record.key),
+                    Alignment.MID,
+                    actionFill(record, queued),
+                    StockReviewStyle.ROW_BORDER,
+                    actionTooltip(record, queued),
+                    null,
+                ),
+                buttons,
+            )
+        }
         WimGuiControls.addLabel(
             card,
             record.submarketName ?: if (record.isBuy()) "Local stock" else "Player fleet",
@@ -205,19 +218,20 @@ object StockReviewShipGridRenderer {
         }
 
     private fun hullClassLabel(record: StockReviewShipRecord): String {
+        record.debugProfile?.hullClassLabel?.let { return it }
         val hullName = record.member.hullSpec?.hullName?.takeIf { it.isNotBlank() }
         return hullName ?: record.displayName()
     }
 
     private fun sizeLabel(record: StockReviewShipRecord): String {
-        val dp = record.member.deploymentPointsCost.roundToInt()
-        val size = when {
-            dp >= 40 -> 4
-            dp >= 20 -> 3
-            dp >= 10 -> 2
-            else -> 1
+        record.debugProfile?.sizeLabel?.let { return it }
+        return when (record.member.hullSpec?.hullSize) {
+            ShipAPI.HullSize.FRIGATE -> "Frigate"
+            ShipAPI.HullSize.DESTROYER -> "Destroyer"
+            ShipAPI.HullSize.CRUISER -> "Cruiser"
+            ShipAPI.HullSize.CAPITAL_SHIP -> "Capital"
+            else -> "Unknown"
         }
-        return "Size: $size"
     }
 
     private fun currentPage(offset: Int, maxOffset: Int, visibleRows: Int, totalPages: Int): Int {

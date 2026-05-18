@@ -102,7 +102,7 @@ class StockReviewPanelPlugin(
             val result = StockReviewShipFilterModal.process(
                 events,
                 root,
-                StockReviewFilterModalRenderer.modalLeft(),
+                StockReviewFilterModalRenderer.modalLeft(state),
                 StockReviewFilterModalRenderer.modalTop(state),
                 state,
                 focusedShipFilterField,
@@ -150,6 +150,7 @@ class StockReviewPanelPlugin(
             modes.getColorDebugTargetIndex(),
             modes.currentColorDebugDraft(),
             modes.isColorDebugPersistent(),
+            focusedShipFilterField,
             buttonBindings,
         )
     }

@@ -15,24 +15,26 @@ import weaponsprocurement.ui.stockreview.state.StockReviewShipSizeFilter
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 
 object StockReviewShipFilterModal {
-    private const val FIELD_WIDTH = 160f
+    private const val FIELD_WIDTH = 138f
     private const val FIELD_HEIGHT = 22f
-    private const val LABEL_WIDTH = 160f
-    private const val LEFT_X = 20f
-    private const val RIGHT_X = 368f
-    private const val SIZE_TOP = 88f
-    private const val FIELD_TOP = 154f
-    private const val ROW_GAP = 10f
+    private const val LABEL_WIDTH = 138f
+    private const val LEFT_X = 16f
+    private const val RIGHT_X = 326f
+    private const val SIZE_TOP = 16f
+    private const val FIELD_TOP = 54f
+    private const val ROW_GAP = 6f
     private const val ROW_HEIGHT = 28f
+    private const val BUTTON_GAP = 6f
 
     @JvmStatic
     fun render(
         panel: CustomPanelAPI,
         state: StockReviewState,
+        focusedField: StockReviewShipFilterField?,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ) {
-        addSectionLabel(panel, "Ship size", LEFT_X, 62f, 646f)
         var x = LEFT_X
+        val buttonWidth = 149f
         for (size in StockReviewShipSizeFilter.values()) {
             val active = state.isShipSizeFilterActive(size)
             WimGuiControls.addBoundButton(
@@ -41,7 +43,7 @@ object StockReviewShipFilterModal {
                 SIZE_TOP,
                 FIELD_HEIGHT,
                 WimGuiButtonSpec.toggle(
-                    154f,
+                    buttonWidth,
                     size.label,
                     StockReviewStyle.TEXT,
                     StockReviewAction.toggleShipSizeFilter(size),
@@ -53,17 +55,17 @@ object StockReviewShipFilterModal {
                 ),
                 buttons,
             )
-            x += 164f
+            x += buttonWidth + BUTTON_GAP
         }
 
-        addField(panel, state, StockReviewShipFilterField.MAX_COST, LEFT_X, FIELD_TOP)
-        addField(panel, state, StockReviewShipFilterField.MIN_ORDNANCE_POINTS, RIGHT_X, FIELD_TOP)
-        addField(panel, state, StockReviewShipFilterField.MIN_SMALL_MOUNTS, LEFT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
-        addField(panel, state, StockReviewShipFilterField.MIN_MEDIUM_MOUNTS, RIGHT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
-        addField(panel, state, StockReviewShipFilterField.MIN_LARGE_MOUNTS, LEFT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
-        addField(panel, state, StockReviewShipFilterField.MIN_ENERGY_MOUNTS, RIGHT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
-        addField(panel, state, StockReviewShipFilterField.MIN_BALLISTIC_MOUNTS, LEFT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
-        addField(panel, state, StockReviewShipFilterField.SHIP_SYSTEM, RIGHT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
+        addField(panel, state, StockReviewShipFilterField.MAX_COST, focusedField, LEFT_X, FIELD_TOP)
+        addField(panel, state, StockReviewShipFilterField.MIN_ORDNANCE_POINTS, focusedField, RIGHT_X, FIELD_TOP)
+        addField(panel, state, StockReviewShipFilterField.MIN_SMALL_MOUNTS, focusedField, LEFT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
+        addField(panel, state, StockReviewShipFilterField.MIN_MEDIUM_MOUNTS, focusedField, RIGHT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
+        addField(panel, state, StockReviewShipFilterField.MIN_LARGE_MOUNTS, focusedField, LEFT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
+        addField(panel, state, StockReviewShipFilterField.MIN_ENERGY_MOUNTS, focusedField, RIGHT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
+        addField(panel, state, StockReviewShipFilterField.MIN_BALLISTIC_MOUNTS, focusedField, LEFT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
+        addField(panel, state, StockReviewShipFilterField.SHIP_SYSTEM, focusedField, RIGHT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
     }
 
     @JvmStatic
@@ -126,24 +128,31 @@ object StockReviewShipFilterModal {
     }
 
     @JvmStatic
-    fun preferredHeight(): Float = 390f
+    fun preferredHeight(pad: Float, footerGap: Float, footerHeight: Float): Float =
+        FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP) + FIELD_HEIGHT + footerGap + footerHeight + pad
 
     data class Result(
         val focusedField: StockReviewShipFilterField?,
         val changed: Boolean,
     )
 
-    private fun addField(panel: CustomPanelAPI, state: StockReviewState, field: StockReviewShipFilterField, x: Float, y: Float) {
+    private fun addField(
+        panel: CustomPanelAPI,
+        state: StockReviewState,
+        field: StockReviewShipFilterField,
+        focusedField: StockReviewShipFilterField?,
+        x: Float,
+        y: Float,
+    ) {
         WimGuiControls.addLabel(panel, field.label, StockReviewStyle.TEXT, x, y, LABEL_WIDTH, FIELD_HEIGHT, Alignment.LMID)
-        val box = panel.createCustomPanel(FIELD_WIDTH, FIELD_HEIGHT, WimGuiPanelPlugin(StockReviewStyle.ACTION_BACKGROUND, StockReviewStyle.ROW_BORDER))
+        val box = panel.createCustomPanel(
+            FIELD_WIDTH,
+            FIELD_HEIGHT,
+            WimGuiPanelPlugin(if (field == focusedField) StockReviewStyle.CELL_BACKGROUND else StockReviewStyle.ACTION_BACKGROUND, StockReviewStyle.ROW_BORDER),
+        )
         panel.addComponent(box).inTL(x + LABEL_WIDTH + 8f, y)
-        WimGuiControls.addLabel(box, state.getShipFilterField(field), StockReviewStyle.TEXT, 0f, 0f, FIELD_WIDTH, FIELD_HEIGHT, Alignment.MID)
-    }
-
-    private fun addSectionLabel(panel: CustomPanelAPI, label: String, x: Float, y: Float, width: Float) {
-        val strip = panel.createCustomPanel(width, FIELD_HEIGHT, WimGuiPanelPlugin(StockReviewStyle.ACTION_BACKGROUND, StockReviewStyle.ROW_BORDER))
-        panel.addComponent(strip).inTL(x, y)
-        WimGuiControls.addLabel(strip, label, StockReviewStyle.TEXT, 0f, 0f, width, FIELD_HEIGHT, Alignment.MID)
+        val value = state.getShipFilterField(field).let { if (field == focusedField) "${it}_" else it }
+        WimGuiControls.addLabel(box, value, StockReviewStyle.TEXT, 0f, 0f, FIELD_WIDTH, FIELD_HEIGHT, Alignment.MID)
     }
 
     private fun fieldAt(root: CustomPanelAPI, modalLeft: Float, modalTop: Float, event: InputEventAPI): StockReviewShipFilterField? =

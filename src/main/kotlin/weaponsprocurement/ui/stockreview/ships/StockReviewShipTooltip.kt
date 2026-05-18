@@ -21,14 +21,17 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 class StockReviewShipTooltip(
-    private val member: FleetMemberAPI,
+    private val record: StockReviewShipRecord,
 ) : TooltipMakerAPI.TooltipCreator {
+    private val member: FleetMemberAPI = record.member
+    private val debugProfile: StockReviewShipDebugProfile? = record.debugProfile
+
     override fun isTooltipExpandable(tooltipParam: Any?): Boolean = false
 
     override fun getTooltipWidth(tooltipParam: Any?): Float = WIDTH
 
     override fun createTooltip(tooltip: TooltipMakerAPI, expanded: Boolean, tooltipParam: Any?) {
-        val layout = TooltipLayout.from(member)
+        val layout = TooltipLayout.from(member, debugProfile)
         val panel = Global.getSettings().createCustom(WIDTH, layout.height, WimGuiPanelPlugin(BACKGROUND, null))
         addTitleBlock(panel, layout)
         addShipPreview(panel, layout)
@@ -38,8 +41,8 @@ class StockReviewShipTooltip(
     }
 
     private fun addTitleBlock(panel: CustomPanelAPI, layout: TooltipLayout) {
-        addPanelLabel(panel, "${member.shipName}, ${member.hullSpec.nameWithDesignationWithDashClass}", TITLE_COLOR, PAD, 10f, TOP_TEXT_WIDTH, 28f, Alignment.LMID)
-        val manufacturer = member.hullSpec.manufacturer?.takeIf { it.isNotBlank() } ?: "Unknown"
+        addPanelLabel(panel, titleText(), TITLE_COLOR, PAD, 10f, TOP_TEXT_WIDTH, 28f, Alignment.LMID)
+        val manufacturer = debugProfile?.manufacturer ?: member.hullSpec.manufacturer?.takeIf { it.isNotBlank() } ?: "Unknown"
         addRichLine(panel, "Design type: ", manufacturer, PAD, 52f, TOP_TEXT_WIDTH, 24f)
         addWrappedPanelLabel(panel, layout.descriptionText, TEXT, PAD, DESCRIPTION_TOP, TOP_TEXT_WIDTH - 18f, DESCRIPTION_LINE_HEIGHT, MAX_DESCRIPTION_LINES)
     }
@@ -57,7 +60,7 @@ class StockReviewShipTooltip(
         addSectionHeading(panel, "Logistical data", PAD, layout.dataHeadingTop, 690f)
         addSectionHeading(panel, "Combat performance", COMBAT_X, layout.dataHeadingTop, COMBAT_WIDTH)
 
-        val logisticsLeft = listOf(
+        val logisticsLeft = debugProfile?.logisticsLeft?.map { StatRow(it.label, it.value) } ?: listOf(
             StatRow("CR per deployment", percent(member.hullSpec.crToDeploy)),
             StatRow("Recovery rate (per day)", percent(member.repairTracker?.recoveryRate ?: member.stats.repairRatePercentPerDay.modifiedValue / 100f)),
             StatRow("Recovery cost (supplies)", integer(member.stats.suppliesToRecover.modifiedValue)),
@@ -67,7 +70,7 @@ class StockReviewShipTooltip(
             StatRow("Hull size", hullSize(member.hullSpec.hullSize)),
             StatRow("Ordnance points", member.hullSpec.getOrdnancePoints(Global.getSector()?.playerStats).toString()),
         )
-        val logisticsRight = listOf(
+        val logisticsRight = debugProfile?.logisticsRight?.map { StatRow(it.label, it.value) } ?: listOf(
             StatRow("Maintenance (supplies/mo)", oneDecimal(member.stats.suppliesPerMonth.modifiedValue)),
             StatRow("Cargo capacity", integer(member.cargoCapacity)),
             StatRow("Maximum crew", integer(member.maxCrew)),
@@ -78,7 +81,7 @@ class StockReviewShipTooltip(
             StatRow("Sensor profile", integer(member.stats.sensorProfile.modifiedValue)),
             StatRow("Sensor strength", integer(member.stats.sensorStrength.modifiedValue)),
         )
-        val combat = listOf(
+        val combat = debugProfile?.combat?.map { StatRow(it.label, it.value) } ?: listOf(
             StatRow("Hull integrity", integer(member.hullSpec.hitpoints)),
             StatRow("Armor rating", integer(member.hullSpec.armorRating)),
             StatRow("Defense", defenseLabel()),
@@ -97,10 +100,10 @@ class StockReviewShipTooltip(
 
     private fun addLoadoutBlock(panel: CustomPanelAPI, layout: TooltipLayout) {
         var y = layout.loadoutTop
-        y = addLoadoutLine(panel, "System:", systemLabel(), y, HIGHLIGHT, layout.systemLines)
-        y = addLoadoutLine(panel, "Mounts:", mountsLabel(), y, HIGHLIGHT, layout.mountLines)
-        y = addLoadoutLine(panel, "Armaments:", armamentsLabel(), y, HIGHLIGHT, layout.armamentLines)
-        addLoadoutLine(panel, "Hull mods:", hullModsLabel(), y, HIGHLIGHT, layout.hullModLines)
+        y = addLoadoutLine(panel, "System:", debugProfile?.system ?: systemLabel(), y, HIGHLIGHT, layout.systemLines)
+        y = addLoadoutLine(panel, "Mounts:", debugProfile?.mounts ?: mountsLabel(), y, HIGHLIGHT, layout.mountLines)
+        y = addLoadoutLine(panel, "Armaments:", debugProfile?.armaments ?: armamentsLabel(), y, HIGHLIGHT, layout.armamentLines)
+        addLoadoutLine(panel, "Hull mods:", debugProfile?.hullMods ?: hullModsLabel(), y, HIGHLIGHT, layout.hullModLines)
     }
 
     private fun addSectionHeading(panel: CustomPanelAPI, text: String, x: Float, y: Float, width: Float) {
@@ -179,6 +182,9 @@ class StockReviewShipTooltip(
         val paragraphs = description.text1Paras.orEmpty().filter { it.isNotBlank() }
         return paragraphs.joinToString("\n\n") { it.trim() }
     }
+
+    private fun titleText(): String =
+        debugProfile?.tooltipTitle ?: "${member.shipName}, ${member.hullSpec.nameWithDesignationWithDashClass}"
 
     private fun systemLabel(): String {
         val id = member.hullSpec.shipSystemId?.takeIf { it.isNotBlank() } ?: return "None"
@@ -306,7 +312,11 @@ class StockReviewShipTooltip(
     ) {
         companion object {
             fun from(member: FleetMemberAPI): TooltipLayout {
-                val description = descriptionText(member)
+                return from(member, null)
+            }
+
+            fun from(member: FleetMemberAPI, debugProfile: StockReviewShipDebugProfile?): TooltipLayout {
+                val description = debugProfile?.description ?: descriptionText(member)
                 val descriptionLineCount = WimGuiText.wrap(
                     description,
                     WimGuiText.estimatedChars(TOP_TEXT_WIDTH - 26f),
@@ -316,10 +326,10 @@ class StockReviewShipTooltip(
                 val dataHeadingTop = max(PREVIEW_TOP + PREVIEW_HEIGHT + 12f, descriptionBottom + 22f)
                 val dataRowsTop = dataHeadingTop + SECTION_HEIGHT + 10f
                 val loadoutTop = dataRowsTop + STAT_ROW_HEIGHT * 9f + 24f
-                val systemLines = lineCount(systemLabel(member), 2)
-                val mountLines = lineCount(mountsLabel(member), 2)
-                val armamentLines = lineCount(armamentsLabel(member), 3)
-                val hullModLines = lineCount(hullModsLabel(member), 2)
+                val systemLines = lineCount(debugProfile?.system ?: systemLabel(member), 2)
+                val mountLines = lineCount(debugProfile?.mounts ?: mountsLabel(member), 2)
+                val armamentLines = lineCount(debugProfile?.armaments ?: armamentsLabel(member), 3)
+                val hullModLines = lineCount(debugProfile?.hullMods ?: hullModsLabel(member), 2)
                 val loadoutHeight = (systemLines + mountLines + armamentLines + hullModLines) * LOADOUT_ROW_HEIGHT
                 val height = (loadoutTop + loadoutHeight + PAD).coerceIn(MIN_HEIGHT, MAX_HEIGHT)
                 return TooltipLayout(

@@ -1,11 +1,14 @@
 package weaponsprocurement.ui.stockreview.ships
 
+import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.CampaignFleetAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
+import com.fs.starfarer.api.fleet.FleetMemberType
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets
 import weaponsprocurement.stock.market.StockSubmarketAccess
+import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 
 class StockReviewShipSnapshotBuilder {
     fun build(market: MarketAPI?, playerFleet: CampaignFleetAPI?, includeBlackMarket: Boolean): StockReviewShipSnapshot {
@@ -13,6 +16,7 @@ class StockReviewShipSnapshotBuilder {
             return StockReviewShipSnapshot.EMPTY
         }
         val buyRecords = ArrayList<StockReviewShipRecord>()
+        addDebugRecord(buyRecords)
         for (submarket in market.submarketsCopy.orEmpty()) {
             if (!StockSubmarketAccess.isTradeEligible(submarket, includeBlackMarket)) continue
             val members = submarket?.cargoNullOk?.mothballedShips?.membersListCopy ?: continue
@@ -74,6 +78,82 @@ class StockReviewShipSnapshotBuilder {
             ),
         )
     }
+
+    private fun addDebugRecord(records: MutableList<StockReviewShipRecord>) {
+        if (!StockReviewStyle.SHOW_WIDTH_TEST_ROWS) return
+        val member = debugMember() ?: return
+        member.shipName = "HSS Debug Worst-Case Layout Regression Fortress of Excessively Long Field Values"
+        records.add(
+            StockReviewShipRecord(
+                "D|debug-worst-case-ship",
+                StockReviewShipTradeSide.BUY,
+                member,
+                null,
+                null,
+                "Debug sample",
+                StockReviewShipPriceQuote(9_999_999, 9_999_999, 99_999_999, 0.99f),
+                debugProfile(),
+            ),
+        )
+    }
+
+    private fun debugMember(): FleetMemberAPI? {
+        val factory = Global.getFactory() ?: return null
+        val candidates = listOf("paragon_Elite", "paragon_Overdriven", "paragon_Hull", "paragon")
+        for (variantOrHullId in candidates) {
+            try {
+                return factory.createFleetMember(FleetMemberType.SHIP, variantOrHullId)
+            } catch (_: RuntimeException) {
+                continue
+            }
+        }
+        return null
+    }
+
+    private fun debugProfile(): StockReviewShipDebugProfile =
+        StockReviewShipDebugProfile(
+            "Debug Worst-Case Supercapital Siege Carrier Logistics Battleship Mk. XIV-D",
+            "Capital",
+            "HSS Debug Worst-Case Layout Regression Fortress, Debug Worst-Case Supercapital Siege Carrier Logistics Battleship Mk. XIV-D",
+            "Debug/Stress Test",
+            "This fake entry intentionally uses extreme values, very long field labels, long system text, dense weapon mounts, and a crowded armament list. It exists only to prove that the ship grid and tooltip can survive worst-case local UI content without wrapping into controls, clipping important text, or creating unusable empty space.",
+            listOf(
+                StockReviewShipDebugStat("CR per deployment", "9999%"),
+                StockReviewShipDebugStat("Recovery rate (per day)", "999.95% (-999.95)"),
+                StockReviewShipDebugStat("Recovery cost (supplies)", "99999"),
+                StockReviewShipDebugStat("Deployment points", "999"),
+                StockReviewShipDebugStat("Peak performance (sec)", "99999"),
+                StockReviewShipDebugStat("Crew complement", "99999 / 99999"),
+                StockReviewShipDebugStat("Hull size", "Capital"),
+                StockReviewShipDebugStat("Ordnance points", "999"),
+            ),
+            listOf(
+                StockReviewShipDebugStat("Maintenance (supplies/mo)", "9999.9"),
+                StockReviewShipDebugStat("Cargo capacity", "99999"),
+                StockReviewShipDebugStat("Maximum crew", "99999"),
+                StockReviewShipDebugStat("Skeleton crew required", "99999"),
+                StockReviewShipDebugStat("Fuel capacity", "99999"),
+                StockReviewShipDebugStat("Maximum burn", "99"),
+                StockReviewShipDebugStat("Fuel / light year", "999.9"),
+                StockReviewShipDebugStat("Sensor profile", "99999"),
+                StockReviewShipDebugStat("Sensor strength", "99999"),
+            ),
+            listOf(
+                StockReviewShipDebugStat("Hull integrity", "999999"),
+                StockReviewShipDebugStat("Armor rating", "99999"),
+                StockReviewShipDebugStat("Defense", "Omni Phase Fortress Shield"),
+                StockReviewShipDebugStat("Shield arc", "360"),
+                StockReviewShipDebugStat("Shield upkeep/sec", "9999"),
+                StockReviewShipDebugStat("Shield flux/damage", "0.01"),
+                StockReviewShipDebugStat("Flux capacity", "999999"),
+                StockReviewShipDebugStat("Flux dissipation", "99999"),
+                StockReviewShipDebugStat("Top speed", "999"),
+            ),
+            "Debug Singularity Cascade Fortress Shield With Excessively Long Name",
+            "12x Large Energy, 12x Large Ballistic, 12x Large Missile, 18x Medium Hybrid, 18x Medium Synergy, 24x Small Universal, 24x Small Composite",
+            "8x Tachyon Lance, 8x Hellbore Cannon, 8x Squall MLRS, 12x Heavy Needler, 12x Hypervelocity Driver, 16x Burst PD Laser, 16x Sabot SRM, 16x Atropos-class Torpedo, 24x Tactical Laser",
+            "Advanced Targeting Core, Integrated Targeting Unit, Expanded Missile Racks, Resistant Flux Conduits, Heavy Armor, Hardened Shields, Solar Shielding, Augmented Drive Field, Operations Center",
+        )
 
     private fun sellTarget(market: MarketAPI?, includeBlackMarket: Boolean): SubmarketAPI? {
         val submarkets = market?.submarketsCopy ?: return null

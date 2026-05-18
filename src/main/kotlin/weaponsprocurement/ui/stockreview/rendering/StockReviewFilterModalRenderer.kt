@@ -15,41 +15,49 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rows.StockReviewFilterGroupSections
 import weaponsprocurement.ui.stockreview.rows.StockReviewFilterRows
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipFilterModal
+import weaponsprocurement.ui.stockreview.state.StockReviewShipFilterField
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import java.awt.Color
 
 class StockReviewFilterModalRenderer private constructor() {
     companion object {
-        private const val WIDTH = 720f
-        private const val ITEM_HEIGHT = 560f
-        private const val PAD = 20f
-        private const val TITLE_HEIGHT = 26f
-        private const val STATUS_HEIGHT = 24f
-        private const val FOOTER_BUTTON_WIDTH = 210f
+        private const val ITEM_WIDTH = 390f
+        private const val SHIP_WIDTH = 650f
+        private const val PAD = 14f
+        private const val FOOTER_GAP = 12f
+        private const val FOOTER_BUTTON_WIDTH = 112f
+        private const val RESET_BUTTON_WIDTH = 96f
+        private const val MAX_ITEM_LIST_HEIGHT = 430f
         private val DIM = Color(0, 0, 0, 150)
 
         @JvmStatic
         fun render(
             root: CustomPanelAPI,
             state: StockReviewState,
+            focusedShipFilterField: StockReviewShipFilterField?,
             buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
             scrollRowFactory: WimGuiModalListRenderer.ScrollRowFactory<StockReviewAction>,
             extraGapProvider: WimGuiModalListRenderer.ExtraGapProvider<StockReviewAction>,
         ): WimGuiListBounds {
-            val height = if (state.isShipTrading()) StockReviewShipFilterModal.preferredHeight() else ITEM_HEIGHT
-            addDim(root)
-            val modalLeft = (StockReviewStyle.MODAL.width - WIDTH) * 0.5f
-            val modalTop = (StockReviewStyle.MODAL.height - height) * 0.5f
-            val modal = root.createCustomPanel(WIDTH, height, WimGuiPanelPlugin(StockReviewStyle.PANEL_BACKGROUND, StockReviewStyle.PANEL_BORDER))
-            root.addComponent(modal).inTL(modalLeft, modalTop)
-            renderHeader(modal, state)
-            val bounds = if (state.isShipTrading()) {
-                StockReviewShipFilterModal.render(modal, state, buttons)
-                WimGuiListBounds(0, modalLeft, modalTop, WIDTH, height)
+            val rows = if (state.isShipTrading()) null else itemRows(state)
+            val width = if (state.isShipTrading()) SHIP_WIDTH else ITEM_WIDTH
+            val height = if (state.isShipTrading()) {
+                StockReviewShipFilterModal.preferredHeight(PAD, FOOTER_GAP, StockReviewStyle.ACTION_BUTTON_HEIGHT)
             } else {
-                renderItemFilters(modal, state, buttons, scrollRowFactory, extraGapProvider).translated(modalLeft, modalTop)
+                itemHeight(rows.orEmpty())
             }
-            renderFooter(modal, state, buttons, height)
+            addDim(root)
+            val modalLeft = (StockReviewStyle.MODAL.width - width) * 0.5f
+            val modalTop = (StockReviewStyle.MODAL.height - height) * 0.5f
+            val modal = root.createCustomPanel(width, height, WimGuiPanelPlugin(StockReviewStyle.PANEL_BACKGROUND, StockReviewStyle.PANEL_BORDER))
+            root.addComponent(modal).inTL(modalLeft, modalTop)
+            val bounds = if (state.isShipTrading()) {
+                StockReviewShipFilterModal.render(modal, state, focusedShipFilterField, buttons)
+                WimGuiListBounds(0, modalLeft, modalTop, width, height)
+            } else {
+                renderItemFilters(modal, state, rows.orEmpty(), buttons, scrollRowFactory, extraGapProvider, width, height).translated(modalLeft, modalTop)
+            }
+            renderFooter(modal, state, buttons, width, height)
             return bounds
         }
 
@@ -58,35 +66,25 @@ class StockReviewFilterModalRenderer private constructor() {
             root.addComponent(dim).inTL(0f, 0f)
         }
 
-        private fun renderHeader(panel: CustomPanelAPI, state: StockReviewState) {
-            WimGuiControls.addLabel(panel, "Filters", StockReviewStyle.TEXT, PAD, 14f, WIDTH - 2f * PAD, TITLE_HEIGHT, Alignment.LMID)
-            val status = if (state.isShipTrading()) {
-                "Active ship filters: ${state.getActiveShipFilterCount()}"
-            } else {
-                "Active item filters: ${state.getActiveFilterCount()} | Active rows are shown first"
-            }
-            WimGuiControls.addLabel(panel, status, StockReviewStyle.TEXT, PAD, 44f, WIDTH - 2f * PAD, STATUS_HEIGHT, Alignment.LMID)
-        }
-
         private fun renderItemFilters(
             panel: CustomPanelAPI,
             state: StockReviewState,
+            rows: List<WimGuiListRow<StockReviewAction>>,
             buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
             scrollRowFactory: WimGuiModalListRenderer.ScrollRowFactory<StockReviewAction>,
             extraGapProvider: WimGuiModalListRenderer.ExtraGapProvider<StockReviewAction>,
+            width: Float,
+            height: Float,
         ): WimGuiListBounds {
-            val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
-            val active = state.getActiveFilters()
-            StockReviewFilterRows.addActive(rows, active)
-            StockReviewFilterGroupSections.addGroups(rows, state, active)
-            val modalLayout = WimGuiModalLayout(WIDTH, ITEM_HEIGHT, PAD, PAD, 78f, 52f, StockReviewStyle.ROW_HEIGHT, StockReviewStyle.ROW_GAP, StockReviewStyle.SMALL_PAD)
-            val listTop = 82f
-            val listHeight = ITEM_HEIGHT - listTop - 72f
+            val footerTop = footerButtonY(height)
+            val listTop = PAD
+            val listHeight = maxOf(StockReviewStyle.ROW_HEIGHT, footerTop - FOOTER_GAP - listTop)
+            val modalLayout = WimGuiModalLayout(width, height, PAD, PAD, listTop, 48f, StockReviewStyle.ROW_HEIGHT, StockReviewStyle.ROW_GAP, StockReviewStyle.SMALL_PAD)
             val spec = WimGuiModalListSpec(
                 modalLayout,
                 PAD,
                 listTop,
-                WIDTH - 2f * PAD,
+                width - 2f * PAD,
                 listHeight,
                 StockReviewStyle.ROW_HEIGHT,
                 StockReviewStyle.ACTION_BUTTON_HEIGHT,
@@ -101,10 +99,9 @@ class StockReviewFilterModalRenderer private constructor() {
             return WimGuiModalListRenderer.renderAndStoreOffset(panel, rows, state, spec, scrollRowFactory, extraGapProvider, buttons)
         }
 
-        private fun renderFooter(panel: CustomPanelAPI, state: StockReviewState, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>, height: Float) {
-            val y = height - PAD - StockReviewStyle.ACTION_BUTTON_HEIGHT
+        private fun renderFooter(panel: CustomPanelAPI, state: StockReviewState, buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>, width: Float, height: Float) {
+            val y = footerButtonY(height)
             val gap = StockReviewStyle.BUTTON_GAP
-            val resetWidth = 160f
             WimGuiControls.addBoundButton(
                 panel,
                 PAD,
@@ -129,7 +126,7 @@ class StockReviewFilterModalRenderer private constructor() {
                 y,
                 StockReviewStyle.ACTION_BUTTON_HEIGHT,
                 WimGuiButtonSpec.toggle(
-                    resetWidth,
+                    RESET_BUTTON_WIDTH,
                     "Reset",
                     StockReviewStyle.TEXT,
                     StockReviewAction.resetFilters(),
@@ -143,7 +140,7 @@ class StockReviewFilterModalRenderer private constructor() {
             )
             WimGuiControls.addBoundButton(
                 panel,
-                WIDTH - PAD - FOOTER_BUTTON_WIDTH,
+                width - PAD - FOOTER_BUTTON_WIDTH,
                 y,
                 StockReviewStyle.ACTION_BUTTON_HEIGHT,
                 WimGuiButtonSpec.toggle(
@@ -162,10 +159,34 @@ class StockReviewFilterModalRenderer private constructor() {
         }
 
         @JvmStatic
-        fun modalLeft(): Float = (StockReviewStyle.MODAL.width - WIDTH) * 0.5f
+        fun modalLeft(state: StockReviewState): Float =
+            (StockReviewStyle.MODAL.width - if (state.isShipTrading()) SHIP_WIDTH else ITEM_WIDTH) * 0.5f
 
         @JvmStatic
         fun modalTop(state: StockReviewState): Float =
-            (StockReviewStyle.MODAL.height - if (state.isShipTrading()) StockReviewShipFilterModal.preferredHeight() else ITEM_HEIGHT) * 0.5f
+            (StockReviewStyle.MODAL.height - if (state.isShipTrading()) {
+                StockReviewShipFilterModal.preferredHeight(PAD, FOOTER_GAP, StockReviewStyle.ACTION_BUTTON_HEIGHT)
+            } else {
+                itemHeight(itemRows(state))
+            }) * 0.5f
+
+        private fun itemRows(state: StockReviewState): List<WimGuiListRow<StockReviewAction>> {
+            val rows = ArrayList<WimGuiListRow<StockReviewAction>>()
+            val active = state.getActiveFilters()
+            StockReviewFilterRows.addActive(rows, active)
+            StockReviewFilterGroupSections.addGroups(rows, state, active)
+            return rows
+        }
+
+        private fun itemHeight(rows: List<WimGuiListRow<StockReviewAction>>): Float {
+            val contentHeight = rows.sumOf {
+                (StockReviewStyle.ROW_HEIGHT + StockReviewStyle.ROW_GAP + if (it.hasTopGap()) StockReviewStyle.CATEGORY_TOP_GAP else 0f).toDouble()
+            }.toFloat() + 2f * StockReviewStyle.SMALL_PAD
+            val listHeight = contentHeight.coerceAtMost(MAX_ITEM_LIST_HEIGHT)
+            return PAD + listHeight + FOOTER_GAP + StockReviewStyle.ACTION_BUTTON_HEIGHT + PAD
+        }
+
+        private fun footerButtonY(height: Float): Float =
+            height - PAD - StockReviewStyle.ACTION_BUTTON_HEIGHT
     }
 }

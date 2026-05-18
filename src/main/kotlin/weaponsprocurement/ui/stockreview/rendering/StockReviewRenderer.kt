@@ -16,6 +16,7 @@ import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrade
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipGridRenderer
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
+import weaponsprocurement.ui.stockreview.state.StockReviewShipFilterField
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
@@ -46,11 +47,12 @@ class StockReviewRenderer :
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
+        focusedShipFilterField: StockReviewShipFilterField?,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
         val modeSpec = StockReviewModeSpec.forScreenMode(screenMode)
         if (screenMode == StockReviewScreenMode.FILTERS) {
-            return StockReviewFilterModalRenderer.render(root, state, buttons, this, this)
+            return StockReviewFilterModalRenderer.render(root, state, focusedShipFilterField, buttons, this, this)
         }
         if (modeSpec.hasHeader()) {
             StockReviewHeaderRenderer.render(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
