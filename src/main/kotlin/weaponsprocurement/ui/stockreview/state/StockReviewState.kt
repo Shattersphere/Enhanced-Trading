@@ -13,6 +13,7 @@ import weaponsprocurement.stock.item.StockSourceMode
 class StockReviewState : WimGuiScrollableListState {
     private val expansion: StockReviewExpansionState
     private val filters: StockReviewFilterState
+    private val shipFilters: StockReviewShipFilterState
     private val source: StockReviewSourceState
     private var listScrollOffset = 0
     private var tradeWarning = "None"
@@ -25,12 +26,14 @@ class StockReviewState : WimGuiScrollableListState {
     constructor(config: StockReviewConfig) {
         expansion = StockReviewExpansionState()
         filters = StockReviewFilterState()
+        shipFilters = StockReviewShipFilterState()
         source = StockReviewSourceState(config)
     }
 
     constructor(source: StockReviewState) {
         expansion = StockReviewExpansionState(source.expansion)
         filters = StockReviewFilterState(source.filters)
+        shipFilters = StockReviewShipFilterState(source.shipFilters)
         this.source = StockReviewSourceState(source.source)
         listScrollOffset = source.listScrollOffset
         tradeWarning = source.tradeWarning
@@ -87,6 +90,52 @@ class StockReviewState : WimGuiScrollableListState {
             markContentChanged()
         }
     }
+
+    fun isShipSizeFilterActive(size: StockReviewShipSizeFilter?): Boolean = shipFilters.isSizeActive(size)
+
+    fun toggleShipSizeFilter(size: StockReviewShipSizeFilter?) {
+        if (shipFilters.toggleSize(size)) {
+            listScrollOffset = 0
+            markContentChanged()
+        }
+    }
+
+    fun getActiveShipSizeFilters(): Set<StockReviewShipSizeFilter> = shipFilters.getActiveSizes()
+
+    fun getShipFilterField(field: StockReviewShipFilterField?): String = shipFilters.getField(field)
+
+    fun setShipFilterField(field: StockReviewShipFilterField?, value: String?) {
+        if (shipFilters.setField(field, value)) {
+            listScrollOffset = 0
+            markContentChanged()
+        }
+    }
+
+    fun appendShipFilterField(field: StockReviewShipFilterField?, char: Char) {
+        if (shipFilters.appendField(field, char)) {
+            listScrollOffset = 0
+            markContentChanged()
+        }
+    }
+
+    fun backspaceShipFilterField(field: StockReviewShipFilterField?) {
+        if (shipFilters.backspaceField(field)) {
+            listScrollOffset = 0
+            markContentChanged()
+        }
+    }
+
+    fun getShipFilterInt(field: StockReviewShipFilterField): Int? = shipFilters.intValue(field)
+
+    fun clearShipFilters() {
+        if (shipFilters.clear()) {
+            listScrollOffset = 0
+            markContentChanged()
+        }
+    }
+
+    fun getActiveShipFilterCount(): Int =
+        shipFilters.activeCount() + if (shipHullFilter.isBlank()) 0 else 1
 
     fun isExpanded(group: StockReviewFilterGroup?): Boolean = filters.isExpanded(group)
     fun toggle(group: StockReviewFilterGroup?) {

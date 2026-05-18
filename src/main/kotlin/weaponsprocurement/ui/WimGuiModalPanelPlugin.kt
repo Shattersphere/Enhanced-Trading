@@ -18,6 +18,7 @@ abstract class WimGuiModalPanelPlugin<A>(
     private var callbacks: CustomVisualDialogDelegate.DialogCallbacks? = null
     private var listBounds: WimGuiListBounds? = initialListBounds
     private var initializing = false
+    private var rebuildRequestedFromInput = false
 
     init {
         modalInput.setListBounds(initialListBounds)
@@ -38,7 +39,7 @@ abstract class WimGuiModalPanelPlugin<A>(
 
     override fun processInput(events: List<InputEventAPI>) {
         if (handleInput(events, root)) {
-            rebuildContent()
+            rebuildRequestedFromInput = true
             return
         }
         val result = modalInput.processInput(events)
@@ -54,6 +55,11 @@ abstract class WimGuiModalPanelPlugin<A>(
 
     override fun advance(amount: Float) {
         if (callbacks != null) {
+            if (rebuildRequestedFromInput) {
+                rebuildRequestedFromInput = false
+                rebuildContent()
+                return
+            }
             modalInput.processButtonsIfRequested(this)
         }
     }

@@ -8,6 +8,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
 import weaponsprocurement.ui.stockreview.state.StockReviewLaunchState
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
+import weaponsprocurement.ui.stockreview.state.StockReviewShipFilterField
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewExecutionController
 import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketIntent
@@ -17,6 +18,7 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewTradeController
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipExecutionController
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipFilterModal
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipGridRenderer
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipHullFilterInput
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
@@ -65,6 +67,7 @@ class StockReviewPanelPlugin(
     private val shipExecution: StockReviewShipExecutionController
     private val tradeActionDispatcher: StockReviewTradeActionDispatcher
     private var shipHullFilterFocused = false
+    private var focusedShipFilterField: StockReviewShipFilterField? = null
 
     init {
         if (launchState != null) {
@@ -94,10 +97,27 @@ class StockReviewPanelPlugin(
     }
 
     override fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean {
+        if (modes.currentScreenMode() == StockReviewScreenMode.FILTERS && state.isShipTrading()) {
+            shipHullFilterFocused = false
+            val result = StockReviewShipFilterModal.process(
+                events,
+                root,
+                StockReviewFilterModalRenderer.modalLeft(),
+                StockReviewFilterModalRenderer.modalTop(state),
+                state,
+                focusedShipFilterField,
+            )
+            focusedShipFilterField = result.focusedField
+            return result.changed
+        }
+        focusedShipFilterField = null
         if (!state.isShipTrading()) {
             val wasFocused = shipHullFilterFocused
             shipHullFilterFocused = false
             return wasFocused
+        }
+        if (modes.currentScreenMode() != StockReviewScreenMode.TRADE) {
+            return false
         }
         val result = StockReviewShipHullFilterInput.process(events, root, state, shipHullFilterFocused)
         shipHullFilterFocused = result.focused

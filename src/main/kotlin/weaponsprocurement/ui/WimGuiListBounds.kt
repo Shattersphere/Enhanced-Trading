@@ -12,6 +12,9 @@ class WimGuiListBounds(
 ) {
     fun getMaxScrollOffset(): Int = maxScrollOffset
 
+    fun translated(dx: Float, dy: Float): WimGuiListBounds =
+        WimGuiListBounds(maxScrollOffset, left + dx, top + dy, width, height)
+
     fun contains(root: CustomPanelAPI?, event: InputEventAPI?): Boolean {
         if (root == null || root.position == null || event == null || maxScrollOffset <= 0) {
             return false

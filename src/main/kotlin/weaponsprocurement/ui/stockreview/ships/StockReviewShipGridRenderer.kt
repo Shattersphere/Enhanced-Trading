@@ -37,7 +37,7 @@ object StockReviewShipGridRenderer {
     ): WimGuiListBounds {
         val spec = StockReviewStyle.TRADE_LIST
         val panelHeight = shipPanelHeight(spec.panelTop)
-        val records = filterByHullClass(snapshot.allRecords(state.getSortMode()), state.getShipHullFilter())
+        val records = filterShipRecords(snapshot.allRecords(state.getSortMode()), state)
         val columns = TARGET_COLUMNS
         val cardWidth = (spec.panelWidth - (columns - 1) * CARD_GAP - 2f * spec.rowHorizontalPad) / columns
         val totalRows = ceil(records.size / columns.toFloat()).toInt()
@@ -247,6 +247,9 @@ object StockReviewShipGridRenderer {
             footerTop - StockReviewStyle.SECTION_GAP - panelTop,
         )
     }
+
+    private fun filterShipRecords(records: List<StockReviewShipRecord>, state: StockReviewState): List<StockReviewShipRecord> =
+        filterByHullClass(records, state.getShipHullFilter()).filter { StockReviewShipFilters.matches(it, state) }
 
     private fun filterByHullClass(records: List<StockReviewShipRecord>, filter: String): List<StockReviewShipRecord> {
         val tokens = filter.lowercase(Locale.ROOT).split(Regex("\\s+")).filter { it.isNotBlank() }

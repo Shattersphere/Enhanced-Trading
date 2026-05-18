@@ -49,6 +49,9 @@ class StockReviewRenderer :
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
         val modeSpec = StockReviewModeSpec.forScreenMode(screenMode)
+        if (screenMode == StockReviewScreenMode.FILTERS) {
+            return StockReviewFilterModalRenderer.render(root, state, buttons, this, this)
+        }
         if (modeSpec.hasHeader()) {
             StockReviewHeaderRenderer.render(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
         }

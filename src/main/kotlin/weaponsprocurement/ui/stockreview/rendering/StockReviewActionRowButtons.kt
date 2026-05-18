@@ -33,7 +33,8 @@ object StockReviewActionRowButtonPolicies {
         "Black Market: ${StockReviewUiText.onOff(context.state.isIncludeBlackMarket())}"
 
     @JvmStatic
-    fun filtersLabel(context: StockReviewActionRowContext): String = "Filters: ${context.state.getActiveFilterCount()}"
+    fun filtersLabel(context: StockReviewActionRowContext): String =
+        if (context.state.isShipTrading()) "Filters: ${context.state.getActiveShipFilterCount()}" else "Filters: ${context.state.getActiveFilterCount()}"
 
     @JvmStatic
     fun alwaysEnabled(context: StockReviewActionRowContext): Boolean = true
@@ -75,7 +76,8 @@ object StockReviewActionRowButtonPolicies {
         "Include black-market stock for Local and Sector Market source modes. Fixer's Market controls its own virtual stock."
 
     @JvmStatic
-    fun filtersTooltip(context: StockReviewActionRowContext): String = "Open the weapon filter list."
+    fun filtersTooltip(context: StockReviewActionRowContext): String =
+        if (context.state.isShipTrading()) "Open the ship filter list." else "Open the weapon and fighter filter list."
 }
 
 class StockReviewActionRowButtons private constructor() {
