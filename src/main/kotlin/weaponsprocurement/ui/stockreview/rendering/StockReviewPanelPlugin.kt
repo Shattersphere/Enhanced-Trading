@@ -17,6 +17,7 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewTradeController
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipExecutionController
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipGridRenderer
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshotBuilder
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipTradeController
@@ -120,7 +121,12 @@ class StockReviewPanelPlugin(
     }
 
     override fun onScroll(scrollDelta: Int, maxScrollOffset: Int) {
-        state.adjustListScrollOffset(scrollDelta, maxScrollOffset)
+        val effectiveDelta = if (state.isShipTrading()) {
+            StockReviewShipGridRenderer.pageScrollDelta(scrollDelta)
+        } else {
+            scrollDelta
+        }
+        state.adjustListScrollOffset(effectiveDelta, maxScrollOffset)
     }
 
     override fun onRebuildFailed(t: Throwable) {

@@ -1,6 +1,6 @@
 # Weapons Procurement Brief
 
-Last updated: 2026-05-18
+Last updated: 2026-05-19
 
 ## Current State
 
@@ -10,12 +10,12 @@ The primary product path is the clean `F8` popup. Cargo-cell badges now live in 
 
 The source tree is fully migrated to Gradle/Kotlin. `build.ps1` remains the normal entry point and delegates to the Gradle wrapper; LazyLib is a required dependency because it supplies the Kotlin runtime in Starsector.
 
-The item-trading popup path is solid and functional as the current baseline. Ship trading is now being added as a local-only mode behind the `Trade: Items` / `Trade: Ships` toggle; treat ship trading as newer code that needs in-game acceptance before it is considered equally proven.
+The item-trading popup path is solid and functional as the current baseline. Ship trading is local-only behind the `Trade: Items` / `Trade: Ships` toggle; the current 4-column by 5-row ship grid layout is the user-confirmed solid baseline to preserve if this GUI regresses.
 
 ## Known-Good Source State
 
 - Current branch: `main`
-- Recent source baseline before this doc/export cleanup: `e9f6014` (`Make sanity workflow manual only`)
+- Recent source baseline before ship-tooltip polish: `5a6ac8d` (`Polish ship grid layout and tooltip`)
 - Version in `mod_info.json`: `0.2.0`
 
 ## Commands
@@ -52,7 +52,7 @@ git diff --check
 ## Current Risks
 
 - Ship trading is local-only in its first implementation. Sector Market and Fixer's Market ship trading remain intentionally out of scope.
-- The ship grid and public-API ship tooltip need in-game visual acceptance against the vanilla ship buy/sell screen.
+- The ship grid layout is a good reference baseline; the public-API ship tooltip still needs in-game visual acceptance against the vanilla ship buy/sell screen after layout polish.
 - Runtime rollback fault validation still needs in-game evidence.
 - Rollback diagnostics now emit structured `WP_STOCK_REVIEW_ROLLBACK` records; use `tools/analyze-trade-rollback-diagnostics.ps1` after a forced-failure run to verify restored cargo counts and credits.
 - Starsector classloading can keep stale jar/class state until restart.

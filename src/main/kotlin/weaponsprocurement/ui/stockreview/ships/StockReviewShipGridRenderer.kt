@@ -48,6 +48,8 @@ object StockReviewShipGridRenderer {
         val maxOffset = max(0, totalRows - visibleRows)
         val offset = min(state.getListScrollOffset(), maxOffset)
         state.setListScrollOffset(offset)
+        val totalPages = max(1, ceil(totalRows / visibleRows.toFloat()).toInt())
+        val currentPage = currentPage(offset, maxOffset, visibleRows, totalPages)
 
         val listPanel = root.createCustomPanel(spec.panelWidth, panelHeight, WimGuiPanelPlugin(spec.panelFill, spec.panelBorder))
         root.addComponent(listPanel).inTL(spec.panelLeft, spec.panelTop)
@@ -75,8 +77,17 @@ object StockReviewShipGridRenderer {
             val y = spec.rowHorizontalPad + row * (cardHeight + CARD_GAP)
             renderCard(listPanel, records[index], pendingTrades.contains(records[index].key), x, y, cardWidth, cardHeight, buttons)
         }
+        renderPageIndicator(root, spec.panelLeft, spec.panelWidth, currentPage, totalPages)
         return WimGuiListBounds(maxOffset, spec.panelLeft, spec.panelTop, spec.panelWidth, panelHeight)
     }
+
+    @JvmStatic
+    fun pageScrollDelta(scrollDelta: Int): Int =
+        when {
+            scrollDelta > 0 -> TARGET_ROWS
+            scrollDelta < 0 -> -TARGET_ROWS
+            else -> 0
+        }
 
     private fun renderCard(
         parent: CustomPanelAPI,
@@ -98,8 +109,7 @@ object StockReviewShipGridRenderer {
         )
         card.addComponent(sprite).inTL(0f, 0f)
 
-        val title = "${record.displayName()} (${record.member.variant?.designation ?: record.member.hullSpec?.designation ?: ""})"
-        WimGuiControls.addLabel(card, title, StockReviewStyle.TEXT, CARD_PAD, 2f, width - 66f, 18f, Alignment.LMID)
+        WimGuiControls.addLabel(card, hullClassLabel(record), StockReviewStyle.TEXT, CARD_PAD, 2f, width - 76f, 18f, Alignment.LMID)
         WimGuiControls.addLabel(
             card,
             StockReviewFormat.credits(record.price.finalCredits.toLong()),
@@ -112,11 +122,11 @@ object StockReviewShipGridRenderer {
         )
         WimGuiControls.addLabel(
             card,
-            hullMarkers(record),
+            sizeLabel(record),
             StockReviewStyle.LOAD_BUTTON,
-            width - 64f,
+            width - 82f,
             2f,
-            58f,
+            76f,
             18f,
             Alignment.RMID,
         )
@@ -188,15 +198,40 @@ object StockReviewShipGridRenderer {
             "Queue selling this exact player-fleet ship."
         }
 
-    private fun hullMarkers(record: StockReviewShipRecord): String {
+    private fun hullClassLabel(record: StockReviewShipRecord): String {
+        val hullName = record.member.hullSpec?.hullName?.takeIf { it.isNotBlank() }
+        return hullName ?: record.displayName()
+    }
+
+    private fun sizeLabel(record: StockReviewShipRecord): String {
         val dp = record.member.deploymentPointsCost.roundToInt()
-        val bars = when {
-            dp >= 40 -> "||||"
-            dp >= 20 -> "|||"
-            dp >= 10 -> "||"
-            else -> "|"
+        val size = when {
+            dp >= 40 -> 4
+            dp >= 20 -> 3
+            dp >= 10 -> 2
+            else -> 1
         }
-        return bars
+        return "Size: $size"
+    }
+
+    private fun currentPage(offset: Int, maxOffset: Int, visibleRows: Int, totalPages: Int): Int {
+        if (totalPages <= 1 || maxOffset <= 0) return 1
+        if (offset >= maxOffset) return totalPages
+        return min(totalPages, offset / visibleRows + 1)
+    }
+
+    private fun renderPageIndicator(parent: CustomPanelAPI, panelLeft: Float, width: Float, currentPage: Int, totalPages: Int) {
+        if (totalPages <= 1) return
+        WimGuiControls.addLabel(
+            parent,
+            "Page $currentPage/$totalPages",
+            StockReviewStyle.MUTED,
+            panelLeft + width - 150f,
+            StockReviewStyle.MODAL.footerButtonY(StockReviewStyle.ACTION_BUTTON_HEIGHT),
+            140f,
+            StockReviewStyle.ROW_HEIGHT,
+            Alignment.RMID,
+        )
     }
 
     private fun shipPanelHeight(panelTop: Float): Float {
