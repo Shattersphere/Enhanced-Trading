@@ -1,8 +1,10 @@
 package weaponsprocurement.ui.stockreview.rows
 
 import weaponsprocurement.ui.WimGuiListRow
+import weaponsprocurement.stock.item.StockItemType
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
+import weaponsprocurement.ui.stockreview.state.StockReviewState
 
 interface StockReviewSectionRowAppender<T> {
     fun add(rows: MutableList<WimGuiListRow<StockReviewAction>>, item: T)
@@ -13,6 +15,8 @@ class StockReviewListSectionSpec<T>(
     @JvmField val expanded: Boolean,
     @JvmField val heading: WimGuiListRow<StockReviewAction>,
     @JvmField val includeWorstCaseRow: Boolean,
+    @JvmField val worstCaseItemType: StockItemType?,
+    @JvmField val state: StockReviewState?,
     @JvmField val itemAppender: StockReviewSectionRowAppender<T>,
 )
 
@@ -24,8 +28,8 @@ class StockReviewListSection<T> private constructor(
         if (!spec.expanded) {
             return spec.items.size
         }
-        if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS && spec.includeWorstCaseRow) {
-            StockReviewWorstCaseItemRows.add(rows, layout)
+        if (StockReviewStyle.showDebugUi() && spec.includeWorstCaseRow) {
+            StockReviewWorstCaseItemRows.add(rows, layout, spec.worstCaseItemType ?: StockItemType.WEAPON, spec.state)
         }
         for (item in spec.items) {
             spec.itemAppender.add(rows, item)

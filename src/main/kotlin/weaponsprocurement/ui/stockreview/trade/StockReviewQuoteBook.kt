@@ -11,6 +11,10 @@ import java.util.Collections
 import java.util.Comparator
 import java.util.HashMap
 
+/**
+ * Snapshot-backed quote resolver for pending item trades. It is the UI-side source of truth
+ * for unavailable prices and seller allocation before execution.
+ */
 class StockReviewQuoteBook(private val snapshot: WeaponStockSnapshot?) {
     private val sortedBuyStocksByItem = HashMap<String, List<SubmarketWeaponStock>>()
     private val sellUnitPriceByItem = HashMap<String, Int>()

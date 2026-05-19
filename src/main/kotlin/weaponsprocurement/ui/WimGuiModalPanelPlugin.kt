@@ -5,6 +5,10 @@ import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate
 import com.fs.starfarer.api.input.InputEventAPI
 import com.fs.starfarer.api.ui.CustomPanelAPI
 
+/**
+ * Shared Starsector modal delegate for rebuild, input, scrolling, and button polling.
+ * Keep custom popup screens on this path to avoid duplicated fragile panel lifecycle code.
+ */
 abstract class WimGuiModalPanelPlugin<A>(
     private val actionClass: Class<A>,
     private val width: Float,
@@ -55,6 +59,10 @@ abstract class WimGuiModalPanelPlugin<A>(
 
     override fun advance(amount: Float) {
         if (callbacks != null) {
+            if (shouldCloseFromExternalInput()) {
+                onCloseRequested()
+                return
+            }
             if (rebuildRequestedFromInput) {
                 rebuildRequestedFromInput = false
                 rebuildContent()
@@ -113,6 +121,8 @@ abstract class WimGuiModalPanelPlugin<A>(
     protected open fun onCloseRequested() {
         close()
     }
+
+    protected open fun shouldCloseFromExternalInput(): Boolean = false
 
     protected open fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean = false
 

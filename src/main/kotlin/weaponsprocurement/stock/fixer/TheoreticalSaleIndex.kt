@@ -14,6 +14,10 @@ import java.util.HashMap
 import java.util.HashSet
 import kotlin.math.max
 
+/**
+ * Infers what factions could plausibly sell from their weapon/LPC catalogs and sell
+ * frequencies. These candidates explain availability/rarity, not real cargo to drain.
+ */
 class TheoreticalSaleIndex {
     fun collect(sector: SectorAPI?, blacklist: WeaponMarketBlacklist?): Map<String, Candidate> {
         val economy = sector?.economy

@@ -176,6 +176,7 @@ class StockReviewActionRowButtons private constructor() {
 class StockReviewActionRowButtonSet private constructor(
     private val definitions: List<StockReviewButtonDefinition<StockReviewActionRowContext>>,
     private val debugDefinitions: List<StockReviewButtonDefinition<StockReviewActionRowContext>>,
+    private val shipCatalogDebugDefinitions: List<StockReviewButtonDefinition<StockReviewActionRowContext>>,
 ) {
     fun build(
         context: StockReviewActionRowContext,
@@ -185,16 +186,21 @@ class StockReviewActionRowButtonSet private constructor(
         for (definition in definitions) {
             buttons.add(definition.build(context, factory))
         }
-        if (WeaponsProcurementConfig.isDebugShipCatalogViewEnabled()) {
+        if (WeaponsProcurementConfig.isDebugUiEnabled()) {
             for (definition in debugDefinitions) {
                 buttons.add(definition.build(context, factory))
+            }
+            if (WeaponsProcurementConfig.isDebugShipCatalogViewEnabled()) {
+                for (definition in shipCatalogDebugDefinitions) {
+                    buttons.add(definition.build(context, factory))
+                }
             }
         }
         return buttons
     }
 
     companion object {
-        @JvmField val EMPTY = StockReviewActionRowButtonSet(emptyList(), emptyList())
+        @JvmField val EMPTY = StockReviewActionRowButtonSet(emptyList(), emptyList(), emptyList())
         @JvmField val TRADE_CONTROLS = StockReviewActionRowButtonSet(
             listOf(
                 StockReviewActionRowButtons.TRADE_KIND,
@@ -202,8 +208,8 @@ class StockReviewActionRowButtonSet private constructor(
                 StockReviewActionRowButtons.SOURCE,
                 StockReviewActionRowButtons.BLACK_MARKET,
                 StockReviewActionRowButtons.FILTERS,
-                StockReviewActionRowButtons.COLORS,
             ),
+            listOf(StockReviewActionRowButtons.COLORS),
             listOf(StockReviewActionRowButtons.SHIPS),
         )
     }

@@ -63,7 +63,7 @@ class StockReviewTooltips private constructor() {
 
         @JvmStatic
         fun itemDataToggle(record: WeaponStockRecord?): String =
-            if (record != null && record.isWing()) "Toggle the wing data display." else "Toggle the weapon data display."
+            if (record != null && record.isWing()) "Open fighter LPC details." else "Open weapon details."
 
         @JvmStatic
         fun decreasePlan(quantity: Int): String = "Decrease the queued trade quantity by ${Math.max(1, quantity)}, selling if applicable."

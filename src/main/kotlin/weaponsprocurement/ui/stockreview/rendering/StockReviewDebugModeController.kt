@@ -1,5 +1,6 @@
 package weaponsprocurement.ui.stockreview.rendering
 
+import weaponsprocurement.config.WeaponsProcurementConfig
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
@@ -41,5 +42,12 @@ class StockReviewDebugModeController(
         },
     )
 
-    fun handle(action: StockReviewAction?): Boolean = dispatcher.handle(action)
+    fun handle(action: StockReviewAction?): Boolean {
+        if (action == null) return false
+        if (!WeaponsProcurementConfig.isDebugUiEnabled() && action.opensDebugMode()) return false
+        return dispatcher.handle(action)
+    }
+
+    private fun StockReviewAction.opensDebugMode(): Boolean =
+        getType() == Type.OPEN_COLOR_DEBUG || getType() == Type.OPEN_SHIP_CATALOG_DEBUG
 }

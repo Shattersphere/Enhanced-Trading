@@ -14,12 +14,16 @@ import weaponsprocurement.ui.stockreview.state.StockReviewShipFilterField
 import weaponsprocurement.ui.stockreview.state.StockReviewShipSizeFilter
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 
+/**
+ * Ship-specific filter controls. Text input is intentionally custom because Starsector's
+ * public campaign UI does not expose a reusable modal text-box widget for this surface.
+ */
 object StockReviewShipFilterModal {
-    private const val FIELD_WIDTH = 138f
+    private const val FIELD_WIDTH = 176f
     private const val FIELD_HEIGHT = 22f
-    private const val LABEL_WIDTH = 138f
-    private const val LEFT_X = 16f
-    private const val RIGHT_X = 326f
+    private const val LABEL_WIDTH = 204f
+    private const val LEFT_X = 18f
+    private const val RIGHT_X = 454f
     private const val SIZE_TOP = 16f
     private const val FIELD_TOP = 54f
     private const val ROW_GAP = 6f
@@ -58,14 +62,10 @@ object StockReviewShipFilterModal {
             x += buttonWidth + BUTTON_GAP
         }
 
-        addField(panel, state, StockReviewShipFilterField.MAX_COST, focusedField, LEFT_X, FIELD_TOP)
-        addField(panel, state, StockReviewShipFilterField.MIN_ORDNANCE_POINTS, focusedField, RIGHT_X, FIELD_TOP)
-        addField(panel, state, StockReviewShipFilterField.MIN_SMALL_MOUNTS, focusedField, LEFT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
-        addField(panel, state, StockReviewShipFilterField.MIN_MEDIUM_MOUNTS, focusedField, RIGHT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
-        addField(panel, state, StockReviewShipFilterField.MIN_LARGE_MOUNTS, focusedField, LEFT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
-        addField(panel, state, StockReviewShipFilterField.MIN_ENERGY_MOUNTS, focusedField, RIGHT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
-        addField(panel, state, StockReviewShipFilterField.MIN_BALLISTIC_MOUNTS, focusedField, LEFT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
-        addField(panel, state, StockReviewShipFilterField.SHIP_SYSTEM, focusedField, RIGHT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
+        for (field in StockReviewShipFilterField.values()) {
+            val bounds = fieldBounds(field)
+            addField(panel, state, field, focusedField, bounds.x, bounds.y)
+        }
     }
 
     @JvmStatic
@@ -129,7 +129,7 @@ object StockReviewShipFilterModal {
 
     @JvmStatic
     fun preferredHeight(pad: Float, footerGap: Float, footerHeight: Float): Float =
-        FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP) + FIELD_HEIGHT + footerGap + footerHeight + pad
+        FIELD_TOP + (fieldRows() - 1) * (ROW_HEIGHT + ROW_GAP) + FIELD_HEIGHT + footerGap + footerHeight + pad
 
     data class Result(
         val focusedField: StockReviewShipFilterField?,
@@ -165,17 +165,15 @@ object StockReviewShipFilterModal {
             event.x >= screenLeft && event.x <= screenRight && event.y >= screenBottom && event.y <= screenTop
         }
 
-    private fun fieldBounds(field: StockReviewShipFilterField): Bounds =
-        when (field) {
-            StockReviewShipFilterField.MAX_COST -> Bounds(LEFT_X, FIELD_TOP)
-            StockReviewShipFilterField.MIN_ORDNANCE_POINTS -> Bounds(RIGHT_X, FIELD_TOP)
-            StockReviewShipFilterField.MIN_SMALL_MOUNTS -> Bounds(LEFT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
-            StockReviewShipFilterField.MIN_MEDIUM_MOUNTS -> Bounds(RIGHT_X, FIELD_TOP + ROW_HEIGHT + ROW_GAP)
-            StockReviewShipFilterField.MIN_LARGE_MOUNTS -> Bounds(LEFT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
-            StockReviewShipFilterField.MIN_ENERGY_MOUNTS -> Bounds(RIGHT_X, FIELD_TOP + 2f * (ROW_HEIGHT + ROW_GAP))
-            StockReviewShipFilterField.MIN_BALLISTIC_MOUNTS -> Bounds(LEFT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
-            StockReviewShipFilterField.SHIP_SYSTEM -> Bounds(RIGHT_X, FIELD_TOP + 3f * (ROW_HEIGHT + ROW_GAP))
-        }
+    private fun fieldBounds(field: StockReviewShipFilterField): Bounds {
+        val index = field.ordinal
+        val row = index / 2
+        val x = if (index % 2 == 0) LEFT_X else RIGHT_X
+        return Bounds(x, FIELD_TOP + row * (ROW_HEIGHT + ROW_GAP))
+    }
+
+    private fun fieldRows(): Int =
+        (StockReviewShipFilterField.values().size + 1) / 2
 
     private data class Bounds(
         val x: Float,

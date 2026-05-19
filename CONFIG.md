@@ -1,10 +1,10 @@
-# Weapons Procurement Configuration
+# Enhanced Trading Configuration
 
 Most settings are exposed through LunaLib. The JSON files under `data/config` are for advanced per-item overrides and remote-market blacklists.
 
 ## Item Keys
 
-Weapons Procurement tracks weapons and fighter LPCs as stock items. Prefer explicit item keys in new config:
+Enhanced Trading tracks weapons and fighter LPCs as stock items. Prefer explicit item keys in new config:
 
 - `W:<weaponId>` for weapons.
 - `F:<wingId>` for fighter LPCs.
@@ -13,7 +13,7 @@ Raw ids are still accepted in compatibility paths, but prefixed keys avoid colli
 
 ## Stock Thresholds
 
-`data/config/weapons_procurement_stock.json` controls default desired stock and optional per-item overrides.
+`data/config/enhanced_trading_stock.json` controls default desired stock and optional per-item overrides.
 
 `desiredDefaults` sets broad fallback thresholds:
 
@@ -50,7 +50,7 @@ Raw ids are still accepted in compatibility paths, but prefixed keys avoid colli
 
 ## Remote Market Blacklist
 
-`data/config/weapons_procurement_market_blacklist.json` blocks items from remote sources:
+`data/config/enhanced_trading_market_blacklist.json` blocks items from remote sources:
 
 ```json
 {

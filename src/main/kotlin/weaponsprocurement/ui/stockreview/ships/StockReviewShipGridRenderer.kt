@@ -2,6 +2,7 @@ package weaponsprocurement.ui.stockreview.ships
 
 import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
+import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.combat.ShipAPI
 import weaponsprocurement.ui.WimGuiButtonBinding
 import weaponsprocurement.ui.WimGuiButtonSpec
@@ -18,6 +19,10 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Compact vanilla-inspired ship grid. Page scrolling and card sizing are tied to the
+ * user-confirmed 4-column by 5-row baseline.
+ */
 object StockReviewShipGridRenderer {
     private const val TARGET_COLUMNS = 4
     private const val TARGET_ROWS = 5
@@ -26,6 +31,7 @@ object StockReviewShipGridRenderer {
     private const val CARD_PAD = 6f
     private const val BUTTON_WIDTH = 84f
     private const val QUESTION_WIDTH = 30f
+    private const val SIZE_LABEL_WIDTH = 92f
 
     @JvmStatic
     fun render(
@@ -81,7 +87,7 @@ object StockReviewShipGridRenderer {
             val column = visibleIndex % columns
             val x = spec.rowHorizontalPad + column * (cardWidth + CARD_GAP)
             val y = spec.rowHorizontalPad + row * (cardHeight + CARD_GAP)
-            renderCard(listPanel, records[index], pendingTrades.contains(records[index].key), x, y, cardWidth, cardHeight, buttons)
+            renderCard(listPanel, records[index], pendingTrades.contains(records[index].key), column, x, y, cardWidth, cardHeight, buttons)
         }
         renderPageIndicator(root, spec.panelLeft, spec.panelWidth, currentPage, totalPages)
         return WimGuiListBounds(maxOffset, spec.panelLeft, spec.panelTop, spec.panelWidth, panelHeight)
@@ -99,6 +105,7 @@ object StockReviewShipGridRenderer {
         parent: CustomPanelAPI,
         record: StockReviewShipRecord,
         queued: Boolean,
+        column: Int,
         x: Float,
         y: Float,
         width: Float,
@@ -115,7 +122,7 @@ object StockReviewShipGridRenderer {
         )
         card.addComponent(sprite).inTL(0f, 0f)
 
-        WimGuiControls.addLabel(card, hullClassLabel(record), StockReviewStyle.TEXT, CARD_PAD, 2f, width - 92f, 18f, Alignment.LMID)
+        WimGuiControls.addLabel(card, hullClassLabel(record), StockReviewStyle.TEXT, CARD_PAD, 2f, width - CARD_PAD - SIZE_LABEL_WIDTH - CARD_GAP, 18f, Alignment.LMID)
         WimGuiControls.addLabel(
             card,
             StockReviewFormat.credits(record.price.finalCredits.toLong()),
@@ -130,9 +137,9 @@ object StockReviewShipGridRenderer {
             card,
             sizeLabel(record),
             StockReviewStyle.LOAD_BUTTON,
-            width - 88f,
+            width - CARD_PAD - SIZE_LABEL_WIDTH,
             2f,
-            82f,
+            SIZE_LABEL_WIDTH,
             18f,
             Alignment.RMID,
         )
@@ -153,6 +160,7 @@ object StockReviewShipGridRenderer {
                 StockReviewStyle.ROW_BORDER,
                 "Show ship details.",
                 StockReviewShipTooltip(record),
+                tooltipLocationForColumn(column),
             ),
             buttons,
         )
@@ -233,6 +241,13 @@ object StockReviewShipGridRenderer {
             else -> "Unknown"
         }
     }
+
+    private fun tooltipLocationForColumn(column: Int): TooltipMakerAPI.TooltipLocation =
+        if (column < TARGET_COLUMNS / 2) {
+            TooltipMakerAPI.TooltipLocation.RIGHT
+        } else {
+            TooltipMakerAPI.TooltipLocation.LEFT
+        }
 
     private fun currentPage(offset: Int, maxOffset: Int, visibleRows: Int, totalPages: Int): Int {
         if (totalPages <= 1 || maxOffset <= 0) return 1

@@ -10,6 +10,10 @@ import weaponsprocurement.ui.stockreview.state.StockReviewFilter
 import weaponsprocurement.ui.stockreview.state.StockReviewFilters
 import java.util.ArrayList
 
+/**
+ * Bulk buy/sell planner. Filter-aware methods intentionally use the active UI filters so
+ * "all until sufficient" only affects rows the player has chosen to see.
+ */
 class StockReviewTradePlanner private constructor() {
     private class CheapestBuyRecordComparator(snapshot: WeaponStockSnapshot?) : Comparator<WeaponStockRecord> {
         private val quoteBook = StockReviewQuoteBook(snapshot)

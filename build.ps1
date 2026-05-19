@@ -25,5 +25,5 @@ if ($LASTEXITCODE -ne 0) {
     throw "Gradle build failed with exit code $LASTEXITCODE."
 }
 
-$jarPath = Join-Path $PSScriptRoot "jars\weapons-procurement.jar"
+$jarPath = Join-Path $PSScriptRoot "jars\enhanced-trading.jar"
 Write-Host "Built $jarPath"

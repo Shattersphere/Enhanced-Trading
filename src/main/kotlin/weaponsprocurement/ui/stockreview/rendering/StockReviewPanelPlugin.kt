@@ -34,6 +34,10 @@ import weaponsprocurement.config.StockReviewConfig
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import weaponsprocurement.lifecycle.StockReviewHotkeyScript
 
+/**
+ * Host/orchestration boundary for the stock-review modal. It wires state, snapshots,
+ * controllers, and reopen/close behavior; domain logic should stay in focused collaborators.
+ */
 class StockReviewPanelPlugin(
     private val initialMarket: MarketAPI?,
     launchState: StockReviewLaunchState?,
@@ -95,6 +99,8 @@ class StockReviewPanelPlugin(
     override fun onCloseRequested() {
         ui.handleCloseRequested()
     }
+
+    override fun shouldCloseFromExternalInput(): Boolean = StockReviewHotkeyScript.consumeCloseRequest()
 
     override fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean {
         if (modes.currentScreenMode() == StockReviewScreenMode.FILTERS && state.isShipTrading()) {

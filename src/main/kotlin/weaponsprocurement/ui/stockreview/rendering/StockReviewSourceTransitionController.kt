@@ -15,6 +15,10 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrades
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrades
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeWarnings
 
+/**
+ * Owns top-row mode/source transitions. Source changes are guarded because item pending
+ * trades are source-specific and cannot be safely reinterpreted across Local/Sector/Fixer.
+ */
 class StockReviewSourceTransitionController(
     private val state: StockReviewState,
     private val modes: StockReviewModeController,

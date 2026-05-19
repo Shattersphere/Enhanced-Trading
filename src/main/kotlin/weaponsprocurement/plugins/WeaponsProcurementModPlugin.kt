@@ -7,6 +7,10 @@ import org.apache.log4j.Logger
 import weaponsprocurement.lifecycle.StockReviewHotkeyScript
 import weaponsprocurement.lifecycle.WeaponsProcurementFixerCatalogUpdater
 
+/**
+ * Registers the campaign scripts that own popup opening and Fixer catalog observation.
+ * Keep feature logic in those scripts/controllers so repeated game loads stay idempotent.
+ */
 class WeaponsProcurementModPlugin : BaseModPlugin() {
     override fun onGameLoad(newGame: Boolean) {
         val sector = Global.getSector()

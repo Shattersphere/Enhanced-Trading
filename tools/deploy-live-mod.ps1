@@ -22,7 +22,7 @@ if ([string]::IsNullOrWhiteSpace($StarsectorDir)) {
 }
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$deployRoot = Join-Path $StarsectorDir "mods\Weapons Procurement"
+$deployRoot = Join-Path $StarsectorDir "mods\Enhanced Trading"
 $stateRoot = Join-Path $repoRoot ".agent-deploy"
 $deployName = "deploy-live-mod"
 
@@ -138,7 +138,7 @@ function Write-DeployContentReport {
 function Assert-DeployJarBoundary {
     param([string]$BaseRoot)
 
-    $jarPath = Join-Path $BaseRoot "jars\weapons-procurement.jar"
+    $jarPath = Join-Path $BaseRoot "jars\enhanced-trading.jar"
     if (-not (Test-Path -LiteralPath $jarPath)) {
         throw "Deploy jar not found: $jarPath"
     }
@@ -160,7 +160,7 @@ function Assert-DeployJarBoundary {
 }
 
 function Assert-DeployRoot {
-    if ((Split-Path -Leaf $deployRoot) -ne "Weapons Procurement") {
+    if ((Split-Path -Leaf $deployRoot) -ne "Enhanced Trading") {
         throw "Refusing to deploy to unexpected root: $deployRoot"
     }
 }
@@ -572,5 +572,5 @@ if (-not [string]::IsNullOrWhiteSpace($blockerPath)) {
 
 Publish-StagedDeploy -StageRoot $stagedRoot
 $mode = if ($NoClean) { "copy-over" } else { "clean-sync" }
-Write-Host "Deployed Weapons Procurement clean package files to $deployRoot ($mode)"
+Write-Host "Deployed Enhanced Trading clean package files to $deployRoot ($mode)"
 Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "succeeded"

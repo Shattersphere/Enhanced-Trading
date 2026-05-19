@@ -5,10 +5,29 @@ import com.fs.starfarer.api.ui.ButtonAPI
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import com.fs.starfarer.api.ui.CutStyle
 import com.fs.starfarer.api.ui.TooltipMakerAPI
+import com.fs.starfarer.api.ui.UIComponentAPI
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewItemTooltip
 import java.awt.Color
 
+/**
+ * Low-level Starsector custom-panel helpers for labels, buttons, tooltip hosts, and panels.
+ * Controls should register here so nested buttons and modal background suppression behave consistently.
+ */
 object WimGuiControls {
+    private var interactionSuppressionDepth = 0
+
+    @JvmStatic
+    fun <T> withoutInteractiveOverlays(block: () -> T): T {
+        interactionSuppressionDepth++
+        return try {
+            block()
+        } finally {
+            interactionSuppressionDepth--
+        }
+    }
+
+    private fun interactionsSuppressed(): Boolean = interactionSuppressionDepth > 0
+
     @JvmStatic
     fun addButton(
         parent: CustomPanelAPI,
@@ -39,6 +58,7 @@ object WimGuiControls {
         borderColor,
         tooltip,
         null,
+        null,
     )
 
     @JvmStatic
@@ -57,6 +77,7 @@ object WimGuiControls {
         borderColor: Color?,
         tooltip: String?,
         tooltipCreator: TooltipMakerAPI.TooltipCreator?,
+        tooltipLocation: TooltipMakerAPI.TooltipLocation?,
     ): WimGuiButtonShell {
         val idle = colors?.idle ?: WimGuiStyle.UNCOLOURED_BUTTON
         val hover = colors?.hover ?: idle
@@ -66,6 +87,10 @@ object WimGuiControls {
 
         val shell = parent.createCustomPanel(width, height, WimGuiPanelPlugin(shellFill, borderColor))
         parent.addComponent(shell).inTL(x, y)
+        if (interactionsSuppressed()) {
+            addLabel(shell, label, resolvedText, 0f, 0f, width, height, alignment)
+            return WimGuiButtonShell(shell, null)
+        }
         if (!enabled) {
             addLabel(shell, label, resolvedText, 0f, 0f, width, height, alignment)
             addTooltipHost(shell, width, height, tooltip, tooltipCreator)
@@ -87,7 +112,7 @@ object WimGuiControls {
         )
         button.isEnabled = enabled
         button.setQuickMode(true)
-        addTooltipTo(element, shell, tooltip, tooltipCreator)
+        addTooltipTo(element, button, tooltip, tooltipCreator, tooltipLocation)
         shell.addUIElement(element).inTL(0f, 0f)
         addLabel(shell, label, resolvedText, 0f, 0f, width, height, alignment)
         return WimGuiButtonShell(shell, button)
@@ -117,6 +142,7 @@ object WimGuiControls {
             spec.borderColor,
             spec.tooltip,
             spec.tooltipCreator,
+            spec.tooltipLocation,
         )
         if (spec.enabled && bindings != null) {
             bindings.add(WimGuiButtonBinding(shell.panel, shell.button, spec.action))
@@ -192,7 +218,9 @@ object WimGuiControls {
     ) {
         val cell = parent.createCustomPanel(width, height, WimGuiPanelPlugin(background, borderColor))
         parent.addComponent(cell).inTL(x, y)
-        addTooltipHost(cell, width, height, tooltip)
+        if (!interactionsSuppressed()) {
+            addTooltipHost(cell, width, height, tooltip)
+        }
         addLabel(cell, label, textColor, 0f, 0f, width, height, alignment)
     }
 
@@ -323,22 +351,38 @@ object WimGuiControls {
         tooltip: String?,
         tooltipCreator: TooltipMakerAPI.TooltipCreator?,
     ) {
+        if (interactionsSuppressed()) {
+            return
+        }
         if (!hasTooltip(tooltip, tooltipCreator)) {
             return
         }
         val element = parent.createUIElement(width, height, false)
-        addTooltipTo(element, parent, tooltip, tooltipCreator)
+        val target = element.addButton(
+            "",
+            TOOLTIP_HOST_ACTION,
+            TRANSPARENT,
+            TRANSPARENT,
+            Alignment.MID,
+            CutStyle.NONE,
+            width,
+            height,
+            0f,
+        )
+        target.setQuickMode(true)
+        addTooltipTo(element, target, tooltip, tooltipCreator, null)
         parent.addUIElement(element).inTL(0f, 0f)
     }
 
     private fun addTooltipTo(
         element: TooltipMakerAPI,
-        target: CustomPanelAPI,
+        target: UIComponentAPI,
         tooltip: String?,
         tooltipCreator: TooltipMakerAPI.TooltipCreator?,
+        tooltipLocation: TooltipMakerAPI.TooltipLocation?,
     ) {
         val creator = tooltipCreator ?: textTooltip(tooltip) ?: return
-        val location = if (tooltipCreator is StockReviewItemTooltip) {
+        val location = tooltipLocation ?: if (tooltipCreator is StockReviewItemTooltip) {
             TooltipMakerAPI.TooltipLocation.RIGHT
         } else {
             TooltipMakerAPI.TooltipLocation.BELOW
@@ -351,6 +395,9 @@ object WimGuiControls {
 
     private fun hasTooltip(tooltip: String?, tooltipCreator: TooltipMakerAPI.TooltipCreator?): Boolean =
         tooltipCreator != null || WimGuiTooltip.hasText(tooltip)
+
+    private val TRANSPARENT = Color(0, 0, 0, 0)
+    private val TOOLTIP_HOST_ACTION = Any()
 
     @JvmStatic
     fun addWrappedLabel(

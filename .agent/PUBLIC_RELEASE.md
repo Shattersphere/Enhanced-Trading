@@ -1,7 +1,7 @@
 # Public Release Checklist
 
 Status: private
-Scope: Curating the private Weapons Procurement repo into a public GitHub repo/package for `https://github.com/Shattersphere-Mods`
+Scope: Curating the private Enhanced Trading repo into a public GitHub repo/package for `https://github.com/Shattersphere-Mods`
 Last updated: 2026-05-18
 
 Never publish this file. It describes private-to-public export rules for keeping the public mod focused on the procurement GUI and free of private agent/archive material.
@@ -9,13 +9,13 @@ Never publish this file. It describes private-to-public export rules for keeping
 ## Release Target
 
 - Public organization: `Shattersphere-Mods`
-- Intended public product: clean Weapons Procurement GUI only.
+- Intended public product: clean Enhanced Trading GUI only.
 - Private source of truth: `D:\Sean Mods\Enhanced Trading`
 - Public release output must not be a blind mirror of this private repo.
 
 ## Current Public-Release Position
 
-Badge ownership now lives in the standalone private `D:\Sean Mods\Weapon Badges` repo. Public Weapons Procurement output must still exclude any badge helper, count bridge, generated badge sprite, or `CargoStackView` patching material if those files are ever accidentally reintroduced.
+Badge ownership now lives in the standalone private `D:\Sean Mods\Weapon Badges` repo. Public Enhanced Trading output must still exclude any badge helper, count bridge, generated badge sprite, or `CargoStackView` patching material if those files are ever accidentally reintroduced.
 
 Before public export, use:
 
@@ -35,9 +35,9 @@ Public output should include only files needed for users/contributors to build a
 - Gradle wrapper and Kotlin build files required to compile the public source tree;
 - `data/campaign/rules.csv`;
 - public-safe `data/config/LunaSettings.csv`;
-- `data/config/weapons_procurement_market_blacklist.json`;
-- `data/config/weapons_procurement_stock.json`;
-- `jars/weapons-procurement.jar` if the public repo ships the built jar;
+- `data/config/enhanced_trading_market_blacklist.json`;
+- `data/config/enhanced_trading_stock.json`;
+- `jars/enhanced-trading.jar` if the public repo ships the built jar;
 - `mod_info.json`;
 - `README.md`;
 - `CONFIG.md`;
@@ -59,7 +59,7 @@ Exclude private and agent material:
 - archive/deep-dive/history docs;
 - deploy queues, local logs, backups, build caches, and machine-specific files.
 
-Cargo-cell badges now live in `D:\Sean Mods\Weapon Badges`. Public Weapons Procurement exports should contain no badge helpers, count bridges, generated badge sprites, or `CargoStackView` patching tools.
+Cargo-cell badges now live in `D:\Sean Mods\Weapon Badges`. Public Enhanced Trading exports should contain no badge helpers, count bridges, generated badge sprites, or `CargoStackView` patching tools.
 
 ## Required Private-To-Public Transformations
 
@@ -108,7 +108,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migr
 git diff --check
 ```
 
-Badge/patcher validation belongs in the standalone private `D:\Sean Mods\Weapon Badges` repo, not in Weapons Procurement.
+Badge/patcher validation belongs in the standalone private `D:\Sean Mods\Weapon Badges` repo, not in Enhanced Trading.
 
 ## Version And Changelog Rules
 
@@ -121,5 +121,5 @@ Badge/patcher validation belongs in the standalone private `D:\Sean Mods\Weapon 
 ## Open Work Before First Public Release
 
 - Build the exported public tree and validate it independently.
-- Add a public package command if the public repo should ship `jars/weapons-procurement.jar`.
+- Add a public package command if the public repo should ship `jars/enhanced-trading.jar`.
 - Decide whether public repo ships the built jar or source-only plus build instructions.

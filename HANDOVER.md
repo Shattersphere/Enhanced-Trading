@@ -1,160 +1,233 @@
-# Weapons Procurement Handover
+# Enhanced Trading Handover
 
-## Purpose
+This handover is written for a modder who is taking over the private source repo. It focuses on how the mod works, where the code is intentionally shaped by Starsector runtime constraints, and where future work is likely to be risky.
 
-Weapons Procurement is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market dialogs or market-backed storage dialogs.
+## What This Mod Is
 
-The primary public path is the clean popup:
+Enhanced Trading is a Starsector `0.98a` mod for opening a compact trade popup from a market or market-backed storage dialog. The popup lets the player review weapon and fighter LPC stock, queue buys and sells, review the pending plan, and confirm the trade.
 
-- open a market dialog or market-backed storage dialog;
-- press `F8`, or enable the optional market-dialog entry in LunaLib;
-- queue buys/sells;
-- review and confirm trades.
+The public/default user path is:
 
-Cargo-cell badges are no longer part of this mod; use the standalone private `D:\Sean Mods\Weapon Badges` mod for that path.
+1. Open a market dialog or a market-backed storage dialog.
+2. Press the LunaLib-configurable trade popup hotkey, default `F8`, or enable the optional dialog option.
+3. Use `Trade: Items` for weapons/LPCs or `Trade: Ships` for local ship trading.
+4. Queue trades, review them, and confirm.
 
-## Current Product Shape
+Important boundary: cargo-cell weapon/LPC badges are no longer part of this repo. They moved to the standalone private `D:\Sean Mods\Weapon Badges` mod. Do not add badge helpers, count bridges, generated badge sprites, or core bytecode patching back here.
 
-- `mod_info.json` id: `weapons_procurement`.
-- Required dependencies: LazyLib and LunaLib.
-- Runtime jar: `jars/weapons-procurement.jar`.
+## Current State
+
+- Repo path: `D:\Sean Mods\Enhanced Trading`.
+- Mod identity: `enhanced_trading`.
 - Main plugin: `weaponsprocurement.plugins.WeaponsProcurementModPlugin`.
-- Clean package files: `data/`, `graphics/`, `jars/`, `mod_info.json`, `README.md`, `CONFIG.md`, `CHANGELOG.md`, `PACKAGING.md`.
+- Runtime jar: `jars/enhanced-trading.jar`.
+- Live deploy target: `C:\Games\Starsector\mods\Enhanced Trading`.
+- Dependencies: LazyLib and LunaLib.
+- Version in `mod_info.json`: `0.2.0`.
+- Primary language: Kotlin, built through Gradle via `build.ps1`.
 
-User-facing docs:
+The item-trading popup is the stable product baseline. Ship trading exists as a local-only first implementation behind the `Trade: Items` / `Trade: Ships` toggle. The 4-column by 5-row ship grid is a user-confirmed visual baseline to preserve. The ship tooltip is a public-API approximation of vanilla; treat further polish as visual/runtime work, not as a simple static refactor.
 
-- `AGENTS.md`: repo-local rules, commands, deploy policy, and knowledge map.
-- `README.md`: install/use summary.
-- `CONFIG.md`: JSON item overrides, blacklists, Luna settings, debug hooks.
-- `PACKAGING.md`: release validation, clean package, and Weapon Badges split note.
-- `CHANGELOG.md`: release notes.
-- `.agent/INDEX.md`: map of active docs and archival reference notes.
-- `.agent/BRIEF.md`: compact current-state handoff.
-- `.agent/PUBLIC_RELEASE.md`: private public-export checklist for `Shattersphere-Mods`. Never publish it.
-- `.agent/archive/INDEX.md`: archive map for deep dives and historical references.
+This repo currently has a dirty worktree with in-progress UI, tooltip, ship-trading, config, data, graphics, and jar changes. Do not assume `main` is a clean release boundary until you inspect `git status --short --branch` and the current diff.
 
-## Entry Points
+## Document Map
 
-- `WeaponsProcurementModPlugin`: registers transient scripts on game load.
-- `StockReviewHotkeyScript`: opens the `F8` popup from valid campaign dialogs.
-- `WP_OpenDialog` plus `data/campaign/rules.csv`: optional dialog action.
-- `WeaponsProcurementFixerCatalogUpdater`: observes safe real market stock over time for Fixer's Market.
+- `AGENTS.md`: repo-local rules, commands, deploy policy, and archive map.
+- `.agent/BRIEF.md`: current status, risks, and next best step.
+- `.agent/ARCHITECTURE_MAP.md`: subsystem diagrams and package map.
+- `.agent/INDEX.md`: doc index.
+- `.agent/PUBLIC_RELEASE.md`: private public-export checklist. Never publish it.
+- `.agent/archive/INDEX.md`: archive/deep-dive index.
+- `README.md`, `CONFIG.md`, `PACKAGING.md`, `CHANGELOG.md`: player/release-facing docs.
+- `PLANS.md`: active plan and deferred work.
 
-## Core Model
+Before large or risky work, start with `AGENTS.md`, `.agent/BRIEF.md`, and `.agent/ARCHITECTURE_MAP.md`. Then open the relevant archive deep dive through `.agent/archive/INDEX.md`.
 
-Stock items are weapons or fighter LPCs. Generic item state uses typed keys:
+## Entry Points And Runtime Lifecycle
+
+`WeaponsProcurementModPlugin` registers two transient campaign scripts on game load:
+
+- `StockReviewHotkeyScript`: owns the popup hotkey, dialog open/close tracking, and reopen requests after review/confirm flows.
+- `WeaponsProcurementFixerCatalogUpdater`: periodically observes safe market stock for Fixer's Market and runs hidden ship-catalog diagnostics when requested.
+
+`WP_OpenDialog` plus `data/campaign/rules.csv` provide the optional market-dialog entry. This path should call the same opener semantics as the hotkey path.
+
+`StockReviewHotkeyScript` requires a current market. The docs intentionally say "market-backed storage dialog" rather than generic storage, because non-market storage has not been modeled for safe pricing or mutation. Pressing the configured hotkey while the popup is open requests a clean close.
+
+Luna settings are read by `WeaponsProcurementConfig`. It publishes stable `System` properties because some hot paths and diagnostic hooks need low-friction reads without repeatedly reaching into LunaLib. The user-visible hotkey is `wp_trade_hotkey`.
+
+## Stock Item Model
+
+Items are weapons and fighter LPCs. Shared maps use typed keys:
 
 - `W:<weaponId>`
 - `F:<wingId>`
 
-Use typed keys for shared maps and trade state. Raw ids are accepted only where a config path intentionally preserves backward compatibility.
+Raw ids appear only at API boundaries or backward-compatible config paths. New shared state should use typed keys.
 
-Important ownership:
+Important model owners:
 
+- `StockItemType`: typed key parsing and construction.
+- `StockItemStacks`: reference cargo stacks, base buy/sell pricing, local tariff math, and cargo-space references.
+- `StockItemSpecs`: safe access to weapon and wing specs.
+- `WeaponStockRecord`: UI-facing derived data for one stock item.
+- `WeaponStockSnapshot`: grouped item records for one popup rebuild.
+- `WeaponStockSnapshotBuilder`: merges player inventory, local or remote stock, desired thresholds, and config ignores.
+- `DesiredStockService`: default and per-item desired stock.
 - `InventoryCountService`: player cargo plus accessible storage counts.
-- `MarketStockService`: current-market stock collection and submarket filtering.
-- `GlobalWeaponMarketService`: Sector Market and Fixer's Market stock construction.
-- `FixerMarketObservedCatalog`: save-persistent observed Fixer catalog.
-- `ObservedStockIndex`, `TheoreticalSaleIndex`, `RarityClassifier`: Fixer's Market current-stock reference, runtime sale-capability catalog, and rarity labels.
-- `WeaponMarketBlacklist`: Sector/Fixer blacklist matching by key, raw id, or display name.
-- `StockReviewConfig`: JSON stock defaults and per-item overrides.
-- `DesiredStockService`: effective desired thresholds.
+- `MarketStockService`: local market stock and submarket filtering.
+- `GlobalWeaponMarketService`: Sector Market and Fixer's Market item stock.
+
+Pricing for weapons and LPCs should stay centralized through `StockItemStacks`. It applies Starsector settings such as `shipWeaponBuyPriceMult` and `shipWeaponSellPriceMult`, then the current submarket tariff where appropriate. If you change item prices, update quote, execution, source allocation, transaction reporting, and tooltip paths together.
 
 ## Source Modes
 
-- `Local`: current market, with the normal Black Market toggle.
-- `Sector Market`: live sector-wide stock from real market cargo. Purchases drain remote cargo and use the sector multiplier.
-- `Fixer's Market`: virtual stock from safe runtime faction catalogs plus observed market reference prices. Purchases do not drain real cargo and use the fixer multiplier.
+`Local` uses the current market and respects the Black Market toggle.
+
+`Sector Market` is live sector-wide stock from real market cargo. It marks prices up by the configured sector multiplier, but keeps market/submarket/cargo identities so confirmation can drain the actual remote stacks.
+
+`Fixer's Market` is virtual stock. It combines:
+
+- `Live`: currently observed real market cargo.
+- `Catalog`: faction catalog eligibility inferred from current market factions and sale rules.
+- `Catalog+ref`: catalog item using previously observed price/cargo-space reference data.
+- `Common` through `Very rare`: rarity metadata from tier and faction sell-frequency heuristics.
+
+Fixer labels explain why an item appears and support sorting/filtering. Rarity does not change price by itself. Fixer purchases do not drain real cargo.
 
 Remote source modes disable black-market selling. Sells while a remote source is active use the current local legal buyer.
 
-Keep Sector Market stock live, not cached across popup rebuilds. It represents actual cargo that may be drained.
+## Item Trade Flow
 
-## Trade Flow
+Pending item trades live in `StockReviewPendingTrades` and `StockReviewPendingTrade`.
 
-Pending trades are staged in `StockReviewPendingTrades` / `StockReviewPendingTrade`.
+Planning:
 
-Execution order:
+- `StockReviewTradeController` mutates the pending plan.
+- `StockReviewTradePlanner` finds filter-aware bulk buy/sell candidates.
+- `StockReviewLocalMarketIntent` preserves active local buy intent while black/open market rebalancing is happening.
+- `StockReviewLocalMarketRebalancer` reconciles local buy allocations across submarkets.
 
-1. sells;
-2. explicit source buys, if any are ever reintroduced;
-3. generic cheapest buys.
+Quote/review:
 
-The current UI uses generic cheapest buys. Do not reintroduce seller-detail/source-specific rows unless the feature is deliberately reopened.
+- `StockReviewTradeContext` and `StockReviewQuoteBook` calculate display quotes, affordability, source allocations, and warning state.
+- Review rows are grouped by buying/selling and item type. Hullmods are currently a placeholder heading only, not a supported trade type.
+
+Execution:
+
+1. Sells execute first.
+2. Generic cheapest-source buys execute second.
+3. The vanilla cargo screen is refreshed.
+4. The popup rebuilds or reopens as needed.
 
 Execution ownership:
 
-- `StockReviewTradeController`: planning mutations.
-- `StockReviewTradeContext` / `StockReviewQuoteBook`: quote and affordability state.
-- `StockReviewExecutionController`: confirm flow, pre-confirm checks, per-line execution handling.
-- `StockPurchaseService`: high-level buy/sell orchestration.
-- `StockPurchasePlan`: cheapest-source plan construction.
-- `StockPurchaseExecutor`: cargo/credit mutation, rollback journal, post-commit transaction reporting.
+- `StockReviewExecutionController`: popup confirm flow.
+- `StockPurchaseService`: high-level item buy/sell orchestration.
+- `StockPurchasePlan`: cheapest-source plan.
+- `StockPurchaseExecutor`: cargo/credit mutations and rollback journal.
 - `StockMarketTransactionReporter`: best-effort `PlayerMarketTransaction` callback reporting.
 
-Trade money totals use `long` via `TradeMoney`; fail closed if a plan is too large to mutate safely through Starsector credit APIs.
+`StockPurchaseExecutor` uses `TradeMoney`/`long` totals and fails closed for unsafe credit mutations. Transaction callbacks are post-commit side effects; do not report a market transaction before rollbackable cargo and credit mutations have succeeded.
 
-Transaction callbacks should be post-commit side effects. Do not fire `SubmarketPlugin.reportPlayerMarketTransaction(...)` before rollbackable cargo and credit mutations have succeeded.
+Rollback diagnostics emit `WP_STOCK_REVIEW_ROLLBACK` log records. Use `tools/analyze-trade-rollback-diagnostics.ps1 -RequirePass` after forced-failure runtime tests.
 
-Forced rollback failures log structured `WP_STOCK_REVIEW_ROLLBACK` records. Use `tools/analyze-trade-rollback-diagnostics.ps1` after an in-game forced-failure run to verify restored cargo counts and credits instead of relying only on visual inspection.
+## Ship Trading
+
+Ship trading is intentionally local-only in v1. Do not assume Sector Market or Fixer's Market ship trading exists.
+
+Main owners:
+
+- `StockReviewShipSnapshotBuilder`: builds buy records from eligible local submarket `mothballedShips` and sell records from the player fleet.
+- `StockReviewShipRecord`: one exact ship member plus source/side/price metadata.
+- `StockReviewPendingShipTrades`: queued exact ship trades.
+- `StockReviewShipTradeController`: toggles ship plans.
+- `StockReviewShipExecutionController`: moves exact `FleetMemberAPI` instances between local submarket storage and player fleet.
+- `StockReviewShipGridRenderer`: compact 4x5 page grid.
+- `StockReviewShipFilterModal`, `StockReviewShipFilters`, and `StockReviewShipHullFilterInput`: ship-specific filters and hull-class text filter.
+- `StockReviewShipTooltip` and `StockReviewShipStats`: public-API vanilla-like tooltip approximation and corrected stat sourcing.
+
+Buy execution removes the exact queued member from the source submarket's mothballed fleet, adds it to the player fleet, deducts credits, and reports a ship transaction. Sell execution removes the exact player fleet member, adds it to the local sell target's mothballed fleet, adds credits, and reports a transaction. If membership changed before confirm, the trade fails cleanly and the popup rebuilds with remaining state.
+
+Future remote ship trading is a new feature, not a small extension. It needs clear semantics for source draining, virtual ships, exact member identity, pricing, fleet limit checks, and transaction reporting.
 
 ## GUI Architecture
 
-`StockReviewPanelPlugin` is lifecycle/context orchestration. Keep domain work in focused controllers/renderers:
+The GUI is built on repo-local `WimGui*` primitives because Starsector's campaign UI has fragile nested custom panel behavior.
 
-- `StockReviewRenderer`: shell/header/body/footer composition.
-- `StockReviewModeSpec` / `StockReviewLayoutContext` / `StockReviewListSourceSpec`: mode selection plus explicit source-kind dispatch for screen-level modal/list/summary layout.
-- `StockReviewListModel` / `StockReviewReviewListModel`: main and review list sources.
-- `StockReviewListSection` / `StockReviewListSectionSpec` / `StockReviewSectionRowAppender` / `StockReviewListEmptyRows`: shared heading/expansion/debug-row list section flow, named row appenders, and empty-state rows.
-- `StockReviewItemTypeSections`: main-list item-type order, section top gaps, item-type headings, and category composition.
-- `StockReviewStockCategorySections`: main-list stock-category order, filters, heading totals, colors, top gaps, and debug-row policy.
-- `StockReviewTradeGroupSections`: review-list trade-group order, trade splitting, headings, top gaps, and debug-row policy.
-- `StockReviewTradeItemRows` / `StockReviewReviewItemRows` / `StockReviewWorstCaseItemRows` / `StockReviewItemRowFrame`: mode-specific item-row assembly on one shared item frame.
-- `StockReviewRowSpec` / `StockReviewRowSpecs` / `StockReviewListRow`: shared row intent specs and the narrow adapter that turns specs into renderable rows.
-- `StockReview*HeadingRows`: focused item-type, stock-category, trade-group, filter, and item-detail heading policies.
-- `StockReviewFilterRows` / `StockReviewFilterGroupSections`: filter-mode active rows, available rows, group visibility, and group expansion flow.
-- `StockReviewItemInfoRows` / `StockReviewItemInfoFields`: Basic/Advanced item detail section flow and named field definitions.
-- `StockReviewDetailRowSpec` / `StockReviewDetailRows` / `StockReviewSourceAllocationRows`: shared label/value detail-row specs, geometry, and review purchase-source allocation rows.
-- `StockReviewCellGroup` / `StockReviewTradeRowCells`: stock/price/plan/action widths, capped labels, debug extrema, and centralized trade/review cell factories.
-- `StockReviewDebugCellGroup` / `StockReviewColorDebugRows` / `StockReviewShipCatalogDebugRows`: shared diagnostic-only cell factories for color previews/buttons and hidden ship-catalog rows.
-- `StockReviewTradeSummaryRenderer` / `StockReviewTradeSummaryFields`: footer summary rendering plus named summary field factories/fill policies.
-- `StockReviewFooterRenderer` / `StockReviewFooterSpec` / `StockReviewFooterButtonSet`: footer layout, explicit footer button-set selection, named button policies, and mode-specific footer button definitions.
-- `StockReviewModeController`: review/filter/color-debug modes.
-- `StockReviewUiController`: source/sort/filter/expansion/reset/navigation actions.
-- `StockReviewExecutionController`: confirm-trade execution.
+Shared UI owners:
 
-Shared `WimGui*` helpers own modal panels, list rendering, row cells, buttons, scrolling, input, tooltips, and campaign dialog host behavior. Future screens should compose these helpers instead of copying stock-review renderer logic.
+- `WimGuiModalPanelPlugin`: custom dialog lifecycle, content rebuild, input routing, and close behavior.
+- `WimGuiControls`: button/label/panel creation and binding registration.
+- `WimGuiButtonPoller`: fallback click detection for nested custom-panel buttons.
+- `WimGuiDialogTracker`: open/close/reopen state for modal dialogs.
+- `WimGuiText`: measured and approximate text fitting/wrapping helpers.
+- `WimGuiTooltip` and `StockReviewTooltipPanel`: tooltip sizing, shared panel styling, and max-height cap.
 
-`WimGuiButtonSpec` creation is factory-owned. The repo no longer has Java UI callers, so old direct Java constructor compatibility is intentionally not preserved; new button specs should go through the existing factories.
+Stock-review orchestration:
 
-Starsector GUI runtime constraints:
+- `StockReviewPanelPlugin`: host boundary and controller wiring. Keep it orchestration-only.
+- `StockReviewRenderer`: screen shell, cached row model, filter background pass, and item/ship mode switch.
+- `StockReviewModeController`: trade/review/filter/debug modes.
+- `StockReviewUiController`: high-level UI actions.
+- `StockReviewActionRowButtons` / `StockReviewActionCells`: standard button routes and style guardrails.
+- `StockReviewListModel`, row sections, row specs, and row renderers: item list and review list composition.
 
-- Nested custom-panel buttons are not reliable through `buttonPressed(...)` alone; keep the event-gated `WimGuiButtonPoller` fallback.
-- Avoid generated helper/anonymous classes in classloader-sensitive GUI paths unless the live jar validator is updated and in-game entry points are tested.
-- Runtime UI alignment has been fragile. Commit `a02e507` is the known-good reference for nested stock-review indentation and right-edge sizing.
+Filter modals should render the current trade screen behind a dim overlay, then draw a centered modal. Background controls must not be interactive while a modal is open.
 
-## Weapon Badges Split
+Known Starsector UI traps:
 
-Cargo-cell badges moved to the standalone private `D:\Sean Mods\Weapon Badges` mod. Weapons Procurement should not contain badge helper classes, count-updater scripts, generated badge sprites, Luna badge settings, deploy wrappers, or `CargoStackView` patching tools.
+- Nested button callbacks are unreliable; preserve the poller fallback.
+- Anchoring components across non-sibling panels can crash with `May only anchor on siblings`.
+- Runtime visual proof matters. Build success does not prove tooltip, row, modal, or scroll behavior.
+- Keep top-level Kotlin helper generation out of classloader-sensitive paths unless live validation confirms it.
 
-## Build And Validation
+## Debug UI And Stress Records
 
-Normal code/asset validation:
+The Luna setting `wp_enable_debug_ui` is the master gate for debug UI. When disabled, the public popup should not show Colors, debug rows, debug weapons/wings, or the debug ship.
+
+Debug records are intentionally extreme and should reuse normal row/tooltip paths as much as possible. They exist to reveal layout failure under long names, large values, dense armaments, and worst-case descriptions. If a debug record needs special handling, keep it small and documented; do not duplicate the whole normal row or tooltip pipeline.
+
+Hidden ship-catalog diagnostics remain controlled by system properties and should stay maintainer-only.
+
+## Tooltips
+
+Weapon and wing tooltips are custom panels inspired by vanilla cargo/refit tooltips. They use public APIs only.
+
+Ship tooltips approximate vanilla's ship-sale tooltip without importing obfuscated UI classes. They use `FleetMemberAPI`, `ShipHullSpecAPI`, public stats, and custom panel drawing. If you adjust ship tooltip layout, test a small frigate, a large capital, and the debug ship.
+
+Tooltip height is capped through `WimGuiTooltip.maxTooltipHeight()`, currently 95% of the screen height. Long text should use available height before truncating. Truncation should happen at the end of the last allowed line, not mid-region.
+
+## Build, Validation, And Deploy
+
+Docs-only checks:
 
 ```powershell
-$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs
 git diff --check
 ```
 
-`deploy-live-mod.ps1` clean-syncs repo-managed files to `C:\Games\Starsector\mods\Weapons Procurement`. If the live jar is locked by Starsector, it stages the built files and starts a minimized visible no-activate queued worker that publishes after the lock clears. Shared deploy/status/zip/state/process helpers live in `tools/lib/Deploy.Common.ps1`; keep deploy entrypoint flags stable and put reusable helper changes there first.
+Runtime/source checks:
 
-Deploy diagnostics:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -StarsectorDir "C:\Games\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo
+git diff --check
+```
+
+Deploy:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -StarsectorDir "C:\Games\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
+```
+
+`tools/deploy-live-mod.ps1` clean-syncs repo-managed files to the live mod folder. If Starsector locks the jar, it stages the built files and queues a minimized visible no-activate deploy worker. A queued deploy is not a live/runtime fix until parity is rechecked after the lock clears.
+
+Use:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status
@@ -162,18 +235,78 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status -CleanStaleStaging
 ```
 
-`-Status` does not build or deploy. `-CheckOnly -RequireCurrent` is the cheap source/live clean-package parity check. Stale staging cleanup is scoped to this repo, target, and deploy workflow.
+Do not deploy docs-only/comment-only work unless explicitly asked.
 
-`tools/export-public.ps1` includes the shared deploy helper module and leak-scans public output.
+## Public Release Boundary
 
-For docs-only edits, `validate-doc-links.ps1` and `git diff --check` are usually sufficient.
+Private repo work is not mirrored directly to `Shattersphere-Mods`. Public export must be curated through `.agent/PUBLIC_RELEASE.md` and `tools/export-public.ps1`.
 
-## Runtime Validation Still Required
+Public output should include only user/contributor material. It must exclude:
 
-Static/build validation is not in-game proof. The remaining high-value runtime check is rollback fault validation:
+- `AGENTS.md`
+- `.agent/`
+- `HANDOVER.md`
+- `PLANS.md`
+- private archives
+- local paths
+- deploy queues/staging logs
+- badge/bytecode patching material
 
-- start Starsector with JVM property `wp.debug.failTradeStep` set to each failure step;
-- test local buy, local sell, Sector Market buy, Fixer's Market buy, and mixed sell-then-buy plans;
-- confirm WP-touched cargo counts and player credits return to pre-confirm values;
-- run `tools/analyze-trade-rollback-diagnostics.ps1 -RequirePass` on the resulting log;
-- reset the setting to `none` before normal play or packaging.
+Changelog entries must be user-facing and must not mention agents, private docs, local paths, or private experiments.
+
+## Unpolished Or Risky Areas
+
+- Ship trading is local-only and still needs more runtime acceptance, especially tooltip polish and edge cases around exact member identity.
+- Remote ship trading is not designed.
+- Ship tooltip layout is custom and public-API-only, so exact vanilla parity is not expected.
+- Runtime rollback fault validation still needs in-game evidence.
+- Item/wing/ship tooltip stats must be audited against vanilla when new fields are added.
+- Filter modal/input handling is fragile because it mixes custom panels, input polling, dimmed background rendering, and Starsector focus behavior.
+- The repo tracks `jars/enhanced-trading.jar`; keep it consistent with source when runtime code changes.
+- Luna/data/graphics/live parity matters. Jar parity alone is insufficient.
+- `May only anchor on siblings` crashes usually mean a UI component was anchored relative to a panel that is not its parent or sibling. Fix the UI ownership/layout path rather than masking the exception.
+
+## Practical Recipes
+
+Add an item filter:
+
+1. Add state in `StockReviewFilterState` / `StockReviewFilter`.
+2. Render controls through the filter row/section path.
+3. Apply matching in `StockReviewFilters`.
+4. Ensure bulk actions respect active filters if users would expect filtered scope.
+5. Run GUI style and Kotlin migration validators.
+
+Change item pricing:
+
+1. Start at `StockItemStacks`.
+2. Verify `WeaponStockRecord`, quote book, purchase plan, execution, summaries, transaction reports, and tooltips use the same base/final semantics.
+3. Test local vanilla comparison for one weapon and one LPC.
+
+Add a ship filter:
+
+1. Add state to `StockReviewShipFilterState`.
+2. Add UI in `StockReviewShipFilterModal`.
+3. Match in `StockReviewShipFilters`.
+4. Ensure the top hull-class input and filter modal combine predictably.
+5. Confirm page count/scroll resets after filter changes.
+
+Add tooltip fields:
+
+1. Find the public API source for the value.
+2. Add the field through the relevant tooltip layout helper.
+3. Test real small/large examples and debug stress records.
+4. Keep the tooltip under the shared max-height cap.
+
+Prepare public export:
+
+1. Read `.agent/PUBLIC_RELEASE.md`.
+2. Build and validate the private source.
+3. Run `tools/export-public.ps1`.
+4. Leak-scan the public output.
+5. Do not publish private handover/archive/plans.
+
+## Recommended Next Steps
+
+Recommended: stabilize and visually verify the current ship tooltip/filter polish before expanding ship trading. The grid baseline is good, but tooltip and modal work remains the most likely user-visible source of regressions.
+
+After that, perform rollback fault validation for item trades and update `.agent/BRIEF.md` with the verified runtime result.

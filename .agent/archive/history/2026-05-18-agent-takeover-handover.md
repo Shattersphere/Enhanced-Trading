@@ -1,12 +1,14 @@
 # Agent takeover handover
 
-Status: historical snapshot
+Status: historical snapshot; stale in badge/private-build and pre-ship-trading areas
 Scope: Weapons Procurement private repo orientation after Kotlin migration, Fixer catalog work, stock-review UI polish, and private badge isolation
 Last verified: 2026-05-18 at commit `b85e7a1`
 Read when: a new agent is taking over the project, resuming broad architecture work, touching stock-review UI, changing source modes, changing Fixer's Market, changing patched badges, or preparing public release work
 Do not read for: one-line config edits, typo fixes, or routine build/deploy commands already covered by `AGENTS.md` and `HANDOVER.md`
 Related files: `AGENTS.md`, `.agent/BRIEF.md`, `HANDOVER.md`, `PLANS.md`, `PACKAGING.md`, `.agent/PUBLIC_RELEASE.md`, `.agent/archive/INDEX.md`, `build.gradle.kts`, `build.ps1`, `mod_info.json`, `tools/deploy-live-mod.ps1`, `tools/deploy-private-badges.ps1`, `src/main/kotlin`, `src/privateBadge/kotlin`
 Search tags: `takeover`, `handover`, `Kotlin migration`, `stock review`, `Fixer`, `Sector Market`, `patched badges`, `public release`, `Shattersphere-Mods`, `ship catalog debug`
+
+Current-doc warning: this is not active guidance. Cargo-cell badges now live in the standalone private `D:\Sean Mods\Weapon Badges` repo, private badge source/build paths described here have been removed or superseded, and `Trade: Ships` now exists as a local-only feature. For current practice, read `HANDOVER.md`, `.agent/ARCHITECTURE_MAP.md`, `.agent/BRIEF.md`, and `PLANS.md` first.
 
 ## Summary
 

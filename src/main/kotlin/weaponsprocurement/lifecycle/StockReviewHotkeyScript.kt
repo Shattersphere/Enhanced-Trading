@@ -20,8 +20,12 @@ import weaponsprocurement.stock.item.StockItemStacks
 import weaponsprocurement.config.StockReviewConfig
 import weaponsprocurement.config.WeaponsProcurementConfig
 
+/**
+ * Owns the trade-popup hotkey lifecycle. Opening intentionally requires a market-backed
+ * dialog/current market; generic non-market storage mutation semantics are not modeled.
+ */
 class StockReviewHotkeyScript : EveryFrameScript {
-    private val hotkey = WimGuiHotkeyLatch(HOTKEY)
+    private val hotkey = WimGuiHotkeyLatch()
 
     override fun isDone(): Boolean = false
 
@@ -33,14 +37,19 @@ class StockReviewHotkeyScript : EveryFrameScript {
             openDialog(pending?.context, pending?.state, "pending-reopen")
             return
         }
-        if (hotkey.consumePress()) {
-            openFromCurrentDialog("hotkey=F8")
+        val hotkeyCode = WeaponsProcurementConfig.tradeHotkeyKeyCode()
+        if (hotkey.consumePress(hotkeyCode)) {
+            // The Luna-configured hotkey is a toggle: pressing it again closes the active popup.
+            if (DIALOG_TRACKER.isOpen()) {
+                DIALOG_TRACKER.requestClose()
+                return
+            }
+            openFromCurrentDialog("hotkey=${hotkeyName(hotkeyCode)}")
         }
     }
 
     companion object {
         private val LOG: Logger = Logger.getLogger(StockReviewHotkeyScript::class.java)
-        private const val HOTKEY = Keyboard.KEY_F8
         private val DIALOG_TRACKER = WimGuiDialogTracker<MarketAPI?, StockReviewLaunchState?>()
         private var canOpenFailureLogged = false
 
@@ -48,6 +57,9 @@ class StockReviewHotkeyScript : EveryFrameScript {
         fun markDialogClosed() {
             DIALOG_TRACKER.markClosed()
         }
+
+        @JvmStatic
+        fun consumeCloseRequest(): Boolean = DIALOG_TRACKER.consumeCloseRequest()
 
         @JvmStatic
         fun requestReopen(market: MarketAPI?, state: StockReviewState?) {
@@ -122,6 +134,9 @@ class StockReviewHotkeyScript : EveryFrameScript {
 
         private fun hasEnabledRemoteSource(): Boolean =
             WeaponsProcurementConfig.isSectorMarketEnabled() || WeaponsProcurementConfig.isFixersMarketEnabled()
+
+        private fun hotkeyName(keyCode: Int): String =
+            Keyboard.getKeyName(keyCode)?.takeIf { it.isNotBlank() } ?: keyCode.toString()
 
         private fun playerHasTradeableCargo(): Boolean {
             val sector = Global.getSector()

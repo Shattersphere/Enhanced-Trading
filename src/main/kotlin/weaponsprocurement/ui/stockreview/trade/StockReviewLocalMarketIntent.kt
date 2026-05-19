@@ -3,6 +3,10 @@ package weaponsprocurement.ui.stockreview.trade
 import java.util.Collections
 import java.util.HashMap
 
+/**
+ * Preserves the user's intended local buy quantity while black-market/open-market toggles
+ * redistribute buys between submarkets. It should be cleared or recaptured after execution.
+ */
 class StockReviewLocalMarketIntent(source: Map<String, Int>? = null) {
     private val desiredBuysByItem = HashMap<String, Int>()
 

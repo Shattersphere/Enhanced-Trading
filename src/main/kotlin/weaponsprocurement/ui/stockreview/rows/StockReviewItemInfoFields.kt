@@ -110,6 +110,17 @@ object StockReviewItemInfoFields {
         StockReviewItemInfoField.meaningful("Refit(Sec)") { it.wingRefitTimeLabel },
     )
 
+    private val WING_ADVANCED_FIELDS = listOf(
+        StockReviewItemInfoField.meaningful("Crew/Fighter") { it.wingCrewPerFighterLabel },
+        StockReviewItemInfoField.meaningful("Hull") { it.wingHullIntegrityLabel },
+        StockReviewItemInfoField.meaningful("Armor") { it.wingArmorRatingLabel },
+        StockReviewItemInfoField.meaningful("Top Speed") { it.wingTopSpeedLabel },
+        StockReviewItemInfoField.meaningful("Flux Capacity") { it.wingFluxCapacityLabel },
+        StockReviewItemInfoField.meaningful("Flux Dissipation") { it.wingFluxDissipationLabel },
+        StockReviewItemInfoField.meaningful("Shield Efficiency") { it.wingShieldEfficiencyLabel },
+        StockReviewItemInfoField.meaningful("Shield Arc") { it.wingShieldArcLabel },
+    )
+
     private val WEAPON_BASIC_FIELDS = listOf(
         StockReviewItemInfoField.meaningful("Primary Role") { it.primaryRoleLabel },
         StockReviewItemInfoField.meaningful("Size") { it.sizeLabel },
@@ -161,5 +172,5 @@ object StockReviewItemInfoFields {
 
     @JvmStatic
     fun advanced(record: WeaponStockRecord): List<StockReviewItemInfoField> =
-        if (record.isWing()) emptyList() else WEAPON_ADVANCED_FIELDS
+        if (record.isWing()) WING_ADVANCED_FIELDS else WEAPON_ADVANCED_FIELDS
 }

@@ -1,6 +1,7 @@
 package weaponsprocurement.ui.stockreview.rendering
 
 import weaponsprocurement.ui.WimGuiButtonBinding
+import weaponsprocurement.ui.WimGuiControls
 import weaponsprocurement.ui.WimGuiListBounds
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiModalListRenderer
@@ -24,6 +25,10 @@ import com.fs.starfarer.api.ui.CustomPanelAPI
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.awt.Color
 
+/**
+ * Builds the visible stock-review screen from immutable render inputs. It owns cached item
+ * row models and routes item trade, ship trade, and filter-modal rendering.
+ */
 class StockReviewRenderer :
     WimGuiModalListRenderer.ScrollRowFactory<StockReviewAction>,
     WimGuiModalListRenderer.ExtraGapProvider<StockReviewAction> {
@@ -52,7 +57,39 @@ class StockReviewRenderer :
     ): WimGuiListBounds {
         val modeSpec = StockReviewModeSpec.forScreenMode(screenMode)
         if (screenMode == StockReviewScreenMode.FILTERS) {
+            // Filter mode draws a non-interactive copy of the trade screen, then overlays the modal.
+            renderFilterBackground(
+                root,
+                snapshot,
+                state,
+                shipSnapshot,
+                pendingTrades,
+                pendingShipTrades,
+                pendingTradeRevision,
+                pendingShipTradeRevision,
+                modeRevision,
+                colorDebugTargetIndex,
+                colorDebugDraft,
+                colorDebugPersistent,
+            )
             return StockReviewFilterModalRenderer.render(root, state, focusedShipFilterField, buttons, this, this)
+        }
+        if (screenMode == StockReviewScreenMode.COLOR_DEBUG) {
+            renderFilterBackground(
+                root,
+                snapshot,
+                state,
+                shipSnapshot,
+                pendingTrades,
+                pendingShipTrades,
+                pendingTradeRevision,
+                pendingShipTradeRevision,
+                modeRevision,
+                colorDebugTargetIndex,
+                colorDebugDraft,
+                colorDebugPersistent,
+            )
+            return StockReviewColorDebugModalRenderer.render(root, colorDebugTargetIndex, colorDebugDraft, colorDebugPersistent, buttons, this, this)
         }
         if (modeSpec.hasHeader()) {
             StockReviewHeaderRenderer.render(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
@@ -161,6 +198,44 @@ class StockReviewRenderer :
         this,
         buttons,
     )
+
+    private fun renderFilterBackground(
+        root: CustomPanelAPI,
+        snapshot: WeaponStockSnapshot,
+        state: StockReviewState,
+        shipSnapshot: StockReviewShipSnapshot,
+        pendingTrades: List<StockReviewPendingTrade>,
+        pendingShipTrades: StockReviewPendingShipTrades,
+        pendingTradeRevision: Int,
+        pendingShipTradeRevision: Int,
+        modeRevision: Int,
+        colorDebugTargetIndex: Int,
+        colorDebugDraft: Color?,
+        colorDebugPersistent: Boolean,
+    ) {
+        val savedScrollOffset = state.getListScrollOffset()
+        val ignoredButtons = ArrayList<WimGuiButtonBinding<StockReviewAction>>()
+        WimGuiControls.withoutInteractiveOverlays {
+            render(
+                root,
+                snapshot,
+                state,
+                shipSnapshot,
+                pendingTrades,
+                pendingShipTrades,
+                pendingTradeRevision,
+                pendingShipTradeRevision,
+                modeRevision,
+                StockReviewScreenMode.TRADE,
+                colorDebugTargetIndex,
+                colorDebugDraft,
+                colorDebugPersistent,
+                null,
+                ignoredButtons,
+            )
+        }
+        state.setListScrollOffset(savedScrollOffset)
+    }
 
     override fun createScrollRow(label: String, scrollDelta: Int): WimGuiListRow<StockReviewAction> =
         StockReviewListRow.fromSpec(StockReviewRowSpecs.scroll(label, StockReviewAction.scrollList(scrollDelta)))

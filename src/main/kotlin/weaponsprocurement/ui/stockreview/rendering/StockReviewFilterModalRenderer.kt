@@ -19,16 +19,22 @@ import weaponsprocurement.ui.stockreview.state.StockReviewShipFilterField
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import java.awt.Color
 
+/**
+ * Draws centered filter modals over a dimmed, non-interactive copy of the active trade screen.
+ * Keep modal sizing content-driven so filters do not consume the whole popup.
+ */
 class StockReviewFilterModalRenderer private constructor() {
     companion object {
         private const val ITEM_WIDTH = 390f
-        private const val SHIP_WIDTH = 650f
+        private const val SHIP_WIDTH = 880f
         private const val PAD = 14f
         private const val FOOTER_GAP = 12f
         private const val FOOTER_BUTTON_WIDTH = 112f
         private const val RESET_BUTTON_WIDTH = 96f
         private const val MAX_ITEM_LIST_HEIGHT = 430f
-        private val DIM = Color(0, 0, 0, 150)
+        private val DIM = Color(0, 0, 0, 191)
+        private val MODAL_BORDER = Color(115, 145, 150, 255)
+        private val TRANSPARENT_BORDER = Color(0, 0, 0, 0)
 
         @JvmStatic
         fun render(
@@ -49,7 +55,7 @@ class StockReviewFilterModalRenderer private constructor() {
             addDim(root)
             val modalLeft = (StockReviewStyle.MODAL.width - width) * 0.5f
             val modalTop = (StockReviewStyle.MODAL.height - height) * 0.5f
-            val modal = root.createCustomPanel(width, height, WimGuiPanelPlugin(StockReviewStyle.PANEL_BACKGROUND, StockReviewStyle.PANEL_BORDER))
+            val modal = root.createCustomPanel(width, height, WimGuiPanelPlugin(StockReviewStyle.PANEL_BACKGROUND, MODAL_BORDER))
             root.addComponent(modal).inTL(modalLeft, modalTop)
             val bounds = if (state.isShipTrading()) {
                 StockReviewShipFilterModal.render(modal, state, focusedShipFilterField, buttons)
@@ -93,7 +99,7 @@ class StockReviewFilterModalRenderer private constructor() {
                 StockReviewStyle.BUTTON_GAP,
                 120f,
                 StockReviewStyle.PANEL_BACKGROUND,
-                StockReviewStyle.PANEL_BORDER,
+                TRANSPARENT_BORDER,
                 StockReviewStyle.ROW_BORDER,
             )
             return WimGuiModalListRenderer.renderAndStoreOffset(panel, rows, state, spec, scrollRowFactory, extraGapProvider, buttons)

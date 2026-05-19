@@ -23,6 +23,7 @@ class WeaponStockRecord(
     val category: StockCategory?,
     submarketStocks: List<SubmarketWeaponStock>,
     private val fixerCatalogMetadata: FixerCatalogMetadata?,
+    val debugProfile: StockDebugItemProfile? = null,
 ) {
     constructor(
         weaponId: String?,
@@ -104,6 +105,33 @@ class WeaponStockRecord(
         FixerCatalogMetadata.create(fixerRarity, null),
     )
 
+    constructor(
+        itemType: StockItemType?,
+        itemId: String?,
+        displayName: String?,
+        ownedCount: Int,
+        playerCargoCount: Int,
+        purchasableCount: Int,
+        desiredCount: Int,
+        category: StockCategory?,
+        submarketStocks: List<SubmarketWeaponStock>,
+        debugProfile: StockDebugItemProfile,
+    ) : this(
+        itemType,
+        itemId,
+        displayName,
+        null,
+        null,
+        ownedCount,
+        playerCargoCount,
+        purchasableCount,
+        desiredCount,
+        category,
+        submarketStocks,
+        null as FixerCatalogMetadata?,
+        debugProfile,
+    )
+
     val itemType: StockItemType = itemType ?: StockItemType.WEAPON
     val itemKey: String = this.itemType.key(itemId)
     val submarketStocks: List<SubmarketWeaponStock> = Collections.unmodifiableList(ArrayList(submarketStocks))
@@ -111,6 +139,8 @@ class WeaponStockRecord(
     private val cheapestPurchasableUnitPriceValue: Int = computeCheapestPurchasableUnitPrice(this.submarketStocks)
 
     fun isWing(): Boolean = StockItemType.WING == itemType
+
+    fun isDebug(): Boolean = debugProfile != null
 
     val storageCount: Int
         get() = ownedCount
@@ -181,52 +211,57 @@ class WeaponStockRecord(
 
     val sizeLabel: String
         get() {
+            debugValue("sizeLabel")?.let { return it }
             if (isWing()) return "Wing"
             return valueOrUnknown(spec?.size)
         }
 
     val typeLabel: String
         get() {
+            debugValue("typeLabel")?.let { return it }
             if (isWing()) return valueOrUnknown(wingSpec?.role)
             return valueOrUnknown(spec?.type)
         }
 
     val primaryRoleLabel: String
-        get() = valueOrUnknown(spec?.primaryRoleStr)
+        get() = debugValue("primaryRoleLabel") ?: valueOrUnknown(spec?.primaryRoleStr)
 
     val opCostLabel: String
-        get() = if (spec == null) "?" else Math.round(spec.getOrdnancePointCost(null)).toString()
+        get() = debugValue("opCostLabel") ?: if (spec == null) "?" else Math.round(spec.getOrdnancePointCost(null)).toString()
 
     val damageTypeLabel: String
-        get() = valueOrUnknown(spec?.damageType)
+        get() = debugValue("damageTypeLabel") ?: valueOrUnknown(spec?.damageType)
 
     val damageLabel: String
         get() {
+            debugValue("damageLabel")?.let { return it }
             if (isWing()) return "?"
             return if (spec?.derivedStats == null) "?" else Math.round(spec.derivedStats.damagePerShot).toString()
         }
 
     val empLabel: String
         get() {
+            debugValue("empLabel")?.let { return it }
             if (isWing()) return "?"
             return if (spec?.derivedStats == null) "?" else Math.round(spec.derivedStats.empPerShot).toString()
         }
 
     val rangeLabel: String
         get() {
+            debugValue("rangeLabel")?.let { return it }
             if (isWing()) return if (wingSpec == null) "?" else Math.round(wingSpec.range).toString()
             return if (spec == null) "?" else Math.round(spec.maxRange).toString()
         }
 
     val fluxPerSecondLabel: String
-        get() = if (isWing() || spec?.derivedStats == null) {
+        get() = debugValue("fluxPerSecondLabel") ?: if (isWing() || spec?.derivedStats == null) {
             "?"
         } else {
             Math.round(spec.derivedStats.fluxPerSecond).toString()
         }
 
     val fluxPerDamageLabel: String
-        get() = if (isWing() || spec?.derivedStats == null) {
+        get() = debugValue("fluxPerDamageLabel") ?: if (isWing() || spec?.derivedStats == null) {
             "?"
         } else {
             formatOneDecimal(spec.derivedStats.fluxPerDam)
@@ -234,12 +269,14 @@ class WeaponStockRecord(
 
     val refireSecondsLabel: String
         get() {
+            debugValue("refireSecondsLabel")?.let { return it }
             val projectile = projectileWeaponSpec()
             return if (projectile == null) "?" else formatTwoDecimals(projectile.refireDelay)
         }
 
     val sustainedDamagePerSecondLabel: String
         get() {
+            debugValue("sustainedDamagePerSecondLabel")?.let { return it }
             if (spec?.derivedStats == null) return "?"
             val sustained = Math.round(spec.derivedStats.sustainedDps)
             val burst = Math.round(spec.derivedStats.dps)
@@ -247,12 +284,14 @@ class WeaponStockRecord(
         }
 
     fun hasDifferentSustainedDamagePerSecond(): Boolean {
+        if (debugValue("sustainedDamagePerSecondLabel") != null) return true
         return spec?.derivedStats != null &&
             Math.round(spec.derivedStats.sustainedDps) != Math.round(spec.derivedStats.dps)
     }
 
     val sustainedFluxPerSecondLabel: String
         get() {
+            debugValue("sustainedFluxPerSecondLabel")?.let { return it }
             if (spec?.derivedStats == null) return "?"
             val sustained = Math.round(spec.derivedStats.sustainedFluxPerSecond)
             val burst = Math.round(spec.derivedStats.fluxPerSecond)
@@ -260,61 +299,66 @@ class WeaponStockRecord(
         }
 
     fun hasDifferentSustainedFluxPerSecond(): Boolean {
+        if (debugValue("sustainedFluxPerSecondLabel") != null) return true
         return spec?.derivedStats != null &&
             Math.round(spec.derivedStats.sustainedFluxPerSecond) != Math.round(spec.derivedStats.fluxPerSecond)
     }
 
     val sustainedEmpPerSecondLabel: String
-        get() = if (spec?.derivedStats == null) "?" else Math.round(spec.derivedStats.empPerSecond).toString()
+        get() = debugValue("sustainedEmpPerSecondLabel") ?: if (spec?.derivedStats == null) "?" else Math.round(spec.derivedStats.empPerSecond).toString()
 
-    fun hasDifferentSustainedEmpPerSecond(): Boolean = false
+    fun hasDifferentSustainedEmpPerSecond(): Boolean = debugValue("sustainedEmpPerSecondLabel") != null
 
     val fluxPerEmpLabel: String
         get() {
+            debugValue("fluxPerEmpLabel")?.let { return it }
             val stats = spec?.derivedStats ?: return "?"
             if (stats.empPerSecond <= 0f) return "?"
             return Math.round(stats.sustainedFluxPerSecond / stats.empPerSecond).toString()
         }
 
     val beamDpsLabel: String
-        get() = if (spec == null || !spec.isBeam || spec.derivedStats == null) {
+        get() = debugValue("beamDpsLabel") ?: if (spec == null || !spec.isBeam || spec.derivedStats == null) {
             "?"
         } else {
             Math.round(spec.derivedStats.dps).toString()
         }
 
     val beamChargeUpLabel: String
-        get() = if (spec == null || spec.beamChargeupTime <= 0f) "?" else formatTwoDecimals(spec.beamChargeupTime)
+        get() = debugValue("beamChargeUpLabel") ?: if (spec == null || spec.beamChargeupTime <= 0f) "?" else formatTwoDecimals(spec.beamChargeupTime)
 
     val beamChargeDownLabel: String
-        get() = if (spec == null || spec.beamChargedownTime <= 0f) "?" else formatTwoDecimals(spec.beamChargedownTime)
+        get() = debugValue("beamChargeDownLabel") ?: if (spec == null || spec.beamChargedownTime <= 0f) "?" else formatTwoDecimals(spec.beamChargedownTime)
 
     val burstDelayLabel: String
         get() {
+            debugValue("burstDelayLabel")?.let { return it }
             val projectile = projectileWeaponSpec()
             return if (projectile == null || projectile.burstDelay <= 0f) "?" else formatTwoDecimals(projectile.burstDelay)
         }
 
     val turnRateLabel: String
         get() {
+            debugValue("turnRateLabel")?.let { return it }
             if (spec == null || spec.turnRate <= 0f) return "?"
             return Math.round(spec.turnRate).toString() + "\u00b0/s"
         }
 
     val minSpreadLabel: String
-        get() = if (spec == null || spec.minSpread <= 0f) "?" else formatOneDecimal(spec.minSpread)
+        get() = debugValue("minSpreadLabel") ?: if (spec == null || spec.minSpread <= 0f) "?" else formatOneDecimal(spec.minSpread)
 
     val maxSpreadLabel: String
-        get() = if (spec == null || spec.maxSpread <= 0f) "?" else formatOneDecimal(spec.maxSpread)
+        get() = debugValue("maxSpreadLabel") ?: if (spec == null || spec.maxSpread <= 0f) "?" else formatOneDecimal(spec.maxSpread)
 
     val spreadPerShotLabel: String
-        get() = if (spec == null || spec.spreadBuildup <= 0f) "?" else formatOneDecimal(spec.spreadBuildup)
+        get() = debugValue("spreadPerShotLabel") ?: if (spec == null || spec.spreadBuildup <= 0f) "?" else formatOneDecimal(spec.spreadBuildup)
 
     val spreadDecayLabel: String
-        get() = if (spec == null || spec.spreadDecayRate <= 0f) "?" else formatOneDecimal(spec.spreadDecayRate)
+        get() = debugValue("spreadDecayLabel") ?: if (spec == null || spec.spreadDecayRate <= 0f) "?" else formatOneDecimal(spec.spreadDecayRate)
 
     val projectileSpeedLabel: String
         get() {
+            debugValue("projectileSpeedLabel")?.let { return it }
             val projectile = projectileWeaponSpec() ?: return "?"
             val speed = try {
                 projectile.getProjectileSpeed(null, null)
@@ -326,18 +370,21 @@ class WeaponStockRecord(
 
     val launchSpeedLabel: String
         get() {
+            debugValue("launchSpeedLabel")?.let { return it }
             val missile = missileSpec()
             return if (missile == null || missile.launchSpeed <= 0f) "?" else Math.round(missile.launchSpeed).toString()
         }
 
     val flightTimeLabel: String
         get() {
+            debugValue("flightTimeLabel")?.let { return it }
             val missile = missileSpec()
             return if (missile == null || missile.maxFlightTime <= 0f) "?" else formatTwoDecimals(missile.maxFlightTime)
         }
 
     val guidedLabel: String
         get() {
+            debugValue("guidedLabel")?.let { return it }
             if (missileSpec() == null) return "?"
             val tracking = spec?.trackingStr
             val guided = !tracking.isNullOrBlank() && !"None".equals(tracking.trim(), ignoreCase = true)
@@ -345,32 +392,59 @@ class WeaponStockRecord(
         }
 
     val maxAmmoLabel: String
-        get() = if (spec == null || !spec.usesAmmo() || spec.maxAmmo <= 0) "?" else spec.maxAmmo.toString()
+        get() = debugValue("maxAmmoLabel") ?: if (spec == null || !spec.usesAmmo() || spec.maxAmmo <= 0) "?" else spec.maxAmmo.toString()
 
     val secPerReloadLabel: String
         get() {
+            debugValue("secPerReloadLabel")?.let { return it }
             if (spec == null || !spec.usesAmmo() || spec.ammoPerSecond <= 0f || spec.reloadSize <= 0f) return "?"
             return formatTwoDecimals(spec.reloadSize / spec.ammoPerSecond)
         }
 
     val ammoGainLabel: String
-        get() = if (spec == null || !spec.usesAmmo() || spec.ammoPerSecond <= 0f) {
+        get() = debugValue("ammoGainLabel") ?: if (spec == null || !spec.usesAmmo() || spec.ammoPerSecond <= 0f) {
             "?"
         } else {
             formatOneDecimal(spec.ammoPerSecond)
         }
 
     val accuracyLabel: String
-        get() = valueOrUnknown(spec?.accuracyStr)
+        get() = debugValue("accuracyLabel") ?: valueOrUnknown(spec?.accuracyStr)
 
     val wingFighterCountLabel: String
-        get() = wingSpec?.numFighters?.toString() ?: "?"
+        get() = debugValue("wingFighterCountLabel") ?: wingSpec?.numFighters?.toString() ?: "?"
 
     val wingOpCostLabel: String
-        get() = if (wingSpec == null) "?" else Math.round(wingSpec.getOpCost(null)).toString()
+        get() = debugValue("wingOpCostLabel") ?: if (wingSpec == null) "?" else Math.round(wingSpec.getOpCost(null)).toString()
 
     val wingRefitTimeLabel: String
-        get() = if (wingSpec == null) "?" else formatOneDecimal(wingSpec.refitTime) + "s"
+        get() = debugValue("wingRefitTimeLabel") ?: if (wingSpec == null) "?" else formatOneDecimal(wingSpec.refitTime) + "s"
+
+    val wingCrewPerFighterLabel: String
+        get() = debugValue("wingCrewPerFighterLabel") ?: "?"
+
+    val wingHullIntegrityLabel: String
+        get() = debugValue("wingHullIntegrityLabel") ?: "?"
+
+    val wingArmorRatingLabel: String
+        get() = debugValue("wingArmorRatingLabel") ?: "?"
+
+    val wingTopSpeedLabel: String
+        get() = debugValue("wingTopSpeedLabel") ?: "?"
+
+    val wingFluxCapacityLabel: String
+        get() = debugValue("wingFluxCapacityLabel") ?: "?"
+
+    val wingFluxDissipationLabel: String
+        get() = debugValue("wingFluxDissipationLabel") ?: "?"
+
+    val wingShieldEfficiencyLabel: String
+        get() = debugValue("wingShieldEfficiencyLabel") ?: "?"
+
+    val wingShieldArcLabel: String
+        get() = debugValue("wingShieldArcLabel") ?: "?"
+
+    private fun debugValue(key: String): String? = debugProfile?.value(key)
 
     private fun projectileWeaponSpec(): ProjectileWeaponSpecAPI? {
         return if (spec is ProjectileWeaponSpecAPI) spec else null

@@ -1,15 +1,16 @@
 # Patched badges deep dive
 
-Status: active-reference
-Scope: Optional patched cargo-cell badge path, count bridge, and bytecode patcher constraints
-Last verified: 2026-05-12, archived from the pre-debloat `HANDOVER.md`
-Read when: changing patcher code, bytecode injection, badge helper, count bridge, badge assets, or `CargoStackView` validation
-Do not read for: clean popup trade/UI work unless it touches patched badges
+Status: retired/historical
+Scope: Pre-split optional patched cargo-cell badge path, count bridge, and bytecode patcher constraints
+Last verified: 2026-05-12, before Weapon Badges became a standalone mod
+Read when: understanding why badge ownership was removed from Weapons Procurement, or migrating old context into `D:\Sean Mods\Weapon Badges`
+Do not read for: clean popup trade/UI work, active Weapons Procurement implementation, or new badge work in this repo
 Related files: `src/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java`, `src/weaponsprocurement/internal/WeaponsProcurementCountUpdater.java`, `tools/cargo-stack-view-patcher.ps1`, `tools/validate-cargo-stack-view-patch.ps1`, `tools/validate-total-badges.ps1`
 Search tags: `CargoStackView`, `starfarer_obf.jar`, `WeaponsProcurementBadgeHelper`, `wp.counts.ready`, `javap`, `bytecode`
 
 ## Summary
 
+- Historical warning: cargo-cell badges now live in the standalone private `D:\Sean Mods\Weapon Badges` repo. Do not reintroduce badge helper classes, count bridges, generated badge sprites, Luna badge settings, or core patching tools to Weapons Procurement.
 - The patched badge path is optional and advanced-use; the clean `F8` popup must remain independent.
 - Do not ship a prepatched `starfarer_obf.jar`.
 - Bytecode reading is useful for learning hidden Starsector behavior; bytecode injection is a last resort requiring explicit consent.

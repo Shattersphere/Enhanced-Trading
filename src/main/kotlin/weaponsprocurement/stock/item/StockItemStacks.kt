@@ -7,6 +7,10 @@ import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.CargoAPI
 import kotlin.math.max
 
+/**
+ * Central price/cargo-space source for weapon and LPC stacks. Keep vanilla multipliers and
+ * tariff math here so UI quotes, execution, summaries, and tooltips stay aligned.
+ */
 object StockItemStacks {
     private const val SETTING_WEAPON_BUY_MULT = "shipWeaponBuyPriceMult"
     private const val SETTING_WEAPON_SELL_MULT = "shipWeaponSellPriceMult"

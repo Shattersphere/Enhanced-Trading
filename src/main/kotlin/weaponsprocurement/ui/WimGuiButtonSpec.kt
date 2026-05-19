@@ -15,6 +15,7 @@ class WimGuiButtonSpec<A>(
     @JvmField val borderColor: Color,
     @JvmField val tooltip: String?,
     @JvmField val tooltipCreator: TooltipMakerAPI.TooltipCreator? = null,
+    @JvmField val tooltipLocation: TooltipMakerAPI.TooltipLocation? = null,
 ) {
     companion object {
         @JvmStatic
@@ -122,6 +123,32 @@ class WimGuiButtonSpec<A>(
             borderColor,
             tooltip,
             tooltipCreator,
+        )
+
+        @JvmStatic
+        fun <A> toggle(
+            width: Float,
+            label: String?,
+            textColor: Color,
+            action: A,
+            alignment: Alignment,
+            color: Color,
+            borderColor: Color,
+            tooltip: String?,
+            tooltipCreator: TooltipMakerAPI.TooltipCreator?,
+            tooltipLocation: TooltipMakerAPI.TooltipLocation?,
+        ): WimGuiButtonSpec<A> = WimGuiButtonSpec(
+            width,
+            label,
+            textColor,
+            action,
+            true,
+            alignment,
+            WimGuiButtonColors.dimmedInner(color),
+            borderColor,
+            tooltip,
+            tooltipCreator,
+            tooltipLocation,
         )
 
         @JvmStatic

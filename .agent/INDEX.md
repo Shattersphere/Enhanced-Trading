@@ -1,4 +1,4 @@
-# Weapons Procurement Doc Index
+# Enhanced Trading Doc Index
 
 Use this map before loading large or historical docs. The active docs stay short; detailed older guidance is archived by topic.
 
@@ -12,7 +12,8 @@ Use this map before loading large or historical docs. The active docs stay short
 | `PACKAGING.md` | Release docs | active | Release/build/package validation and the Weapon Badges split note. | Preparing releases or deployment. |
 | `CHANGELOG.md` | Release docs | active | Release notes. | Bumping version or preparing a release. |
 | `HANDOVER.md` | Stable memory | active | Current architecture, stable decisions, validation commands, and runtime caveats. | Changing architecture, entry points, source modes, trade flow, or validation commands. |
-| `PLANS.md` | Active plan | active | Active work and blocked/deferred items only. | Large, risky, planned, or multi-session work. |
-| `.agent/archive/INDEX.md` | Archive map | active | Searchable index of deep dives, history, and retired plans. | A task may depend on historical/deep-dive knowledge. |
+| `.agent/ARCHITECTURE_MAP.md` | Architecture map | active | Diagrams and package maps for open flow, item trading, ship trading, UI layering, and build/deploy surfaces. | Onboarding, planning larger changes, or tracing ownership between stock, trade, UI, and deploy code. |
+| `PLANS.md` | Active plan | active | Short active plan, deferred items, and retired-plan pointers. Completed migration/release history should not live here. | Large, risky, planned, or multi-session work. |
+| `.agent/archive/INDEX.md` | Archive map | active | Searchable index of deep dives, history, and retired plans, with status notes for stale historical guidance. | A task may depend on historical/deep-dive knowledge. |
 
-Do not read every archive file by default. Open `.agent/archive/INDEX.md`, search for the relevant subsystem, then read only the matching deep dive.
+Do not read every archive file by default. Open `.agent/archive/INDEX.md`, check the status/read-when notes, then read only the matching deep dive. Historical badge docs are retained for context only; active badge work belongs in the standalone `D:\Sean Mods\Weapon Badges` repo.

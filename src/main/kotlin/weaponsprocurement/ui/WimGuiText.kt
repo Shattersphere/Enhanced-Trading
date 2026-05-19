@@ -3,6 +3,10 @@ package weaponsprocurement.ui
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import java.util.Locale
 
+/**
+ * Text fitting helpers for Starsector's limited UI API. Prefer these paths when labels need
+ * deterministic ellipsizing instead of ad hoc string clipping.
+ */
 object WimGuiText {
     private val weakLineEndings: Set<String> = setOf(
         "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "or", "the", "to", "with",
@@ -51,15 +55,26 @@ object WimGuiText {
             return lines
         }
         val visible = ArrayList(lines.subList(0, safeLines))
-        val overflow = StringBuilder()
-        for (i in safeLines - 1 until lines.size) {
-            if (overflow.isNotEmpty()) {
-                overflow.append(' ')
-            }
-            overflow.append(lines[i])
-        }
-        visible[visible.size - 1] = fit(overflow.toString(), safeChars)
+        visible[visible.size - 1] = markTruncatedLine(visible[visible.size - 1], safeChars)
         return visible
+    }
+
+    @JvmStatic
+    fun wrapToWidth(text: String?, element: TooltipMakerAPI, availableWidth: Float, maxLines: Int): List<String> {
+        val safeWidth = maxOf(1f, availableWidth)
+        val safeLines = maxOf(1, maxLines)
+        return try {
+            val lines = wrapAllMeasured(text, element, safeWidth)
+            if (lines.size <= safeLines) {
+                lines
+            } else {
+                val visible = ArrayList(lines.subList(0, safeLines))
+                visible[visible.size - 1] = markMeasuredTruncatedLine(visible[visible.size - 1], safeWidth, element)
+                visible
+            }
+        } catch (_: RuntimeException) {
+            wrap(text, estimatedChars(availableWidth), maxLines)
+        }
     }
 
     @JvmStatic
@@ -89,14 +104,7 @@ object WimGuiText {
         val cappedLines = ArrayList<String>()
         if (truncated) {
             cappedLines.addAll(wrappedLines.subList(0, cappedMaxLines))
-            val overflow = StringBuilder()
-            for (i in cappedMaxLines - 1 until wrappedLines.size) {
-                if (overflow.isNotEmpty()) {
-                    overflow.append(' ')
-                }
-                overflow.append(wrappedLines[i])
-            }
-            cappedLines[cappedLines.size - 1] = fit(overflow.toString(), maxCharsPerLine)
+            cappedLines[cappedLines.size - 1] = markTruncatedLine(cappedLines[cappedLines.size - 1], maxCharsPerLine)
         } else {
             cappedLines.addAll(wrappedLines)
         }
@@ -148,6 +156,24 @@ object WimGuiText {
         }
         return if (lines.isEmpty()) listOf("") else lines
     }
+
+    private fun wrapAllMeasured(text: String?, element: TooltipMakerAPI, availableWidth: Float): List<String> {
+        val lines = ArrayList<String>()
+        for (rawLine in (text ?: "").split(Regex("\\r?\\n"), limit = 0)) {
+            lines.addAll(wrapTextLineMeasured(rawLine, element, availableWidth))
+        }
+        return if (lines.isEmpty()) listOf("") else lines
+    }
+
+    private fun markTruncatedLine(line: String, maxCharsPerLine: Int): String {
+        if (maxCharsPerLine <= 3) {
+            return fit(line, maxCharsPerLine)
+        }
+        return fit("${line.trimEnd()} ...", maxCharsPerLine)
+    }
+
+    private fun markMeasuredTruncatedLine(line: String, availableWidth: Float, element: TooltipMakerAPI): String =
+        truncateMeasuredLineToFit("${line.trimEnd()}...", availableWidth, element)
 
     private fun wrapTextLineWordAware(line: String?, maxCharsPerLine: Int): List<String> {
         if (line == null || line.trim().isEmpty()) {
@@ -205,6 +231,69 @@ object WimGuiText {
             val end = minOf(token.length, index + maxCharsPerLine)
             chunks.add(token.substring(index, end))
             index = end
+        }
+        return chunks
+    }
+
+    private fun wrapTextLineMeasured(line: String?, element: TooltipMakerAPI, availableWidth: Float): List<String> {
+        val normalized = line?.trim() ?: ""
+        if (normalized.isEmpty()) {
+            return listOf("")
+        }
+        val wrapped = ArrayList<String>()
+        var current = ""
+        for (word in normalized.split(Regex("\\s+"))) {
+            val segments = splitMeasuredToken(word, element, availableWidth)
+            for (segmentIndex in segments.indices) {
+                val segment = segments[segmentIndex]
+                val candidate = if (current.isEmpty()) segment else "$current $segment"
+                current = if (fitsMeasured(candidate, availableWidth, element)) {
+                    candidate
+                } else {
+                    if (current.isNotEmpty()) {
+                        wrapped.add(current)
+                    }
+                    segment
+                }
+                if (segmentIndex < segments.size - 1) {
+                    if (current.isNotEmpty()) {
+                        wrapped.add(current)
+                    }
+                    current = ""
+                }
+            }
+        }
+        if (current.isNotEmpty()) {
+            wrapped.add(current)
+        }
+        return if (wrapped.isEmpty()) listOf("") else wrapped
+    }
+
+    private fun splitMeasuredToken(token: String, element: TooltipMakerAPI, availableWidth: Float): List<String> {
+        if (token.isEmpty() || fitsMeasured(token, availableWidth, element)) {
+            return listOf(token)
+        }
+        val chunks = ArrayList<String>()
+        var start = 0
+        while (start < token.length) {
+            var low = start + 1
+            var high = token.length
+            var best = start + 1
+            while (low <= high) {
+                val mid = (low + high) / 2
+                val candidate = token.substring(start, mid)
+                if (fitsMeasured(candidate, availableWidth, element)) {
+                    best = mid
+                    low = mid + 1
+                } else {
+                    high = mid - 1
+                }
+            }
+            if (best <= start) {
+                best = start + 1
+            }
+            chunks.add(token.substring(start, best))
+            start = best
         }
         return chunks
     }

@@ -9,6 +9,10 @@ import weaponsprocurement.config.WeaponMarketBlacklist
 import weaponsprocurement.config.WeaponsProcurementConfig
 import weaponsprocurement.stock.fixer.ShipCatalogDiagnostics
 
+/**
+ * Observes real market cargo for Fixer's Market reference data and one-shot diagnostics.
+ * Success and failure timestamps stay separate so transient scan failures retry quickly.
+ */
 class WeaponsProcurementFixerCatalogUpdater : EveryFrameScript {
     private val catalog = FixerMarketObservedCatalog()
     private val shipDiagnostics = ShipCatalogDiagnostics()

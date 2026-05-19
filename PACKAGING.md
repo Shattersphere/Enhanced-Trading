@@ -1,4 +1,4 @@
-# Weapons Procurement Packaging Notes
+# Enhanced Trading Packaging Notes
 
 ## Clean Package
 
@@ -6,14 +6,14 @@ The public package is the clean procurement GUI:
 
 - normal Starsector mod files only;
 - `F8` opens the Weapon Stock Review popup in valid market/storage contexts;
-- optional LunaLib market-dialog entry can add `Open "Weapon Procurement"`;
+- optional LunaLib market-dialog entry can add `Open "Enhanced Trading"`;
 - no private docs, local paths, deploy queues, or internal archives.
 - LazyLib and LunaLib remain required dependencies.
 
 Include:
 
 - `data/`
-- `jars/weapons-procurement.jar`
+- `jars/enhanced-trading.jar`
 - `mod_info.json`
 - `README.md`
 - `CONFIG.md`
@@ -62,7 +62,7 @@ git diff --check
 
 ## Weapon Badges Split
 
-Cargo-cell badges are no longer packaged with Weapons Procurement. Do not package badge helpers, count bridges, generated badge sprites, or core patching tools with this mod.
+Cargo-cell badges are no longer packaged with Enhanced Trading. Do not package badge helpers, count bridges, generated badge sprites, or core patching tools with this mod.
 
 ## Trade Rollback Fault Validation
 

@@ -1,5 +1,5 @@
 param(
-    [string]$JarPath = (Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) "jars") "weapons-procurement.jar"),
+    [string]$JarPath = (Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) "jars") "enhanced-trading.jar"),
     [string]$PublicExportPath = (Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) "build") "public-export"),
     [switch]$RequireNoJava
 )

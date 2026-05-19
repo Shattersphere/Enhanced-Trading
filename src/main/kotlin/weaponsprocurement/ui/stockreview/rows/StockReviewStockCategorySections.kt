@@ -14,6 +14,10 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import java.awt.Color
 import java.util.Collections
 
+/**
+ * Item stock category sections for the main item-trade view. Rows respect active filters,
+ * while heading buy/sell aggregates use the full category so hidden queued trades stay visible.
+ */
 class StockReviewStockCategorySection private constructor(
     @JvmField val category: StockCategory,
     private val fillColor: Color,
@@ -45,7 +49,9 @@ class StockReviewStockCategorySection private constructor(
                     expanded,
                     topGap,
                 ),
-                includesWorstCaseRow && StockItemType.WEAPON == itemType,
+                includesWorstCaseRow,
+                itemType,
+                state,
                 StockReviewTradeRecordRowAppender(state, tradeContext, layout),
             ),
         )

@@ -10,6 +10,10 @@ import com.fs.starfarer.api.impl.campaign.ids.Submarkets
 import weaponsprocurement.stock.market.StockSubmarketAccess
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 
+/**
+ * Builds the local-only ship trade snapshot from market mothballed ships plus player fleet
+ * sell candidates. Remote ship trading needs separate source semantics before being added.
+ */
 class StockReviewShipSnapshotBuilder {
     fun build(market: MarketAPI?, playerFleet: CampaignFleetAPI?, includeBlackMarket: Boolean): StockReviewShipSnapshot {
         if (market == null) {
@@ -80,8 +84,9 @@ class StockReviewShipSnapshotBuilder {
     }
 
     private fun addDebugRecord(records: MutableList<StockReviewShipRecord>) {
-        if (!StockReviewStyle.SHOW_WIDTH_TEST_ROWS) return
+        if (!StockReviewStyle.showDebugUi()) return
         val member = debugMember() ?: return
+        // Stress record is gated by debug UI but still flows through the normal grid/tooltip path.
         member.shipName = "HSS Debug Worst-Case Layout Regression Fortress of Excessively Long Field Values"
         records.add(
             StockReviewShipRecord(
@@ -116,10 +121,10 @@ class StockReviewShipSnapshotBuilder {
             "Capital",
             "HSS Debug Worst-Case Layout Regression Fortress, Debug Worst-Case Supercapital Siege Carrier Logistics Battleship Mk. XIV-D",
             "Debug/Stress Test",
-            "This fake entry intentionally uses extreme values, very long field labels, long system text, dense weapon mounts, and a crowded armament list. It exists only to prove that the ship grid and tooltip can survive worst-case local UI content without wrapping into controls, clipping important text, or creating unusable empty space.",
+            "This fake entry intentionally uses extreme values, very long field labels, long system text, dense weapon mounts, and a crowded armament list. It exists only to prove that the ship grid and tooltip can survive worst-case local UI content without wrapping into controls, clipping important text, or creating unusable empty space. The description deliberately keeps going with extra clauses about implausible refit history, overlong campaign provenance, overloaded carrier logistics, and stress-test notes so the tooltip has to expand before it decides to truncate. If a real modded hull ships with this much descriptive copy, the popup should preserve the useful top-level details, avoid colliding with the preview sprite, and cut off the tail gracefully instead of pushing data rows off-screen. This second diagnostic paragraph keeps piling on deliberately awkward content: contradictory doctrine notes, excessive prototype lineage, nested battlefield caveats, refit warnings, salvage-office caveats, officer folklore, support-fleet logistics, and long prose that should use the available tooltip height before it is clipped. The intent is to prove that the title, art, description, data tables, and loadout rows all remain readable when a modded capital ship supplies far more lore text than a vanilla hull ever would.",
             listOf(
                 StockReviewShipDebugStat("CR per deployment", "9999%"),
-                StockReviewShipDebugStat("Recovery rate (per day)", "999.95% (-999.95)"),
+                StockReviewShipDebugStat("Recovery rate (per day)", "999% (-999)"),
                 StockReviewShipDebugStat("Recovery cost (supplies)", "99999"),
                 StockReviewShipDebugStat("Deployment points", "999"),
                 StockReviewShipDebugStat("Peak performance (sec)", "99999"),
@@ -144,7 +149,7 @@ class StockReviewShipSnapshotBuilder {
                 StockReviewShipDebugStat("Defense", "Omni Phase Fortress Shield"),
                 StockReviewShipDebugStat("Shield arc", "360"),
                 StockReviewShipDebugStat("Shield upkeep/sec", "9999"),
-                StockReviewShipDebugStat("Shield flux/damage", "0.01"),
+                StockReviewShipDebugStat("Shield efficiency", "0.01"),
                 StockReviewShipDebugStat("Flux capacity", "999999"),
                 StockReviewShipDebugStat("Flux dissipation", "99999"),
                 StockReviewShipDebugStat("Top speed", "999"),

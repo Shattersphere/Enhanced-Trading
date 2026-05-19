@@ -24,7 +24,7 @@ class WeaponMarketBlacklist private constructor(
 
     companion object {
         private val LOG: Logger = Logger.getLogger(WeaponMarketBlacklist::class.java)
-        private const val CONFIG_PATH = "data/config/weapons_procurement_market_blacklist.json"
+        private const val CONFIG_PATH = "data/config/enhanced_trading_market_blacklist.json"
         private const val SECTOR_KEY = "BANNED_FROM_SECTOR_MARKET"
         private const val FIXERS_KEY = "BANNED_FROM_FIXERS_MARKET"
 

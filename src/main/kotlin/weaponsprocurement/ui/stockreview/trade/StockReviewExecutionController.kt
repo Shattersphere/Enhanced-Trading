@@ -14,6 +14,10 @@ import weaponsprocurement.trade.plan.TradeMoney
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import java.util.Collections
 
+/**
+ * Confirms item pending trades after preflight quote/capacity checks. It reconciles local buy
+ * intent after execution because that intent is edit-state, not a persistent preference.
+ */
 class StockReviewExecutionController(
     private val state: StockReviewState,
     private val pendingTrades: StockReviewPendingTrades,

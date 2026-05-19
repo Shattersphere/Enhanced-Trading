@@ -40,8 +40,8 @@ $includeFiles = @(
     "settings.gradle.kts",
     "data/campaign/rules.csv",
     "data/config/LunaSettings.csv",
-    "data/config/weapons_procurement_market_blacklist.json",
-    "data/config/weapons_procurement_stock.json",
+    "data/config/enhanced_trading_market_blacklist.json",
+    "data/config/enhanced_trading_stock.json",
     "tools/deploy-live-mod.ps1",
     "tools/lib/Deploy.Common.ps1",
     "tools/analyze-trade-rollback-diagnostics.ps1",
@@ -115,7 +115,7 @@ if (Test-Path -LiteralPath $publicDeploy) {
 function Assert-DeployJarBoundary {
     param([string]$BaseRoot)
 
-    $jarPath = Join-Path $BaseRoot "jars\weapons-procurement.jar"
+    $jarPath = Join-Path $BaseRoot "jars\enhanced-trading.jar"
     if (-not (Test-Path -LiteralPath $jarPath)) {
         throw "Deploy jar not found: $jarPath"
     }
@@ -155,7 +155,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Gradle build failed with exit code $LASTEXITCODE."
 }
 
-$jarPath = Join-Path $PSScriptRoot "jars\weapons-procurement.jar"
+$jarPath = Join-Path $PSScriptRoot "jars\enhanced-trading.jar"
 Write-Host "Built $jarPath"
 '@ | Set-Content -LiteralPath $publicBuildWrapper -NoNewline
 $publicDocValidator = Join-Path $resolvedOutput "tools/validate-doc-links.ps1"
@@ -244,4 +244,4 @@ if ($leaks.Count -gt 0) {
     throw "Public export leak scan failed:`n$($leaks -join "`n")"
 }
 
-Write-Host "Exported public Weapons Procurement source to $resolvedOutput"
+Write-Host "Exported public Enhanced Trading source to $resolvedOutput"

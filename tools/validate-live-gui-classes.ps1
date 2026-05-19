@@ -7,8 +7,8 @@ if ([string]::IsNullOrWhiteSpace($StarsectorDir)) {
 }
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$repoJar = Join-Path $repoRoot "jars\weapons-procurement.jar"
-$liveJar = Join-Path $StarsectorDir "mods\Weapons Procurement\jars\weapons-procurement.jar"
+$repoJar = Join-Path $repoRoot "jars\enhanced-trading.jar"
+$liveJar = Join-Path $StarsectorDir "mods\Enhanced Trading\jars\enhanced-trading.jar"
 $classValidator = Join-Path $PSScriptRoot "validate-jar-classes.ps1"
 
 powershell -NoProfile -ExecutionPolicy Bypass -File $classValidator -JarPath $repoJar -Label "Repo"

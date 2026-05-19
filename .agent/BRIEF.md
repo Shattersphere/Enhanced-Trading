@@ -1,16 +1,20 @@
-# Weapons Procurement Brief
+# Enhanced Trading Brief
 
 Last updated: 2026-05-19
 
 ## Current State
 
-Weapons Procurement is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market dialogs or market-backed storage dialogs.
+Enhanced Trading is a Starsector `0.98a` mod for reviewing weapon and fighter LPC stock, planning buys/sells, and confirming trades from market dialogs or market-backed storage dialogs.
 
-The primary product path is the clean `F8` popup. Cargo-cell badges now live in the standalone private `D:\Sean Mods\Weapon Badges` mod.
+The primary product path is the clean trade popup, opened with the LunaLib-configurable hotkey that defaults to `F8`. Cargo-cell badges now live in the standalone private `D:\Sean Mods\Weapon Badges` mod.
 
 The source tree is fully migrated to Gradle/Kotlin. `build.ps1` remains the normal entry point and delegates to the Gradle wrapper; LazyLib is a required dependency because it supplies the Kotlin runtime in Starsector.
 
 The item-trading popup path is solid and functional as the current baseline. Ship trading is local-only behind the `Trade: Items` / `Trade: Ships` toggle; the current 4-column by 5-row ship grid layout is the user-confirmed solid baseline to preserve if this GUI regresses.
+
+For modder handoff, `HANDOVER.md` is now the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
+
+The worktree currently contains broad in-progress runtime/UI changes around ship trading, tooltip polish, debug UI, and Weapon Badges cleanup. Treat this branch as functional but not a clean release boundary until the changed files are reviewed as a batch.
 
 ## Known-Good Source State
 
@@ -42,7 +46,7 @@ git diff --check
 
 ## Deploy Target
 
-- Live mod folder: `C:\Games\Starsector\mods\Weapons Procurement`
+- Live mod folder: `C:\Games\Starsector\mods\Enhanced Trading`
 - Deploy command: `tools/deploy-live-mod.ps1`
 - The deploy script clean-syncs repo-managed clean-package files, or stages and queues a minimized visible no-activate deploy if the live jar is locked.
 - Shared deploy/status/state/zip/process helpers live in `tools/lib/Deploy.Common.ps1`; keep `deploy-live-mod.ps1` command-line behavior stable.
@@ -55,10 +59,11 @@ git diff --check
 - The ship grid layout is a good reference baseline; the public-API ship tooltip still needs in-game visual acceptance against the vanilla ship buy/sell screen after layout polish.
 - Runtime rollback fault validation still needs in-game evidence.
 - Rollback diagnostics now emit structured `WP_STOCK_REVIEW_ROLLBACK` records; use `tools/analyze-trade-rollback-diagnostics.ps1` after a forced-failure run to verify restored cargo counts and credits.
+- Weapon Badges is standalone in `D:\Sean Mods\Weapon Badges`; do not reintroduce cargo-cell badge assets, core patching, or badge count publishing here.
 - Starsector classloading can keep stale jar/class state until restart.
 - Luna settings, data/config files, graphics, and metadata matter; jar parity alone is not sufficient for data-heavy changes.
 - Public release to `Shattersphere-Mods` must be curated. Do not mirror this private repo because it contains agent docs and local/private references.
 
 ## Next Best Step
 
-For code/runtime work, inspect `PLANS.md` and the relevant archive deep dive through `.agent/archive/INDEX.md`. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.
+For code/runtime work, inspect the short active `PLANS.md` and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.

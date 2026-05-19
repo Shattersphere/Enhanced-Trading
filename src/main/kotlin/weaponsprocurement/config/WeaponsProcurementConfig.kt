@@ -4,10 +4,14 @@ import lunalib.lunaSettings.LunaSettings
 import org.apache.log4j.Logger
 import java.util.Locale
 
+/**
+ * LunaLib settings bridge. Values are refreshed into System properties so campaign scripts,
+ * UI code, and debug hooks can read stable settings without depending on Luna call sites.
+ */
 object WeaponsProcurementConfig {
     private val LOG: Logger = Logger.getLogger(WeaponsProcurementConfig::class.java)
 
-    private const val MOD_ID = "weapons_procurement"
+    private const val MOD_ID = "enhanced_trading"
     private const val SETTING_UPDATE_INTERVAL = "wp_update_interval_seconds"
     private const val SETTING_ENABLE_DIALOG_OPTION = "wp_enable_dialog_option"
     private const val SETTING_ENABLE_SECTOR_MARKET = "wp_enable_sector_market"
@@ -19,6 +23,8 @@ object WeaponsProcurementConfig {
     private const val SETTING_DESIRED_MEDIUM_WEAPON_COUNT = "wp_desired_medium_weapon_count"
     private const val SETTING_DESIRED_LARGE_WEAPON_COUNT = "wp_desired_large_weapon_count"
     private const val SETTING_DESIRED_FIGHTER_WING_COUNT = "wp_desired_fighter_wing_count"
+    private const val SETTING_TRADE_HOTKEY = "wp_trade_hotkey"
+    private const val SETTING_ENABLE_DEBUG_UI = "wp_enable_debug_ui"
     private const val KEY_UPDATE_INTERVAL = "wp.config.updateIntervalSeconds"
     private const val KEY_DIALOG_OPTION_ENABLED = "wp.config.dialogOptionEnabled"
     private const val KEY_SECTOR_MARKET_ENABLED = "wp.config.sectorMarketEnabled"
@@ -30,6 +36,8 @@ object WeaponsProcurementConfig {
     private const val KEY_DESIRED_MEDIUM_WEAPON_COUNT = "wp.config.desiredMediumWeaponCount"
     private const val KEY_DESIRED_LARGE_WEAPON_COUNT = "wp.config.desiredLargeWeaponCount"
     private const val KEY_DESIRED_FIGHTER_WING_COUNT = "wp.config.desiredFighterWingCount"
+    private const val KEY_TRADE_HOTKEY = "wp.config.tradeHotkey"
+    private const val KEY_DEBUG_UI_ENABLED = "wp.config.debugUiEnabled"
     const val KEY_DEBUG_TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"
     const val KEY_DEBUG_SHIP_CATALOG: String = "wp.debug.shipCatalog"
     const val KEY_DEBUG_SHIP_CATALOG_VIEW: String = "wp.debug.shipCatalogView"
@@ -45,6 +53,9 @@ object WeaponsProcurementConfig {
     private const val DEFAULT_DESIRED_MEDIUM_WEAPON_COUNT = 8
     private const val DEFAULT_DESIRED_LARGE_WEAPON_COUNT = 4
     private const val DEFAULT_DESIRED_FIGHTER_WING_COUNT = 4
+    private const val DEFAULT_TRADE_HOTKEY = 66
+    private const val MIN_TRADE_HOTKEY = 1
+    private const val MAX_TRADE_HOTKEY = 255
     private const val MIN_DESIRED_WEAPON_COUNT = 0
     private const val MAX_DESIRED_WEAPON_COUNT = 999
     private const val MAX_CONFIG_LOGS = 10
@@ -63,6 +74,8 @@ object WeaponsProcurementConfig {
         var fixersMarketTagInferenceEnabled = false
         var sectorMarketPriceMultiplier = DEFAULT_SECTOR_MARKET_PRICE_MULTIPLIER
         var fixersMarketPriceMultiplier = DEFAULT_FIXERS_MARKET_PRICE_MULTIPLIER
+        var tradeHotkey = DEFAULT_TRADE_HOTKEY
+        var debugUiEnabled = false
         val desiredSmallWeaponCount: Int
         val desiredMediumWeaponCount: Int
         val desiredLargeWeaponCount: Int
@@ -96,6 +109,14 @@ object WeaponsProcurementConfig {
         if (fixersMultiplier != null) {
             fixersMarketPriceMultiplier = fixersMultiplier.toFloat()
         }
+        val debugUi = readBooleanSetting(SETTING_ENABLE_DEBUG_UI)
+        if (debugUi != null) {
+            debugUiEnabled = debugUi
+        }
+        val hotkey = readIntSetting(SETTING_TRADE_HOTKEY)
+        if (hotkey != null) {
+            tradeHotkey = hotkey
+        }
         desiredSmallWeaponCount = readDesiredWeaponCount(SETTING_DESIRED_SMALL_WEAPON_COUNT, DEFAULT_DESIRED_SMALL_WEAPON_COUNT)
         desiredMediumWeaponCount = readDesiredWeaponCount(SETTING_DESIRED_MEDIUM_WEAPON_COUNT, DEFAULT_DESIRED_MEDIUM_WEAPON_COUNT)
         desiredLargeWeaponCount = readDesiredWeaponCount(SETTING_DESIRED_LARGE_WEAPON_COUNT, DEFAULT_DESIRED_LARGE_WEAPON_COUNT)
@@ -105,6 +126,7 @@ object WeaponsProcurementConfig {
         effective = clamp(effective, MIN_UPDATE_INTERVAL_SEC, MAX_UPDATE_INTERVAL_SEC)
         sectorMarketPriceMultiplier = clamp(sectorMarketPriceMultiplier, MIN_REMOTE_MARKET_PRICE_MULTIPLIER, MAX_REMOTE_MARKET_PRICE_MULTIPLIER)
         fixersMarketPriceMultiplier = clamp(fixersMarketPriceMultiplier, MIN_REMOTE_MARKET_PRICE_MULTIPLIER, MAX_REMOTE_MARKET_PRICE_MULTIPLIER)
+        tradeHotkey = clamp(tradeHotkey, MIN_TRADE_HOTKEY, MAX_TRADE_HOTKEY)
         System.setProperty(KEY_UPDATE_INTERVAL, effective.toString())
         System.setProperty(KEY_DIALOG_OPTION_ENABLED, dialogOptionEnabled.toString())
         System.setProperty(KEY_SECTOR_MARKET_ENABLED, sectorMarketEnabled.toString())
@@ -116,6 +138,8 @@ object WeaponsProcurementConfig {
         System.setProperty(KEY_DESIRED_MEDIUM_WEAPON_COUNT, desiredMediumWeaponCount.toString())
         System.setProperty(KEY_DESIRED_LARGE_WEAPON_COUNT, desiredLargeWeaponCount.toString())
         System.setProperty(KEY_DESIRED_FIGHTER_WING_COUNT, desiredFighterWingCount.toString())
+        System.setProperty(KEY_TRADE_HOTKEY, tradeHotkey.toString())
+        System.setProperty(KEY_DEBUG_UI_ENABLED, debugUiEnabled.toString())
         System.setProperty(KEY_DEBUG_TRADE_FAILURE_STEP, debugTradeFailureStep)
         if (configLogs < MAX_CONFIG_LOGS) {
             configLogs++
@@ -131,6 +155,8 @@ object WeaponsProcurementConfig {
                     " desiredMediumWeaponCount=$desiredMediumWeaponCount" +
                     " desiredLargeWeaponCount=$desiredLargeWeaponCount" +
                     " desiredFighterWingCount=$desiredFighterWingCount" +
+                    " tradeHotkey=$tradeHotkey" +
+                    " debugUiEnabled=$debugUiEnabled" +
                     " debugTradeFailureStep=$debugTradeFailureStep",
             )
         }
@@ -190,6 +216,14 @@ object WeaponsProcurementConfig {
         System.getProperty(KEY_DEBUG_SHIP_CATALOG_VIEW, "false").toBoolean()
 
     @JvmStatic
+    fun isDebugUiEnabled(): Boolean =
+        readBooleanSetting(SETTING_ENABLE_DEBUG_UI) ?: System.getProperty(KEY_DEBUG_UI_ENABLED, "false").toBoolean()
+
+    @JvmStatic
+    fun tradeHotkeyKeyCode(): Int =
+        clamp(readIntSetting(SETTING_TRADE_HOTKEY) ?: readPublishedInt(KEY_TRADE_HOTKEY, DEFAULT_TRADE_HOTKEY), MIN_TRADE_HOTKEY, MAX_TRADE_HOTKEY)
+
+    @JvmStatic
     fun debugTradeFailureStep(): String = normalizeDebugTradeFailureStep(System.getProperty(KEY_DEBUG_TRADE_FAILURE_STEP, ""))
 
     private fun readDesiredWeaponCount(settingId: String, defaultValue: Int): Int {
@@ -237,6 +271,15 @@ object WeaponsProcurementConfig {
         }
     }
 
+    private fun readIntSetting(settingId: String): Int? {
+        return try {
+            LunaSettings.getInt(MOD_ID, settingId)
+        } catch (t: RuntimeException) {
+            logConfigReadError(settingId, t)
+            null
+        }
+    }
+
     private fun logConfigReadError(settingId: String, t: Throwable) {
         if (!configErrorLogged) {
             configErrorLogged = true
@@ -245,14 +288,14 @@ object WeaponsProcurementConfig {
     }
 
     private fun readPublishedDesiredWeaponCount(propertyKey: String, fallback: Int): Int {
+        return clamp(readPublishedInt(propertyKey, fallback), MIN_DESIRED_WEAPON_COUNT, MAX_DESIRED_WEAPON_COUNT)
+    }
+
+    private fun readPublishedInt(propertyKey: String, fallback: Int): Int {
         return try {
-            clamp(
-                System.getProperty(propertyKey, fallback.toString()).toInt(),
-                MIN_DESIRED_WEAPON_COUNT,
-                MAX_DESIRED_WEAPON_COUNT,
-            )
+            System.getProperty(propertyKey, fallback.toString()).toInt()
         } catch (_: RuntimeException) {
-            clamp(fallback, MIN_DESIRED_WEAPON_COUNT, MAX_DESIRED_WEAPON_COUNT)
+            fallback
         }
     }
 

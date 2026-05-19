@@ -62,7 +62,7 @@ class StockReviewConfig private constructor(
 
     companion object {
         private val LOG: Logger = Logger.getLogger(StockReviewConfig::class.java)
-        private const val CONFIG_PATH = "data/config/weapons_procurement_stock.json"
+        private const val CONFIG_PATH = "data/config/enhanced_trading_stock.json"
 
         private const val DEFAULT_SMALL_WEAPON_COUNT = 16
         private const val DEFAULT_MEDIUM_WEAPON_COUNT = 8

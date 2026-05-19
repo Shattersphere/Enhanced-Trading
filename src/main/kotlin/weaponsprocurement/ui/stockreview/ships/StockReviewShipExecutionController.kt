@@ -9,6 +9,10 @@ import com.fs.starfarer.api.campaign.econ.SubmarketAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import org.apache.log4j.Logger
 
+/**
+ * Confirms queued exact-member ship trades. The FleetMember id must still exist in the
+ * source/player list at confirm time or the trade fails cleanly and leaves the plan visible.
+ */
 class StockReviewShipExecutionController(
     private val pendingTrades: StockReviewPendingShipTrades,
     private val host: Host,

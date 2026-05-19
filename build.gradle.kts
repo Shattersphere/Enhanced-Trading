@@ -143,7 +143,7 @@ sourceSets {
 
 tasks.register("validateLocalBuildEnvironment") {
     group = "verification"
-    description = "Checks Starsector and dependency mod paths used for local Weapons Procurement builds."
+    description = "Checks Starsector and dependency mod paths used for local Enhanced Trading builds."
 
     doLast {
         println("Starsector directory: ${starsectorDirectory.absolutePath}")
@@ -187,13 +187,13 @@ java.targetCompatibility = JavaVersion.VERSION_17
 
 tasks.named<Jar>("jar") {
     dependsOn("validateLocalBuildEnvironment")
-    archiveFileName.set("weapons-procurement.jar")
+    archiveFileName.set("enhanced-trading.jar")
     destinationDirectory.set(layout.projectDirectory.dir("jars"))
     from(sourceSets["main"].output)
 }
 
 tasks.register("buildMod") {
     group = "build"
-    description = "Builds the public-safe clean Weapons Procurement jar."
+    description = "Builds the public-safe clean Enhanced Trading jar."
     dependsOn("jar")
 }

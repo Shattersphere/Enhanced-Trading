@@ -1,11 +1,11 @@
 {
-    "id": "weapons_procurement",
-    "name": "Weapons Procurement",
-    "author": "seanra94",
+    "id": "enhanced_trading",
+    "name": "Enhanced Trading",
+    "author": "seanra94, spinloki",
     "version": { "major": "0", "minor": "2", "patch": "0" },
-    "description": "Adds a market stock review and trade-planning popup for buying, selling, and tracking weapon and fighter LPC stock.",
+    "description": "Adds compact market trade screens for buying, selling, and tracking weapons, fighter LPCs, and local ships.",
     "gameVersion": "0.98a",
-    "jars": ["jars/weapons-procurement.jar"],
+    "jars": ["jars/enhanced-trading.jar"],
     "modPlugin": "weaponsprocurement.plugins.WeaponsProcurementModPlugin",
     "dependencies": [
         { "id": "lw_lazylib", "name": "LazyLib" },

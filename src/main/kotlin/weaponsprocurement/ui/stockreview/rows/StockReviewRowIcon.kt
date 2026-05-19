@@ -17,6 +17,7 @@ class StockReviewRowIcon private constructor(
 
         @JvmStatic
         fun weapon(record: WeaponStockRecord?): StockReviewRowIcon? {
+            record?.debugProfile?.iconSpriteName?.let { return StockReviewRowIcon(it) }
             if (record == null || record.spec == null) return null
             return weapon(
                 StockReviewWeaponIconPlugin.spriteName(record.spec),
@@ -26,6 +27,7 @@ class StockReviewRowIcon private constructor(
 
         @JvmStatic
         fun wing(record: WeaponStockRecord?): StockReviewRowIcon? {
+            record?.debugProfile?.iconSpriteName?.let { return StockReviewRowIcon(it) }
             val spriteName = record?.wingSpec?.variant?.hullSpec?.spriteName
             val resolvedSpriteName = spriteName?.takeIf { WimGuiTooltip.hasText(it) } ?: return null
             return StockReviewRowIcon(resolvedSpriteName)

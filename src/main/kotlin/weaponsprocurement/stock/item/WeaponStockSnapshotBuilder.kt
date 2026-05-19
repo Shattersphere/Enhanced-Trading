@@ -16,6 +16,10 @@ import java.util.Comparator
 import java.util.EnumMap
 import java.util.HashSet
 
+/**
+ * Builds the item-trade read model from owned counts, current source stock, config ignores,
+ * and desired thresholds. This class does not mutate cargo; execution is handled elsewhere.
+ */
 class WeaponStockSnapshotBuilder {
     private val inventoryCountService = InventoryCountService()
     private val marketStockService = MarketStockService()

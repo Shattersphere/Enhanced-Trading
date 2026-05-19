@@ -18,47 +18,31 @@ object StockReviewItemInfoRows {
         state: StockReviewState?,
         layout: StockReviewRowLayout,
     ) {
+        val basicRows = fields(record, layout, StockReviewItemInfoFields.basic(record))
         val basicExpanded = isInfoSectionExpanded(state, StockReviewItemDetailHeadingRows.basicInfoSectionKey(record))
         rows.add(StockReviewItemDetailHeadingRows.basicInfo(record, basicExpanded, layout))
         if (basicExpanded) {
-            addBasicInfo(rows, record, layout)
+            rows.addAll(basicRows)
         }
-        if (record.isWing()) {
+
+        val advancedRows = fields(record, layout, StockReviewItemInfoFields.advanced(record))
+        if (advancedRows.isEmpty()) {
             return
         }
         val advancedExpanded = isInfoSectionExpanded(state, StockReviewItemDetailHeadingRows.advancedInfoSectionKey(record))
         rows.add(StockReviewItemDetailHeadingRows.advancedInfo(record, advancedExpanded, layout))
         if (advancedExpanded) {
-            addAdvancedInfo(rows, record, layout)
+            rows.addAll(advancedRows)
         }
     }
-
-    private fun addBasicInfo(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        record: WeaponStockRecord,
-        layout: StockReviewRowLayout,
-    ) = addFields(rows, record, layout, StockReviewItemInfoFields.basic(record))
-
-    private fun addAdvancedInfo(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
-        record: WeaponStockRecord,
-        layout: StockReviewRowLayout,
-    ) = addFields(rows, record, layout, StockReviewItemInfoFields.advanced(record))
 
     private fun isInfoSectionExpanded(state: StockReviewState?, sectionKey: String): Boolean =
         state == null || !state.isItemExpanded(sectionKey)
 
-    private fun addFields(
-        rows: MutableList<WimGuiListRow<StockReviewAction>>,
+    private fun fields(
         record: WeaponStockRecord,
         layout: StockReviewRowLayout,
         fields: List<StockReviewItemInfoField>,
-    ) {
-        for (field in fields) {
-            val row = field.row(record, layout)
-            if (row != null) {
-                rows.add(row)
-            }
-        }
-    }
+    ): List<WimGuiListRow<StockReviewAction>> =
+        fields.mapNotNull { it.row(record, layout) }
 }

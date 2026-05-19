@@ -7,6 +7,10 @@ import weaponsprocurement.stock.item.SubmarketWeaponStock
 import weaponsprocurement.stock.market.MarketStockService
 import java.util.HashMap
 
+/**
+ * Collects currently visible legal market cargo as Fixer's live/reference evidence.
+ * This index supplies metadata and price/cargo references; it does not create virtual stock.
+ */
 class ObservedStockIndex {
     private val marketStockService = MarketStockService()
 

@@ -1,166 +1,114 @@
-# Weapons Procurement Plans
+# Enhanced Trading Active Plan
 
-## Current Status
+This file is active work only. Completed migrations, old public-release cleanup notes, and historical investigations belong in `.agent/archive/`.
 
-The repo is in release-prep shape for the clean popup path:
+## Current Baseline
 
-- `F8` stock-review popup works from market dialogs and market-backed storage dialogs.
-- Optional dialog entry exists and defaults off.
-- Weapons and fighter LPCs share the same stock/review/trade flow.
-- Local, Sector Market, and Fixer's Market source modes exist.
-- Sector Market drains real remote cargo; Fixer's Market is virtual.
-- Fixer's Market uses runtime theoretical sale capability plus rarity estimates, with observed live/persistent stock used for reference prices and correction.
-- Cargo-cell badges have moved to the standalone private `D:\Sean Mods\Weapon Badges` mod.
-- Gradle/Kotlin migration and AGC-style package ownership split are complete; `build.ps1` remains the compatibility entry point.
-- Packaging, deploy, live-jar validation, doc-link validation, and a manual-only GitHub sanity workflow exist.
+- `Trade: Items` is the stable product baseline for weapon and fighter LPC stock review, planning, review, and confirmation.
+- `Trade: Ships` is a local-only first implementation. Preserve the user-confirmed 4-column by 5-row ship-grid layout unless a later design pass explicitly changes it.
+- Source modes for item trading are intentionally different: Local mutates the current market, Sector Market drains real remote cargo, and Fixer's Market is virtual catalog stock.
+- Ship trading is not wired into Sector Market or Fixer's Market.
+- Cargo-cell weapon/LPC badges live in the standalone private `D:\Sean Mods\Weapon Badges` repo. Do not reintroduce badge helpers, generated badge sprites, count bridges, or `CargoStackView` patching tools here.
+- The worktree may contain broad in-progress UI, tooltip, debug, data, graphics, and jar changes. Treat it as functional but not release-clean until the current diff is reviewed and validated as a batch.
 
 ## Active Work
 
-### Public Release Separation
+### 1. Stabilize Ship And Tooltip UI Polish
 
-Prepare the private repo so a curated public `Shattersphere-Mods` repo/package can contain the procurement GUI with no private-doc traces or standalone badge-mod material.
+Status: active
 
-Completed:
+Scope:
 
-- Badge-only source, assets, patcher tools, build flags, and deploy wrappers moved out to the standalone `D:\Sean Mods\Weapon Badges` mod.
-- The plugin no longer imports or directly registers badge updater classes.
-- Badge Luna/settings publication is no longer part of Weapons Procurement.
-- `tools/export-public.ps1` creates a curated public tree and runs a leak scan.
-- Public README/PACKAGING docs describe only the procurement GUI path.
-- `tools/deploy-live-mod.ps1` stages and queues deploys when the live jar is locked.
-- Badge-class rejection checks remain as guardrails against accidentally reintroducing old badge ownership.
+- Ship grid density, paging, hull-class text filtering, and filter modal layout.
+- Ship, weapon, and wing tooltip sizing, truncation, stat sourcing, and debug stress records.
+- Debug UI visibility behind the LunaLib debug toggle.
 
-Acceptance:
+Constraints:
 
-- Public output builds the procurement GUI.
-- Public output contains no `AGENTS.md`, `.agent/`, `HANDOVER.md`, `PLANS.md`, private archives, local machine paths, badge sprites, patcher tools, bytecode patch docs, or badge settings.
-- Weapons Procurement contains no badge helper classes, count-updater scripts, generated badge sprites, or `CargoStackView` patching tools.
+- Keep ship trading local-only.
+- Do not change item trade behavior while polishing ship UI.
+- Do not use obfuscated vanilla UI classes directly; use public APIs and custom-panel approximations.
+- Tooltips should stay within the screen and avoid premature mid-line truncation.
 
-Still open:
+Done when:
 
-- Decide whether the public repo should commit the built jar or build jars only for release packages.
+- The ship grid still uses the full available trade area cleanly.
+- Weapon, wing, and ship tooltips have in-game visual acceptance at common UI scales.
+- Debug weapon, wing, and ship stress records exercise worst-case content without clipping controls.
 
-### Kotlin Migration
+### 2. Runtime Rollback Fault Validation
 
-Migrate the repo to Kotlin and a Gradle build in reviewable chunks while preserving the current public mod identity, jar path, config ids, and trade behavior.
+Status: active, manual-runtime evidence needed
 
-Completed:
+Diagnostic support emits structured `WP_STOCK_REVIEW_ROLLBACK` log records and includes `tools/analyze-trade-rollback-diagnostics.ps1` for pass/fail summarization.
 
-- Gradle/Kotlin wrapper foundation added while legacy Java still compiles.
-- `build.ps1` delegates to Gradle for compatibility with existing commands.
-- LazyLib is declared as a required dependency for the Kotlin runtime.
-- `tools/validate-kotlin-migration.ps1` validates build files, dependency declarations, Java migration status, clean jar badge-class exclusion, and public-export boundaries.
-- Core enums/value helpers and low-risk stock/Fixer catalog helpers converted to Kotlin while preserving the `weaponsprocurement.core` Java interop surface.
-- Inventory counts, market stock collection, and market blacklist services converted to Kotlin.
-- Global remote stock service and persistent Fixer observed catalog storage converted to Kotlin.
-- Stock review config loading and stock snapshot assembly converted to Kotlin.
-- Stock record/stat label helpers converted to Kotlin.
-- Pending trade state, line quote, portfolio quote, and seller allocation value classes converted to Kotlin.
-- Quote book and trade context converted to Kotlin.
-- Trade validation, source lookup, and transaction-reporting helpers converted to Kotlin.
-- Purchase service and executor mutation/rollback code converted to Kotlin.
-- Shared WimGui and stock-review UI primitive/value classes converted to Kotlin.
-- Stock-review source/filter/mode state and player-cargo helper code converted to Kotlin.
-- WimGui style, modal input, button polling, list layout, and campaign dialog host helpers converted to Kotlin.
-- Stock-review action model, row cells/list rows, and height-aware scroll slicing converted to Kotlin.
-- Stock-review expansion/state and trade-warning tracking converted to Kotlin.
-- WimGui modal panel base class plus list row/modal-list renderers converted to Kotlin.
-- Stock-review trade planner, row-cell helper, and trade controller converted to Kotlin.
-- Stock-review footer, summary, and review-list model converted to Kotlin.
-- Stock-review tooltip copy helpers and color-debug row model converted to Kotlin.
-- Stock-review style constants and modal list style specs converted to Kotlin.
-- Shared WimGui text wrapping, control rendering helpers, and button-style validator converted for Kotlin source.
-- Stock-review list row factories, expanded item-info rows, and main list model converted to Kotlin.
-- Stock-review weapon icon renderer and debug color store converted to Kotlin.
-- Stock-review UI action controller and trade execution controller converted to Kotlin.
-- Stock-review modal panel plugin and main renderer converted to Kotlin.
-- Stock-review hotkey script, Fixer catalog updater, stable mod plugin entrypoint, and public-export plugin stripping converted for Kotlin.
-- Luna/settings publication bridge converted to Kotlin while preserving Java-facing static config API.
-- Vanilla-style stock-review item tooltip converted to Kotlin.
-- Dialog rule-command entrypoint converted to Kotlin while preserving the `WP_OpenDialog` rules class name.
-- Final no-Java-source migration gate passes for the private repo and public export.
-- Config ownership split into `weaponsprocurement.config`.
-- Runtime lifecycle scripts split into `weaponsprocurement.lifecycle`.
-- Former `core` package split into `weaponsprocurement.stock` and `weaponsprocurement.trade`.
-- Stock ownership split into `weaponsprocurement.stock.item`, `stock.inventory`, `stock.market`, and `stock.fixer`.
-- Trade ownership split into `weaponsprocurement.trade.plan`, `trade.execution`, and `trade.quote`.
-- Shared WimGui primitives moved under `weaponsprocurement.ui`.
-- Stock review UI feature files moved under `weaponsprocurement.ui.stockreview` and split into `actions`, `state`, `rows`, `tooltips`, `rendering`, and `trade`.
+Manual validation matrix:
 
-Still open:
+- local legal buy;
+- local sell;
+- local black-market buy/sell if available;
+- Sector Market buy;
+- Fixer's Market buy;
+- mixed sell-then-buy plan.
 
-- No source-structure blocker remains for the migration. Future cleanup should be tied to concrete feature or bug work.
+Run one forced-failure step at a time with `wp.debug.failTradeStep` set to:
 
-### Runtime Rollback Validation
+- `after-source-removal`
+- `after-player-cargo-remove`
+- `after-player-cargo-add`
+- `after-target-cargo-add`
+- `after-credit-mutation`
 
-Validate the trade rollback fault hook in game.
+Then analyze logs:
 
-Diagnostic support now emits structured `WP_STOCK_REVIEW_ROLLBACK` log records and includes `tools/analyze-trade-rollback-diagnostics.ps1` for pass/fail summarization.
+```powershell
+$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass
+```
 
-Steps:
+Reset the setting to unset, empty, or `none` before normal play or packaging.
 
-1. Start Starsector with JVM property `wp.debug.failTradeStep` set to one failure step.
-2. Open a valid market or storage dialog.
-3. Test each relevant trade mode:
-   - local legal buy;
-   - local sell;
-   - local black-market buy/sell if available;
-   - Sector Market buy;
-   - Fixer's Market buy;
-   - mixed sell-then-buy plan.
-4. Confirm player credits, player cargo, and touched market cargo return to pre-confirm values after forced failure.
-5. Repeat for:
-   - `after-source-removal`;
-   - `after-player-cargo-remove`;
-   - `after-player-cargo-add`;
-   - `after-target-cargo-add`;
-   - `after-credit-mutation`.
-6. Run:
+### 3. Curated Public Export
 
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass
-   ```
+Status: deferred until explicitly requested
 
-7. Reset the setting to `none`.
+Use `.agent/PUBLIC_RELEASE.md`. Do not mirror this private repo to a public organization.
 
-Acceptance:
+Open release questions:
 
-- No GUI crash.
-- Controlled failure message appears.
-- WP-touched item counts and credits are restored.
-- Analyzer reports passing `WP_STOCK_REVIEW_ROLLBACK` evidence for each forced failure step.
-- Successful trades still work after resetting the debug setting.
+- Whether the public repo should commit `jars/enhanced-trading.jar` or build jars only for packages.
+- Whether the current ship-trading work is release-ready or should remain private until more runtime polish is complete.
 
-## Deferred Until Runtime Evidence
+### 4. Remote Ship Trading
 
-- Tune row widths only after seeing clipping at real UI scales or with long modded names.
-- Add wing-specific filters only if wing rows are noisy in real saves.
-- Improve failure messages for concrete observed cases such as no valid buyer, illegal market, access restriction, commission/faction restrictions, or modded submarket behavior.
-- Add extra black-market suspicion/reputation/economy simulation only if runtime testing proves vanilla/modded transaction listeners are not firing through the current callback path.
-- Narrow popup reopen state payload only if stale warning/scroll/mode state becomes a real bug.
+Status: deferred new feature
 
-## Avoid Unless Reopened Deliberately
+Do not add Sector Market or Fixer's Market ship trading as part of UI polish. Remote ship trading needs a separate design for ship identity, source draining, pricing, virtual availability, and failure handling.
 
-- Do not reintroduce badge helper, count bridge, generated badge sprite, or `CargoStackView` patching code to Weapons Procurement. That ownership belongs in `D:\Sean Mods\Weapon Badges`.
-- Do not reintroduce seller-detail rows or source-specific local-buy actions without a deliberate UI design pass.
-- Do not treat build/static validation as proof that custom Starsector UI behavior works in game.
+## Retired Or Completed
+
+- Kotlin/Gradle migration: complete. Use `tools/validate-kotlin-migration.ps1` as the guard.
+- UI primitive and stock-review package ownership split: complete. See `HANDOVER.md` and `.agent/ARCHITECTURE_MAP.md`.
+- Badge split: active ownership is now standalone in `D:\Sean Mods\Weapon Badges`. Historical context is archived in `.agent/archive/deep-dives/patched-badges.md`, but it is not active implementation guidance for this repo.
+- Source-mode remediation, rollback hardening, and Fixer catalog evolution: see `.agent/archive/history/2026-05-trade-source-remediation.md` and `.agent/archive/deep-dives/trade-and-sources.md`.
 
 ## Validation Commands
 
-For code or asset changes:
+Docs-only:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs
 git diff --check
 ```
 
-For docs-only changes:
+Runtime/source:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
+$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo
 git diff --check
 ```

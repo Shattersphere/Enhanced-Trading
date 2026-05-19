@@ -1,7 +1,7 @@
 id,trigger,conditions,script,text,options,notes
-# Optional market-dialog entry point. F8 remains available regardless of this Luna setting.
+# Optional market-dialog entry point. The LunaLib-configurable trade popup hotkey remains available regardless of this setting.
 wp_marketOpenWeaponProcurement,PopulateOptions,"$hasMarket
 $menuState == main
 $tradeMode != NONE
-WP_OpenDialog canShow",,,"11:wp_openWeaponProcurement:Open ""Weapon Procurement""",
+WP_OpenDialog canShow",,,"11:wp_openWeaponProcurement:Open ""Enhanced Trading""",
 wp_marketOpenWeaponProcurementSel,DialogOptionSelected,$option == wp_openWeaponProcurement,WP_OpenDialog open,,,

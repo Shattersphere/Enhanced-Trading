@@ -21,6 +21,10 @@ import java.util.Collections
 import java.util.HashMap
 import java.util.HashSet
 
+/**
+ * Builds non-local item sources. Sector Market keeps real cargo identities for draining,
+ * while Fixer's Market emits virtual stock plus catalog/rarity metadata.
+ */
 class GlobalWeaponMarketService {
     private val marketStockService = MarketStockService()
     private val observedStockIndex = ObservedStockIndex()

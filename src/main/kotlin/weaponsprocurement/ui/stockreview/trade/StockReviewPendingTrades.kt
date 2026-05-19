@@ -5,6 +5,10 @@ package weaponsprocurement.ui.stockreview.trade
 import java.util.ArrayList
 import java.util.Collections
 
+/**
+ * Mutable pending item-trade plan used by the popup. The revision counter is part of render
+ * cache invalidation, so every state-changing method must mark the plan changed.
+ */
 class StockReviewPendingTrades {
     private val trades = ArrayList<StockReviewPendingTrade>()
     private val view: List<StockReviewPendingTrade> = Collections.unmodifiableList(trades)

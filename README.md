@@ -1,6 +1,6 @@
-# Weapons Procurement
+# Enhanced Trading
 
-Weapons Procurement adds a stock review and trade-planning popup for Starsector market dialogs and market-backed storage dialogs.
+Enhanced Trading adds a stock review and trade-planning popup for Starsector market dialogs and market-backed storage dialogs.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ Weapons Procurement adds a stock review and trade-planning popup for Starsector 
 ## Main Workflow (Clean Path)
 
 1. Open a market interaction dialog, or a storage interaction that is backed by the current market.
-2. Press `F8` to open the popup.
+2. Press the LunaLib-configurable trade popup hotkey (default `F8`) to open or close the popup.
 3. Queue buys/sells per item.
 4. Open `Review Trades`.
 5. Confirm trades.
@@ -29,6 +29,7 @@ Availability of source modes is controlled by Luna settings.
 ## Key Settings (LunaLib)
 
 - `Enable market dialogue option`
+- `Trade popup hotkey`
 - `Enable Sector Market`
 - `Enable Fixer's Market`
 - `Legacy Fixer catalog inference flag` (compatibility only; Fixer's Market now uses safe runtime cataloging by default)

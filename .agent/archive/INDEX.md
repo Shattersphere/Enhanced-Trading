@@ -1,6 +1,8 @@
-# Archive Index
+# Weapons Procurement Archive Index
 
-Archives preserve useful detail that should remain searchable but should not be startup context. Search this file first, then open only the relevant deep dive.
+Archives preserve useful detail that should remain searchable but should not be startup context. Read current docs first: `.agent/BRIEF.md`, `HANDOVER.md`, `.agent/ARCHITECTURE_MAP.md`, and `PLANS.md`.
+
+Open archive files selectively. Several files are historical snapshots from before the standalone `D:\Sean Mods\Weapon Badges` split and before ship trading was added; use their status and notes before treating them as guidance.
 
 ## Deep Dives
 
@@ -9,8 +11,8 @@ Archives preserve useful detail that should remain searchable but should not be 
 | `.agent/archive/deep-dives/starsector-ui.md` | Starsector UI / classloader | active-reference | Changing stock-review layout, row sizing, `WimGui*`, buttons, scrolling, text fitting, helper extraction, or live-jar class validation. | `WimGui`, `buttonPressed`, `indent`, `a02e507`, `NoClassDefFoundError`, `validate-live-gui-classes` |
 | `.agent/archive/deep-dives/vanilla-weapon-tooltip-bytecode.md` | Starsector UI / bytecode | active-reference | Attempting to match vanilla weapon hover tooltips, cargo-cell tooltip behavior, weapon row icons, or codex weapon tooltip layout. | `CargoDataGridView`, `CargoTooltipFactory`, `StandardTooltipV2`, `TooltipLocation.RIGHT`, `StockReviewWeaponIconPlugin`, `codex` |
 | `.agent/archive/deep-dives/trade-and-sources.md` | Trade/source behavior | active-reference | Changing Local/Sector/Fixer sources, Fixer catalog inference, ship catalog prototypes, pending trades, quotes, tariffs, cargo mutation, transaction callbacks, or market blacklists. | `Sector Market`, `Fixer's Market`, `TheoreticalSaleIndex`, `ObservedStockIndex`, `RarityClassifier`, `TheoreticalShipSaleIndex`, `ObservedShipStockIndex`, `FactionAPI`, `StockPurchaseExecutor`, `StockReviewQuoteBook`, `W:`, `F:` |
-| `.agent/archive/deep-dives/patched-badges.md` | Historical patched badge path | historical | Investigating pre-split badge design or migrating context into the standalone `D:\Sean Mods\Weapon Badges` repo. | `CargoStackView`, `starfarer_obf.jar`, `WeaponsProcurementBadgeHelper`, `wp.private.patchedBadgesEnabled`, `wp.counts.ready`, `javap`, `bytecode` |
-| `.agent/archive/deep-dives/runtime-validation.md` | Runtime/release validation | active-reference | Preparing manual in-game validation, rollback fault checks, release validation, or clean deploy troubleshooting. | `deploy-live-mod`, `queued deploy`, `rollback`, `wp.debug.failTradeStep` |
+| `.agent/archive/deep-dives/patched-badges.md` | Historical patched badge path | retired/historical | Understanding why badge ownership was removed from Weapons Procurement, or migrating old context into the standalone `D:\Sean Mods\Weapon Badges` repo. Do not use it to add badge code here. | `CargoStackView`, `starfarer_obf.jar`, `WeaponsProcurementBadgeHelper`, `wp.private.patchedBadgesEnabled`, `wp.counts.ready`, `javap`, `bytecode` |
+| `.agent/archive/deep-dives/runtime-validation.md` | Runtime/release validation | active-reference with retired badge notes | Preparing manual in-game validation, rollback fault checks, release validation, or clean deploy troubleshooting. Badge validation sections are historical only. | `deploy-live-mod`, `queued deploy`, `rollback`, `wp.debug.failTradeStep` |
 
 ## History
 
@@ -19,7 +21,7 @@ Archives preserve useful detail that should remain searchable but should not be 
 | `.agent/archive/history/2026-05-gui-framework-migration.md` | GUI migration history | historical | Investigating why the popup uses the current `WimGui*` custom-panel/list architecture or why a helper/validator exists. | `WimGui`, `ACG`, `StockReviewRenderer`, `NoClassDefFoundError`, `modal list` |
 | `.agent/archive/history/2026-05-trade-source-remediation.md` | Trade/source remediation history | historical | Investigating completed review-agent tasks, source-mode evolution, rollback hardening, or trade execution boundaries. | `rollback`, `Sector Market`, `Fixer's Market`, `perItem`, `BUY_FROM_SUBMARKET`, `TradeMoney` |
 | `.agent/archive/history/2026-05-product-and-validation-history.md` | Product/release history | historical | Investigating clean-vs-patched product boundary, release validation posture, or why badge approaches are avoided. | `clean popup`, `patched badges`, `CargoStackView`, `late over-icon`, `Sanity`, `deploy-live-mod` |
-| `.agent/archive/history/2026-05-18-agent-takeover-handover.md` | Agent takeover handover | historical snapshot | A new agent needs point-in-time project context beyond the living handover, especially after Kotlin migration, Fixer catalog work, UI cleanup, or private badge changes. | `takeover`, `Kotlin migration`, `stock review`, `Fixer`, `Sector Market`, `patched badges`, `public release`, `ship catalog debug` |
+| `.agent/archive/history/2026-05-18-agent-takeover-handover.md` | Agent takeover handover | historical snapshot/stale in places | A new agent needs May 18 point-in-time context. Badge/private-build and pre-ship-trading sections are superseded by current `HANDOVER.md`, `.agent/ARCHITECTURE_MAP.md`, and `PLANS.md`. | `takeover`, `Kotlin migration`, `stock review`, `Fixer`, `Sector Market`, `patched badges`, `public release`, `ship catalog debug` |
 
 ## Retired Plans
 

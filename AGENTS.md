@@ -1,13 +1,13 @@
-# Weapons Procurement Agent Guide
+# Enhanced Trading Agent Guide
 
-Repo-local instructions for Weapons Procurement. These override the workspace-level `D:\Sean Mods\AGENTS.md` where more specific.
+Repo-local instructions for Enhanced Trading. These override the workspace-level `D:\Sean Mods\AGENTS.md` where more specific.
 
 ## Project Root
 
 - Repo: `D:\Sean Mods\Enhanced Trading`
 - Game: Starsector `0.98a`
-- Live clean-package target: `C:\Games\Starsector\mods\Weapons Procurement`
-- Runtime jar: `jars/weapons-procurement.jar`
+- Live clean-package target: `C:\Games\Starsector\mods\Enhanced Trading`
+- Runtime jar: `jars/enhanced-trading.jar`
 - Main plugin: `weaponsprocurement.plugins.WeaponsProcurementModPlugin`
 - Required dependencies: LazyLib and LunaLib
 
@@ -87,7 +87,7 @@ Do not read every archive file at session start. Search first, then open only th
   Read before trying to match or reuse vanilla cargo/refit weapon hover tooltips.
 - Trade planning, source modes, quote semantics, and transaction side effects: `.agent/archive/deep-dives/trade-and-sources.md`.
   Read before changing Local/Sector/Fixer behavior, pending trades, tariffs, source allocation, or cargo mutation.
-- Optional cargo-cell badges now live in the standalone `D:\Sean Mods\Weapon Badges` repo. Do not add badge helper, count bridge, or bytecode patcher code back to Weapons Procurement.
+- Optional cargo-cell badges now live in the standalone `D:\Sean Mods\Weapon Badges` repo. Do not add badge helper, count bridge, or bytecode patcher code back to Enhanced Trading.
 - Runtime and release validation procedures: `.agent/archive/deep-dives/runtime-validation.md`.
   Read before release validation, manual in-game testing, rollback fault tests, or live deploy troubleshooting.
 - Public release/export boundary: `.agent/PUBLIC_RELEASE.md`.

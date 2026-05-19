@@ -5,13 +5,12 @@ import weaponsprocurement.ui.WimGuiModalLayout
 import weaponsprocurement.ui.WimGuiModalListSpec
 import weaponsprocurement.ui.WimGuiStyle
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
+import weaponsprocurement.config.WeaponsProcurementConfig
 import com.fs.starfarer.api.Global
 import java.awt.Color
 
 class StockReviewStyle private constructor() {
     companion object {
-        const val SHOW_WIDTH_TEST_ROWS = true
-
         private const val FALLBACK_WIDTH = 1180f
         private const val FALLBACK_HEIGHT = 640f
         private const val MIN_FULLSCREEN_WIDTH = 900f
@@ -46,7 +45,7 @@ class StockReviewStyle private constructor() {
         @JvmField var REVIEW_WIDTH = compactWidth(REVIEW_TARGET_WIDTH)
         @JvmField var REVIEW_HEIGHT = compactHeight(REVIEW_TARGET_HEIGHT)
         @JvmField var FILTER_WIDTH = compactWidth(FILTER_TARGET_WIDTH)
-        const val DEBUG_VALUE_WIDTH = 430f
+        const val DEBUG_VALUE_WIDTH = 390f
         const val DEBUG_SAMPLE_WIDTH = 130f
         const val DEBUG_DELTA_BUTTON_WIDTH = 48f
         const val ACTION_BUTTON_HEIGHT = 22f
@@ -76,6 +75,9 @@ class StockReviewStyle private constructor() {
         const val RESET_ALL_BUTTON_WIDTH = 150f
         const val BUTTON_POLL_FRAMES_AFTER_MOUSE_EVENT = 3
         const val REFRESH_VANILLA_CORE_AFTER_PURCHASE = false
+
+        @JvmStatic
+        fun showDebugUi(): Boolean = WeaponsProcurementConfig.isDebugUiEnabled()
 
         @JvmField var MODAL = WimGuiModalLayout(WIDTH, HEIGHT, PAD, PAD, HEADER_HEIGHT + SMALL_PAD + ACTION_ROW_HEIGHT, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)
         @JvmField var REVIEW_MODAL = WimGuiModalLayout(REVIEW_WIDTH, REVIEW_HEIGHT, PAD, PAD, 0f, FOOTER_HEIGHT, ROW_HEIGHT, ROW_GAP, SMALL_PAD)

@@ -1,5 +1,6 @@
 package weaponsprocurement.ui.stockreview.rows
 
+import weaponsprocurement.stock.item.StockItemType
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
@@ -11,6 +12,10 @@ import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeGroup
 import java.util.Collections
 
+/**
+ * Review-screen grouping for queued item trades. Buying and selling are top-level groups,
+ * with Weapons/Wings/Hullmods headings beneath to keep the modal extensible.
+ */
 class StockReviewTradeGroupSection private constructor(
     @JvmField val tradeGroup: StockReviewTradeGroup,
     private val topGap: Boolean,
@@ -80,11 +85,11 @@ class StockReviewTradeGroupSection private constructor(
         if (!expanded) {
             return
         }
-        if (StockReviewStyle.SHOW_WIDTH_TEST_ROWS &&
+        if (StockReviewStyle.showDebugUi() &&
             includesWorstCaseRow &&
             itemGroup == StockReviewReviewItemGroup.WEAPONS
         ) {
-            StockReviewWorstCaseItemRows.add(rows, layout)
+            StockReviewWorstCaseItemRows.add(rows, layout, StockItemType.WEAPON, state)
         }
         if (itemGroupTrades.isEmpty()) {
             return

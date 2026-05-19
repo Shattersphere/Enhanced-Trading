@@ -10,6 +10,10 @@ import java.util.Collections
 import java.util.Comparator
 import java.util.HashMap
 
+/**
+ * Reallocates queued local buys when black-market inclusion changes. It preserves total
+ * intended quantity, but only for Local source mode where submarket allocation is real.
+ */
 object StockReviewLocalMarketRebalancer {
     @JvmStatic
     fun rebalanceBlackMarketToggle(

@@ -1,10 +1,8 @@
 package weaponsprocurement.ui.stockreview.rendering
 
 import weaponsprocurement.ui.WimGuiTooltip
-import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin
 import com.fs.starfarer.api.combat.WeaponAPI
-import com.fs.starfarer.api.graphics.SpriteAPI
 import com.fs.starfarer.api.loading.WeaponSpecAPI
 import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.util.Misc
@@ -59,10 +57,10 @@ class StockReviewWeaponIconPlugin(
 
     private fun renderWeaponSprite(x: Float, y: Float, width: Float, height: Float, alphaMult: Float) {
         val inset = maxOf(2f, minOf(width, height) * 0.24f)
-        renderFittedSprite(
+        StockReviewSpriteRenderer.renderFittedSprite(
             spriteName,
             Color.WHITE,
-            x + width * 0.5f,
+            visualCenterX(x, width),
             y + height * 0.5f,
             maxOf(1f, width - 2f * inset),
             maxOf(1f, height - 2f * inset),
@@ -81,7 +79,7 @@ class StockReviewWeaponIconPlugin(
     ) {
         val size = minOf(width, height) * ratio
         val thickness = motifStroke(width, height)
-        val left = x + width * 0.5f - size * 0.5f
+        val left = visualCenterX(x, width) - size * 0.5f
         val bottom = y + height * 0.5f - size * 0.5f
         Misc.renderQuadAlpha(left, bottom, size, thickness, color, alphaMult)
         Misc.renderQuadAlpha(left, bottom + size - thickness, size, thickness, color, alphaMult)
@@ -98,7 +96,7 @@ class StockReviewWeaponIconPlugin(
         color: Color,
         alphaMult: Float,
     ) {
-        val cx = x + width * 0.5f
+        val cx = visualCenterX(x, width)
         val cy = y + height * 0.5f
         val radius = minOf(width, height) * ratio * 0.5f
         renderLineLoop(
@@ -120,10 +118,12 @@ class StockReviewWeaponIconPlugin(
         alphaMult: Float,
     ) {
         val size = minOf(width, height) * ratio
-        renderFittedSprite(CIRCLE_SPRITE, color, x + width * 0.5f, y + height * 0.5f, size, size, alphaMult)
+        StockReviewSpriteRenderer.renderFittedSprite(CIRCLE_SPRITE, color, visualCenterX(x, width), y + height * 0.5f, size, size, alphaMult)
     }
 
     private fun motifStroke(width: Float, height: Float): Float = maxOf(2.25f, minOf(width, height) * 0.07f)
+
+    private fun visualCenterX(x: Float, width: Float): Float = StockReviewIconLayout.visualCenterX(x, width)
 
     private fun renderLineLoop(color: Color, alphaMult: Float, strokeWidth: Float, xs: FloatArray?, ys: FloatArray?) {
         if (xs == null || ys == null || xs.size != ys.size || xs.size < 2) {
@@ -146,44 +146,6 @@ class StockReviewWeaponIconPlugin(
         }
         GL11.glEnd()
         GL11.glPopMatrix()
-    }
-
-    private fun renderFittedSprite(
-        path: String?,
-        color: Color?,
-        centerX: Float,
-        centerY: Float,
-        maxWidth: Float,
-        maxHeight: Float,
-        alphaMult: Float,
-    ): Boolean {
-        if (!WimGuiTooltip.hasText(path)) {
-            return false
-        }
-        val sprite: SpriteAPI = try {
-            Global.getSettings().getSprite(path)
-        } catch (ex: RuntimeException) {
-            return false
-        } ?: return false
-        if (sprite.width <= 0f || sprite.height <= 0f) {
-            return false
-        }
-        val oldWidth = sprite.width
-        val oldHeight = sprite.height
-        val oldAlpha = sprite.alphaMult
-        val oldColor = sprite.color
-        val oldAngle = sprite.angle
-        val scale = minOf(maxOf(1f, maxWidth) / oldWidth, maxOf(1f, maxHeight) / oldHeight)
-        sprite.setSize(oldWidth * scale, oldHeight * scale)
-        sprite.alphaMult = oldAlpha * alphaMult
-        sprite.color = color ?: Color.WHITE
-        sprite.angle = 0f
-        sprite.renderAtCenter(centerX, centerY)
-        sprite.setSize(oldWidth, oldHeight)
-        sprite.alphaMult = oldAlpha
-        sprite.color = oldColor
-        sprite.angle = oldAngle
-        return true
     }
 
     companion object {

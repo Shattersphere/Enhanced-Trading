@@ -16,6 +16,10 @@ import java.util.ArrayList
 import java.util.IdentityHashMap
 import java.util.Locale
 
+/**
+ * Performs item cargo/credit mutations with rollback bookkeeping. Transaction reports are
+ * intentionally emitted only after the rollbackable cargo mutations have succeeded.
+ */
 class StockPurchaseExecutor private constructor() {
     companion object {
         private const val FAIL_AFTER_SOURCE_REMOVAL = "after-source-removal"
