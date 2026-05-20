@@ -273,6 +273,10 @@ object WimGuiControls {
         if (cell == null) {
             return
         }
+        if (cell.isTextField()) {
+            addTextFieldCell(parent, x, y, height, cell, borderColor)
+            return
+        }
         if (cell.isAction()) {
             val action = cell.getAction() ?: return
             val fill = if (cell.isEnabled()) cell.getFillColor() else WimGuiStyle.DISABLED_BACKGROUND
@@ -309,6 +313,55 @@ object WimGuiControls {
             cell.getAlignment(),
             cell.getTooltip(),
         )
+    }
+
+    private fun <A> addTextFieldCell(
+        parent: CustomPanelAPI,
+        x: Float,
+        y: Float,
+        height: Float,
+        cell: WimGuiRowCell<A>,
+        borderColor: Color?,
+    ) {
+        val key = cell.getTextFieldKey() ?: return
+        val onCommit = cell.getTextFieldCommit()
+        val onCommitString = cell.getTextFieldCommitString()
+        if (onCommit == null && onCommitString == null) return
+        val initial = cell.getTextFieldInitial() ?: ""
+        val blur = cell.getTextFieldBlur() ?: ""
+        val width = cell.getWidth()
+        val fill = cell.getFillColor()
+        val textColor = cell.getTextColor() ?: WimGuiStyle.DEFAULT_TEXT
+        val border = cell.borderColor(borderColor) ?: WimGuiStyle.ROW_BORDER
+        // Mirror addInfoCell's panel-plugin chrome so the field matches surrounding cell borders.
+        val box = parent.createCustomPanel(width, height, WimGuiPanelPlugin(fill, border))
+        parent.addComponent(box).inTL(x, y)
+        // setMidAlignment biases text slightly right because the caret reserves space on the right
+        // side of the text. Shift the inner element a few pixels left so digits sit visually centered.
+        val centerBias = 4f
+        val tt = box.createUIElement(width, height, false)
+        tt.setParaSmallInsignia()
+        val field = tt.addTextField(width, 0f)
+        field.setText(initial)
+        field.setMaxChars(cell.getTextFieldMaxChars())
+        field.setMidAlignment()
+        field.setUndoOnEscape(false)
+        field.setHandleCtrlV(true)
+        field.setColor(textColor)
+        // Let the wrapping panel draw the background/border so the field aligns with neighbours.
+        val transparent = Color(0, 0, 0, 0)
+        field.setBgColor(transparent)
+        field.setBorderColor(transparent)
+        if (onCommitString != null) {
+            if (cell.isTextFieldLive()) {
+                WimGuiTextFieldRegistry.bindStringLive(key, field, initial, blur, onCommitString)
+            } else {
+                WimGuiTextFieldRegistry.bindString(key, field, initial, blur, onCommitString)
+            }
+        } else if (onCommit != null) {
+            WimGuiTextFieldRegistry.bind(key, field, initial, blur, onCommit)
+        }
+        box.addUIElement(tt).inTL(-centerBias, 0f)
     }
 
     @JvmStatic

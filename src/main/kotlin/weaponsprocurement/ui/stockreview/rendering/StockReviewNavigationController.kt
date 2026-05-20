@@ -30,6 +30,7 @@ class StockReviewNavigationController(
             when (action.getType()) {
                 Type.REVIEW_PURCHASE -> openReviewIfNeeded()
                 Type.GO_BACK -> goBack()
+                Type.OPEN_AUTO_RULES -> openAutoRules()
                 else -> return@group
             }
         },
@@ -70,6 +71,11 @@ class StockReviewNavigationController(
         }
         state.setListScrollOffset(0)
         host.reopen(false)
+    }
+
+    private fun openAutoRules() {
+        modes.enterAutoRules(state)
+        host.requestContentRebuild()
     }
 
     private fun leaveTransientMode(): Boolean {

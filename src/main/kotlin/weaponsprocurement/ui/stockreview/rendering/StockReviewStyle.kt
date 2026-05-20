@@ -50,6 +50,7 @@ class StockReviewStyle private constructor() {
         const val DEBUG_DELTA_BUTTON_WIDTH = 48f
         const val ACTION_BUTTON_HEIGHT = 22f
         const val ROW_HEIGHT = 22f
+        const val AUTO_RULES_ROW_HEIGHT = 28f
         const val ROW_GAP = 4f
         const val CATEGORY_TOP_GAP = ROW_GAP
         const val SUMMARY_ROW_GAP = 4f
@@ -139,6 +140,13 @@ class StockReviewStyle private constructor() {
         @JvmField var FILTER_LIST = listSpec(MODAL, PAD, LIST_TOP, FILTER_LIST_WIDTH, LIST_HEIGHT)
         @JvmField var REVIEW_LIST = listSpec(REVIEW_MODAL, PAD, REVIEW_LIST_TOP, REVIEW_LIST_WIDTH, REVIEW_LIST_HEIGHT)
 
+        // Two-pane split for AUTO_RULES: left pane holds general controls (toggles, credit floor,
+        // category tabs, filter chips, bulk-apply), right pane holds the per-item list.
+        const val AUTO_RULES_LEFT_WIDTH = 720f
+        const val AUTO_RULES_PANE_GAP = SECTION_GAP
+        @JvmField var AUTO_RULES_LEFT_LIST = listSpec(MODAL, PAD, LIST_TOP, AUTO_RULES_LEFT_WIDTH, LIST_HEIGHT, AUTO_RULES_ROW_HEIGHT)
+        @JvmField var AUTO_RULES_RIGHT_LIST = listSpec(MODAL, PAD + AUTO_RULES_LEFT_WIDTH + AUTO_RULES_PANE_GAP, LIST_TOP, Math.max(ROW_HEIGHT, LIST_WIDTH - AUTO_RULES_LEFT_WIDTH - AUTO_RULES_PANE_GAP), LIST_HEIGHT, AUTO_RULES_ROW_HEIGHT)
+
         private fun fullscreenWidth(): Float = screenDimension(true, FALLBACK_WIDTH, MIN_FULLSCREEN_WIDTH, SCREEN_EDGE_X_MARGIN)
 
         private fun fullscreenHeight(): Float = screenDimension(false, FALLBACK_HEIGHT, MIN_FULLSCREEN_HEIGHT, SCREEN_EDGE_Y_MARGIN)
@@ -227,6 +235,8 @@ class StockReviewStyle private constructor() {
             TRADE_LIST = listSpec(MODAL, PAD, TRADE_LIST_TOP, LIST_WIDTH, TRADE_LIST_HEIGHT)
             FILTER_LIST = listSpec(FILTER_MODAL, PAD, FILTER_LIST_TOP, FILTER_LIST_WIDTH, FILTER_LIST_HEIGHT)
             REVIEW_LIST = listSpec(REVIEW_MODAL, PAD, REVIEW_LIST_TOP, REVIEW_LIST_WIDTH, REVIEW_LIST_HEIGHT)
+            AUTO_RULES_LEFT_LIST = listSpec(MODAL, PAD, LIST_TOP, AUTO_RULES_LEFT_WIDTH, LIST_HEIGHT, AUTO_RULES_ROW_HEIGHT)
+            AUTO_RULES_RIGHT_LIST = listSpec(MODAL, PAD + AUTO_RULES_LEFT_WIDTH + AUTO_RULES_PANE_GAP, LIST_TOP, Math.max(ROW_HEIGHT, LIST_WIDTH - AUTO_RULES_LEFT_WIDTH - AUTO_RULES_PANE_GAP), LIST_HEIGHT, AUTO_RULES_ROW_HEIGHT)
         }
 
         private fun listSpec(
@@ -235,14 +245,15 @@ class StockReviewStyle private constructor() {
             panelTop: Float,
             panelWidth: Float,
             panelHeight: Float,
+            rowHeight: Float = ROW_HEIGHT,
         ): WimGuiModalListSpec = WimGuiModalListSpec(
             modal,
             panelLeft,
             panelTop,
             panelWidth,
             panelHeight,
-            ROW_HEIGHT,
-            ACTION_BUTTON_HEIGHT,
+            rowHeight,
+            rowHeight,
             ROW_GAP,
             SMALL_PAD,
             BUTTON_GAP,

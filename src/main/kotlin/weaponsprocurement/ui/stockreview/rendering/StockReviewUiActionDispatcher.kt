@@ -14,6 +14,7 @@ class StockReviewUiActionDispatcher(
     private val filters: StockReviewFilterActionController,
     private val debugMode: StockReviewDebugModeController,
     private val navigation: StockReviewNavigationController,
+    private val autoRules: StockReviewAutoRulesActionController,
 ) {
     private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
         StockReviewActionHandlerGroup.group(StockReviewActionGroup.ROW_EXPANSION) { action ->
@@ -33,6 +34,9 @@ class StockReviewUiActionDispatcher(
         },
         StockReviewActionHandlerGroup.group(StockReviewActionGroup.NAVIGATION) { action ->
             navigation.handle(action)
+        },
+        StockReviewActionHandlerGroup.group(StockReviewActionGroup.AUTO_RULES) { action ->
+            autoRules.handle(action)
         },
     )
 

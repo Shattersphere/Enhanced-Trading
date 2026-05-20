@@ -95,6 +95,17 @@ class StockReviewLayoutContext private constructor(
                     StockReviewSummaryKind.TRADE_SUMMARY,
                     StockReviewFooterSpec.trade(),
                 )
+                StockReviewScreenMode.AUTO_RULES -> StockReviewLayoutContext(
+                    screenMode,
+                    rowLayout,
+                    StockReviewStyle.MODAL,
+                    StockReviewStyle.TRADE_LIST,
+                    StockReviewListSourceSpec.autoRules(),
+                    StockReviewHeaderKind.NONE,
+                    StockReviewActionRowKind.NONE,
+                    StockReviewSummaryKind.NONE,
+                    StockReviewFooterSpec.autoRules(),
+                )
             }
         }
     }

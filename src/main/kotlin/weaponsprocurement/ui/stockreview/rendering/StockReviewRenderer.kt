@@ -7,6 +7,7 @@ import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.WimGuiModalListRenderer
 import weaponsprocurement.ui.WimGuiModalListSpec
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.rows.StockReviewAutoRulesRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewFooterRenderer
 import weaponsprocurement.ui.stockreview.rows.StockReviewListRow
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
@@ -52,6 +53,7 @@ class StockReviewRenderer :
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
+        autoRulesController: weaponsprocurement.ui.stockreview.state.StockReviewAutoRulesController?,
         focusedShipFilterField: StockReviewShipFilterField?,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
@@ -122,8 +124,13 @@ class StockReviewRenderer :
             colorDebugTargetIndex,
             colorDebugDraft,
             colorDebugPersistent,
+            autoRulesController,
         )
-        val result = renderRows(root, model.rows, state, model.listSpec, buttons)
+        val result = if (screenMode == StockReviewScreenMode.AUTO_RULES && model.autoRulesLeftCount >= 0) {
+            renderAutoRulesPanes(root, model, state, buttons)
+        } else {
+            renderRows(root, model.rows, state, model.listSpec, buttons)
+        }
         if (modeSpec.hasTradeSummary() && !state.isShipTrading()) {
             StockReviewTradeSummaryRenderer.render(root, model.tradeContext, state, model.rowLayout)
         }
@@ -143,6 +150,7 @@ class StockReviewRenderer :
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
+        autoRulesController: weaponsprocurement.ui.stockreview.state.StockReviewAutoRulesController?,
     ): RenderModel {
         val key = RenderModelKey(
             state.getContentRevision(),
@@ -153,6 +161,7 @@ class StockReviewRenderer :
             colorDebugTargetIndex,
             colorKey(colorDebugDraft),
             colorDebugPersistent,
+            autoRulesController?.getRevision() ?: 0,
         )
         val current = cachedModel
         if (current != null &&
@@ -163,22 +172,36 @@ class StockReviewRenderer :
 
         val tradeContext = StockReviewTradeContext(snapshot, pendingTrades)
         val rowLayout = modeSpec.rowLayout
-        val rows: List<WimGuiListRow<StockReviewAction>> = modeSpec.listSourceSpec.build(
-            StockReviewListSourceContext(
-                snapshot,
-                state,
-                pendingTrades,
-                pendingShipTrades,
-                tradeContext,
-                rowLayout,
-                colorDebugTargetIndex,
-                colorDebugDraft,
-                colorDebugPersistent,
-            ),
-        )
+        val rows: List<WimGuiListRow<StockReviewAction>>
+        val autoRulesLeftCount: Int
+        if (modeSpec.screenMode == StockReviewScreenMode.AUTO_RULES) {
+            val leftRows = StockReviewAutoRulesRows.buildLeftRows(rowLayout, autoRulesController)
+            val rightRows = StockReviewAutoRulesRows.buildRightRows(rowLayout, autoRulesController)
+            val combined = ArrayList<WimGuiListRow<StockReviewAction>>(leftRows.size + rightRows.size)
+            combined.addAll(leftRows)
+            combined.addAll(rightRows)
+            rows = combined
+            autoRulesLeftCount = leftRows.size
+        } else {
+            rows = modeSpec.listSourceSpec.build(
+                StockReviewListSourceContext(
+                    snapshot,
+                    state,
+                    pendingTrades,
+                    pendingShipTrades,
+                    tradeContext,
+                    rowLayout,
+                    colorDebugTargetIndex,
+                    colorDebugDraft,
+                    colorDebugPersistent,
+                    autoRulesController,
+                ),
+            )
+            autoRulesLeftCount = -1
+        }
         val listSpec = modeSpec.listSpec
 
-        val built = RenderModel(snapshot, key, tradeContext, rowLayout, rows, listSpec)
+        val built = RenderModel(snapshot, key, tradeContext, rowLayout, rows, listSpec, autoRulesLeftCount)
         cachedModel = built
         return built
     }
@@ -198,6 +221,39 @@ class StockReviewRenderer :
         this,
         buttons,
     )
+
+    private fun renderAutoRulesPanes(
+        root: CustomPanelAPI,
+        model: RenderModel,
+        state: StockReviewState,
+        buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
+    ): WimGuiListBounds {
+        val leftRows = model.rows.subList(0, model.autoRulesLeftCount)
+        val rightRows = model.rows.subList(model.autoRulesLeftCount, model.rows.size)
+
+        // Left pane: non-scrolling general controls. Discard the scroll result so we don't trample
+        // the shared list scroll offset state, which the right pane uses for item-row scrolling.
+        WimGuiModalListRenderer.render(
+            root,
+            leftRows,
+            0,
+            StockReviewStyle.AUTO_RULES_LEFT_LIST,
+            this,
+            this,
+            buttons,
+        )
+
+        // Right pane: scrollable item list, shares state.listScrollOffset.
+        return WimGuiModalListRenderer.renderAndStoreOffset(
+            root,
+            rightRows,
+            state,
+            StockReviewStyle.AUTO_RULES_RIGHT_LIST,
+            this,
+            this,
+            buttons,
+        )
+    }
 
     private fun renderFilterBackground(
         root: CustomPanelAPI,
@@ -231,6 +287,7 @@ class StockReviewRenderer :
                 colorDebugDraft,
                 colorDebugPersistent,
                 null,
+                null,
                 ignoredButtons,
             )
         }
@@ -256,6 +313,7 @@ class StockReviewRenderer :
         val colorDebugTargetIndex: Int,
         val colorDebugDraftRgb: Int,
         val colorDebugPersistent: Boolean,
+        val autoRulesRevision: Int,
     ) {
         fun matches(other: RenderModelKey): Boolean =
             stateRevision == other.stateRevision &&
@@ -265,7 +323,8 @@ class StockReviewRenderer :
                 screenMode == other.screenMode &&
                 colorDebugTargetIndex == other.colorDebugTargetIndex &&
                 colorDebugDraftRgb == other.colorDebugDraftRgb &&
-                colorDebugPersistent == other.colorDebugPersistent
+                colorDebugPersistent == other.colorDebugPersistent &&
+                autoRulesRevision == other.autoRulesRevision
     }
 
     private class RenderModel(
@@ -275,6 +334,7 @@ class StockReviewRenderer :
         val rowLayout: StockReviewRowLayout,
         val rows: List<WimGuiListRow<StockReviewAction>>,
         val listSpec: WimGuiModalListSpec,
+        val autoRulesLeftCount: Int,
     ) {
         fun matches(
             snapshot: WeaponStockSnapshot,

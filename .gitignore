@@ -1,5 +1,7 @@
 build/
 .gradle/
+.vscode/
+.idea/
 .agent-deploy/
 Deploy Status.txt
 tools/patcher/build/
@@ -7,3 +9,5 @@ tools/patcher/build/
 *.class
 *.wim_tmp
 jars/*.tmp.jar
+bin*
+build.sh

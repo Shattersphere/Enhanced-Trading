@@ -22,6 +22,7 @@ enum class StockReviewFooterButtonSetKind {
     REVIEW,
     TRADE,
     SHIP_TRADE,
+    AUTO_RULES,
 }
 
 class StockReviewFooterContext(
@@ -77,6 +78,10 @@ class StockReviewFooterSpec private constructor(
         @JvmStatic
         fun trade(): StockReviewFooterSpec =
             leftRow(StockReviewStyle.MODAL, StockReviewFooterButtonSetKind.TRADE)
+
+        @JvmStatic
+        fun autoRules(): StockReviewFooterSpec =
+            leftRow(StockReviewStyle.MODAL, StockReviewFooterButtonSetKind.AUTO_RULES)
 
         private fun leftRow(
             modal: WimGuiModalLayout,

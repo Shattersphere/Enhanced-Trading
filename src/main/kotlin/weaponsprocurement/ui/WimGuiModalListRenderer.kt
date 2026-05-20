@@ -29,6 +29,8 @@ class WimGuiModalListRenderer private constructor() {
                 spec.panelHeight,
                 spec.panelWidth,
                 spec.modal,
+                spec.rowHeight,
+                spec.rowGap,
                 gapProvider(extraGapProvider),
             )
             val slice = layout.scrollSlice

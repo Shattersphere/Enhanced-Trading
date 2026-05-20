@@ -5,6 +5,9 @@
 - Added Gradle/Kotlin build support while preserving the existing `build.ps1` entry point.
 - Added LazyLib as a required dependency for Kotlin runtime support.
 - Moved cargo-cell badge support out of Enhanced Trading and kept this mod focused on the stock-review popup.
+- Reworked auto-trade black-market routing: when a black-market toggle is on, the black market is checked first and the open market still handles items the black market refuses; previously the open market was skipped entirely.
+- Auto-trade now always routes through the black market when the transponder is off. Removed the separate "Use black market with transponder off" toggle.
+- Replaced credit-floor and per-item sell-above / buy-below numeric controls with editable text fields. Leave a field blank to clear the rule.
 
 ## 0.2.0 - 2026-05-09
 

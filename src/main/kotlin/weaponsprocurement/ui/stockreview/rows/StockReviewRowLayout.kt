@@ -13,6 +13,7 @@ enum class StockReviewScreenMode {
     FILTERS,
     COLOR_DEBUG,
     SHIP_CATALOG_DEBUG,
+    AUTO_RULES,
 }
 
 class StockReviewRowLayout private constructor(

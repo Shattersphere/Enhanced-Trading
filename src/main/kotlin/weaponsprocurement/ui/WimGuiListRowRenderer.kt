@@ -34,15 +34,19 @@ class WimGuiListRowRenderer private constructor() {
             val cellBlockWidth = WimGuiRowCell.totalWidth(row.getCells(), cellGap)
             val reservedBlockWidth = Math.max(cellBlockWidth, row.rightReserveWidth())
             val labelLeft = row.getIndent()
-            val labelWidth = Math.max(minLabelWidth, width - labelLeft - reservedBlockWidth)
+            val hasLabelText = !row.getLabel().isNullOrEmpty()
+            val cellsFlushLeft = row.getMainAction() == null && !hasLabelText && row.getCells().isNotEmpty()
+
             if (row.getMainAction() != null) {
+                val labelWidth = Math.max(minLabelWidth, width - labelLeft - reservedBlockWidth)
                 addMainAction(rowPanel, row, labelLeft, labelWidth, actionHeight, buttonGap, defaultBorder, buttons)
-            } else {
+            } else if (hasLabelText) {
+                val labelWidth = Math.max(minLabelWidth, width - labelLeft - reservedBlockWidth)
                 addLabel(rowPanel, row.getLabel(), row.getTextColor(), labelLeft, labelWidth, rowHeight)
             }
 
             if (row.getCells().isNotEmpty()) {
-                var x = width - row.rightReserveWidth() - cellBlockWidth
+                var x = if (cellsFlushLeft) labelLeft else width - row.rightReserveWidth() - cellBlockWidth
                 for (cell in row.getCells()) {
                     WimGuiControls.addRowCell(rowPanel, x, 0f, actionHeight, cell, buttons, defaultBorder)
                     x += cell.getWidth() + cellGap

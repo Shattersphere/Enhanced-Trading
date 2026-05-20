@@ -6,6 +6,7 @@ import weaponsprocurement.ui.WimGuiListBounds
 import weaponsprocurement.ui.WimGuiModalPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rows.StockReviewScreenMode
+import weaponsprocurement.ui.stockreview.state.StockReviewAutoRulesController
 import weaponsprocurement.ui.stockreview.state.StockReviewLaunchState
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewShipFilterField
@@ -63,6 +64,7 @@ class StockReviewPanelPlugin(
     private val pendingTrades = StockReviewPendingTrades()
     private val pendingShipTrades = StockReviewPendingShipTrades()
     private val localMarketIntent = StockReviewLocalMarketIntent(launchState?.getLocalBuyIntent())
+    private val autoRulesController = StockReviewAutoRulesController()
     private val modes: StockReviewModeController
     private val ui: StockReviewUiController
     private val trades: StockReviewTradeController
@@ -80,7 +82,7 @@ class StockReviewPanelPlugin(
             localMarketIntent.seedFromTrades(pendingTrades.asList())
         }
         modes = StockReviewModeController(reviewMode(launchState))
-        ui = StockReviewUiController(state, modes, pendingTrades, pendingShipTrades, localMarketIntent, this)
+        ui = StockReviewUiController(state, modes, pendingTrades, pendingShipTrades, localMarketIntent, autoRulesController, this)
         trades = StockReviewTradeController(state, pendingTrades, localMarketIntent, this)
         shipTrades = StockReviewShipTradeController(pendingShipTrades, this)
         execution = StockReviewExecutionController(state, pendingTrades, purchaseService, this)
@@ -156,6 +158,7 @@ class StockReviewPanelPlugin(
             modes.getColorDebugTargetIndex(),
             modes.currentColorDebugDraft(),
             modes.isColorDebugPersistent(),
+            autoRulesController,
             focusedShipFilterField,
             buttonBindings,
         )

@@ -15,6 +15,13 @@ class WimGuiRowCell<A> private constructor(
     private val borderOverride: Color?,
     private val hasBorderOverride: Boolean,
     private val tooltip: String?,
+    private val textFieldKey: String? = null,
+    private val textFieldInitial: String? = null,
+    private val textFieldBlur: String? = null,
+    private val textFieldCommit: ((Int) -> Unit)? = null,
+    private val textFieldCommitString: ((String) -> Unit)? = null,
+    private val textFieldMaxChars: Int = 9,
+    private val textFieldLive: Boolean = false,
 ) {
     fun getLabel(): String? = label
     fun getWidth(): Float = width
@@ -22,10 +29,18 @@ class WimGuiRowCell<A> private constructor(
     fun getTextColor(): Color? = textColor
     fun getAction(): A? = action
     fun isEnabled(): Boolean = enabled
-    fun isAction(): Boolean = action != null
+    fun isAction(): Boolean = action != null && textFieldKey == null
+    fun isTextField(): Boolean = textFieldKey != null
     fun getAlignment(): Alignment = alignment ?: Alignment.MID
     fun borderColor(defaultBorder: Color?): Color? = if (hasBorderOverride) borderOverride else defaultBorder
     fun getTooltip(): String? = tooltip
+    fun getTextFieldKey(): String? = textFieldKey
+    fun getTextFieldInitial(): String? = textFieldInitial
+    fun getTextFieldBlur(): String? = textFieldBlur
+    fun getTextFieldCommit(): ((Int) -> Unit)? = textFieldCommit
+    fun getTextFieldCommitString(): ((String) -> Unit)? = textFieldCommitString
+    fun getTextFieldMaxChars(): Int = textFieldMaxChars
+    fun isTextFieldLive(): Boolean = textFieldLive
 
     companion object {
         @JvmStatic
@@ -118,6 +133,78 @@ class WimGuiRowCell<A> private constructor(
             action,
             enabled,
             tooltip,
+        )
+
+        @JvmStatic
+        fun <A> textField(
+            key: String,
+            width: Float,
+            initialText: String,
+            blurText: String,
+            fillColor: Color?,
+            textColor: Color?,
+            onCommit: (Int) -> Unit,
+            tooltip: String?,
+        ): WimGuiRowCell<A> = WimGuiRowCell(
+            label = null,
+            width = width,
+            fillColor = fillColor,
+            textColor = textColor,
+            action = null,
+            enabled = true,
+            alignment = Alignment.MID,
+            borderOverride = null,
+            hasBorderOverride = false,
+            tooltip = tooltip,
+            textFieldKey = key,
+            textFieldInitial = initialText,
+            textFieldBlur = blurText,
+            textFieldCommit = onCommit,
+        )
+
+        @JvmStatic
+        fun <A> textFieldString(
+            key: String,
+            width: Float,
+            initialText: String,
+            blurText: String,
+            fillColor: Color?,
+            textColor: Color?,
+            maxChars: Int,
+            onCommit: (String) -> Unit,
+            tooltip: String?,
+        ): WimGuiRowCell<A> = textFieldString(key, width, initialText, blurText, fillColor, textColor, maxChars, false, onCommit, tooltip)
+
+        @JvmStatic
+        fun <A> textFieldString(
+            key: String,
+            width: Float,
+            initialText: String,
+            blurText: String,
+            fillColor: Color?,
+            textColor: Color?,
+            maxChars: Int,
+            live: Boolean,
+            onCommit: (String) -> Unit,
+            tooltip: String?,
+        ): WimGuiRowCell<A> = WimGuiRowCell(
+            label = null,
+            width = width,
+            fillColor = fillColor,
+            textColor = textColor,
+            action = null,
+            enabled = true,
+            alignment = Alignment.MID,
+            borderOverride = null,
+            hasBorderOverride = false,
+            tooltip = tooltip,
+            textFieldKey = key,
+            textFieldInitial = initialText,
+            textFieldBlur = blurText,
+            textFieldCommit = null,
+            textFieldCommitString = onCommit,
+            textFieldMaxChars = maxChars,
+            textFieldLive = live,
         )
 
         @JvmStatic

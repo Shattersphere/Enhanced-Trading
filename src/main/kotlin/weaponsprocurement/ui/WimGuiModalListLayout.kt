@@ -18,7 +18,7 @@ class WimGuiModalListLayout<T> private constructor(
             bodyHeight: Float,
             panelWidth: Float,
             modal: WimGuiModalLayout,
-        ): WimGuiModalListLayout<T> = compute(rows, requestedOffset, bodyTop, bodyHeight, panelWidth, modal, null)
+        ): WimGuiModalListLayout<T> = compute(rows, requestedOffset, bodyTop, bodyHeight, panelWidth, modal, modal.rowHeight, modal.rowGap, null)
 
         @JvmStatic
         fun <T> compute(
@@ -29,15 +29,28 @@ class WimGuiModalListLayout<T> private constructor(
             panelWidth: Float,
             modal: WimGuiModalLayout,
             extraGapProvider: WimGuiScroll.ExtraGapProvider<T>?,
+        ): WimGuiModalListLayout<T> = compute(rows, requestedOffset, bodyTop, bodyHeight, panelWidth, modal, modal.rowHeight, modal.rowGap, extraGapProvider)
+
+        @JvmStatic
+        fun <T> compute(
+            rows: List<T>?,
+            requestedOffset: Int,
+            bodyTop: Float,
+            bodyHeight: Float,
+            panelWidth: Float,
+            modal: WimGuiModalLayout,
+            rowHeight: Float,
+            rowGap: Float,
+            extraGapProvider: WimGuiScroll.ExtraGapProvider<T>?,
         ): WimGuiModalListLayout<T> {
-            val availablePanelHeight = Math.max(modal.rowHeight, bodyHeight)
-            val availableInnerHeight = Math.max(modal.rowHeight, availablePanelHeight - 2f * modal.listInset)
+            val availablePanelHeight = Math.max(rowHeight, bodyHeight)
+            val availableInnerHeight = Math.max(rowHeight, availablePanelHeight - 2f * modal.listInset)
             val slice = WimGuiScroll.verticalSlice(
                 rows,
                 requestedOffset,
                 availableInnerHeight,
-                modal.rowHeight,
-                modal.rowGap,
+                rowHeight,
+                rowGap,
                 extraGapProvider,
             )
             val renderedPanelHeight = availablePanelHeight

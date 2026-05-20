@@ -8,6 +8,9 @@ class StockReviewModeController(private var reviewMode: Boolean) {
     private var filterMode = false
     private var colorDebugMode = false
     private var shipCatalogDebugMode = false
+    private var autoRulesMode = false
+    private var autoRulesReturnToReview = false
+    private var autoRulesReturnScrollOffset = 0
     private var colorDebugReturnToReview = false
     private var colorDebugReturnScrollOffset = 0
     private var shipCatalogReturnToReview = false
@@ -23,6 +26,7 @@ class StockReviewModeController(private var reviewMode: Boolean) {
         when {
             colorDebugMode -> StockReviewScreenMode.COLOR_DEBUG
             shipCatalogDebugMode -> StockReviewScreenMode.SHIP_CATALOG_DEBUG
+            autoRulesMode -> StockReviewScreenMode.AUTO_RULES
             filterMode -> StockReviewScreenMode.FILTERS
             reviewMode -> StockReviewScreenMode.REVIEW
             else -> StockReviewScreenMode.TRADE
@@ -36,6 +40,10 @@ class StockReviewModeController(private var reviewMode: Boolean) {
             }
             StockReviewScreenMode.SHIP_CATALOG_DEBUG -> {
                 leaveShipCatalogDebug(state)
+                true
+            }
+            StockReviewScreenMode.AUTO_RULES -> {
+                leaveAutoRules(state)
                 true
             }
             StockReviewScreenMode.FILTERS -> {
@@ -112,6 +120,29 @@ class StockReviewModeController(private var reviewMode: Boolean) {
         shipCatalogDebugMode = false
         reviewMode = shipCatalogReturnToReview
         state.setListScrollOffset(shipCatalogReturnScrollOffset)
+        markChangedIf(changed)
+    }
+
+    fun enterAutoRules(state: StockReviewState) {
+        val changed = !autoRulesMode || reviewMode || filterMode || colorDebugMode || shipCatalogDebugMode || state.getListScrollOffset() != 0
+        autoRulesReturnToReview = reviewMode
+        autoRulesReturnScrollOffset = state.getListScrollOffset()
+        autoRulesMode = true
+        reviewMode = false
+        filterMode = false
+        colorDebugMode = false
+        shipCatalogDebugMode = false
+        state.setListScrollOffset(0)
+        markChangedIf(changed)
+    }
+
+    fun leaveAutoRules(state: StockReviewState) {
+        val changed = autoRulesMode ||
+            reviewMode != autoRulesReturnToReview ||
+            state.getListScrollOffset() != autoRulesReturnScrollOffset
+        autoRulesMode = false
+        reviewMode = autoRulesReturnToReview
+        state.setListScrollOffset(autoRulesReturnScrollOffset)
         markChangedIf(changed)
     }
 

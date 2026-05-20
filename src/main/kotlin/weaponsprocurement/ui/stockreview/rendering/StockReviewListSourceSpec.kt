@@ -3,6 +3,7 @@ package weaponsprocurement.ui.stockreview.rendering
 import weaponsprocurement.ui.WimGuiListRow
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.rows.StockReviewColorDebugRows
+import weaponsprocurement.ui.stockreview.rows.StockReviewAutoRulesRows
 import weaponsprocurement.ui.stockreview.rows.StockReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewReviewListModel
 import weaponsprocurement.ui.stockreview.rows.StockReviewRowLayout
@@ -10,6 +11,7 @@ import weaponsprocurement.ui.stockreview.rows.StockReviewShipCatalogDebugRows
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrade
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipReviewListModel
 import weaponsprocurement.ui.stockreview.state.StockReviewFilterListModel
+import weaponsprocurement.ui.stockreview.state.StockReviewAutoRulesController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
@@ -22,6 +24,7 @@ enum class StockReviewListSourceKind {
     FILTERS,
     COLOR_DEBUG,
     SHIP_CATALOG_DEBUG,
+    AUTO_RULES,
 }
 
 class StockReviewListSourceContext(
@@ -34,6 +37,7 @@ class StockReviewListSourceContext(
     @JvmField val colorDebugTargetIndex: Int,
     @JvmField val colorDebugDraft: Color?,
     @JvmField val colorDebugPersistent: Boolean,
+    @JvmField val autoRulesController: StockReviewAutoRulesController?,
 )
 
 class StockReviewListSourceSpec private constructor(
@@ -55,6 +59,8 @@ class StockReviewListSourceSpec private constructor(
                 StockReviewColorDebugRows.build(context.colorDebugTargetIndex, context.colorDebugDraft, context.colorDebugPersistent)
             StockReviewListSourceKind.SHIP_CATALOG_DEBUG ->
                 StockReviewShipCatalogDebugRows.build()
+            StockReviewListSourceKind.AUTO_RULES ->
+                StockReviewAutoRulesRows.build(context.rowLayout, context.autoRulesController)
         }
 
     companion object {
@@ -72,5 +78,8 @@ class StockReviewListSourceSpec private constructor(
 
         @JvmStatic
         fun shipCatalogDebug(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.SHIP_CATALOG_DEBUG)
+
+        @JvmStatic
+        fun autoRules(): StockReviewListSourceSpec = StockReviewListSourceSpec(StockReviewListSourceKind.AUTO_RULES)
     }
 }

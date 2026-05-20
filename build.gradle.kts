@@ -43,7 +43,14 @@ val starsectorDirectoryPath: String =
         )
 
 val starsectorDirectory = file(starsectorDirectoryPath)
-val starsectorCoreDirectory = File(starsectorDirectory, "starsector-core")
+val starsectorCoreDirectory = run {
+    val windowsCore = File(starsectorDirectory, "starsector-core")
+    when {
+        hasStarsectorCoreJars(windowsCore) -> windowsCore
+        hasStarsectorCoreJars(starsectorDirectory) -> starsectorDirectory
+        else -> windowsCore
+    }
+}
 
 data class RequiredMod(
     val displayName: String,

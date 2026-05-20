@@ -2,6 +2,7 @@ package weaponsprocurement.config
 
 import lunalib.lunaSettings.LunaSettings
 import org.apache.log4j.Logger
+import weaponsprocurement.autotrade.AutoTradeConfig
 import java.util.Locale
 
 /**
@@ -25,6 +26,13 @@ object WeaponsProcurementConfig {
     private const val SETTING_DESIRED_FIGHTER_WING_COUNT = "wp_desired_fighter_wing_count"
     private const val SETTING_TRADE_HOTKEY = "wp_trade_hotkey"
     private const val SETTING_ENABLE_DEBUG_UI = "wp_enable_debug_ui"
+    private const val SETTING_AUTOTRADE_ENABLED = "wp_autotrade_enabled"
+    private const val SETTING_AUTOTRADE_SELL_BLACK = "wp_autotrade_sell_through_black"
+    private const val SETTING_AUTOTRADE_BUY_BLACK = "wp_autotrade_buy_through_black"
+    private const val SETTING_AUTOTRADE_BUY_HULLMODS_BLACK = "wp_autotrade_buy_hullmods_from_black"
+    private const val SETTING_AUTOTRADE_BUY_UNKNOWN_HULLMODS = "wp_autotrade_buy_unknown_hullmods"
+    private const val SETTING_AUTOTRADE_LEARN_HULLMODS = "wp_autotrade_learn_hullmods_on_buy"
+    private const val SETTING_AUTOTRADE_CREDIT_FLOOR = "wp_autotrade_credit_floor"
     private const val KEY_UPDATE_INTERVAL = "wp.config.updateIntervalSeconds"
     private const val KEY_DIALOG_OPTION_ENABLED = "wp.config.dialogOptionEnabled"
     private const val KEY_SECTOR_MARKET_ENABLED = "wp.config.sectorMarketEnabled"
@@ -50,6 +58,9 @@ object WeaponsProcurementConfig {
     private const val MIN_REMOTE_MARKET_PRICE_MULTIPLIER = 1.00f
     private const val MAX_REMOTE_MARKET_PRICE_MULTIPLIER = 20.00f
     private const val DEFAULT_DESIRED_SMALL_WEAPON_COUNT = 16
+    private const val DEFAULT_AUTOTRADE_CREDIT_FLOOR = 0
+    private const val MIN_AUTOTRADE_CREDIT_FLOOR = 0
+    private const val MAX_AUTOTRADE_CREDIT_FLOOR = 1_000_000_000
     private const val DEFAULT_DESIRED_MEDIUM_WEAPON_COUNT = 8
     private const val DEFAULT_DESIRED_LARGE_WEAPON_COUNT = 4
     private const val DEFAULT_DESIRED_FIGHTER_WING_COUNT = 4
@@ -214,6 +225,23 @@ object WeaponsProcurementConfig {
     @JvmStatic
     fun isDebugShipCatalogViewEnabled(): Boolean =
         System.getProperty(KEY_DEBUG_SHIP_CATALOG_VIEW, "false").toBoolean()
+
+    /**
+     * Seed boolean toggles and the credit floor on a brand-new [AutoTradeConfig] from
+     * current LunaSettings. Per-item rules and seen/ruled sets are not touched.
+     */
+    @JvmStatic
+    fun applyAutoTradeDefaults(config: AutoTradeConfig) {
+        readBooleanSetting(SETTING_AUTOTRADE_ENABLED)?.let { config.enabled = it }
+        readBooleanSetting(SETTING_AUTOTRADE_SELL_BLACK)?.let { config.sellThroughBlack = it }
+        readBooleanSetting(SETTING_AUTOTRADE_BUY_BLACK)?.let { config.buyThroughBlack = it }
+        readBooleanSetting(SETTING_AUTOTRADE_BUY_HULLMODS_BLACK)?.let { config.buyHullmodsFromBlack = it }
+        readBooleanSetting(SETTING_AUTOTRADE_BUY_UNKNOWN_HULLMODS)?.let { config.buyUnknownHullmods = it }
+        readBooleanSetting(SETTING_AUTOTRADE_LEARN_HULLMODS)?.let { config.learnHullmodsOnBuy = it }
+        readDoubleSetting(SETTING_AUTOTRADE_CREDIT_FLOOR)?.let {
+            config.creditFloor = clamp(Math.round(it.toFloat()), MIN_AUTOTRADE_CREDIT_FLOOR, MAX_AUTOTRADE_CREDIT_FLOOR)
+        }
+    }
 
     @JvmStatic
     fun isDebugUiEnabled(): Boolean =

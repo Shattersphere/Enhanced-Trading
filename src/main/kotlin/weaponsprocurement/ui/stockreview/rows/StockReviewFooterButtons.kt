@@ -123,6 +123,24 @@ class StockReviewFooterButtons private constructor() {
             "Review the queued trades before confirming them.",
         )
 
+        private val OPEN_AUTO_RULES = footer(
+            "open-auto-rules",
+            StockReviewActionGroup.NAVIGATION,
+            "Auto-Rules",
+            StockReviewAction.openAutoRules(),
+            StockReviewStyle.ACTION_BACKGROUND,
+            "Edit automated trade rules for weapons, fighter LPCs, and hullmods.",
+        )
+
+        private val AUTO_RULES_DONE = footer(
+            "auto-rules-done",
+            StockReviewActionGroup.NAVIGATION,
+            "Done",
+            StockReviewAction.goBack(),
+            StockReviewStyle.CONFIRM_BUTTON,
+            "Return to the trade screen.",
+        )
+
         private val PURCHASE_ALL = bulk(
             "purchase-all-until-sufficient",
             StockReviewActionGroup.BULK_SUFFICIENT_PURCHASE,
@@ -176,14 +194,16 @@ class StockReviewFooterButtons private constructor() {
                 StockReviewFooterButtonSetKind.REVIEW -> REVIEW_SET
                 StockReviewFooterButtonSetKind.TRADE -> TRADE_SET
                 StockReviewFooterButtonSetKind.SHIP_TRADE -> SHIP_TRADE_SET
+                StockReviewFooterButtonSetKind.AUTO_RULES -> AUTO_RULES_SET
             }
 
         private val COLOR_DEBUG_SET = StockReviewFooterButtonSet(COLOR_CANCEL, COLOR_CONFIRM, COLOR_APPLY, COLOR_RESTORE)
         private val FILTERS_SET = StockReviewFooterButtonSet(FILTER_CANCEL, FILTER_CONFIRM, FILTER_RESET)
         private val SHIP_CATALOG_DEBUG_SET = StockReviewFooterButtonSet(null, GO_BACK)
         private val REVIEW_SET = StockReviewFooterButtonSet(REVIEW_BACK, REVIEW_CONFIRM)
-        private val TRADE_SET = StockReviewFooterButtonSet(null, TRADE_REVIEW, PURCHASE_ALL, SELL_ALL, RESET_ALL)
+        private val TRADE_SET = StockReviewFooterButtonSet(null, TRADE_REVIEW, PURCHASE_ALL, SELL_ALL, RESET_ALL, OPEN_AUTO_RULES)
         private val SHIP_TRADE_SET = StockReviewFooterButtonSet(null, TRADE_REVIEW, RESET_ALL)
+        private val AUTO_RULES_SET = StockReviewFooterButtonSet(null, AUTO_RULES_DONE)
 
         private fun footer(
             id: String,

@@ -1,6 +1,7 @@
 package weaponsprocurement.ui.stockreview.rendering
 
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
+import weaponsprocurement.ui.stockreview.state.StockReviewAutoRulesController
 import weaponsprocurement.ui.stockreview.state.StockReviewModeController
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewLocalMarketIntent
@@ -14,6 +15,7 @@ class StockReviewUiController(
     private val pendingTrades: StockReviewPendingTrades,
     private val pendingShipTrades: StockReviewPendingShipTrades,
     private val localMarketIntent: StockReviewLocalMarketIntent,
+    private val autoRulesController: StockReviewAutoRulesController,
     private val host: Host,
 ) {
     private val rowExpansion = StockReviewRowExpansionController(state, host)
@@ -22,7 +24,8 @@ class StockReviewUiController(
     private val filters = StockReviewFilterActionController(state, modes, host)
     private val debugMode = StockReviewDebugModeController(state, modes, host)
     private val navigation = StockReviewNavigationController(state, modes, pendingTrades, pendingShipTrades, host)
-    private val actionDispatcher = StockReviewUiActionDispatcher(rowExpansion, sourceTransitions, scroll, filters, debugMode, navigation)
+    private val autoRules = StockReviewAutoRulesActionController(autoRulesController, host)
+    private val actionDispatcher = StockReviewUiActionDispatcher(rowExpansion, sourceTransitions, scroll, filters, debugMode, navigation, autoRules)
 
     interface Host :
         StockReviewRowExpansionController.Host,
@@ -30,7 +33,8 @@ class StockReviewUiController(
         StockReviewScrollController.Host,
         StockReviewFilterActionController.Host,
         StockReviewDebugModeController.Host,
-        StockReviewNavigationController.Host {
+        StockReviewNavigationController.Host,
+        StockReviewAutoRulesActionController.Host {
     }
 
     fun handleCloseRequested() {

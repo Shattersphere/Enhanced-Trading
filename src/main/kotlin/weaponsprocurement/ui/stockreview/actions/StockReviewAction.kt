@@ -59,6 +59,30 @@ class StockReviewAction private constructor(
         REVIEW_PURCHASE,
         CONFIRM_PURCHASE,
         GO_BACK,
+        OPEN_AUTO_RULES,
+        AUTO_RULES_TOGGLE_ENABLED,
+        AUTO_RULES_TOGGLE_SELL_BLACK,
+        AUTO_RULES_TOGGLE_BUY_BLACK,
+        AUTO_RULES_TOGGLE_HULLMODS_FROM_BLACK,
+        AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS,
+        AUTO_RULES_TOGGLE_LEARN_HULLMODS,
+        AUTO_RULES_ADJUST_CREDIT_FLOOR,
+        AUTO_RULES_CYCLE_TAB,
+        AUTO_RULES_CYCLE_HELD_FILTER,
+        AUTO_RULES_CYCLE_RULE_FILTER,
+        AUTO_RULES_CYCLE_NEW_FILTER,
+        AUTO_RULES_CYCLE_SIZE_FILTER,
+        AUTO_RULES_CYCLE_DAMAGE_FILTER,
+        AUTO_RULES_CYCLE_DESIGN_TYPE_FILTER,
+        AUTO_RULES_COMMIT_NAME_QUERY,
+        AUTO_RULES_ADJUST_SELL_ABOVE,
+        AUTO_RULES_ADJUST_BUY_BELOW,
+        AUTO_RULES_CLEAR_RULE,
+        AUTO_RULES_TOGGLE_SELECT_ITEM,
+        AUTO_RULES_TOGGLE_SELECT_ALL_VISIBLE,
+        AUTO_RULES_APPLY_BULK,
+        AUTO_RULES_CLEAR_SELECTED,
+        AUTO_RULES_TOGGLE_HULLMOD_BLACKLIST,
     }
 
     fun getType(): Type = type
@@ -229,5 +253,103 @@ class StockReviewAction private constructor(
         @JvmStatic
         fun goBack(): StockReviewAction =
             StockReviewAction(Type.GO_BACK, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun openAutoRules(): StockReviewAction =
+            StockReviewAction(Type.OPEN_AUTO_RULES, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleEnabled(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_ENABLED, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleSellBlack(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_SELL_BLACK, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleBuyBlack(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_BUY_BLACK, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleHullmodsFromBlack(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_HULLMODS_FROM_BLACK, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleBuyUnknownHullmods(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleLearnHullmods(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_LEARN_HULLMODS, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesAdjustCreditFloor(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_ADJUST_CREDIT_FLOOR, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleTab(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_TAB, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleHeldFilter(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_HELD_FILTER, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleRuleFilter(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_RULE_FILTER, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleNewFilter(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_NEW_FILTER, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleSizeFilter(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_SIZE_FILTER, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleDamageFilter(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_DAMAGE_FILTER, null, null, null, null, null, null, null, null, null, delta)
+
+        @JvmStatic
+        fun autoRulesCycleDesignTypeFilter(delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CYCLE_DESIGN_TYPE_FILTER, null, null, null, null, null, null, null, null, null, delta)
+
+        /** Dispatched purely as a notice that a name-query commit happened; the actual
+         *  string is delivered via the text field callback, not the action payload. */
+        @JvmStatic
+        fun autoRulesCommitNameQuery(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_COMMIT_NAME_QUERY, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesAdjustSellAbove(itemKey: String?, delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_ADJUST_SELL_ABOVE, null, null, null, null, null, null, null, itemKey, null, delta)
+
+        @JvmStatic
+        fun autoRulesAdjustBuyBelow(itemKey: String?, delta: Int): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_ADJUST_BUY_BELOW, null, null, null, null, null, null, null, itemKey, null, delta)
+
+        @JvmStatic
+        fun autoRulesClearRule(itemKey: String?): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CLEAR_RULE, null, null, null, null, null, null, null, itemKey, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleSelectItem(itemKey: String?): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_SELECT_ITEM, null, null, null, null, null, null, null, itemKey, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleSelectAllVisible(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_SELECT_ALL_VISIBLE, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesApplyBulk(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_APPLY_BULK, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesClearSelected(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_CLEAR_SELECTED, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleHullmodBlacklist(hullmodId: String?): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_HULLMOD_BLACKLIST, null, null, null, null, null, null, null, hullmodId, null, 0)
     }
 }
