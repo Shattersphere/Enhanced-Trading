@@ -61,9 +61,8 @@ class StockReviewAction private constructor(
         GO_BACK,
         OPEN_AUTO_RULES,
         AUTO_RULES_TOGGLE_ENABLED,
-        AUTO_RULES_TOGGLE_SELL_BLACK,
-        AUTO_RULES_TOGGLE_BUY_BLACK,
-        AUTO_RULES_TOGGLE_HULLMODS_FROM_BLACK,
+        AUTO_RULES_TOGGLE_SUSPICION_SELL,
+        AUTO_RULES_TOGGLE_SUSPICION_BUY,
         AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS,
         AUTO_RULES_TOGGLE_LEARN_HULLMODS,
         AUTO_RULES_ADJUST_CREDIT_FLOOR,
@@ -263,16 +262,12 @@ class StockReviewAction private constructor(
             StockReviewAction(Type.AUTO_RULES_TOGGLE_ENABLED, null, null, null, null, null, null, null, null, null, 0)
 
         @JvmStatic
-        fun autoRulesToggleSellBlack(): StockReviewAction =
-            StockReviewAction(Type.AUTO_RULES_TOGGLE_SELL_BLACK, null, null, null, null, null, null, null, null, null, 0)
+        fun autoRulesToggleSuspicionSelling(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_SUSPICION_SELL, null, null, null, null, null, null, null, null, null, 0)
 
         @JvmStatic
-        fun autoRulesToggleBuyBlack(): StockReviewAction =
-            StockReviewAction(Type.AUTO_RULES_TOGGLE_BUY_BLACK, null, null, null, null, null, null, null, null, null, 0)
-
-        @JvmStatic
-        fun autoRulesToggleHullmodsFromBlack(): StockReviewAction =
-            StockReviewAction(Type.AUTO_RULES_TOGGLE_HULLMODS_FROM_BLACK, null, null, null, null, null, null, null, null, null, 0)
+        fun autoRulesToggleSuspicionBuying(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_SUSPICION_BUY, null, null, null, null, null, null, null, null, null, 0)
 
         @JvmStatic
         fun autoRulesToggleBuyUnknownHullmods(): StockReviewAction =

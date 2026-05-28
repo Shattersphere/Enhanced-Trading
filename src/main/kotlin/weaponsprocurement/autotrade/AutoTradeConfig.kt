@@ -24,21 +24,46 @@ class AutoTradeConfig {
     /** Master switch. When false, no automatic trades happen on market open. */
     @JvmField var enabled: Boolean = true
 
-    /** Route auto-sells through the black market in addition to the open market. */
+    /**
+     * Allow auto-sells to use the black market when doing so is attributable to the player
+     * (transponder on) and therefore raises smuggling suspicion. When the transponder is off
+     * the player is anonymous, so the black market is always used regardless of this flag.
+     */
+    @JvmField var allowSuspicionWhenSelling: Boolean = false
+
+    /**
+     * Allow auto-buys (weapons, fighter LPCs, and hullmods) from the black market when doing
+     * so is attributable to the player (transponder on). When the transponder is off the
+     * black market is the only accessible market, so buys there happen regardless.
+     */
+    @JvmField var allowSuspicionWhenBuying: Boolean = false
+
+    /**
+     * Deprecated: replaced by [allowSuspicionWhenSelling]. Kept as a `@JvmField` only so
+     * existing save files deserialize without an XStream UnknownField error; never read.
+     */
+    @Deprecated("Replaced by allowSuspicionWhenSelling; this field is ignored.")
     @JvmField var sellThroughBlack: Boolean = false
 
-    /** Route auto-buys (weapons and fighter LPCs) through the black market in addition to the open market. */
+    /**
+     * Deprecated: replaced by [allowSuspicionWhenBuying]. Kept as a `@JvmField` only so
+     * existing save files deserialize without an XStream UnknownField error; never read.
+     */
+    @Deprecated("Replaced by allowSuspicionWhenBuying; this field is ignored.")
     @JvmField var buyThroughBlack: Boolean = false
 
     /**
-     * Deprecated: black-market routing is now automatic whenever the transponder is off.
-     * Kept as a `@JvmField` purely so existing save files deserialize without an XStream
-     * UnknownField error; the value is never read.
+     * Deprecated: black-market routing is now governed by [allowSuspicionWhenSelling] /
+     * [allowSuspicionWhenBuying] and transponder state. Kept for save compatibility; never read.
      */
-    @Deprecated("Black market is always used when the transponder is off; this field is ignored.")
+    @Deprecated("Replaced by the allowSuspicion* flags; this field is ignored.")
     @JvmField var useBlackWhenTransponderOff: Boolean = false
 
-    /** Additionally scan the black market for unknown hullmods to auto-buy. */
+    /**
+     * Deprecated: black-market hullmod buys now follow [allowSuspicionWhenBuying]. Kept for
+     * save compatibility; never read.
+     */
+    @Deprecated("Replaced by allowSuspicionWhenBuying; this field is ignored.")
     @JvmField var buyHullmodsFromBlack: Boolean = false
 
     /** Auto-buy hullmods the player faction has not yet learned. */

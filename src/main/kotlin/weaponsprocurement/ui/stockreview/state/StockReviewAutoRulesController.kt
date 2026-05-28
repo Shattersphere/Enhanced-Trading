@@ -275,9 +275,8 @@ class StockReviewAutoRulesController {
     }
 
     fun handleToggleEnabled() = mutate { it.enabled = !it.enabled }
-    fun handleToggleSellBlack() = mutate { it.sellThroughBlack = !it.sellThroughBlack }
-    fun handleToggleBuyBlack() = mutate { it.buyThroughBlack = !it.buyThroughBlack }
-    fun handleToggleHullmodsFromBlack() = mutate { it.buyHullmodsFromBlack = !it.buyHullmodsFromBlack }
+    fun handleToggleSuspicionSelling() = mutate { it.allowSuspicionWhenSelling = !it.allowSuspicionWhenSelling }
+    fun handleToggleSuspicionBuying() = mutate { it.allowSuspicionWhenBuying = !it.allowSuspicionWhenBuying }
     fun handleToggleBuyUnknownHullmods() = mutate { it.buyUnknownHullmods = !it.buyUnknownHullmods }
     fun handleToggleLearnHullmods() = mutate { it.learnHullmodsOnBuy = !it.learnHullmodsOnBuy }
 
@@ -387,7 +386,6 @@ class StockReviewAutoRulesController {
     private fun collectItemRows(cfg: AutoTradeConfig, type: StockItemType): List<String> {
         val ruleMap = if (type == StockItemType.WING) cfg.fighters else cfg.weapons
         val owned = playerOwnedIds(type)
-        val settings = Global.getSettings()
         val query = nameQuery.lowercase()
 
         val all = LinkedHashSet<String>()
@@ -397,6 +395,15 @@ class StockReviewAutoRulesController {
 
         val filtered = ArrayList<String>(all.size)
         for (id in all) {
+            // Skip ids that do not resolve to a spec of this tab's type. This guards against
+            // cross-typed entries from older bugs and stale ids from uninstalled mods, either
+            // of which would otherwise throw "spec not found" while rendering the tab.
+            val typeSpecExists = if (type == StockItemType.WING) {
+                StockItemSpecs.wingSpec(id) != null
+            } else {
+                StockItemSpecs.weaponSpec(id) != null
+            }
+            if (!typeSpecExists) continue
             val isOwned = owned.contains(id)
             val rule = ruleMap[id]
             val isRuled = rule != null && !rule.isEmpty()
@@ -422,7 +429,7 @@ class StockReviewAutoRulesController {
             }
             // Weapon-only filters: size + damage type
             if (type == StockItemType.WEAPON) {
-                val spec = settings?.getWeaponSpec(id)
+                val spec = StockItemSpecs.weaponSpec(id)
                 if (sizeFilter != AutoRulesSizeFilter.ALL) {
                     val s = spec?.size
                     val match = when (sizeFilter) {

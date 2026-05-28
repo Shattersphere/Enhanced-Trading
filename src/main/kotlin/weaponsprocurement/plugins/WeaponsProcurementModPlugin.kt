@@ -5,6 +5,7 @@ import com.fs.starfarer.api.EveryFrameScript
 import com.fs.starfarer.api.Global
 import org.apache.log4j.Logger
 import weaponsprocurement.autotrade.AutoTradeMarketListener
+import weaponsprocurement.autotrade.AutoTradeSubmarketListener
 import weaponsprocurement.lifecycle.StockReviewHotkeyScript
 import weaponsprocurement.lifecycle.WeaponsProcurementFixerCatalogUpdater
 
@@ -34,7 +35,9 @@ class WeaponsProcurementModPlugin : BaseModPlugin() {
         try {
             sector.listenerManager.removeListenerOfClass(AutoTradeMarketListener::class.java)
             sector.listenerManager.addListener(AutoTradeMarketListener())
-            LOG.info("WP_AUTOTRADE listener registered")
+            sector.listenerManager.removeListenerOfClass(AutoTradeSubmarketListener::class.java)
+            sector.listenerManager.addListener(AutoTradeSubmarketListener())
+            LOG.info("WP_AUTOTRADE listeners registered")
         } catch (t: Throwable) {
             LOG.warn("WP_AUTOTRADE listener registration failed", t)
         }

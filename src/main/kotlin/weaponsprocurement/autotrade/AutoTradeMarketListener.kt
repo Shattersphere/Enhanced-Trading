@@ -3,53 +3,55 @@ package weaponsprocurement.autotrade
 import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener
-import com.fs.starfarer.api.characters.PersonAPI
-import com.fs.starfarer.api.impl.campaign.ids.Submarkets
 import org.apache.log4j.Logger
 
 /**
- * Triggers a single [AutoTradeEngine.run] pass when the player opens a market dialog.
- * Dedupes via a transient marker so reopening the same market in one interaction does
- * not loop. The actual cargo mutation happens through [AutoTradeEngine] / its helpers.
+ * Scans for pending auto-trades when the player hails a market and shows an informational
+ * message naming where trades will apply. It does not mutate cargo: execution happens in the
+ * real trade screen via [AutoTradeSubmarketListener]. Begins/ends the shared
+ * [AutoTradeVisitState] so per-visit dedupe is correct.
  */
 class AutoTradeMarketListener : ColonyInteractionListener {
-    @Transient private var lastHandledMarketId: String? = null
+    @Transient private var lastNotifiedMarketId: String? = null
 
     override fun reportPlayerOpenedMarket(market: MarketAPI?) {
-        runOnce(market)
+        onMarketOpened(market)
     }
 
     override fun reportPlayerOpenedMarketAndCargoUpdated(market: MarketAPI?) {
-        runOnce(market)
+        onMarketOpened(market)
     }
 
     override fun reportPlayerClosedMarket(market: MarketAPI?) {
-        lastHandledMarketId = null
+        lastNotifiedMarketId = null
+        AutoTradeVisitState.endVisit()
     }
 
     override fun reportPlayerMarketTransaction(transaction: com.fs.starfarer.api.campaign.PlayerMarketTransaction?) {
         // no-op
     }
 
-    private fun runOnce(market: MarketAPI?) {
+    private fun onMarketOpened(market: MarketAPI?) {
         if (market == null) return
-        if (market.id != null && market.id == lastHandledMarketId) return
-        lastHandledMarketId = market.id
+        AutoTradeVisitState.beginVisit(market.id)
+        if (market.id != null && market.id == lastNotifiedMarketId) return
+        lastNotifiedMarketId = market.id
         try {
-            // Prime open and black submarkets so their cargo is current.
-            val open = market.getSubmarket(Submarkets.SUBMARKET_OPEN)
-            val black = market.getSubmarket(Submarkets.SUBMARKET_BLACK)
-            AutoTradeSubmarketAccess.prime(open)
-            AutoTradeSubmarketAccess.prime(black)
-
             val playerCargo = Global.getSector()?.playerFleet?.cargo
             AutoTradeRegistry.get().markSeenFromCargo(playerCargo)
 
-            val summary = AutoTradeEngine.run(market) ?: return
-            Global.getSector()?.campaignUI?.addMessage(summary)
+            val scan = AutoTradeEngine.scan(market) ?: return
+            Global.getSector()?.campaignUI?.addMessage(buildMessage(market, scan))
         } catch (t: Throwable) {
-            LOG.warn("Auto-trade listener pass failed", t)
+            LOG.warn("Auto-trade scan failed", t)
         }
+    }
+
+    private fun buildMessage(market: MarketAPI, scan: AutoTradeEngine.ScanResult): String {
+        val parts = ArrayList<String>()
+        if (scan.sellCount > 0) parts.add("${scan.sellCount} to sell")
+        if (scan.buySubmarketNames.isNotEmpty()) parts.add("buys at ${scan.buySubmarketNames.joinToString(", ")}")
+        return "Auto-trade pending @ ${market.name}: ${parts.joinToString("; ")}. Open a market to apply."
     }
 
     companion object {

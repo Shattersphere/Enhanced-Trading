@@ -27,9 +27,8 @@ object WeaponsProcurementConfig {
     private const val SETTING_TRADE_HOTKEY = "wp_trade_hotkey"
     private const val SETTING_ENABLE_DEBUG_UI = "wp_enable_debug_ui"
     private const val SETTING_AUTOTRADE_ENABLED = "wp_autotrade_enabled"
-    private const val SETTING_AUTOTRADE_SELL_BLACK = "wp_autotrade_sell_through_black"
-    private const val SETTING_AUTOTRADE_BUY_BLACK = "wp_autotrade_buy_through_black"
-    private const val SETTING_AUTOTRADE_BUY_HULLMODS_BLACK = "wp_autotrade_buy_hullmods_from_black"
+    private const val SETTING_AUTOTRADE_SUSPICION_SELL = "wp_autotrade_allow_suspicion_selling"
+    private const val SETTING_AUTOTRADE_SUSPICION_BUY = "wp_autotrade_allow_suspicion_buying"
     private const val SETTING_AUTOTRADE_BUY_UNKNOWN_HULLMODS = "wp_autotrade_buy_unknown_hullmods"
     private const val SETTING_AUTOTRADE_LEARN_HULLMODS = "wp_autotrade_learn_hullmods_on_buy"
     private const val SETTING_AUTOTRADE_CREDIT_FLOOR = "wp_autotrade_credit_floor"
@@ -233,9 +232,8 @@ object WeaponsProcurementConfig {
     @JvmStatic
     fun applyAutoTradeDefaults(config: AutoTradeConfig) {
         readBooleanSetting(SETTING_AUTOTRADE_ENABLED)?.let { config.enabled = it }
-        readBooleanSetting(SETTING_AUTOTRADE_SELL_BLACK)?.let { config.sellThroughBlack = it }
-        readBooleanSetting(SETTING_AUTOTRADE_BUY_BLACK)?.let { config.buyThroughBlack = it }
-        readBooleanSetting(SETTING_AUTOTRADE_BUY_HULLMODS_BLACK)?.let { config.buyHullmodsFromBlack = it }
+        readBooleanSetting(SETTING_AUTOTRADE_SUSPICION_SELL)?.let { config.allowSuspicionWhenSelling = it }
+        readBooleanSetting(SETTING_AUTOTRADE_SUSPICION_BUY)?.let { config.allowSuspicionWhenBuying = it }
         readBooleanSetting(SETTING_AUTOTRADE_BUY_UNKNOWN_HULLMODS)?.let { config.buyUnknownHullmods = it }
         readBooleanSetting(SETTING_AUTOTRADE_LEARN_HULLMODS)?.let { config.learnHullmodsOnBuy = it }
         readDoubleSetting(SETTING_AUTOTRADE_CREDIT_FLOOR)?.let {

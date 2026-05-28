@@ -1,31 +1,36 @@
 package weaponsprocurement.autotrade
 
 import com.fs.starfarer.api.Global
-import com.fs.starfarer.api.campaign.SubmarketPlugin
-import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.fs.starfarer.api.campaign.CampaignUIAPI.CoreUITradeMode
+import com.fs.starfarer.api.campaign.CoreUIAPI
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI
-import com.fs.starfarer.api.impl.campaign.ids.Factions
-import com.fs.starfarer.api.impl.campaign.ids.Submarkets
+import com.fs.starfarer.api.ui.HintPanelAPI
+import weaponsprocurement.stock.market.StockSubmarketAccess
 
 /**
- * Submarket accessibility helpers ported from AutoTrader. We delegate to the vanilla
- * submarket plugin's `isEnabled(null)` check whenever it tolerates a null UI; if it
- * insists on a real CoreUIAPI we fall back to a conservative manual heuristic.
+ * Generic submarket accessibility for the auto-trade hail scan.
+ *
+ * Rather than hard-coding open/black rules, this delegates to each submarket plugin's own
+ * `isEnabled(CoreUIAPI)` - the same decision the game UI uses - so it works for military
+ * markets (relationship-gated), storage, and arbitrary modded submarkets. The plugin's only
+ * `CoreUIAPI` dependency is the trade mode, which we derive from transponder state: a fleet
+ * running with its transponder off is in SNEAK mode (open/military markets disabled, only the
+ * black market reachable), otherwise OPEN.
  */
 object AutoTradeSubmarketAccess {
     @JvmStatic
-    fun isAccessible(market: MarketAPI?, submarketId: String): Boolean {
-        if (market == null) return false
-        val submarket = market.getSubmarket(submarketId) ?: return false
-        val plugin = submarket.plugin
-        if (plugin != null) {
-            try {
-                return plugin.isEnabled(null)
-            } catch (_: Throwable) {
-                // Plugin needed a real CoreUIAPI - fall through to the manual heuristic.
-            }
+    fun isAccessible(submarket: SubmarketAPI?): Boolean {
+        if (submarket == null) return false
+        if (StockSubmarketAccess.isNonTradeSubmarket(submarket.specId)) return false
+        val plugin = submarket.plugin ?: return false
+        if (plugin.isHidden) return false
+        val transponderOn = Global.getSector()?.playerFleet?.isTransponderOn == true
+        val mode = if (transponderOn) CoreUITradeMode.OPEN else CoreUITradeMode.SNEAK
+        return try {
+            plugin.isEnabled(StubCoreUi(mode))
+        } catch (_: RuntimeException) {
+            false
         }
-        return manualFallback(market, submarketId)
     }
 
     @JvmStatic
@@ -38,14 +43,8 @@ object AutoTradeSubmarketAccess {
         }
     }
 
-    private fun manualFallback(market: MarketAPI, submarketId: String): Boolean {
-        if (market.isPlayerOwned) return true
-        val freePort = market.isFreePort
-        val hostile = market.faction != null && market.faction.isHostileTo(Factions.PLAYER)
-        if (hostile && !freePort) return false
-        if (Submarkets.SUBMARKET_BLACK == submarketId) return true
-        if (freePort) return true
-        val playerFleet = Global.getSector()?.playerFleet
-        return playerFleet != null && playerFleet.isTransponderOn
+    private class StubCoreUi(private val mode: CoreUITradeMode) : CoreUIAPI {
+        override fun getTradeMode(): CoreUITradeMode = mode
+        override fun getHintPanel(): HintPanelAPI? = null
     }
 }

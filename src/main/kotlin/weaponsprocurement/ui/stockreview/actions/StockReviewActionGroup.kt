@@ -81,9 +81,8 @@ enum class StockReviewActionGroup(
     AUTO_RULES(
         "auto-rules controls",
         StockReviewAction.Type.AUTO_RULES_TOGGLE_ENABLED,
-        StockReviewAction.Type.AUTO_RULES_TOGGLE_SELL_BLACK,
-        StockReviewAction.Type.AUTO_RULES_TOGGLE_BUY_BLACK,
-        StockReviewAction.Type.AUTO_RULES_TOGGLE_HULLMODS_FROM_BLACK,
+        StockReviewAction.Type.AUTO_RULES_TOGGLE_SUSPICION_SELL,
+        StockReviewAction.Type.AUTO_RULES_TOGGLE_SUSPICION_BUY,
         StockReviewAction.Type.AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS,
         StockReviewAction.Type.AUTO_RULES_TOGGLE_LEARN_HULLMODS,
         StockReviewAction.Type.AUTO_RULES_ADJUST_CREDIT_FLOOR,

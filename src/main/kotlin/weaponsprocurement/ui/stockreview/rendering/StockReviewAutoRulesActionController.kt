@@ -20,9 +20,8 @@ class StockReviewAutoRulesActionController(
         StockReviewActionHandlerGroup.group(StockReviewActionGroup.AUTO_RULES) { action ->
             when (action.getType()) {
                 Type.AUTO_RULES_TOGGLE_ENABLED -> controller.handleToggleEnabled()
-                Type.AUTO_RULES_TOGGLE_SELL_BLACK -> controller.handleToggleSellBlack()
-                Type.AUTO_RULES_TOGGLE_BUY_BLACK -> controller.handleToggleBuyBlack()
-                Type.AUTO_RULES_TOGGLE_HULLMODS_FROM_BLACK -> controller.handleToggleHullmodsFromBlack()
+                Type.AUTO_RULES_TOGGLE_SUSPICION_SELL -> controller.handleToggleSuspicionSelling()
+                Type.AUTO_RULES_TOGGLE_SUSPICION_BUY -> controller.handleToggleSuspicionBuying()
                 Type.AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS -> controller.handleToggleBuyUnknownHullmods()
                 Type.AUTO_RULES_TOGGLE_LEARN_HULLMODS -> controller.handleToggleLearnHullmods()
                 Type.AUTO_RULES_ADJUST_CREDIT_FLOOR -> controller.handleAdjustCreditFloor(action.getQuantity())

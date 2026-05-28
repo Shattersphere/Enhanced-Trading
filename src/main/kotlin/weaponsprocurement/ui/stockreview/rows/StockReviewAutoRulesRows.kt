@@ -60,10 +60,9 @@ object StockReviewAutoRulesRows {
 
         // Global toggles
         rows.add(toggleRow("Auto-trade enabled", cfg.enabled, StockReviewAction.autoRulesToggleEnabled(), "Master switch for automatic buy/sell when opening a market."))
-        rows.add(toggleRow("Sell through black market", cfg.sellThroughBlack, StockReviewAction.autoRulesToggleSellBlack(), "Also consider the black market when selling. The black market is checked first; the open market still handles items in the rare case where a black market is not present. Black-market routing is usually forced whenever your transponder is off."))
-        rows.add(toggleRow("Buy through black market", cfg.buyThroughBlack, StockReviewAction.autoRulesToggleBuyBlack(), "Also buy from the black market when stocked. The black market is checked first; any remaining quantity is still pulled from the open market. Black-market routing is usually forced whenever your transponder is off."))
+        rows.add(toggleRow("Allow suspicion when selling", cfg.allowSuspicionWhenSelling, StockReviewAction.autoRulesToggleSuspicionSelling(), "Allow auto-sells to use the black market while your transponder is on, raising smuggling suspicion. With your transponder off you are anonymous, so the black market is always used regardless of this toggle."))
+        rows.add(toggleRow("Allow suspicion when buying", cfg.allowSuspicionWhenBuying, StockReviewAction.autoRulesToggleSuspicionBuying(), "Allow auto-buys (weapons, fighter LPCs, and hullmods) to use the black market while your transponder is on, raising smuggling suspicion. With your transponder off the black market is the only market, so buys there happen regardless."))
         rows.add(toggleRow("Buy unknown hullmods", cfg.buyUnknownHullmods, StockReviewAction.autoRulesToggleBuyUnknownHullmods(), "Automatically purchase modspecs your character does not already know."))
-        rows.add(toggleRow("Buy hullmods from black market", cfg.buyHullmodsFromBlack, StockReviewAction.autoRulesToggleHullmodsFromBlack(), "Also scan the black market when buying unknown hullmods."))
         rows.add(toggleRow("Learn hullmods on purchase", cfg.learnHullmodsOnBuy, StockReviewAction.autoRulesToggleLearnHullmods(), "If on, purchased hullmods are added to your known list immediately. If off, the modspec is added to cargo as a learnable item."))
 
         // Credit floor
@@ -324,7 +323,7 @@ object StockReviewAutoRulesRows {
                     initialText = sellInitial,
                     blurText = "-",
                     tooltip = "Sell whenever you own more than this many. Blank = no rule.",
-                ) { committed -> controller.handleCommitSellAbove(rawId, committed) },
+                ) { committed -> controller.handleCommitSellAbove(itemKey, committed) },
                 infoCell("Buy<", THRESHOLD_LABEL_WIDTH, StockReviewStyle.CELL_BACKGROUND, null),
                 textFieldCell(
                     key = "autoRules:buyBelow:$scope:$rawId",
@@ -332,8 +331,8 @@ object StockReviewAutoRulesRows {
                     initialText = buyInitial,
                     blurText = "-",
                     tooltip = "Buy whenever you own fewer than this many. Blank = no rule.",
-                ) { committed -> controller.handleCommitBuyBelow(rawId, committed) },
-                actionCell("Clear", CLEAR_WIDTH, StockReviewStyle.CANCEL_BUTTON, StockReviewAction.autoRulesClearRule(rawId), "Remove the rule for this item."),
+                ) { committed -> controller.handleCommitBuyBelow(itemKey, committed) },
+                actionCell("Clear", CLEAR_WIDTH, StockReviewStyle.CANCEL_BUTTON, StockReviewAction.autoRulesClearRule(itemKey), "Remove the rule for this item."),
             ),
         )
     }
