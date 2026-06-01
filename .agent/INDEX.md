@@ -17,3 +17,8 @@ Use this map before loading large or historical docs. The active docs stay short
 | `.agent/archive/INDEX.md` | Archive map | active | Searchable index of deep dives, history, and retired plans, with status notes for stale historical guidance. | A task may depend on historical/deep-dive knowledge. |
 
 Do not read every archive file by default. Open `.agent/archive/INDEX.md`, check the status/read-when notes, then read only the matching deep dive. Historical badge docs are retained for context only; active badge work belongs in the standalone `D:\Sean Mods\Weapon Badges` repo.
+
+
+## Shared Libraries
+
+- `.agent/SHARED_LIBRARIES.md`: read before using, inspecting, or improving Shatter Lib, or before dependency-reference work involving MagicLib, LazyLib, or LunaLib.

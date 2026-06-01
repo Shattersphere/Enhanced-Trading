@@ -102,3 +102,8 @@ Do not read every archive file at session start. Search first, then open only th
 - Do not reintroduce visible seller-detail/source-specific local buy rows without a design pass.
 - Treat compile success and jar parity as insufficient proof for runtime UI, LunaLib, or campaign behavior.
 - Keep dangerous validation hooks disabled by default.
+
+
+## Shared Libraries
+
+Before copying/reimplementing reusable Starsector helpers or changing Shatter Lib, MagicLib, LazyLib, or LunaLib integration, read `.agent/SHARED_LIBRARIES.md`. Shatter Lib may be edited only for generic, consumer-neutral improvements; MagicLib, LazyLib, and LunaLib are read-only dependency libraries unless the user gives separate explicit instructions.
