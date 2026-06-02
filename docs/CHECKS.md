@@ -1,0 +1,41 @@
+# Checks
+
+A lightweight validation command menu. Use the smallest check that gives useful evidence for the task. Do not run every check by default.
+
+## Command Menu
+
+| Check | Command | Use when | Evidence to report | Cost/risk |
+|---|---|---|---|---|
+| Template/project hygiene | `python scripts/check-template-state.py --initialized` | Template sync, doc-system edits, governance file changes | Pass/fail and warnings | low |
+| Repo map freshness | `python scripts/update-repo-map.py --write` then review diff | Tracked structure changes | Whether `docs/REPO_MAP.md` changed | low |
+| Public doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | Public docs changes | Pass/fail | low |
+| Private doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | Agent/private docs changes | Pass/fail | low |
+| Diff whitespace | `git diff --check` | Any source/docs change before commit | Pass/fail | low |
+| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | Runtime/source changes | Build passed/failed; key error if failed | medium; requires Starsector path |
+| Build environment | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | Dependency/path checks | Resolved Starsector, LunaLib, LazyLib paths | low/medium; requires local install |
+| GUI button style | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | GUI/button rendering changes | Pass/fail | low |
+| Kotlin/source boundary | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | Source/package/build boundary changes | Pass/fail and skipped jar/export checks | low/medium |
+| Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | Runtime deploy troubleshooting | Queue/lock/staging status | low; requires Starsector path |
+| Deploy parity | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | Runtime changes when live parity matters | Current/stale source/live state | medium; requires Starsector path |
+| Runtime deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | Runtime changes that need live validation | Deploy or queued deploy result | high; writes live mod target |
+| Live GUI classes | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1` | After runtime deploys | Live jar class validation | medium |
+| Public export | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\export-public.ps1` | Explicit public release/export work | Export path and leak/boundary status | medium |
+| Rollback diagnostics | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass` | Manual forced rollback validation | Pass/fail by failure step | high; requires runtime log evidence |
+
+## Tier Guidance
+
+- Fast edit: run no check or one cheap targeted check if useful.
+- Standard change: run the relevant focused build/test/lint/validator for the touched surface.
+- Deep/risky/release work: plan first; run focused checks during development and broader checks at the end of a cohesive batch.
+- Release boundary: run source checks, package/export checks, leak checks, and any required runtime/deploy validation.
+
+## Evidence Rules
+
+Report the exact check name or command family, pass/fail/partial status, key failure message if failed, and what remains unverified.
+
+Do not claim build, deploy, runtime, or in-game evidence unless that command or manual check actually ran.
+
+## Missing Coverage
+
+- Runtime UI, LunaLib behavior, campaign interactions, rollback safety, and Starsector classloader behavior require in-game evidence; compile and jar parity are not enough.
+- No dedicated unit-test suite is declared in the current Gradle build.

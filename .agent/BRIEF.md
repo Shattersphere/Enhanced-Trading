@@ -1,6 +1,6 @@
 # Enhanced Trading Brief
 
-Last updated: 2026-05-19
+Last updated: 2026-06-03
 
 ## Current State
 
@@ -12,14 +12,14 @@ The source tree is fully migrated to Gradle/Kotlin. `build.ps1` remains the norm
 
 The item-trading popup path is solid and functional as the current baseline. Ship trading is local-only behind the `Trade: Items` / `Trade: Ships` toggle; the current 4-column by 5-row ship grid layout is the user-confirmed solid baseline to preserve if this GUI regresses.
 
-For modder handoff, `HANDOVER.md` is now the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
+For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
-The worktree currently contains broad in-progress runtime/UI changes around ship trading, tooltip polish, debug UI, and Weapon Badges cleanup. Treat this branch as functional but not a clean release boundary until the changed files are reviewed as a batch.
+The repo has been synced with the generic template doc system. Exact facts now live in `docs/PROJECT_FACTS.md`, validation commands in `docs/CHECKS.md`, and generated orientation in `docs/REPO_MAP.md`.
 
 ## Known-Good Source State
 
 - Current branch: `main`
-- Recent source baseline before ship-tooltip polish: `5a6ac8d` (`Polish ship grid layout and tooltip`)
+- Template-sync baseline before this docs update: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
 ## Commands
@@ -28,6 +28,7 @@ Docs-only:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
+python scripts/check-template-state.py --initialized
 git diff --check
 ```
 
@@ -66,4 +67,4 @@ git diff --check
 
 ## Next Best Step
 
-For code/runtime work, inspect the short active `PLANS.md` and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.
+For code/runtime work, inspect the short active `PLANS.md`, `docs/PROJECT_FACTS.md`, `docs/CHECKS.md`, and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. For shared-library work, read `.agent/SHARED_LIBRARIES.md` before inspecting Shatter Lib. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.

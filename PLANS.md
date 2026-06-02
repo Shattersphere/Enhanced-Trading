@@ -9,7 +9,7 @@ This file is active work only. Completed migrations, old public-release cleanup 
 - Source modes for item trading are intentionally different: Local mutates the current market, Sector Market drains real remote cargo, and Fixer's Market is virtual catalog stock.
 - Ship trading is not wired into Sector Market or Fixer's Market.
 - Cargo-cell weapon/LPC badges live in the standalone private `D:\Sean Mods\Weapon Badges` repo. Do not reintroduce badge helpers, generated badge sprites, count bridges, or `CargoStackView` patching tools here.
-- The worktree may contain broad in-progress UI, tooltip, debug, data, graphics, and jar changes. Treat it as functional but not release-clean until the current diff is reviewed and validated as a batch.
+- Template-synced project facts and checks now live in `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`. Use those as the source of truth for commands, paths, dependencies, Git mode, and shared-library authorization.
 
 ## Active Work
 

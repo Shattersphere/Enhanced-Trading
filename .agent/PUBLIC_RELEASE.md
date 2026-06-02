@@ -10,7 +10,7 @@ Never publish this file. It describes private-to-public export rules for keeping
 
 - Public organization: `Shattersphere-Mods`
 - Intended public product: clean Enhanced Trading GUI only.
-- Private source of truth: `D:\Sean Mods\Enhanced Trading`
+- Private source of truth: `D:\Sean Code Projects\Starsector Projects\Enhanced Trading`
 - Public release output must not be a blind mirror of this private repo.
 
 ## Current Public-Release Position

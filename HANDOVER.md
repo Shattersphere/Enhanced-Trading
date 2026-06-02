@@ -17,7 +17,7 @@ Important boundary: cargo-cell weapon/LPC badges are no longer part of this repo
 
 ## Current State
 
-- Repo path: `D:\Sean Mods\Enhanced Trading`.
+- Repo path: `D:\Sean Code Projects\Starsector Projects\Enhanced Trading`.
 - Mod identity: `enhanced_trading`.
 - Main plugin: `weaponsprocurement.plugins.WeaponsProcurementModPlugin`.
 - Runtime jar: `jars/enhanced-trading.jar`.
@@ -28,11 +28,14 @@ Important boundary: cargo-cell weapon/LPC badges are no longer part of this repo
 
 The item-trading popup is the stable product baseline. Ship trading exists as a local-only first implementation behind the `Trade: Items` / `Trade: Ships` toggle. The 4-column by 5-row ship grid is a user-confirmed visual baseline to preserve. The ship tooltip is a public-API approximation of vanilla; treat further polish as visual/runtime work, not as a simple static refactor.
 
-This repo currently has a dirty worktree with in-progress UI, tooltip, ship-trading, config, data, graphics, and jar changes. Do not assume `main` is a clean release boundary until you inspect `git status --short --branch` and the current diff.
+Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation commands live in `docs/CHECKS.md`; generated orientation lives in `docs/REPO_MAP.md`. Do not assume `main` is a release boundary until you inspect `git status --short --branch`, `PLANS.md`, and the current diff.
 
 ## Document Map
 
 - `AGENTS.md`: repo-local rules, commands, deploy policy, and archive map.
+- `docs/PROJECT_FACTS.md`: exact paths, commands, dependencies, Git mode, deploy target, compatibility risks, and shared-library authorization.
+- `docs/CHECKS.md`: validation command menu and evidence rules.
+- `docs/REPO_MAP.md`: generated path inventory and major repo areas.
 - `.agent/BRIEF.md`: current status, risks, and next best step.
 - `.agent/ARCHITECTURE_MAP.md`: subsystem diagrams and package map.
 - `.agent/INDEX.md`: doc index.
@@ -40,6 +43,7 @@ This repo currently has a dirty worktree with in-progress UI, tooltip, ship-trad
 - `.agent/archive/INDEX.md`: archive/deep-dive index.
 - `README.md`, `CONFIG.md`, `PACKAGING.md`, `CHANGELOG.md`: player/release-facing docs.
 - `PLANS.md`: active plan and deferred work.
+- `.agent/SHARED_LIBRARIES.md`: Shatter Lib edit gate and read-only dependency-library workflow.
 
 Before large or risky work, start with `AGENTS.md`, `.agent/BRIEF.md`, and `.agent/ARCHITECTURE_MAP.md`. Then open the relevant archive deep dive through `.agent/archive/INDEX.md`.
 
