@@ -24,7 +24,7 @@ class WimGuiTooltip(text: String?) : TooltipMakerAPI.TooltipCreator {
     }
 
     companion object {
-        private const val MAX_SCREEN_HEIGHT_FRACTION = 0.85f
+        private const val MAX_SCREEN_HEIGHT_FRACTION = 0.95f
         private const val FALLBACK_SCREEN_HEIGHT = 1080f
         private const val TEXT_LINE_HEIGHT = 22f
         private const val WIDTH = 320f
@@ -33,7 +33,10 @@ class WimGuiTooltip(text: String?) : TooltipMakerAPI.TooltipCreator {
         fun hasText(tooltip: String?): Boolean = tooltip != null && tooltip.trim().isNotEmpty()
 
         @JvmStatic
-        fun maxTooltipHeight(lineHeight: Float = TEXT_LINE_HEIGHT): Float {
+        fun maxTooltipHeight(): Float = maxTooltipHeight(TEXT_LINE_HEIGHT)
+
+        @JvmStatic
+        fun maxTooltipHeight(lineHeight: Float): Float {
             val screenHeight = try {
                 Global.getSettings().screenHeight
             } catch (_: RuntimeException) {
@@ -46,7 +49,10 @@ class WimGuiTooltip(text: String?) : TooltipMakerAPI.TooltipCreator {
         }
 
         @JvmStatic
-        fun capHeight(height: Float, lineHeight: Float = TEXT_LINE_HEIGHT): Float =
+        fun capHeight(height: Float): Float = capHeight(height, TEXT_LINE_HEIGHT)
+
+        @JvmStatic
+        fun capHeight(height: Float, lineHeight: Float): Float =
             minOf(maxTooltipHeight(lineHeight), maxOf(1f, height))
 
         private fun cappedText(text: String, tooltip: TooltipMakerAPI): String {

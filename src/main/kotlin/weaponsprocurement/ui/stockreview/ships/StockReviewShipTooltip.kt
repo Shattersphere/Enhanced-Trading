@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import weaponsprocurement.ui.WimGuiPanelPlugin
+import weaponsprocurement.ui.WimGuiText
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltipPanel
 import java.awt.Color
 import java.util.Locale
@@ -178,7 +179,11 @@ class StockReviewShipTooltip(
         lineHeight: Float,
         maxLines: Int,
     ): Int {
-        val lines = StockReviewTooltipPanel.wrapLines(parent, text, color, width, lineHeight, maxLines)
+        val usableWidth = StockReviewTooltipPanel.usableTextWidth(width, Alignment.LMID)
+        val measure = parent.createUIElement(usableWidth, lineHeight, false)
+        measure.setParaFontDefault()
+        measure.setParaFontColor(color)
+        val lines = WimGuiText.wrapToWidth(text, measure, usableWidth, maxLines)
         for (i in lines.indices) {
             StockReviewTooltipPanel.addLabel(parent, lines[i], color, x, y + i * lineHeight, width, lineHeight, Alignment.LMID)
         }

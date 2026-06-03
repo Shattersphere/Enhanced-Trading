@@ -28,10 +28,16 @@ object StockReviewTooltipPanel {
     val SHIP_BORDER: Color = Color(100, 185, 200, 255)
 
     @JvmStatic
-    fun maxTooltipHeight(lineHeight: Float = WimGuiStyle.TEXT_LINE_HEIGHT): Float = WimGuiTooltip.maxTooltipHeight(lineHeight)
+    fun maxTooltipHeight(): Float = WimGuiTooltip.maxTooltipHeight()
 
     @JvmStatic
-    fun capHeight(height: Float, lineHeight: Float = WimGuiStyle.TEXT_LINE_HEIGHT): Float = WimGuiTooltip.capHeight(height, lineHeight)
+    fun maxTooltipHeight(lineHeight: Float): Float = WimGuiTooltip.maxTooltipHeight(lineHeight)
+
+    @JvmStatic
+    fun capHeight(height: Float): Float = WimGuiTooltip.capHeight(height)
+
+    @JvmStatic
+    fun capHeight(height: Float, lineHeight: Float): Float = WimGuiTooltip.capHeight(height, lineHeight)
 
     @JvmStatic
     fun addLabel(

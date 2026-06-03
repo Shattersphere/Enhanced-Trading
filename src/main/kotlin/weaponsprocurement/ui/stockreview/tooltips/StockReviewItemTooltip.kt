@@ -78,7 +78,6 @@ class StockReviewItemTooltip private constructor(
             StockReviewTooltipPanel.maxTooltipHeight(WING_LINE_HEIGHT),
             WimGuiPanelPlugin(StockReviewTooltipPanel.ITEM_BACKGROUND, StockReviewTooltipPanel.ITEM_BORDER),
         )
-        val descriptionLines = measuredPanelLines(panel, layout.descriptionText, WING_CONTENT_WIDTH, WING_LINE_HEIGHT, WING_DESCRIPTION_MAX_LINES)
         val systemLines = measuredPanelLines(panel, layout.systemText, WING_LOADOUT_VALUE_WIDTH, WING_LOADOUT_ROW_HEIGHT, WING_LOADOUT_MAX_LINES)
         val armamentLines = measuredPanelLines(panel, layout.armamentsText, WING_LOADOUT_VALUE_WIDTH, WING_LOADOUT_ROW_HEIGHT, WING_LOADOUT_MAX_LINES)
         var y = WING_PAD_TOP
@@ -86,16 +85,7 @@ class StockReviewItemTooltip private constructor(
         y += 34f
         addRichPanelLine(panel, "Design type:", layout.manufacturer, y)
         y += 32f
-        addPanelLines(
-            panel,
-            descriptionLines,
-            textColor(),
-            WING_PAD_X,
-            y,
-            WING_CONTENT_WIDTH,
-            WING_LINE_HEIGHT,
-        )
-        y += maxOf(1, descriptionLines.size) * WING_LINE_HEIGHT + 10f
+        y += addWingDescription(panel, layout.descriptionText, y) + 10f
         priceLabel()?.let { price ->
             addInlineHighlight(panel, "Sells for:", price, " per unit.", y)
             y += WING_LINE_HEIGHT
@@ -708,6 +698,26 @@ class StockReviewItemTooltip private constructor(
                 WING_LOADOUT_ROW_HEIGHT,
             )
             return y + maxOf(1, lines.size) * WING_LOADOUT_ROW_HEIGHT
+        }
+
+        private fun addWingDescription(panel: CustomPanelAPI, text: String, y: Float): Float {
+            if (!hasText(text)) {
+                return WING_LINE_HEIGHT
+            }
+            val content = panel.createUIElement(WING_CONTENT_WIDTH, WING_MAX_HEIGHT, false)
+            content.setParaFontDefault()
+            content.setParaFontColor(textColor())
+            val paragraphs = text.trim()
+                .split(Regex("\\n\\s*\\n"))
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+            for (index in paragraphs.indices) {
+                content.addPara(tooltipFormat(paragraphs[index]), if (index == 0) 0f else SMALL_PAD, textColor())
+            }
+            val height = maxOf(WING_LINE_HEIGHT, content.heightSoFar)
+            content.position.setSize(WING_CONTENT_WIDTH, height)
+            panel.addUIElement(content).inTL(WING_PAD_X, y)
+            return height
         }
 
         private fun addRichPanelLine(panel: CustomPanelAPI, prefix: String, value: String, y: Float) {
