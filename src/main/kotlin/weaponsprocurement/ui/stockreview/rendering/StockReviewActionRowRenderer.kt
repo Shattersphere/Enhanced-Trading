@@ -29,19 +29,18 @@ class StockReviewActionRowRenderer private constructor() {
                 StockReviewActionRowContext(snapshot, state),
                 BUTTON_FACTORY,
             )
-            if (actionButtons.isEmpty()) {
-                return
+            if (actionButtons.isNotEmpty()) {
+                WimGuiModalActionRow.add(
+                    root,
+                    modeSpec.modal,
+                    0f,
+                    0f,
+                    StockReviewStyle.ACTION_BUTTON_HEIGHT,
+                    StockReviewStyle.BUTTON_GAP,
+                    actionButtons,
+                    buttons,
+                )
             }
-            WimGuiModalActionRow.add(
-                root,
-                modeSpec.modal,
-                0f,
-                0f,
-                StockReviewStyle.ACTION_BUTTON_HEIGHT,
-                StockReviewStyle.BUTTON_GAP,
-                actionButtons,
-                buttons,
-            )
             if (state.isShipTrading()) {
                 StockReviewShipHullFilterInput.render(root, state)
             }
