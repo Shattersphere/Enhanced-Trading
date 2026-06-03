@@ -56,6 +56,8 @@ enum class StockReviewActionGroup(
         StockReviewAction.Type.TOGGLE_FILTER_GROUP,
         StockReviewAction.Type.TOGGLE_FILTER,
         StockReviewAction.Type.TOGGLE_SHIP_SIZE_FILTER,
+        StockReviewAction.Type.CLEAR_ITEM_SEARCH,
+        StockReviewAction.Type.CLEAR_SHIP_HULL_FILTER,
         StockReviewAction.Type.RESET_FILTERS,
     ),
     DEBUG_MODE(

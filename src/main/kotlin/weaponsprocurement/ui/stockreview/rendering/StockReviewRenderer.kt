@@ -52,6 +52,8 @@ class StockReviewRenderer :
         colorDebugTargetIndex: Int,
         colorDebugDraft: Color?,
         colorDebugPersistent: Boolean,
+        itemSearchFocused: Boolean,
+        shipHullFilterFocused: Boolean,
         focusedShipFilterField: StockReviewShipFilterField?,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
@@ -95,7 +97,7 @@ class StockReviewRenderer :
             StockReviewHeaderRenderer.render(root, snapshot, state, modeSpec, colorDebugTargetIndex, colorDebugDraft)
         }
         if (modeSpec.hasTradeActionRow()) {
-            StockReviewActionRowRenderer.render(root, snapshot, state, modeSpec, buttons)
+            StockReviewActionRowRenderer.render(root, snapshot, state, modeSpec, itemSearchFocused, shipHullFilterFocused, buttons)
         }
         if (screenMode == StockReviewScreenMode.TRADE && state.isShipTrading()) {
             val result = StockReviewShipGridRenderer.render(root, shipSnapshot, state, pendingShipTrades, buttons)
@@ -230,6 +232,8 @@ class StockReviewRenderer :
                 colorDebugTargetIndex,
                 colorDebugDraft,
                 colorDebugPersistent,
+                false,
+                false,
                 null,
                 ignoredButtons,
             )

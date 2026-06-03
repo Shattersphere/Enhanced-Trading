@@ -21,6 +21,7 @@ class StockReviewState : WimGuiScrollableListState {
     private var initialCargoCapacity = -1f
     private var contentRevision = 0
     private var tradeKind = StockReviewTradeKind.ITEMS
+    private var itemSearch = ""
     private var shipHullFilter = ""
 
     constructor(config: StockReviewConfig) {
@@ -41,6 +42,7 @@ class StockReviewState : WimGuiScrollableListState {
         initialCargoCapacity = source.initialCargoCapacity
         contentRevision = source.contentRevision
         tradeKind = source.tradeKind
+        itemSearch = source.itemSearch
         shipHullFilter = source.shipHullFilter
     }
 
@@ -82,7 +84,7 @@ class StockReviewState : WimGuiScrollableListState {
     }
 
     fun getActiveFilters(): Set<StockReviewFilter> = filters.getActiveFilters()
-    fun getActiveFilterCount(): Int = filters.getActiveFilterCount()
+    fun getActiveFilterCount(): Int = filters.getActiveFilterCount() + if (itemSearch.isBlank()) 0 else 1
 
     fun clearFilters() {
         if (filters.clearFilters()) {
@@ -180,8 +182,34 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun getShipHullFilter(): String = shipHullFilter
 
+    fun getItemSearch(): String = itemSearch
+
+    fun setItemSearch(value: String?) {
+        val normalized = normalizeSearchText(value)
+        if (itemSearch == normalized) {
+            return
+        }
+        itemSearch = normalized
+        listScrollOffset = 0
+        markContentChanged()
+    }
+
+    fun appendItemSearch(char: Char) {
+        if (itemSearch.length >= MAX_SEARCH_TEXT_LENGTH || !isSearchTextChar(char)) {
+            return
+        }
+        setItemSearch(itemSearch + char)
+    }
+
+    fun backspaceItemSearch() {
+        if (itemSearch.isEmpty()) {
+            return
+        }
+        setItemSearch(itemSearch.substring(0, itemSearch.length - 1))
+    }
+
     fun setShipHullFilter(value: String?) {
-        val normalized = normalizeShipHullFilter(value)
+        val normalized = normalizeSearchText(value)
         if (shipHullFilter == normalized) {
             return
         }
@@ -191,7 +219,7 @@ class StockReviewState : WimGuiScrollableListState {
     }
 
     fun appendShipHullFilter(char: Char) {
-        if (shipHullFilter.length >= MAX_SHIP_HULL_FILTER_LENGTH || !isShipHullFilterChar(char)) {
+        if (shipHullFilter.length >= MAX_SEARCH_TEXT_LENGTH || !isSearchTextChar(char)) {
             return
         }
         setShipHullFilter(shipHullFilter + char)
@@ -246,15 +274,15 @@ class StockReviewState : WimGuiScrollableListState {
         if (changed) markContentChanged()
     }
 
-    private fun normalizeShipHullFilter(value: String?): String =
+    private fun normalizeSearchText(value: String?): String =
         (value ?: "")
-            .filter(::isShipHullFilterChar)
-            .take(MAX_SHIP_HULL_FILTER_LENGTH)
+            .filter(::isSearchTextChar)
+            .take(MAX_SEARCH_TEXT_LENGTH)
 
-    private fun isShipHullFilterChar(char: Char): Boolean =
+    private fun isSearchTextChar(char: Char): Boolean =
         char.isLetterOrDigit() || char == ' ' || char == '-' || char == '_' || char == '\'' || char == '.'
 
     companion object {
-        private const val MAX_SHIP_HULL_FILTER_LENGTH = 40
+        private const val MAX_SEARCH_TEXT_LENGTH = 40
     }
 }

@@ -1,13 +1,12 @@
-package weaponsprocurement.ui.stockreview.ships
+package weaponsprocurement.ui.stockreview.rendering
 
 import com.fs.starfarer.api.input.InputEventAPI
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import weaponsprocurement.ui.WimGuiButtonBinding
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.rendering.StockReviewSearchInputSupport
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 
-object StockReviewShipHullFilterInput {
+object StockReviewItemSearchInput {
     @JvmStatic
     fun render(
         root: CustomPanelAPI,
@@ -15,7 +14,7 @@ object StockReviewShipHullFilterInput {
         focused: Boolean,
         buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ) {
-        StockReviewSearchInputSupport.renderShipHullSearch(root, state, focused, buttons)
+        StockReviewSearchInputSupport.renderItemSearch(root, state, focused, buttons)
     }
 
     @JvmStatic
@@ -25,5 +24,5 @@ object StockReviewShipHullFilterInput {
         state: StockReviewState,
         focused: Boolean,
     ): StockReviewSearchInputSupport.Result =
-        StockReviewSearchInputSupport.processShipHullSearch(events, root, state, focused)
+        StockReviewSearchInputSupport.processItemSearch(events, root, state, focused)
 }

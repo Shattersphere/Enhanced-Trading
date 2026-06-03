@@ -13,6 +13,7 @@ import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
 import java.awt.Color
 import java.util.Collections
+import java.util.Locale
 
 /**
  * Item stock category sections for the main item-trade view. Rows respect active filters,
@@ -33,7 +34,7 @@ class StockReviewStockCategorySection private constructor(
         itemType: StockItemType,
     ): Int {
         val allRecords = snapshot?.getRecords(itemType, category) ?: emptyList()
-        val records = filteredRecords(allRecords, state.getActiveFilters())
+        val records = filteredRecords(allRecords, state.getActiveFilters(), state.getItemSearch())
         val expanded = state.isExpanded(itemType, category)
         return StockReviewListSection.add(
             rows,
@@ -60,17 +61,50 @@ class StockReviewStockCategorySection private constructor(
     private fun filteredRecords(
         records: List<WeaponStockRecord>?,
         activeFilters: Set<StockReviewFilter>?,
+        searchQuery: String?,
     ): List<WeaponStockRecord> {
-        if (records == null || records.isEmpty() || StockReviewFilters.count(activeFilters) <= 0) {
+        if (records == null || records.isEmpty()) {
             return records ?: emptyList()
+        }
+        val terms = searchTerms(searchQuery)
+        if (StockReviewFilters.count(activeFilters) <= 0 && terms.isEmpty()) {
+            return records
         }
         val result = ArrayList<WeaponStockRecord>()
         for (record in records) {
-            if (StockReviewFilters.matches(record, activeFilters)) {
+            if (StockReviewFilters.matches(record, activeFilters) && matchesSearch(record, terms)) {
                 result.add(record)
             }
         }
         return result
+    }
+
+    private fun searchTerms(searchQuery: String?): List<String> =
+        searchQuery
+            ?.lowercase(Locale.ROOT)
+            ?.split(Regex("\\s+"))
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
+
+    private fun matchesSearch(record: WeaponStockRecord, terms: List<String>): Boolean {
+        if (terms.isEmpty()) {
+            return true
+        }
+        val searchable = listOfNotNull(
+            record.displayName,
+            record.displayNameWithFixerMarker,
+            record.itemId,
+            record.itemKey,
+            record.itemType.sectionLabel,
+            record.itemType.singularLabel,
+            record.sizeLabel,
+            record.typeLabel,
+            record.primaryRoleLabel,
+            record.damageTypeLabel,
+            record.fixerRarityLabel,
+            record.fixerAvailabilityLabel,
+        ).joinToString(" ").lowercase(Locale.ROOT)
+        return terms.all { searchable.contains(it) }
     }
 
     private fun categoryHeading(

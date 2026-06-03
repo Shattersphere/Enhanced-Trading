@@ -19,6 +19,8 @@ class StockReviewActionRowRenderer private constructor() {
             snapshot: WeaponStockSnapshot,
             state: StockReviewState,
             modeSpec: StockReviewModeSpec,
+            itemSearchFocused: Boolean,
+            shipHullFilterFocused: Boolean,
             buttons: MutableList<WimGuiButtonBinding<StockReviewAction>>,
         ) {
             if (modeSpec.actionRowKind != StockReviewActionRowKind.TRADE_CONTROLS) {
@@ -42,7 +44,9 @@ class StockReviewActionRowRenderer private constructor() {
                 )
             }
             if (state.isShipTrading()) {
-                StockReviewShipHullFilterInput.render(root, state)
+                StockReviewShipHullFilterInput.render(root, state, shipHullFilterFocused, buttons)
+            } else {
+                StockReviewItemSearchInput.render(root, state, itemSearchFocused, buttons)
             }
         }
     }

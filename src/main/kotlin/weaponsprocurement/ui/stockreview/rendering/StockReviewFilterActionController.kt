@@ -25,12 +25,15 @@ class StockReviewFilterActionController(
                 Type.TOGGLE_FILTER_GROUP -> state.toggle(action.getFilterGroup())
                 Type.TOGGLE_FILTER -> state.toggleFilter(action.getFilter())
                 Type.TOGGLE_SHIP_SIZE_FILTER -> state.toggleShipSizeFilter(action.getShipSizeFilter())
+                Type.CLEAR_ITEM_SEARCH -> state.setItemSearch("")
+                Type.CLEAR_SHIP_HULL_FILTER -> state.setShipHullFilter("")
                 Type.RESET_FILTERS -> {
                     if (state.isShipTrading()) {
                         state.clearShipFilters()
                         state.setShipHullFilter("")
                     } else {
                         state.clearFilters()
+                        state.setItemSearch("")
                     }
                 }
                 else -> return@group

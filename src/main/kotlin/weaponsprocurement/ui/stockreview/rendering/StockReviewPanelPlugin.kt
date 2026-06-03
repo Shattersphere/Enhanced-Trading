@@ -70,6 +70,7 @@ class StockReviewPanelPlugin(
     private val execution: StockReviewExecutionController
     private val shipExecution: StockReviewShipExecutionController
     private val tradeActionDispatcher: StockReviewTradeActionDispatcher
+    private var itemSearchFocused = false
     private var shipHullFilterFocused = false
     private var focusedShipFilterField: StockReviewShipFilterField? = null
 
@@ -104,6 +105,7 @@ class StockReviewPanelPlugin(
 
     override fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean {
         if (modes.currentScreenMode() == StockReviewScreenMode.FILTERS && state.isShipTrading()) {
+            itemSearchFocused = false
             shipHullFilterFocused = false
             val result = StockReviewShipFilterModal.process(
                 events,
@@ -117,14 +119,20 @@ class StockReviewPanelPlugin(
             return result.changed
         }
         focusedShipFilterField = null
-        if (!state.isShipTrading()) {
-            val wasFocused = shipHullFilterFocused
+        if (modes.currentScreenMode() != StockReviewScreenMode.TRADE) {
+            val wasFocused = itemSearchFocused || shipHullFilterFocused
+            itemSearchFocused = false
             shipHullFilterFocused = false
             return wasFocused
         }
-        if (modes.currentScreenMode() != StockReviewScreenMode.TRADE) {
-            return false
+        if (!state.isShipTrading()) {
+            val wasFocused = shipHullFilterFocused
+            shipHullFilterFocused = false
+            val result = StockReviewItemSearchInput.process(events, root, state, itemSearchFocused)
+            itemSearchFocused = result.focused
+            return wasFocused || result.changed
         }
+        itemSearchFocused = false
         val result = StockReviewShipHullFilterInput.process(events, root, state, shipHullFilterFocused)
         shipHullFilterFocused = result.focused
         return result.changed
@@ -156,6 +164,8 @@ class StockReviewPanelPlugin(
             modes.getColorDebugTargetIndex(),
             modes.currentColorDebugDraft(),
             modes.isColorDebugPersistent(),
+            itemSearchFocused,
+            shipHullFilterFocused,
             focusedShipFilterField,
             buttonBindings,
         )

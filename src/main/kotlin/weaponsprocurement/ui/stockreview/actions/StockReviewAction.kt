@@ -44,6 +44,8 @@ class StockReviewAction private constructor(
         TOGGLE_FILTER_GROUP,
         TOGGLE_FILTER,
         TOGGLE_SHIP_SIZE_FILTER,
+        CLEAR_ITEM_SEARCH,
+        CLEAR_SHIP_HULL_FILTER,
         RESET_FILTERS,
         OPEN_COLOR_DEBUG,
         OPEN_SHIP_CATALOG_DEBUG,
@@ -177,6 +179,14 @@ class StockReviewAction private constructor(
         @JvmStatic
         fun resetFilters(): StockReviewAction =
             StockReviewAction(Type.RESET_FILTERS, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun clearItemSearch(): StockReviewAction =
+            StockReviewAction(Type.CLEAR_ITEM_SEARCH, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun clearShipHullFilter(): StockReviewAction =
+            StockReviewAction(Type.CLEAR_SHIP_HULL_FILTER, null, null, null, null, null, null, null, null, null, 0)
 
         @JvmStatic
         fun openColorDebug(): StockReviewAction =
