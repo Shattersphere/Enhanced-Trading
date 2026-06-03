@@ -110,6 +110,13 @@ val lazyLibDirectory = resolveDependencyModDirectory(
         modIds = listOf("lw_lazylib"),
     )
 )
+val shatterLibDirectory = resolveDependencyModDirectory(
+    RequiredMod(
+        displayName = "Shatter Lib",
+        folderPrefixes = listOf("Shatter Lib"),
+        modIds = listOf("shatter_lib"),
+    )
+)
 
 fun dependencyJarTree(directory: File) =
     fileTree(File(directory, "jars")) {
@@ -130,6 +137,7 @@ dependencies {
     )
     compileOnly(dependencyJarTree(lunaLibDirectory))
     compileOnly(dependencyJarTree(lazyLibDirectory))
+    compileOnly(dependencyJarTree(shatterLibDirectory))
 }
 
 sourceSets {
@@ -150,6 +158,7 @@ tasks.register("validateLocalBuildEnvironment") {
         println("Starsector core: ${starsectorCoreDirectory.absolutePath}")
         println("LunaLib: ${lunaLibDirectory.absolutePath}")
         println("LazyLib: ${lazyLibDirectory.absolutePath}")
+        println("Shatter Lib: ${shatterLibDirectory.absolutePath}")
 
         require(starsectorDirectory.isDirectory) {
             "Missing Starsector directory: ${starsectorDirectory.absolutePath}"
@@ -160,7 +169,11 @@ tasks.register("validateLocalBuildEnvironment") {
         require(hasStarsectorCoreJars(starsectorCoreDirectory)) {
             "Missing required Starsector core jars in: ${starsectorCoreDirectory.absolutePath}"
         }
-        listOf("LunaLib" to lunaLibDirectory, "LazyLib" to lazyLibDirectory).forEach { (name, directory) ->
+        listOf(
+            "LunaLib" to lunaLibDirectory,
+            "LazyLib" to lazyLibDirectory,
+            "Shatter Lib" to shatterLibDirectory,
+        ).forEach { (name, directory) ->
             val jarsDirectory = File(directory, "jars")
             require(jarsDirectory.isDirectory) {
                 "$name has no jars directory: ${jarsDirectory.absolutePath}"

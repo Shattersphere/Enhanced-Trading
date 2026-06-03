@@ -26,7 +26,7 @@ object WimGuiControls {
         }
     }
 
-    private fun interactionsSuppressed(): Boolean = interactionSuppressionDepth > 0
+    fun interactionsSuppressed(): Boolean = interactionSuppressionDepth > 0
 
     @JvmStatic
     fun addButton(

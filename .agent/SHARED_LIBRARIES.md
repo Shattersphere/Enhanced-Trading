@@ -14,7 +14,7 @@ Read this only when a task may use, inspect, or improve a declared shared librar
 | LazyLib | Third-party Starsector helper/dependency library. | Yes, only as dependency/API reference when this repo declares or uses LazyLib. | No. | Resolve from this repo's build files, `mod_info.json`, dependency docs, or the configured Starsector install. | Treat as external API. Do not modify LazyLib files or repos. |
 | LunaLib | Third-party Starsector settings/UI dependency library. | Yes, only as dependency/API reference when this repo declares or uses LunaLib. | No. | Resolve from this repo's build files, `mod_info.json`, dependency docs, or the configured Starsector install. | Treat as external API. Do not modify LunaLib files or repos. |
 
-Enhanced Trading does not currently declare Shatter Lib in `build.gradle.kts` or `mod_info.json`. If a later task adds Shatter Lib consumption, update `docs/PROJECT_FACTS.md`, this file, build/dependency metadata, public install docs, and validation expectations together.
+Enhanced Trading declares Shatter Lib in `build.gradle.kts` and `mod_info.json` as a required build/runtime dependency. Keep `docs/PROJECT_FACTS.md`, this file, build/dependency metadata, public install docs, and validation expectations synchronized when Shatter Lib consumption changes.
 
 ## Use Rule
 

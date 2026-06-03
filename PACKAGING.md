@@ -8,7 +8,7 @@ The public package is the clean procurement GUI:
 - `F8` opens the Weapon Stock Review popup in valid market/storage contexts;
 - optional LunaLib market-dialog entry can add `Open "Enhanced Trading"`;
 - no private docs, local paths, deploy queues, or internal archives.
-- LazyLib and LunaLib remain required dependencies.
+- LazyLib, LunaLib, and Shatter Lib remain required dependencies.
 
 Include:
 

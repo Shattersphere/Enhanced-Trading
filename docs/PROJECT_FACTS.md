@@ -77,6 +77,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Kotlin stdlib | `2.1.20` compile-only | Kotlin runtime support | Build file compiles against it; Starsector runtime dependency handling also relies on installed dependency mods. |
 | LazyLib | installed Starsector mod, mod id `lw_lazylib` | Required dependency | Declared in `mod_info.json`; compile jars resolved from installed mod. |
 | LunaLib | installed Starsector mod, mod id `lunalib` | Required dependency/settings UI | Declared in `mod_info.json`; compile jars resolved from installed mod. |
+| Shatter Lib | installed Starsector mod, mod id `shatter_lib` | Required shared UI/runtime helpers | Declared in `mod_info.json`; compile jars resolved from installed mod. |
 
 ## Shared Libraries
 
@@ -84,11 +85,11 @@ Declare external libraries here before agents inspect or edit them. Use `.agent/
 
 | Library | Role | Version/source | Read authorized | Edit authorized | Location / resolution | Validation requirements |
 |---|---|---|---:|---:|---|---|
-| Shatter Lib | Shattersphere shared Starsector utility library for reusable GUI models, adapters, diagnostics, validation, and storage/config primitives | Not currently declared as a runtime/build dependency in `mod_info.json` or `build.gradle.kts` | Yes, when the task may reuse or extract generic Starsector library behavior | Yes, only through `.agent/SHARED_LIBRARIES.md` edit gate | `D:\Sean Code Projects\Starsector Projects\Shatter Lib` | Validate Shatter Lib under its own docs, and validate this consumer integration where feasible. If the edit gate is not satisfied, write a task packet instead. |
+| Shatter Lib | Shattersphere shared Starsector utility library for reusable GUI models, adapters, diagnostics, validation, and storage/config primitives | Required build/runtime dependency declared in `mod_info.json` and `build.gradle.kts` | Yes, when the task may reuse or extract generic Starsector library behavior | Yes, only through `.agent/SHARED_LIBRARIES.md` edit gate | `D:\Sean Code Projects\Starsector Projects\Shatter Lib`; build resolves installed mod id `shatter_lib` | Validate Shatter Lib under its own docs, and validate this consumer integration where feasible. If the edit gate is not satisfied, write a task packet instead. |
 | LazyLib | Third-party Starsector helper/dependency library | Installed dependency mod | Yes, only as dependency/API reference when relevant | No | Resolve from this repo's build files, `mod_info.json`, dependency docs, or configured Starsector install | Treat as external API. Do not edit, fork, patch, vendor, or reconfigure. |
 | LunaLib | Third-party Starsector settings/UI dependency library | Installed dependency mod | Yes, only as dependency/API reference when relevant | No | Resolve from this repo's build files, `mod_info.json`, dependency docs, or configured Starsector install | Treat as external API. Do not edit, fork, patch, vendor, or reconfigure. |
 
-Enhanced Trading does not currently consume Shatter Lib at build/runtime. If future work adds Shatter Lib as a dependency, update `build.gradle.kts`, `mod_info.json`, this section, `.agent/SHARED_LIBRARIES.md`, and public install/config docs together.
+Enhanced Trading consumes Shatter Lib at build/runtime. Keep `build.gradle.kts`, `mod_info.json`, this section, `.agent/SHARED_LIBRARIES.md`, and public install/config docs in sync when dependency handling changes.
 
 ## Compatibility And Persistence Risks
 
@@ -108,4 +109,3 @@ Enhanced Trading does not currently consume Shatter Lib at build/runtime. If fut
 ## Open Fact Questions
 
 - TODO[unknown]: confirm whether the trusted private `origin` is private on GitHub from hosting metadata, if needed.
-- TODO[unknown]: confirm whether Shatter Lib should become a runtime/build dependency during a later Enhanced Trading migration.

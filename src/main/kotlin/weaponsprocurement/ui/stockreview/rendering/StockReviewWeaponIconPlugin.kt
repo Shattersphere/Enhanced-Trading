@@ -6,6 +6,7 @@ import com.fs.starfarer.api.combat.WeaponAPI
 import com.fs.starfarer.api.loading.WeaponSpecAPI
 import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.util.Misc
+import com.shattersphere.shatterlib.starsector.ui.StarsectorSpritePainter
 import org.lwjgl.opengl.GL11
 import java.awt.Color
 
@@ -57,7 +58,7 @@ class StockReviewWeaponIconPlugin(
 
     private fun renderWeaponSprite(x: Float, y: Float, width: Float, height: Float, alphaMult: Float) {
         val inset = maxOf(2f, minOf(width, height) * 0.24f)
-        StockReviewSpriteRenderer.renderFittedSprite(
+        StarsectorSpritePainter.renderFittedSprite(
             spriteName,
             Color.WHITE,
             visualCenterX(x, width),
@@ -118,7 +119,7 @@ class StockReviewWeaponIconPlugin(
         alphaMult: Float,
     ) {
         val size = minOf(width, height) * ratio
-        StockReviewSpriteRenderer.renderFittedSprite(CIRCLE_SPRITE, color, visualCenterX(x, width), y + height * 0.5f, size, size, alphaMult)
+        StarsectorSpritePainter.renderFittedSprite(CIRCLE_SPRITE, color, visualCenterX(x, width), y + height * 0.5f, size, size, alphaMult)
     }
 
     private fun motifStroke(width: Float, height: Float): Float = maxOf(2.25f, minOf(width, height) * 0.07f)

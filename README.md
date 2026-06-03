@@ -7,6 +7,7 @@ Enhanced Trading adds a stock review and trade-planning popup for Starsector mar
 - Starsector `0.98a`
 - [LazyLib](https://fractalsoftworks.com/forum/index.php?topic=5444.0) (required; provides the Kotlin runtime)
 - [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=12712.0) (required)
+- Shatter Lib (required)
 
 ## Main Workflow (Clean Path)
 

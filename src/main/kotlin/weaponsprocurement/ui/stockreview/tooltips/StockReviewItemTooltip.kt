@@ -4,7 +4,6 @@ import weaponsprocurement.ui.WimGuiText
 import weaponsprocurement.ui.WimGuiPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.rendering.StockReviewIconLayout
-import weaponsprocurement.ui.stockreview.rendering.StockReviewSpriteRenderer
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.rendering.StockReviewWeaponIconPlugin
 import com.fs.starfarer.api.Global
@@ -21,6 +20,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI
 import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
+import com.shattersphere.shatterlib.starsector.ui.StarsectorSpritePainter
 import weaponsprocurement.trade.quote.CreditFormat
 import weaponsprocurement.stock.item.StockDebugItemProfile
 import weaponsprocurement.stock.item.StockDebugItemStat
@@ -400,7 +400,7 @@ class StockReviewItemTooltip private constructor(
         private fun renderSprite(x: Float, y: Float, width: Float, height: Float, inset: Float, alphaMult: Float) {
             val maxWidth = maxOf(1f, width - 2f * inset)
             val maxHeight = maxOf(1f, height - 2f * inset)
-            StockReviewSpriteRenderer.renderFittedSprite(
+            StarsectorSpritePainter.renderFittedSprite(
                 spriteName,
                 Color.WHITE,
                 StockReviewIconLayout.visualCenterX(x, width),

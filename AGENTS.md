@@ -9,7 +9,7 @@ Repo-local instructions for Enhanced Trading. Current task instructions and nest
 - Mod id: `enhanced_trading`
 - Runtime jar: `jars/enhanced-trading.jar`
 - Main plugin: `weaponsprocurement.plugins.WeaponsProcurementModPlugin`
-- Required dependencies: LazyLib and LunaLib
+- Required dependencies: LazyLib, LunaLib, and Shatter Lib
 - Exact commands, paths, dependencies, Git mode, and compatibility notes live in `docs/PROJECT_FACTS.md`.
 - Validation choices live in `docs/CHECKS.md`.
 

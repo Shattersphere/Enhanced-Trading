@@ -1,9 +1,12 @@
 package weaponsprocurement.ui
 
-import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
-import weaponsprocurement.ui.stockreview.rows.StockReviewRowIcon
-import weaponsprocurement.ui.stockreview.rendering.StockReviewPlainIconPlugin
+import com.shattersphere.shatterlib.starsector.ui.StarsectorPanelTableCellSpec
+import com.shattersphere.shatterlib.starsector.ui.StarsectorPanelTableRenderSpec
+import com.shattersphere.shatterlib.starsector.ui.StarsectorPanelTableRowIconSpec
+import com.shattersphere.shatterlib.starsector.ui.StarsectorPanelTableRowSpec
+import com.shattersphere.shatterlib.starsector.ui.StarsectorPanelTableRows
+import weaponsprocurement.ui.stockreview.rendering.StockReviewIconLayout
 import java.awt.Color
 
 class WimGuiListRowRenderer private constructor() {
@@ -21,90 +24,73 @@ class WimGuiListRowRenderer private constructor() {
             defaultBorder: Color,
             buttons: MutableList<WimGuiButtonBinding<A>>,
         ) {
-            val width = parent.position.width - 2f * horizontalPad
-            val rowBorder = if (row.getIndent() > 0f) null else row.getBorderColor()
-            val rowPanel = parent.createCustomPanel(
-                width,
-                rowHeight,
-                WimGuiPanelPlugin(row.getFillColor(), rowBorder),
+            val interactive = !WimGuiControls.interactionsSuppressed()
+            val result = StarsectorPanelTableRows.render(
+                StarsectorPanelTableRenderSpec(
+                    parent = parent,
+                    row = StarsectorPanelTableRowSpec(
+                        label = row.getLabel(),
+                        fillColor = row.getFillColor(),
+                        textColor = row.getTextColor() ?: WimGuiStyle.DEFAULT_TEXT,
+                        borderColor = if (row.getIndent() > 0f) null else row.getBorderColor(),
+                        labelBorderColor = if (row.getMainAction() != null) defaultBorder else null,
+                        buttonFillColor = row.getButtonFillColor() ?: WimGuiStyle.UNCOLOURED_BUTTON,
+                        buttonTextColor = row.getTextColor() ?: WimGuiStyle.DEFAULT_TEXT,
+                        indent = row.getIndent(),
+                        action = row.getMainAction(),
+                        actionCoversRow = false,
+                        alignment = row.getMainAlignment(),
+                        cells = row.getCells().map { cell ->
+                            StarsectorPanelTableCellSpec(
+                                label = cell.getLabel(),
+                                width = cell.getWidth(),
+                                fillColor = cellFill(cell),
+                                textColor = cell.getTextColor() ?: WimGuiStyle.DEFAULT_TEXT,
+                                borderColor = cell.borderColor(defaultBorder),
+                                action = cell.getAction(),
+                                enabled = cell.isEnabled(),
+                                alignment = cell.getAlignment(),
+                                tooltipText = cell.getTooltip(),
+                            )
+                        },
+                        rightReserveWidth = row.rightReserveWidth(),
+                        tooltipText = row.getTooltip(),
+                        tooltipCreator = row.getTooltipCreator(),
+                        icon = rowIconSpec(row),
+                    ),
+                    y = y,
+                    rowHeight = rowHeight,
+                    actionHeight = actionHeight,
+                    horizontalPad = horizontalPad,
+                    cellGap = row.cellGap(buttonGap),
+                    minLabelWidth = minLabelWidth,
+                    labelLeftPad = WimGuiStyle.TEXT_LEFT_PAD,
+                    defaultBorderColor = defaultBorder,
+                    textTopPad = WimGuiStyle.TEXT_TOP_PAD,
+                    preferredTextLineHeight = rowHeight,
+                    interactive = interactive,
+                ),
             )
-            parent.addComponent(rowPanel).inTL(horizontalPad, y)
-
-            val cellGap = row.cellGap(buttonGap)
-            val cellBlockWidth = WimGuiRowCell.totalWidth(row.getCells(), cellGap)
-            val reservedBlockWidth = Math.max(cellBlockWidth, row.rightReserveWidth())
-            val labelLeft = row.getIndent()
-            val labelWidth = Math.max(minLabelWidth, width - labelLeft - reservedBlockWidth)
-            if (row.getMainAction() != null) {
-                addMainAction(rowPanel, row, labelLeft, labelWidth, actionHeight, buttonGap, defaultBorder, buttons)
-            } else {
-                addLabel(rowPanel, row.getLabel(), row.getTextColor(), labelLeft, labelWidth, rowHeight)
-            }
-
-            if (row.getCells().isNotEmpty()) {
-                var x = width - row.rightReserveWidth() - cellBlockWidth
-                for (cell in row.getCells()) {
-                    WimGuiControls.addRowCell(rowPanel, x, 0f, actionHeight, cell, buttons, defaultBorder)
-                    x += cell.getWidth() + cellGap
+            if (interactive) {
+                for (binding in result.actionBindings) {
+                    buttons.add(WimGuiButtonBinding(binding.panel, null, binding.action))
                 }
             }
         }
 
-        private fun <A> addMainAction(
-            rowPanel: CustomPanelAPI,
-            row: WimGuiListRow<A>,
-            labelLeft: Float,
-            labelWidth: Float,
-            actionHeight: Float,
-            buttonGap: Float,
-            defaultBorder: Color,
-            buttons: MutableList<WimGuiButtonBinding<A>>,
-        ) {
-            val action = row.getMainAction() ?: return
-            var buttonLeft = labelLeft
-            var buttonWidth = labelWidth
-            val icon = row.getIcon()
-            if (icon != null) {
-                val iconSize = actionHeight
-                val iconSlotWidth = iconSize + buttonGap
-                addRowIcon(rowPanel, icon, labelLeft, 0f, iconSize)
-                buttonLeft += iconSlotWidth
-                buttonWidth = Math.max(8f, labelWidth - iconSlotWidth)
-            }
-            WimGuiControls.addBoundButton(
-                rowPanel,
-                buttonLeft,
-                0f,
-                actionHeight,
-                WimGuiButtonSpec.toggle(
-                    buttonWidth,
-                    row.getLabel(),
-                    row.getTextColor() ?: WimGuiStyle.DEFAULT_TEXT,
-                    action,
-                    row.getMainAlignment(),
-                    row.getButtonFillColor() ?: WimGuiStyle.UNCOLOURED_BUTTON,
-                    defaultBorder,
-                    row.getTooltip(),
-                    row.getTooltipCreator(),
-                ),
-                buttons,
+        private fun <A> rowIconSpec(row: WimGuiListRow<A>): StarsectorPanelTableRowIconSpec? {
+            val icon = row.getIcon() ?: return null
+            return StarsectorPanelTableRowIconSpec(
+                spriteName = icon.spriteName,
+                visualCenterRatio = StockReviewIconLayout.relativeVisualCenterX(1f),
             )
         }
 
-        private fun addRowIcon(parent: CustomPanelAPI, icon: StockReviewRowIcon?, x: Float, y: Float, size: Float) {
-            if (icon == null || size <= 0f) {
-                return
+        private fun <A> cellFill(cell: WimGuiRowCell<A>): Color? =
+            if (cell.isAction() && !cell.isEnabled()) {
+                WimGuiStyle.DISABLED_BACKGROUND
+            } else {
+                cell.getFillColor()
             }
-            val panel = parent.createCustomPanel(
-                size,
-                size,
-                StockReviewPlainIconPlugin(icon.spriteName),
-            )
-            parent.addComponent(panel).inTL(x, y)
-        }
-
-        private fun addLabel(parent: CustomPanelAPI, text: String?, color: Color?, x: Float, width: Float, rowHeight: Float) {
-            WimGuiControls.addLabel(parent, text, color, x, 0f, width, rowHeight, Alignment.LMID)
-        }
     }
 }

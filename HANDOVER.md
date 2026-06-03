@@ -22,7 +22,7 @@ Important boundary: cargo-cell weapon/LPC badges are no longer part of this repo
 - Main plugin: `weaponsprocurement.plugins.WeaponsProcurementModPlugin`.
 - Runtime jar: `jars/enhanced-trading.jar`.
 - Live deploy target: `C:\Games\Starsector\mods\Enhanced Trading`.
-- Dependencies: LazyLib and LunaLib.
+- Dependencies: LazyLib, LunaLib, and Shatter Lib.
 - Version in `mod_info.json`: `0.2.0`.
 - Primary language: Kotlin, built through Gradle via `build.ps1`.
 

@@ -58,7 +58,7 @@ foreach ($file in @(
 $modInfoPath = Join-Path $repoRoot "mod_info.json"
 if (Test-Path -LiteralPath $modInfoPath) {
     $modInfoText = Get-Content -LiteralPath $modInfoPath -Raw
-    foreach ($dependencyId in @("lunalib", "lw_lazylib")) {
+foreach ($dependencyId in @("lunalib", "lw_lazylib", "shatter_lib")) {
         if ($modInfoText.IndexOf($dependencyId, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
             Write-Gate -Status "PASS" -Message "mod_info.json declares $dependencyId"
         } else {

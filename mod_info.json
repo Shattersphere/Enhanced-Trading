@@ -9,6 +9,7 @@
     "modPlugin": "weaponsprocurement.plugins.WeaponsProcurementModPlugin",
     "dependencies": [
         { "id": "lw_lazylib", "name": "LazyLib" },
-        { "id": "lunalib", "name": "LunaLib" }
+        { "id": "lunalib", "name": "LunaLib" },
+        { "id": "shatter_lib", "name": "Shatter Lib" }
     ]
 }

@@ -2,7 +2,7 @@ package weaponsprocurement.ui.stockreview.ships
 
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin
 import com.fs.starfarer.api.ui.PositionAPI
-import weaponsprocurement.ui.stockreview.rendering.StockReviewSpriteRenderer
+import com.shattersphere.shatterlib.starsector.ui.StarsectorSpritePainter
 import java.awt.Color
 
 class StockReviewShipSpritePlugin(
@@ -19,7 +19,7 @@ class StockReviewShipSpritePlugin(
 
     override fun renderBelow(alphaMult: Float) {
         val current = position ?: return
-        StockReviewSpriteRenderer.renderFittedSprite(
+        StarsectorSpritePainter.renderFittedSprite(
             spriteName,
             Color.WHITE,
             current.x + current.width * 0.5f,

@@ -5,6 +5,8 @@ import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.CargoAPI
 import com.fs.starfarer.api.campaign.CargoStackAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.shattersphere.shatterlib.gui.dialog.DialogLifecycleTracker
+import com.shattersphere.shatterlib.input.KeyPressLatch
 import org.apache.log4j.Logger
 import org.lwjgl.input.Keyboard
 import weaponsprocurement.ui.stockreview.state.StockReviewLaunchState
@@ -13,8 +15,6 @@ import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.WimGuiCampaignDialogHost
 import weaponsprocurement.ui.WimGuiDialogOpener
-import weaponsprocurement.ui.WimGuiDialogTracker
-import weaponsprocurement.ui.WimGuiHotkeyLatch
 import weaponsprocurement.stock.market.MarketStockService
 import weaponsprocurement.stock.item.StockItemStacks
 import weaponsprocurement.config.StockReviewConfig
@@ -25,7 +25,7 @@ import weaponsprocurement.config.WeaponsProcurementConfig
  * dialog/current market; generic non-market storage mutation semantics are not modeled.
  */
 class StockReviewHotkeyScript : EveryFrameScript {
-    private val hotkey = WimGuiHotkeyLatch()
+    private val hotkey = KeyPressLatch { Keyboard.isKeyDown(it) }
 
     override fun isDone(): Boolean = false
 
@@ -50,7 +50,7 @@ class StockReviewHotkeyScript : EveryFrameScript {
 
     companion object {
         private val LOG: Logger = Logger.getLogger(StockReviewHotkeyScript::class.java)
-        private val DIALOG_TRACKER = WimGuiDialogTracker<MarketAPI?, StockReviewLaunchState?>()
+        private val DIALOG_TRACKER = DialogLifecycleTracker<MarketAPI?, StockReviewLaunchState?>()
         private var canOpenFailureLogged = false
 
         @JvmStatic
