@@ -1,6 +1,6 @@
 # Enhanced Trading Brief
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Current State
 
@@ -21,6 +21,10 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - Current branch: `main`
 - Template-sync baseline before this docs update: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
+
+## Collaboration Notes
+
+- Collaborator branch `autotrade-first-draft` at `https://github.com/Shattersphere/Enhanced-Trading/tree/autotrade-first-draft` currently resolves to commit `08a67538bf0dda4ea0418b3b72e4bed2ad523ab2`. Expect merge conflicts with local work; branch was requested as a separate sibling checkout before integration.
 
 ## Commands
 
