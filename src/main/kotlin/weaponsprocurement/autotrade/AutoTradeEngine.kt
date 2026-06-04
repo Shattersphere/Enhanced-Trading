@@ -2,6 +2,7 @@ package weaponsprocurement.autotrade
 
 import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.CargoAPI
+import com.fs.starfarer.api.campaign.CargoStackAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI
 import org.apache.log4j.Logger
@@ -29,12 +30,13 @@ object AutoTradeEngine {
     private val LOG: Logger = Logger.getLogger(AutoTradeEngine::class.java)
     private val PURCHASE_SERVICE = StockPurchaseService()
 
-    /** Read-only preview of what a market visit would do. */
+    /** Read-only preview of what a market visit would do: the items to sell, and the items to
+     *  buy keyed by the submarket they're stocked at. */
     class ScanResult(
-        @JvmField val sellCount: Int,
-        @JvmField val buySubmarketNames: List<String>,
+        @JvmField val sellLabels: List<String>,
+        @JvmField val buysBySubmarket: Map<String, List<String>>,
     ) {
-        fun isEmpty(): Boolean = sellCount == 0 && buySubmarketNames.isEmpty()
+        fun isEmpty(): Boolean = sellLabels.isEmpty() && buysBySubmarket.isEmpty()
     }
 
     @JvmStatic
@@ -43,22 +45,22 @@ object AutoTradeEngine {
         val cfg = AutoTradeRegistry.get()
         if (!cfg.enabled) return null
         val sector = Global.getSector() ?: return null
-        val playerCargo = sector.playerFleet?.cargo ?: return null
         val transponderOff = sector.playerFleet?.isTransponderOn == false
 
-        var sellCount = 0
-        for ((itemId, rule) in snapshot(cfg.weapons)) sellCount += sellableQty(StockItemType.WEAPON, itemId, rule, playerCargo)
-        for ((itemId, rule) in snapshot(cfg.fighters)) sellCount += sellableQty(StockItemType.WING, itemId, rule, playerCargo)
+        val sellLabels = sellCandidateLabels()
 
-        val buyNames = ArrayList<String>()
+        val buysBySubmarket = LinkedHashMap<String, List<String>>()
         for (submarket in market.submarketsCopy ?: emptyList()) {
             if (submarket == null) continue
             if (!AutoTradeSubmarketAccess.isAccessible(submarket)) continue
             if (!buysAllowedAt(submarket, cfg, transponderOff)) continue
-            if (submarketHasBuys(submarket, cfg, playerCargo)) buyNames.add(submarket.name ?: submarket.specId)
+            // Generate stock so the preview reflects what's actually buyable right now.
+            AutoTradeSubmarketAccess.prime(submarket)
+            val labels = buyCandidateLabels(submarket)
+            if (labels.isNotEmpty()) buysBySubmarket[submarket.name ?: submarket.specId] = labels
         }
 
-        val result = ScanResult(sellCount, buyNames)
+        val result = ScanResult(sellLabels, buysBySubmarket)
         return if (result.isEmpty()) null else result
     }
 
@@ -157,37 +159,101 @@ object AutoTradeEngine {
         return true
     }
 
-    private fun sellableQty(itemType: StockItemType, itemId: String, rule: AutoTradeItemRule, playerCargo: CargoAPI): Int {
-        if (rule.sellAbove < 0) return 0
-        val owned = StockItemCargo.itemCount(playerCargo, itemType, itemId)
-        return if (owned > rule.sellAbove) owned - rule.sellAbove else 0
+    /**
+     * Whether the given player-cargo stack would be auto-sold (a sell rule applies and the
+     * player owns more than the rule's threshold). Used to mark candidates in the trade screen.
+     */
+    @JvmStatic
+    fun isSellCandidate(stack: CargoStackAPI?): Boolean {
+        if (stack == null) return false
+        val cfg = AutoTradeRegistry.get()
+        if (!cfg.enabled) return false
+        val playerCargo = Global.getSector()?.playerFleet?.cargo ?: return false
+        val type = stackItemType(stack) ?: return false
+        val id = StockItemStacks.itemId(stack, type) ?: return false
+        val rule = ruleFor(cfg, type, id) ?: return false
+        if (rule.sellAbove < 0) return false
+        return StockItemCargo.itemCount(playerCargo, type, id) > rule.sellAbove
     }
 
-    private fun submarketHasBuys(submarket: SubmarketAPI, cfg: AutoTradeConfig, playerCargo: CargoAPI): Boolean {
-        AutoTradeSubmarketAccess.prime(submarket)
-        val cargo = submarket.cargoNullOk ?: return false
-        for ((itemId, rule) in snapshot(cfg.weapons)) {
-            if (hasBuyStock(StockItemType.WEAPON, itemId, rule, cargo, playerCargo)) return true
-        }
-        for ((itemId, rule) in snapshot(cfg.fighters)) {
-            if (hasBuyStock(StockItemType.WING, itemId, rule, cargo, playerCargo)) return true
-        }
-        if (cfg.buyUnknownHullmods && AutoTradeHullmodBuyer.hasBuyableHullmod(submarket, cfg)) return true
-        return false
-    }
-
-    private fun hasBuyStock(
-        itemType: StockItemType,
-        itemId: String,
-        rule: AutoTradeItemRule,
-        submarketCargo: CargoAPI,
-        playerCargo: CargoAPI,
-    ): Boolean {
+    /**
+     * Whether the given submarket stock stack would be auto-bought: buying is allowed at this
+     * submarket, a buy rule applies and the player owns fewer than the rule's threshold, or the
+     * stack is a buyable unknown hullmod. Used to mark candidates in the trade screen.
+     */
+    @JvmStatic
+    fun isBuyCandidate(submarket: SubmarketAPI?, stack: CargoStackAPI?): Boolean {
+        if (submarket == null || stack == null) return false
+        val cfg = AutoTradeRegistry.get()
+        if (!cfg.enabled) return false
+        val transponderOff = Global.getSector()?.playerFleet?.isTransponderOn == false
+        if (!buysAllowedAt(submarket, cfg, transponderOff)) return false
+        if (cfg.buyUnknownHullmods && AutoTradeHullmodBuyer.isBuyableHullmodStack(stack, cfg)) return true
+        if (stack.size < 1f) return false
+        val type = stackItemType(stack) ?: return false
+        val id = StockItemStacks.itemId(stack, type) ?: return false
+        val rule = ruleFor(cfg, type, id) ?: return false
         if (rule.buyBelow <= 0) return false
-        val owned = StockItemCargo.itemCount(playerCargo, itemType, itemId)
-        if (owned >= rule.buyBelow) return false
-        val stack = StockItemCargo.itemStack(submarketCargo, itemType, itemId) ?: return false
-        return Math.round(stack.size) > 0
+        val playerCargo = Global.getSector()?.playerFleet?.cargo ?: return false
+        return StockItemCargo.itemCount(playerCargo, type, id) < rule.buyBelow
+    }
+
+    /** True if any player-cargo stack is currently an auto-sell candidate. */
+    @JvmStatic
+    fun hasSellCandidates(): Boolean {
+        val stacks = Global.getSector()?.playerFleet?.cargo?.stacksCopy ?: return false
+        return stacks.any { isSellCandidate(it) }
+    }
+
+    /** True if any stack stocked at this submarket is currently an auto-buy candidate. */
+    @JvmStatic
+    fun submarketHasBuyCandidates(submarket: SubmarketAPI?): Boolean {
+        val stacks = submarket?.cargoNullOk?.stacksCopy ?: return false
+        return stacks.any { isBuyCandidate(submarket, it) }
+    }
+
+    /** Display names of the items that would be auto-bought at this submarket right now. */
+    @JvmStatic
+    fun buyCandidateLabels(submarket: SubmarketAPI?): List<String> {
+        val stacks = submarket?.cargoNullOk?.stacksCopy ?: return emptyList()
+        val out = ArrayList<String>()
+        for (stack in stacks) {
+            if (stack != null && isBuyCandidate(submarket, stack)) out.add(candidateLabel(stack))
+        }
+        return out
+    }
+
+    /** Display names of the items that would be auto-sold from player cargo right now. */
+    @JvmStatic
+    fun sellCandidateLabels(): List<String> {
+        val stacks = Global.getSector()?.playerFleet?.cargo?.stacksCopy ?: return emptyList()
+        val out = ArrayList<String>()
+        for (stack in stacks) {
+            if (stack != null && isSellCandidate(stack)) out.add(candidateLabel(stack))
+        }
+        return out
+    }
+
+    private fun candidateLabel(stack: CargoStackAPI): String {
+        if (stack.isSpecialStack) {
+            stack.hullModSpecIfHullMod?.let { return it.displayName ?: it.id ?: "hullmod" }
+        }
+        val type = stackItemType(stack)
+        if (type != null) {
+            StockItemStacks.itemId(stack, type)?.let { return StockItemCargo.itemDisplayName(type, it) }
+        }
+        return "item"
+    }
+
+    private fun stackItemType(stack: CargoStackAPI): StockItemType? = when {
+        StockItemStacks.isVisibleWeaponStack(stack) -> StockItemType.WEAPON
+        StockItemStacks.isVisibleWingStack(stack) -> StockItemType.WING
+        else -> null
+    }
+
+    private fun ruleFor(cfg: AutoTradeConfig, type: StockItemType, id: String): AutoTradeItemRule? {
+        val rule = if (type == StockItemType.WING) cfg.fighters[id] else cfg.weapons[id]
+        return rule?.takeUnless { it.isEmpty() }
     }
 
     private fun applySellRule(

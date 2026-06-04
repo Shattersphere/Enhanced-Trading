@@ -25,6 +25,13 @@ class AutoTradeConfig {
     @JvmField var enabled: Boolean = true
 
     /**
+     * When true, auto-trades are not executed automatically on opening a submarket. Instead,
+     * candidate stacks are marked in the trade screen and the player presses the execute
+     * hotkey to apply them. When false, trades run automatically (the original behavior).
+     */
+    @JvmField var requireConfirm: Boolean = false
+
+    /**
      * Allow auto-sells to use the black market when doing so is attributable to the player
      * (transponder on) and therefore raises smuggling suspicion. When the transponder is off
      * the player is anonymous, so the black market is always used regardless of this flag.

@@ -275,6 +275,7 @@ class StockReviewAutoRulesController {
     }
 
     fun handleToggleEnabled() = mutate { it.enabled = !it.enabled }
+    fun handleToggleRequireConfirm() = mutate { it.requireConfirm = !it.requireConfirm }
     fun handleToggleSuspicionSelling() = mutate { it.allowSuspicionWhenSelling = !it.allowSuspicionWhenSelling }
     fun handleToggleSuspicionBuying() = mutate { it.allowSuspicionWhenBuying = !it.allowSuspicionWhenBuying }
     fun handleToggleBuyUnknownHullmods() = mutate { it.buyUnknownHullmods = !it.buyUnknownHullmods }

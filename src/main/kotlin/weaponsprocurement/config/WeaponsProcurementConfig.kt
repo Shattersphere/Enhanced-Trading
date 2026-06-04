@@ -32,6 +32,8 @@ object WeaponsProcurementConfig {
     private const val SETTING_AUTOTRADE_BUY_UNKNOWN_HULLMODS = "wp_autotrade_buy_unknown_hullmods"
     private const val SETTING_AUTOTRADE_LEARN_HULLMODS = "wp_autotrade_learn_hullmods_on_buy"
     private const val SETTING_AUTOTRADE_CREDIT_FLOOR = "wp_autotrade_credit_floor"
+    private const val SETTING_AUTOTRADE_REQUIRE_CONFIRM = "wp_autotrade_require_confirm"
+    private const val SETTING_AUTOTRADE_EXECUTE_HOTKEY = "wp_autotrade_execute_hotkey"
     private const val KEY_UPDATE_INTERVAL = "wp.config.updateIntervalSeconds"
     private const val KEY_DIALOG_OPTION_ENABLED = "wp.config.dialogOptionEnabled"
     private const val KEY_SECTOR_MARKET_ENABLED = "wp.config.sectorMarketEnabled"
@@ -64,6 +66,7 @@ object WeaponsProcurementConfig {
     private const val DEFAULT_DESIRED_LARGE_WEAPON_COUNT = 4
     private const val DEFAULT_DESIRED_FIGHTER_WING_COUNT = 4
     private const val DEFAULT_TRADE_HOTKEY = 66
+    private const val DEFAULT_AUTOTRADE_EXECUTE_HOTKEY = 44 // LWJGL keycode for Z
     private const val MIN_TRADE_HOTKEY = 1
     private const val MAX_TRADE_HOTKEY = 255
     private const val MIN_DESIRED_WEAPON_COUNT = 0
@@ -232,6 +235,7 @@ object WeaponsProcurementConfig {
     @JvmStatic
     fun applyAutoTradeDefaults(config: AutoTradeConfig) {
         readBooleanSetting(SETTING_AUTOTRADE_ENABLED)?.let { config.enabled = it }
+        readBooleanSetting(SETTING_AUTOTRADE_REQUIRE_CONFIRM)?.let { config.requireConfirm = it }
         readBooleanSetting(SETTING_AUTOTRADE_SUSPICION_SELL)?.let { config.allowSuspicionWhenSelling = it }
         readBooleanSetting(SETTING_AUTOTRADE_SUSPICION_BUY)?.let { config.allowSuspicionWhenBuying = it }
         readBooleanSetting(SETTING_AUTOTRADE_BUY_UNKNOWN_HULLMODS)?.let { config.buyUnknownHullmods = it }
@@ -248,6 +252,10 @@ object WeaponsProcurementConfig {
     @JvmStatic
     fun tradeHotkeyKeyCode(): Int =
         clamp(readIntSetting(SETTING_TRADE_HOTKEY) ?: readPublishedInt(KEY_TRADE_HOTKEY, DEFAULT_TRADE_HOTKEY), MIN_TRADE_HOTKEY, MAX_TRADE_HOTKEY)
+
+    @JvmStatic
+    fun autoTradeExecuteHotkeyKeyCode(): Int =
+        clamp(readIntSetting(SETTING_AUTOTRADE_EXECUTE_HOTKEY) ?: DEFAULT_AUTOTRADE_EXECUTE_HOTKEY, MIN_TRADE_HOTKEY, MAX_TRADE_HOTKEY)
 
     @JvmStatic
     fun debugTradeFailureStep(): String = normalizeDebugTradeFailureStep(System.getProperty(KEY_DEBUG_TRADE_FAILURE_STEP, ""))

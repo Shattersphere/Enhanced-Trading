@@ -20,6 +20,7 @@ class StockReviewAutoRulesActionController(
         StockReviewActionHandlerGroup.group(StockReviewActionGroup.AUTO_RULES) { action ->
             when (action.getType()) {
                 Type.AUTO_RULES_TOGGLE_ENABLED -> controller.handleToggleEnabled()
+                Type.AUTO_RULES_TOGGLE_REQUIRE_CONFIRM -> controller.handleToggleRequireConfirm()
                 Type.AUTO_RULES_TOGGLE_SUSPICION_SELL -> controller.handleToggleSuspicionSelling()
                 Type.AUTO_RULES_TOGGLE_SUSPICION_BUY -> controller.handleToggleSuspicionBuying()
                 Type.AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS -> controller.handleToggleBuyUnknownHullmods()

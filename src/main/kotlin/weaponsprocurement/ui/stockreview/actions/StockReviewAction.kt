@@ -61,6 +61,7 @@ class StockReviewAction private constructor(
         GO_BACK,
         OPEN_AUTO_RULES,
         AUTO_RULES_TOGGLE_ENABLED,
+        AUTO_RULES_TOGGLE_REQUIRE_CONFIRM,
         AUTO_RULES_TOGGLE_SUSPICION_SELL,
         AUTO_RULES_TOGGLE_SUSPICION_BUY,
         AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS,
@@ -260,6 +261,10 @@ class StockReviewAction private constructor(
         @JvmStatic
         fun autoRulesToggleEnabled(): StockReviewAction =
             StockReviewAction(Type.AUTO_RULES_TOGGLE_ENABLED, null, null, null, null, null, null, null, null, null, 0)
+
+        @JvmStatic
+        fun autoRulesToggleRequireConfirm(): StockReviewAction =
+            StockReviewAction(Type.AUTO_RULES_TOGGLE_REQUIRE_CONFIRM, null, null, null, null, null, null, null, null, null, 0)
 
         @JvmStatic
         fun autoRulesToggleSuspicionSelling(): StockReviewAction =

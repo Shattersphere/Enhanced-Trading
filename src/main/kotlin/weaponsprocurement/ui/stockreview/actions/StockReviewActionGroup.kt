@@ -81,6 +81,7 @@ enum class StockReviewActionGroup(
     AUTO_RULES(
         "auto-rules controls",
         StockReviewAction.Type.AUTO_RULES_TOGGLE_ENABLED,
+        StockReviewAction.Type.AUTO_RULES_TOGGLE_REQUIRE_CONFIRM,
         StockReviewAction.Type.AUTO_RULES_TOGGLE_SUSPICION_SELL,
         StockReviewAction.Type.AUTO_RULES_TOGGLE_SUSPICION_BUY,
         StockReviewAction.Type.AUTO_RULES_TOGGLE_BUY_UNKNOWN_HULLMODS,

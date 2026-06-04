@@ -63,21 +63,22 @@ object AutoTradeHullmodBuyer {
     /** Read-only check used by the hail scan: does this submarket stock a buyable hullmod? */
     @JvmStatic
     fun hasBuyableHullmod(submarket: SubmarketAPI, cfg: AutoTradeConfig): Boolean {
-        val cargo = submarket.cargoNullOk ?: return false
-        val stacks = cargo.stacksCopy ?: return false
+        val stacks = submarket.cargoNullOk?.stacksCopy ?: return false
+        return stacks.any { isBuyableHullmodStack(it, cfg) }
+    }
+
+    /** True if this stack is an unknown, non-blacklisted, in-stock modspec the player could buy. */
+    @JvmStatic
+    fun isBuyableHullmodStack(stack: CargoStackAPI?, cfg: AutoTradeConfig): Boolean {
+        if (stack == null || !stack.isSpecialStack) return false
+        val special = stack.specialDataIfSpecial ?: return false
+        if (MODSPEC != special.id) return false
+        val hm = stack.hullModSpecIfHullMod ?: return false
+        val hmId = hm.id ?: return false
+        if (stack.size < 1f) return false
         val character = Global.getSector()?.characterData ?: return false
-        for (stack in stacks) {
-            if (!stack.isSpecialStack) continue
-            val special = stack.specialDataIfSpecial ?: continue
-            if (MODSPEC != special.id) continue
-            val hm = stack.hullModSpecIfHullMod ?: continue
-            val hmId = hm.id ?: continue
-            if (stack.size < 1f) continue
-            if (character.knowsHullMod(hmId)) continue
-            if (cfg.hullmodBlacklist.contains(hmId)) continue
-            return true
-        }
-        return false
+        if (character.knowsHullMod(hmId)) return false
+        return !cfg.hullmodBlacklist.contains(hmId)
     }
 
     private fun tryBuyOne(

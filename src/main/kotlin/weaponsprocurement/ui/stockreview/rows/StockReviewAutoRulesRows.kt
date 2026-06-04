@@ -60,6 +60,7 @@ object StockReviewAutoRulesRows {
 
         // Global toggles
         rows.add(toggleRow("Auto-trade enabled", cfg.enabled, StockReviewAction.autoRulesToggleEnabled(), "Master switch for automatic buy/sell when opening a market."))
+        rows.add(toggleRow("Confirm before auto-trading", cfg.requireConfirm, StockReviewAction.autoRulesToggleRequireConfirm(), "When on, auto-trade does not run automatically. Candidate stacks are marked in the trade screen and you press the execute hotkey (default E, set in LunaLib) to apply the pending trades for the open submarket. When off, trades run automatically as you open submarkets."))
         rows.add(toggleRow("Allow suspicion when selling", cfg.allowSuspicionWhenSelling, StockReviewAction.autoRulesToggleSuspicionSelling(), "Allow auto-sells to use the black market while your transponder is on, raising smuggling suspicion. With your transponder off you are anonymous, so the black market is always used regardless of this toggle."))
         rows.add(toggleRow("Allow suspicion when buying", cfg.allowSuspicionWhenBuying, StockReviewAction.autoRulesToggleSuspicionBuying(), "Allow auto-buys (weapons, fighter LPCs, and hullmods) to use the black market while your transponder is on, raising smuggling suspicion. With your transponder off the black market is the only market, so buys there happen regardless."))
         rows.add(toggleRow("Buy unknown hullmods", cfg.buyUnknownHullmods, StockReviewAction.autoRulesToggleBuyUnknownHullmods(), "Automatically purchase modspecs your character does not already know."))

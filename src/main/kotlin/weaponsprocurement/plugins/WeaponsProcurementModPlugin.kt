@@ -4,6 +4,7 @@ import com.fs.starfarer.api.BaseModPlugin
 import com.fs.starfarer.api.EveryFrameScript
 import com.fs.starfarer.api.Global
 import org.apache.log4j.Logger
+import weaponsprocurement.autotrade.AutoTradeExecuteHotkeyScript
 import weaponsprocurement.autotrade.AutoTradeMarketListener
 import weaponsprocurement.autotrade.AutoTradeSubmarketListener
 import weaponsprocurement.lifecycle.StockReviewHotkeyScript
@@ -31,6 +32,12 @@ class WeaponsProcurementModPlugin : BaseModPlugin() {
         ) {
             sector.addTransientScript(WeaponsProcurementFixerCatalogUpdater())
             LOG.info("WP_FIXER_CATALOG updater registered")
+        }
+        if (!hasScript(sector.transientScripts, AutoTradeExecuteHotkeyScript::class.java) &&
+            !hasScript(sector.scripts, AutoTradeExecuteHotkeyScript::class.java)
+        ) {
+            sector.addTransientScript(AutoTradeExecuteHotkeyScript())
+            LOG.info("WP_AUTOTRADE execute-hotkey script registered")
         }
         try {
             sector.listenerManager.removeListenerOfClass(AutoTradeMarketListener::class.java)
