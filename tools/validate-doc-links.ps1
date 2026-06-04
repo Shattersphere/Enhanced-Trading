@@ -24,6 +24,7 @@ if ($IncludePrivateDocs) {
         "docs/ASSET_PROVENANCE.md",
         ".agent/INDEX.md",
         ".agent/BRIEF.md",
+        ".agent/ARCHITECTURE_MAP.md",
         ".agent/DOC_SYSTEM.md",
         ".agent/PLAN.md",
         ".agent/BACKLOG.md",
@@ -35,9 +36,12 @@ if ($IncludePrivateDocs) {
         ".agent/archive/deep-dives/trade-and-sources.md",
         ".agent/archive/deep-dives/patched-badges.md",
         ".agent/archive/deep-dives/runtime-validation.md",
+        ".agent/archive/deep-dives/vanilla-weapon-tooltip-bytecode.md",
+        ".agent/archive/history/2026-05-18-agent-takeover-handover.md",
         ".agent/archive/history/2026-05-gui-framework-migration.md",
         ".agent/archive/history/2026-05-trade-source-remediation.md",
-        ".agent/archive/history/2026-05-product-and-validation-history.md"
+        ".agent/archive/history/2026-05-product-and-validation-history.md",
+        ".agent/archive/history/snapshots/2026-05-18-agent-takeover-handover-full.md"
     )
 }
 $badLinks = @()

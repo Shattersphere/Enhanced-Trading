@@ -21,27 +21,11 @@ git status --short --branch
 
 ## Standard Checks
 
-Use the smallest relevant check from `docs/CHECKS.md`.
+Use the smallest relevant check from `docs/CHECKS.md`; exact commands and path requirements live in `docs/PROJECT_FACTS.md`.
 
-Docs/template checks:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs
-python scripts/check-template-state.py --initialized
-git diff --check
-```
-
-Runtime/source checks:
-
-```powershell
-$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent
-git diff --check
-```
+- Docs/private agent changes: private doc-link check, template hygiene when governance files change, and `git diff --check`.
+- Runtime/source changes: build plus the focused GUI/Kotlin/deploy/runtime validator that covers the touched surface.
+- Deploy only when the policy below or the current task calls for it.
 
 ## Deploy Policy
 

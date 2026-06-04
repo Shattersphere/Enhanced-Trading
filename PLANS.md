@@ -92,23 +92,6 @@ Do not add Sector Market or Fixer's Market ship trading as part of UI polish. Re
 - Badge split: active ownership is now standalone in `D:\Sean Mods\Weapon Badges`. Historical context is archived in `.agent/archive/deep-dives/patched-badges.md`, but it is not active implementation guidance for this repo.
 - Source-mode remediation, rollback hardening, and Fixer catalog evolution: see `.agent/archive/history/2026-05-trade-source-remediation.md` and `.agent/archive/deep-dives/trade-and-sources.md`.
 
-## Validation Commands
+## Validation Routing
 
-Docs-only:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs
-git diff --check
-```
-
-Runtime/source:
-
-```powershell
-$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo
-git diff --check
-```
+Use `docs/CHECKS.md` for exact validation commands and evidence rules. For docs-only edits, use the private/public doc-link checks as appropriate plus `git diff --check`; for runtime/source work, combine the build with the focused GUI, Kotlin migration, deploy parity, live-class, or rollback diagnostic check that covers the touched surface.

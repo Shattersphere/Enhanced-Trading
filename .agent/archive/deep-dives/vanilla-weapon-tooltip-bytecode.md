@@ -1,7 +1,7 @@
 # Vanilla Weapon Tooltip Bytecode Deep Dive
 
 Status: active-reference
-Scope: Weapons Procurement, Starsector 0.98a campaign cargo/refit-style weapon hover tooltips
+Scope: Enhanced Trading, Starsector 0.98a campaign cargo/refit-style weapon hover tooltips
 Last verified: 2026-05-16 against `C:\Games\Starsector\starsector-core\starfarer_obf.jar.wp_backup`
 Read when: attempting to make stock-review weapon rows match vanilla hover tooltips, cargo-cell tooltip behavior, or codex weapon tooltip layout
 Do not read for: ordinary stock list layout, trade execution, source pricing, or optional badge rendering unless a tooltip change crosses into private UI classes
@@ -10,7 +10,7 @@ Search tags: vanilla tooltip, weapon hover, CargoDataGridView, CargoTooltipFacto
 
 ## Summary
 
-- Vanilla cargo-grid weapon hover tooltips are not built through the public `TooltipMakerAPI.TooltipCreator` path used by Weapons Procurement rows.
+- Vanilla cargo-grid weapon hover tooltips are not built through the public `TooltipMakerAPI.TooltipCreator` path used by Enhanced Trading rows.
 - The vanilla path is `CargoDataGridView.createItemView()` -> `assignTooltipToView()` -> `createTooltipForStack()` -> `CargoTooltipFactory` -> `StandardTooltipV2`.
 - The exact vanilla weapon tooltip depends on private/obfuscated classes including `CargoStackView`, `CargoItemStack`, `CargoDataGridView$o`, `F`, `BaseWeaponSpec`, `StandardTooltipV2`, and `StandardTooltipV2Expandable`.
 - Vanilla attaches the tooltip directly to `CargoStackView` with private UI methods, then adjusts placement in a `beforeShowing` runnable.

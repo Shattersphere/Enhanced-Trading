@@ -1,7 +1,7 @@
 # Runtime validation deep dive
 
 Status: active-reference with retired badge sections
-Scope: Weapons Procurement runtime, release, deploy, rollback, and historical patched-badge validation procedures
+Scope: Enhanced Trading runtime, release, deploy, rollback, and historical patched-badge validation procedures
 Last verified: current clean-deploy commands updated 2026-05-19; badge sections are pre-split history
 Read when: preparing manual in-game validation, rollback fault checks, release validation, or deploy troubleshooting
 Do not read for: small docs-only edits that do not affect validation commands
@@ -15,7 +15,7 @@ Search tags: `deploy-live-mod`, `rollback`, `wp.debug.failTradeStep`, `validate-
 - Validate the clean popup in real market/storage contexts.
 - Validate each trade source and trade mode separately.
 - Forced rollback testing remains the key outstanding runtime proof.
-- Patched badge validation is no longer a Weapons Procurement task; badge validation belongs in the standalone `D:\Sean Mods\Weapon Badges` repo.
+- Patched badge validation is no longer an Enhanced Trading task; badge validation belongs in the standalone `D:\Sean Mods\Weapon Badges` repo.
 - Restart Starsector after class/helper/jar changes because stale classloader state can survive hot-copying.
 - Live deploy stages files and queues a minimized visible no-activate worker when Starsector locks the jar; treat queued deploys as pending until live parity passes.
 - Reset dangerous debug/fault settings to `none` before normal play or packaging.
@@ -33,14 +33,14 @@ Search tags: `deploy-live-mod`, `rollback`, `wp.debug.failTradeStep`, `validate-
 
 ## Test-Ready Command Sequence
 
-Full local validation sequence for Weapons Procurement code, assets, deploy, and live jar checks:
+Full local validation sequence for Enhanced Trading code, assets, deploy, and live jar checks:
 
 ```powershell
 $env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\weapons-procurement.jar -Label Repo
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
@@ -126,7 +126,7 @@ Do not treat build success as proof of rollback behavior. This needs in-game evi
 
 ## Retired Patched Badge Manual Validation
 
-Historical only. Cargo-cell badges moved to the standalone private `D:\Sean Mods\Weapon Badges` repo; do not run or recreate these steps in Weapons Procurement. Keep this checklist only as context for old bug reports and migration work.
+Historical only. Cargo-cell badges moved to the standalone private `D:\Sean Mods\Weapon Badges` repo; do not run or recreate these steps in Enhanced Trading. Keep this checklist only as context for old bug reports and migration work.
 
 1. Restore then patch `starfarer_obf.jar` using the repo scripts.
 2. Run `validate-cargo-stack-view-patch.ps1`.

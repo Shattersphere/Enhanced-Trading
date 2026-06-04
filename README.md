@@ -53,13 +53,11 @@ Release notes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## Build/Validation
 
+For local source builds, set `STARSECTOR_DIRECTORY` to your Starsector install and run:
+
 ```powershell
 $env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
-git diff --check
 ```
+
+Use [PACKAGING.md](PACKAGING.md) for release validation, deploy checks, and rollback diagnostic procedures.

@@ -3,8 +3,8 @@
 Status: retired/historical
 Scope: Pre-split optional patched cargo-cell badge path, count bridge, and bytecode patcher constraints
 Last verified: 2026-05-12, before Weapon Badges became a standalone mod
-Read when: understanding why badge ownership was removed from Weapons Procurement, or migrating old context into `D:\Sean Mods\Weapon Badges`
-Do not read for: clean popup trade/UI work, active Weapons Procurement implementation, or new badge work in this repo
+Read when: understanding why badge ownership was removed from Enhanced Trading, or migrating old context into `D:\Sean Mods\Weapon Badges`
+Do not read for: clean popup trade/UI work, active Enhanced Trading implementation, or new badge work in this repo
 Related files: `src/weaponsprocurement/internal/WeaponsProcurementBadgeHelper.java`, `src/weaponsprocurement/internal/WeaponsProcurementCountUpdater.java`, `tools/cargo-stack-view-patcher.ps1`, `tools/validate-cargo-stack-view-patch.ps1`, `tools/validate-total-badges.ps1`
 Search tags: `CargoStackView`, `starfarer_obf.jar`, `WeaponsProcurementBadgeHelper`, `wp.counts.ready`, `javap`, `bytecode`
 

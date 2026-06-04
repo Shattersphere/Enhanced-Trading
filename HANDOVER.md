@@ -32,20 +32,14 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Document Map
 
-- `AGENTS.md`: repo-local rules, commands, deploy policy, and archive map.
-- `docs/PROJECT_FACTS.md`: exact paths, commands, dependencies, Git mode, deploy target, compatibility risks, and shared-library authorization.
-- `docs/CHECKS.md`: validation command menu and evidence rules.
-- `docs/REPO_MAP.md`: generated path inventory and major repo areas.
-- `.agent/BRIEF.md`: current status, risks, and next best step.
-- `.agent/ARCHITECTURE_MAP.md`: subsystem diagrams and package map.
-- `.agent/INDEX.md`: doc index.
-- `.agent/PUBLIC_RELEASE.md`: private public-export checklist. Never publish it.
-- `.agent/archive/INDEX.md`: archive/deep-dive index.
-- `README.md`, `CONFIG.md`, `PACKAGING.md`, `CHANGELOG.md`: player/release-facing docs.
-- `PLANS.md`: active plan and deferred work.
-- `.agent/SHARED_LIBRARIES.md`: Shatter Lib edit gate and read-only dependency-library workflow.
+Use `.agent/INDEX.md` as the routing map. The high-value starting points are:
 
-Before large or risky work, start with `AGENTS.md`, `.agent/BRIEF.md`, and `.agent/ARCHITECTURE_MAP.md`. Then open the relevant archive deep dive through `.agent/archive/INDEX.md`.
+- `AGENTS.md`: repo-local operating rules, deploy policy, hard constraints, and archive trigger map.
+- `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`: exact commands, paths, deploy/Git facts, validation choices, and evidence limits.
+- `.agent/BRIEF.md`, `PLANS.md`, and `.agent/ARCHITECTURE_MAP.md`: current state, active work, subsystem map, and high-risk read triggers.
+- `.agent/archive/INDEX.md`: deep evidence and history; open only the note matching the task.
+
+Before large or risky work, start with those routing docs and then inspect the relevant source files or archive note.
 
 ## Entry Points And Runtime Lifecycle
 
@@ -204,40 +198,11 @@ Tooltip height is capped through `WimGuiTooltip.maxTooltipHeight()`, currently 9
 
 ## Build, Validation, And Deploy
 
-Docs-only checks:
+Exact build, validation, deploy, status, and parity commands live in `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs
-git diff --check
-```
-
-Runtime/source checks:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -StarsectorDir "C:\Games\Starsector"
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo
-git diff --check
-```
-
-Deploy:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -StarsectorDir "C:\Games\Starsector"
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
-```
+Use docs-only checks for docs-only edits. For runtime/source work, build first, then add the focused validator that matches the touched surface: GUI button style, Kotlin/source boundary, deploy parity, live GUI classes, or rollback diagnostics.
 
 `tools/deploy-live-mod.ps1` clean-syncs repo-managed files to the live mod folder. If Starsector locks the jar, it stages the built files and queues a minimized visible no-activate deploy worker. A queued deploy is not a live/runtime fix until parity is rechecked after the lock clears.
-
-Use:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status -CleanStaleStaging
-```
 
 Do not deploy docs-only/comment-only work unless explicitly asked.
 

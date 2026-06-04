@@ -1,11 +1,11 @@
 # Trade and sources deep dive
 
 Status: active-reference
-Scope: Weapons Procurement trade planning, source modes, quotes, cargo mutation, and transaction reporting
+Scope: Enhanced Trading trade planning, source modes, quotes, cargo mutation, and transaction reporting
 Last verified: 2026-05-17, against local Starsector 0.98a bytecode and installed Diable Avionics 2.9.4 data
 Read when: changing Local/Sector/Fixer behavior, pending trades, quotes, tariffs, market blacklists, cargo mutation, or transaction callbacks
 Do not read for: pure UI row layout, patched badge rendering, or docs-only release notes
-Related files: `src/weaponsprocurement/core`, `src/weaponsprocurement/gui/StockReviewTrade*`, `src/weaponsprocurement/gui/StockReviewExecutionController.java`, `data/config/weapons_procurement_market_blacklist.json`
+Related files: `src/main/kotlin/weaponsprocurement`, `data/config/enhanced_trading_market_blacklist.json`
 Search tags: `Sector Market`, `Fixer's Market`, `StockPurchaseExecutor`, `StockReviewQuoteBook`, `reportPlayerMarketTransaction`, `TheoreticalSaleIndex`, `ObservedStockIndex`, `RarityClassifier`, `TheoreticalShipSaleIndex`, `ObservedShipStockIndex`, `FactionAPI`, `W:`, `F:`
 
 ## Summary
@@ -57,7 +57,7 @@ Search tags: `Sector Market`, `Fixer's Market`, `StockPurchaseExecutor`, `StockR
 - Do not cache Sector Market stock across popup snapshot rebuilds. It represents live remote cargo that purchases can drain.
 - Remote source modes disable black-market selling. Selling in remote modes uses the current local legal buyer.
 - Sector and Fixer's Market can be independently disabled through LunaLib.
-- `data/config/weapons_procurement_market_blacklist.json` blocks item keys, raw ids, weapon display names, and wing display names from remote source rows.
+- `data/config/enhanced_trading_market_blacklist.json` blocks item keys, raw ids, weapon display names, and wing display names from remote source rows.
 
 ## Fixer's Market Catalog Direction
 

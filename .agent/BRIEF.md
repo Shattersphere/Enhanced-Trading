@@ -1,6 +1,6 @@
 # Enhanced Trading Brief
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Current State
 
@@ -26,36 +26,10 @@ The repo has been synced with the generic template doc system. Exact facts now l
 
 - Collaborator branch `autotrade-first-draft` at `https://github.com/Shattersphere/Enhanced-Trading/tree/autotrade-first-draft` currently resolves to commit `08a67538bf0dda4ea0418b3b72e4bed2ad523ab2`. Expect merge conflicts with local work; branch was requested as a separate sibling checkout before integration.
 
-## Commands
+## Operational Routing
 
-Docs-only:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
-python scripts/check-template-state.py --initialized
-git diff --check
-```
-
-Runtime/source:
-
-```powershell
-$env:STARSECTOR_DIRECTORY = "X:\Path\To\Starsector"
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1
-git diff --check
-```
-
-## Deploy Target
-
-- Live mod folder: `C:\Games\Starsector\mods\Enhanced Trading`
-- Deploy command: `tools/deploy-live-mod.ps1`
-- The deploy script clean-syncs repo-managed clean-package files, or stages and queues a minimized visible no-activate deploy if the live jar is locked.
-- Shared deploy/status/state/zip/process helpers live in `tools/lib/Deploy.Common.ps1`; keep `deploy-live-mod.ps1` command-line behavior stable.
-- Use `tools/deploy-live-mod.ps1 -Status` for queue/status/blocker/staging diagnostics, `-CheckOnly -RequireCurrent` for cheap source/live clean-package parity, and `-Status -CleanStaleStaging` for scoped stale staging cleanup.
+- Exact commands, deploy target, dependency paths, Git mode, and shared-library facts live in `docs/PROJECT_FACTS.md`.
+- Validation choices and evidence limits live in `docs/CHECKS.md`.
 - Docs-only changes normally do not need deploy.
 
 ## Current Risks

@@ -1,7 +1,7 @@
 # Starsector UI deep dive
 
 Status: active-reference
-Scope: Weapons Procurement stock-review campaign UI and shared `WimGui*` helpers
+Scope: Enhanced Trading stock-review campaign UI and shared `WimGui*` helpers
 Last verified: 2026-05-12, archived from the pre-debloat `HANDOVER.md`
 Read when: changing stock-review layout, row sizing, indentation, `WimGui*`, buttons, scrolling, text fitting, helper extraction, or live-jar class validation
 Do not read for: pure config copy edits, release-note updates, or non-UI trade math
