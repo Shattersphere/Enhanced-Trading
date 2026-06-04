@@ -21,6 +21,10 @@ import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import com.shattersphere.shatterlib.starsector.ui.StarsectorSpritePainter
+import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterItemTooltipContext
+import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterTooltipContextLine
+import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWeaponTooltip
+import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWingTooltip
 import weaponsprocurement.trade.quote.CreditFormat
 import weaponsprocurement.stock.item.StockDebugItemProfile
 import weaponsprocurement.stock.item.StockDebugItemStat
@@ -31,8 +35,7 @@ import java.awt.Color
 import java.util.Locale
 
 /**
- * Custom weapon/LPC tooltip approximation. Debug records and real specs share this path so
- * stress samples exercise the same production layout as normal rows.
+ * Custom weapon/LPC tooltip approximation for debug and stress records.
  */
 class StockReviewItemTooltip private constructor(
     private val record: WeaponStockRecord,
@@ -330,6 +333,29 @@ class StockReviewItemTooltip private constructor(
         return if (price <= 0) null else CreditFormat.credits(price)
     }
 
+    private fun shatterContext(): ShatterItemTooltipContext {
+        val lines = ArrayList<ShatterTooltipContextLine>()
+        if (!record.isWing()) {
+            cargoSpaceLabel()?.takeIf { hasText(it) }?.let { cargoSpace ->
+                lines.add(ShatterTooltipContextLine("Cargo space: $cargoSpace per unit.", cargoSpace))
+            }
+        }
+        priceLabel()?.takeIf { hasText(it) }?.let { price ->
+            val text = if (record.isWing()) "Sells for: $price per unit." else "Price: $price per unit."
+            lines.add(ShatterTooltipContextLine(text, price))
+        }
+        val count = record.ownedCount.toString()
+        val label = if (record.isWing()) {
+            "fighter LPCs"
+        } else if (record.ownedCount == 1) {
+            "weapon"
+        } else {
+            "weapons"
+        }
+        lines.add(ShatterTooltipContextLine("You own a total of $count $label of this type.", count))
+        return ShatterItemTooltipContext(includeDefaultCargoAndPrice = false, lines = lines)
+    }
+
     private fun damageValue(spec: WeaponSpecAPI): String? {
         if (spec.hasTag("damage_special")) {
             return "Special"
@@ -466,7 +492,23 @@ class StockReviewItemTooltip private constructor(
             if (!record.isWing() && record.spec == null) {
                 return null
             }
-            return StockReviewItemTooltip(record)
+            val itemId = record.itemId ?: return null
+            val local = StockReviewItemTooltip(record)
+            if (record.isWing()) {
+                val spec = record.wingSpec ?: return null
+                return ShatterWingTooltip(
+                    wingId = itemId,
+                    spec = spec,
+                    includeReplacementNotes = false,
+                    context = local.shatterContext(),
+                )
+            }
+            val spec = record.spec ?: return null
+            return ShatterWeaponTooltip(
+                weaponId = itemId,
+                spec = spec,
+                context = local.shatterContext(),
+            )
         }
 
         private fun addStatRow(panel: CustomPanelAPI, x: Float, y: Float, width: Float, height: Float, row: StatRow?) {

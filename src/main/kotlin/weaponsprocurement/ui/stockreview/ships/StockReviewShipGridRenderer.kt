@@ -4,6 +4,7 @@ import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.combat.ShipAPI
+import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterShipTooltip
 import weaponsprocurement.ui.WimGuiButtonBinding
 import weaponsprocurement.ui.WimGuiButtonSpec
 import weaponsprocurement.ui.WimGuiControls
@@ -159,7 +160,7 @@ object StockReviewShipGridRenderer {
                 StockReviewStyle.ACTION_BACKGROUND,
                 StockReviewStyle.ROW_BORDER,
                 "Show ship details.",
-                StockReviewShipTooltip(record),
+                shipTooltip(record),
                 tooltipLocationForColumn(column),
             ),
             buttons,
@@ -248,6 +249,9 @@ object StockReviewShipGridRenderer {
         } else {
             TooltipMakerAPI.TooltipLocation.LEFT
         }
+
+    private fun shipTooltip(record: StockReviewShipRecord): TooltipMakerAPI.TooltipCreator =
+        if (record.isDebug()) StockReviewShipTooltip(record) else ShatterShipTooltip(record.member)
 
     private fun currentPage(offset: Int, maxOffset: Int, visibleRows: Int, totalPages: Int): Int {
         if (totalPages <= 1 || maxOffset <= 0) return 1
