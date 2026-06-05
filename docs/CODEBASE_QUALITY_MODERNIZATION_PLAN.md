@@ -42,13 +42,13 @@ Ships/fighters: ship trading remains local-only exact-member trading in `ui.stoc
 
 Persistence: keep Fixer catalog state simple, sanitized, and migration-aware. No save-key rename without approval.
 
-Validation/tooling/docs: validators must reflect the current architecture. Maintainer docs should stay compact and link deep dives rather than duplicating history.
+Validation/tooling/docs: validators must reflect the current architecture. `tools/lib/Validation.Assertions.ps1` owns shared PowerShell assertions; validators own repo contracts. Maintainer docs stay compact and link deep dives.
 
 ## Risk Register
 
 | Area | Evidence | Impact | Mitigation | Validation | Status |
 |---|---|---|---|---|---|
-| Validator/CI drift | stale jar/class checks | false failures or ignored checks | keep validator lists current | jar, Kotlin, GUI, compatibility validators | active |
+| Validator/CI drift | stale jar/class checks or helper drift | false failures or ignored checks | keep validator lists current and share assertions | jar, Kotlin, GUI, compatibility validators | active |
 | GUI/classloader | `WimGui*`, UI deep dive | crashes, clipping, stale classes | bounded UI edits | GUI validator, jar/live class, in-game | active |
 | Trade rollback | `StockPurchaseExecutor`, analyzer | cargo/credit corruption | static contract guard plus forced-failure matrix | validator plus runtime analyzer | active |
 | Source semantics | Local/Sector/Fixer services | wrong cargo drain/pricing | preserve static contracts and runtime matrix | validator plus manual trade matrix | active |
