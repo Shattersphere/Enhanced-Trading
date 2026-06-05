@@ -30,6 +30,19 @@ function Read-Text {
     return Get-Content -LiteralPath $path -Raw
 }
 
+function Assert-Contains {
+    param(
+        [string]$Label,
+        [string]$Text,
+        [string]$Needle
+    )
+    if ($Text.Contains($Needle)) {
+        Add-Pass "$Label contains $Needle"
+    } else {
+        Add-Failure "$Label missing $Needle"
+    }
+}
+
 function Assert-Equal {
     param(
         [string]$Label,
@@ -258,6 +271,35 @@ $blacklistJson = (Read-Text "data/config/enhanced_trading_market_blacklist.json"
 Assert-ObjectKeys "enhanced_trading_market_blacklist.json root" $blacklistJson @("BANNED_FROM_SECTOR_MARKET", "BANNED_FROM_FIXERS_MARKET")
 Assert-StringArray "enhanced_trading_market_blacklist.json" $blacklistJson "BANNED_FROM_SECTOR_MARKET"
 Assert-StringArray "enhanced_trading_market_blacklist.json" $blacklistJson "BANNED_FROM_FIXERS_MARKET"
+
+$stockItemTypeSource = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/StockItemType.kt"
+foreach ($needle in @(
+    'WEAPON("Weapons", "Weapon", CompatibilityIds.StockItemKeys.WEAPON_PREFIX)',
+    'WING("Wings", "Wing", CompatibilityIds.StockItemKeys.WING_PREFIX)',
+    'fun key(itemId: String?): String = keyPrefix + (itemId ?: "")',
+    'itemKey != null && itemKey.startsWith(WING.keyPrefix)',
+    'if (itemKey == null) return null',
+    'itemKey.substring(type.keyPrefix.length)',
+    'return itemKey'
+)) {
+    Assert-Contains "StockItemType item-key contract" $stockItemTypeSource $needle
+}
+
+$blacklistSource = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponMarketBlacklist.kt"
+foreach ($needle in @(
+    'private const val CONFIG_PATH = CompatibilityIds.ConfigFiles.MARKET_BLACKLIST',
+    'private const val SECTOR_KEY = CompatibilityIds.MarketBlacklist.SECTOR_KEY',
+    'private const val FIXERS_KEY = CompatibilityIds.MarketBlacklist.FIXERS_KEY',
+    'val rawId = StockItemType.rawId(itemKey)',
+    'set.contains(normalize(itemKey)) || set.contains(normalize(rawId))',
+    'val displayName = displayName(itemKey, rawId)',
+    'set.contains(normalize(displayName))',
+    'StockItemSpecs.wingSpec(rawId)?.wingName',
+    'StockItemSpecs.weaponSpec(rawId)?.weaponName',
+    'trimmed.lowercase(Locale.US)'
+)) {
+    Assert-Contains "WeaponMarketBlacklist matching contract" $blacklistSource $needle
+}
 
 $sortModeSource = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/StockSortMode.kt"
 foreach ($alias in @('"COST"', '"PURCHASABLE"', '"FOR_SALE"', '"OWNED"')) {
