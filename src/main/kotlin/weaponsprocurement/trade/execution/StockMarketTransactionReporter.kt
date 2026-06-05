@@ -65,7 +65,7 @@ class StockMarketTransactionReporter private constructor() {
                 )
                 transaction.creditValue = (if (bought) creditValue else -creditValue).toFloat()
                 plugin.reportPlayerMarketTransaction(transaction)
-            } catch (t: RuntimeException) {
+            } catch (t: Throwable) {
                 // Transaction callbacks are best-effort; cargo mutation has already succeeded.
                 log.warn("WP_STOCK_REVIEW transaction report failed for $itemId at ${submarket.specId}", t)
             }

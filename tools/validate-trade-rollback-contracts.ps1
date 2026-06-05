@@ -35,6 +35,7 @@ if ($luna.Contains("wp.debug.failTradeStep")) {
 }
 
 $executor = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseExecutor.kt"
+$transactionReporter = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockMarketTransactionReporter.kt"
 foreach ($step in $steps) {
     $constantName = "FAIL_" + $step.ToUpperInvariant().Replace("-", "_")
     Assert-Contains "StockPurchaseExecutor.kt failure constant" $executor "private const val $constantName = `"$step`""
@@ -176,6 +177,14 @@ foreach ($needle in @(
     'return credits in 0L..MAX_EXECUTABLE_CREDITS'
 )) {
     Assert-Contains "TradeMoney.kt" $money $needle
+}
+
+foreach ($needle in @(
+    'catch (t: Throwable)',
+    '// Transaction callbacks are best-effort; cargo mutation has already succeeded.',
+    'log.warn("WP_STOCK_REVIEW transaction report failed for $itemId at ${submarket.specId}", t)'
+)) {
+    Assert-Contains "StockMarketTransactionReporter.kt post-commit report guard" $transactionReporter $needle
 }
 
 $analyzer = Read-Text "tools/analyze-trade-rollback-diagnostics.ps1"
