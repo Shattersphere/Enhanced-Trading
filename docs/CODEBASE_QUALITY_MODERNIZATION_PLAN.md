@@ -52,7 +52,7 @@ Validation/tooling/docs: validators must reflect the current architecture. Maint
 | Source semantics | Local/Sector/Fixer services | wrong cargo drain/pricing | preserve contracts | build plus manual trade matrix | active |
 | Fixer persistence | save key v1 | save compatibility loss | migration-before-change | static and runtime save proof | active |
 | Ship trading | exact-member local code | ship loss or remote leakage | local-only gate | in-game ship buy/sell | active |
-| Settings/config | Luna and JSON loaders | broken user configs | compatibility validator | static plus Luna runtime | active |
+| Settings/config | Luna and JSON loaders | broken user configs | compatibility and config-contract validators | static plus Luna runtime | active |
 | Public/export | curated export scripts | private leak/public breakage | explicit release gate | export/leak scan | parked |
 | Broad polish | many split UI owners | churn without value | avoid cosmetic moves | none unless touched | low-value |
 
@@ -72,9 +72,9 @@ Low-value work to avoid: package churn, cosmetic renames, broad helper extractio
 
 ## Validation Matrix
 
-Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, `validate-kotlin-migration.ps1`, `validate-gui-button-style.ps1`, `validate-jar-classes.ps1`, `validate-compatibility-surfaces.ps1`, `validate-doc-links.ps1`, `export-public.ps1`, `git diff --check`, deploy parity.
+Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, `validate-kotlin-migration.ps1`, `validate-gui-button-style.ps1`, `validate-jar-classes.ps1`, `validate-compatibility-surfaces.ps1`, `validate-config-contracts.ps1`, `validate-doc-links.ps1`, `export-public.ps1`, `git diff --check`, deploy parity.
 
-Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, blacklist display-name matching, and Fixer catalog encode/decode. No dedicated unit-test suite is currently declared.
+Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, blacklist display-name matching, and Fixer catalog encode/decode. `validate-config-contracts.ps1` now statically covers Luna/source key consistency, stock JSON shape, blacklist JSON shape, sort aliases, typed `perItem` keys, legacy `perWeapon`, and core `TradeMoney` guard strings. No dedicated unit-test suite is currently declared.
 
 Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live jar class validation.
 
@@ -90,7 +90,7 @@ Stop when remaining work is cosmetic, risky without behavior need, lacks practic
 
 1. Keep `tools/validate-jar-classes.ps1`, `.github/workflows/sanity.yml`, and `tools/validate-compatibility-surfaces.ps1` green before runtime cleanup.
 2. Use this document plus `docs/CODE_QUALITY.md` when selecting bounded cleanup.
-3. Add parser/key tests only where they protect real shipped config or save contracts.
+3. Expand parser/key tests only where they protect real shipped config or save contracts not covered by `validate-config-contracts.ps1`.
 4. Finish rollback forced-failure runtime validation before changing trade execution semantics.
 5. Treat GUI cleanup as runtime work: run GUI/static checks and get in-game proof for layout changes.
 6. Keep ship trading local-only unless remote ship semantics receive a separate design.

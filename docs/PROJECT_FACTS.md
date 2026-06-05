@@ -46,6 +46,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector core jars plus LunaLib/LazyLib jars. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
+| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock JSON, blacklist JSON, sort alias, and trade money guard. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |

@@ -74,6 +74,7 @@ python scripts/update-repo-map.py --write
   - `tools/deploy-live-mod.ps1`
   - `tools/export-public.ps1`
   - `tools/validate-compatibility-surfaces.ps1`
+  - `tools/validate-config-contracts.ps1`
   - `tools/validate-doc-links.ps1`
   - `tools/validate-gui-button-style.ps1`
   - `tools/validate-jar-classes.ps1`
