@@ -90,6 +90,10 @@ jobs:
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1
 
+      - name: Validate runtime evidence contracts
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-runtime-evidence-contracts.ps1
+
       - name: Reject stale stock-review pending purchase class
         shell: pwsh
         run: |

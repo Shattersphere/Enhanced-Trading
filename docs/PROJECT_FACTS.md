@@ -53,15 +53,16 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 |---|---|---|---|
 | List files | `rg --files` | repo root | Search before opening large docs/archive. |
 | Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires Starsector path; optional Shatter Lib override. |
-| Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Local iteration only; accepts the same path overrides as `Build`. |
-| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector, dependency, and Shatter Lib API jars. |
+| Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Local iteration only. |
+| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector/dependency API jars. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
-| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock/blacklist JSON, item keys, aliases, trade money. |
-| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, encoding, sanitization, lifecycle/policy gates, blacklist safety. |
-| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, forced-failure hooks, diagnostics, and credit/cargo guards. |
-| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer separation, virtual Fixer stock, source rehydration, dispatch. |
-| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local-only exact-member ship snapshot, pending trade, buy/sell mutation, remote gate. |
+| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/JSON/item-key/trade-money gates. |
+| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, encoding, lifecycle/policy gates. |
+| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, hooks, diagnostics, credit/cargo guards. |
+| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer separation, rehydration, dispatch. |
+| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local exact-member snapshot/trade/mutation, remote gate. |
+| Runtime evidence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-runtime-evidence-contracts.ps1` | repo root | Evidence helper gates. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |

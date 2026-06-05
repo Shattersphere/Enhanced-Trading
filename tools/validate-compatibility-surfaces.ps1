@@ -153,6 +153,7 @@ Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-fixer-persisten
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-trade-rollback-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-source-semantics-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-ship-trading-contracts.ps1'
+Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-runtime-evidence-contracts.ps1'
 if ($sanity.Contains("weapons-procurement.jar")) {
     Add-Failure ".github/workflows/sanity.yml must not reference weapons-procurement.jar"
 } else {

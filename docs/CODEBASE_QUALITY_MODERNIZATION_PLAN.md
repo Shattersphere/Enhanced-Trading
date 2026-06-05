@@ -75,7 +75,7 @@ Low-value work to avoid: package churn, cosmetic renames, broad helper extractio
 
 ## Validation Matrix
 
-Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, Kotlin/GUI/jar/compat/config/Fixer/rollback/source/ship validators, doc links, `export-public.ps1`, `git diff --check`, deploy parity/evidence.
+Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, Kotlin/GUI/jar/compat/config/Fixer/rollback/source/ship/evidence validators, doc links, `export-public.ps1`, `git diff --check`, deploy parity/evidence.
 
 Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist display-name matching. Config/Fixer/rollback/source/ship validators cover Luna/source keys, JSON schema, item keys, blacklist matching, `TradeMoney`, Fixer save gates, rollback hooks/fields, Local/Sector/Fixer separation, and local exact-member ship trade gates. Add runtime save/rollback/trade proof before migration or trade semantics changes. No unit-test suite is declared.
 
