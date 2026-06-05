@@ -25,6 +25,7 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Deploy parity | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | Runtime changes when live parity matters | Current/stale source/live state plus Shatter Lib runtime API state | medium; requires Starsector path |
 | Runtime deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | Runtime changes that need live validation | Deploy or queued deploy result | high; writes live mod target; blocks stale Shatter Lib API |
 | Live GUI classes | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1` | After runtime deploys | Live jar class validation | medium |
+| Runtime evidence report | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\collect-runtime-validation-evidence.ps1` | Preparing or summarizing manual in-game validation evidence | Deploy/log evidence present, skipped, or still manual | low unless requiring deploy/live/log proof |
 | Public export | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\export-public.ps1` | Explicit public release/export work | Export path and leak/boundary status | medium |
 | Rollback diagnostics | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass` | Manual forced rollback validation | Pass/fail by failure step | high; requires runtime log evidence |
 
@@ -48,6 +49,7 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 ## Missing Coverage
 
 - Runtime UI, LunaLib behavior, campaign interactions, rollback safety, and Starsector classloader behavior require in-game evidence; compile and jar parity are not enough.
+- `tools/collect-runtime-validation-evidence.ps1` only summarizes deploy/log evidence. It does not create in-game proof; use `-RequireDeployParity`, `-RequireLiveJar`, or `-RequireRollbackPass` when a session needs those gates to fail closed.
 - No dedicated unit-test suite is declared in the current Gradle build.
 - `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.
 - `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency, item-key parsing, blacklist matching, and trade-money guards; it does not prove LunaLib runtime UI behavior.

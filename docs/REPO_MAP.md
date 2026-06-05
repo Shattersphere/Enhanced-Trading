@@ -71,6 +71,7 @@ python scripts/update-repo-map.py --write
   - `tools/lib/`
   - `tools/analyze-ship-catalog-diagnostics.ps1`
   - `tools/analyze-trade-rollback-diagnostics.ps1`
+  - `tools/collect-runtime-validation-evidence.ps1`
   - `tools/deploy-live-mod.ps1`
   - `tools/export-public.ps1`
   - `tools/validate-compatibility-surfaces.ps1`

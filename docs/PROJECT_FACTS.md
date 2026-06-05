@@ -51,25 +51,26 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 
 | Purpose | Command | Working directory | Notes |
 |---|---|---|---|
-| List files | `rg --files` | repo root | Use targeted search before opening large docs or archives. |
-| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires `STARSECTOR_DIRECTORY` or `-StarsectorDir`; optional `-ShatterLibDir` / `SHATTER_LIB_DIRECTORY`. |
+| List files | `rg --files` | repo root | Search before opening large docs/archive. |
+| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires Starsector path; optional Shatter Lib override. |
 | Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Local iteration only; accepts the same path overrides as `Build`. |
-| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector, dependency, and Shatter Lib API jars. Optional `-PshatterLibDir=<path>`. |
+| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector, dependency, and Shatter Lib API jars. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
-| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock/blacklist JSON, item keys, aliases, and trade-money guards. |
-| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, encoding, sanitization, lifecycle/policy gates, blacklist safety, observed fallback. |
+| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock/blacklist JSON, item keys, aliases, trade money. |
+| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, encoding, sanitization, lifecycle/policy gates, blacklist safety. |
 | Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, forced-failure hooks, diagnostics, and credit/cargo guards. |
 | Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer separation, virtual Fixer stock, source rehydration, dispatch. |
-| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local-only exact-member ship snapshot, pending trade, buy/sell mutation, and remote ship gate guard. |
+| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local-only exact-member ship snapshot, pending trade, buy/sell mutation, remote gate. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |
 | Update repo map | `python scripts/update-repo-map.py --write` | repo root | Run after tracked structure changes. |
 | Deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | repo root | In scope only for runtime/package changes. |
 | Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | repo root | No-build queue/status/blocker report. |
-| Deploy parity check | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | repo root | Source/live clean-package parity plus installed Shatter Lib API freshness. |
+| Deploy parity check | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | repo root | Source/live clean-package parity plus Shatter Lib API freshness. |
 | Live GUI class validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1` | repo root | Run after runtime deploys. |
+| Runtime evidence report | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\collect-runtime-validation-evidence.ps1` | repo root | Summarizes deploy/live/log evidence; require gates via switches. |
 | Public export | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\export-public.ps1` | repo root | Public release/export only. |
 
 ## Paths
