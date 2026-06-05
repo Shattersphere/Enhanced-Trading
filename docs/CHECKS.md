@@ -11,6 +11,7 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Public doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | Public docs changes | Pass/fail | low |
 | Private doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | Agent/private docs changes | Pass/fail | low |
 | Diff whitespace | `git diff --check` | Any source/docs change before commit | Pass/fail | low |
+| GitHub sanity workflow | `.github/workflows/sanity.yml` on `main` push, pull request, or manual dispatch | CI/validator wiring changes | Workflow trigger and step coverage | low/medium |
 | Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | Runtime/source changes | Build passed/failed; key error if failed | medium; requires Starsector path; accepts `-ShatterLibDir` |
 | Build environment | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | Dependency/path checks | Resolved Starsector, dependency paths, and Shatter Lib API freshness | low/medium; requires local install |
 | GUI button style | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | GUI/button rendering changes | Pass/fail | low |
