@@ -119,10 +119,16 @@ class StockReviewQuoteBook(private val snapshot: WeaponStockSnapshot?) {
             if (quantity <= 0) continue
 
             val cost = TradeMoney.lineTotal(stock.unitPrice, quantity)
+            if (cost < 0L) continue
+            val baseCost = TradeMoney.lineTotal(stock.baseUnitPrice, quantity)
+            if (baseCost < 0L) continue
+            val cargo = stock.unitCargoSpace * quantity
+            if (cargo < 0f || cargo.isNaN() || cargo.isInfinite()) continue
+
             totalCost = TradeMoney.safeAdd(totalCost, cost)
-            totalBaseCost = TradeMoney.safeAdd(totalBaseCost, TradeMoney.lineTotal(stock.baseUnitPrice, quantity))
+            totalBaseCost = TradeMoney.safeAdd(totalBaseCost, baseCost)
             totalQuantity += quantity
-            totalCargo += quantity * stock.unitCargoSpace
+            totalCargo += cargo
             allocations.add(StockReviewSellerAllocation(stock.displaySourceName, stock.sourceId, quantity, cost))
             remaining -= quantity
             if (remainingBySource != null) {

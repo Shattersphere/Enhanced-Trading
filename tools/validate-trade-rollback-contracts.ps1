@@ -138,6 +138,33 @@ Assert-Order "StockPurchasePlan.kt invalid plan-source guard" $plan @(
     'totalSpace += lineSpace'
 )
 
+$quoteBook = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewQuoteBook.kt"
+foreach ($needle in @(
+    'val cost = TradeMoney.lineTotal(stock.unitPrice, quantity)',
+    'if (cost < 0L) continue',
+    'val baseCost = TradeMoney.lineTotal(stock.baseUnitPrice, quantity)',
+    'if (baseCost < 0L) continue',
+    'val cargo = stock.unitCargoSpace * quantity',
+    'if (cargo < 0f || cargo.isNaN() || cargo.isInfinite()) continue',
+    'totalBaseCost = TradeMoney.safeAdd(totalBaseCost, baseCost)',
+    'totalCargo += cargo'
+)) {
+    Assert-Contains "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook $needle
+}
+Assert-Order "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook @(
+    'val cost = TradeMoney.lineTotal(stock.unitPrice, quantity)',
+    'if (cost < 0L) continue',
+    'val baseCost = TradeMoney.lineTotal(stock.baseUnitPrice, quantity)',
+    'if (baseCost < 0L) continue',
+    'val cargo = stock.unitCargoSpace * quantity',
+    'if (cargo < 0f || cargo.isNaN() || cargo.isInfinite()) continue',
+    'totalCost = TradeMoney.safeAdd(totalCost, cost)',
+    'totalBaseCost = TradeMoney.safeAdd(totalBaseCost, baseCost)',
+    'totalQuantity += quantity',
+    'totalCargo += cargo',
+    'allocations.add(StockReviewSellerAllocation(stock.displaySourceName, stock.sourceId, quantity, cost))'
+)
+
 $money = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/TradeMoney.kt"
 foreach ($needle in @(
     'MAX_EXECUTABLE_CREDITS: Long = 2147483647L',
