@@ -39,7 +39,8 @@ class StockReviewItemTooltip private constructor(
 ) : TooltipMakerAPI.TooltipCreator {
     override fun isTooltipExpandable(tooltipParam: Any?): Boolean = false
 
-    override fun getTooltipWidth(tooltipParam: Any?): Float = if (record.isWing()) WING_WIDTH else WIDTH
+    override fun getTooltipWidth(tooltipParam: Any?): Float =
+        if (record.isWing()) StockReviewWingTooltipRenderer.WIDTH else WIDTH
 
     override fun createTooltip(tooltip: TooltipMakerAPI, expanded: Boolean, tooltipParam: Any?) {
         if (record.isWing()) {
@@ -73,37 +74,7 @@ class StockReviewItemTooltip private constructor(
             ?.takeIf { record.isWing() }
             ?.let { debugWingLayout(it) }
             ?: wingLayout(record, record.wingSpec ?: return)
-        val panel = Global.getSettings().createCustom(
-            WING_WIDTH,
-            StockReviewTooltipPanel.maxTooltipHeight(WING_LINE_HEIGHT),
-            WimGuiPanelPlugin(StockReviewTooltipPanel.ITEM_BACKGROUND, StockReviewTooltipPanel.ITEM_BORDER),
-        )
-        val systemLines = measuredPanelLines(panel, layout.systemText, WING_LOADOUT_VALUE_WIDTH, WING_LOADOUT_ROW_HEIGHT, WING_LOADOUT_MAX_LINES)
-        val armamentLines = measuredPanelLines(panel, layout.armamentsText, WING_LOADOUT_VALUE_WIDTH, WING_LOADOUT_ROW_HEIGHT, WING_LOADOUT_MAX_LINES)
-        var y = WING_PAD_TOP
-        addPanelLabel(panel, layout.title, titleColor(), WING_PAD_X, y, WING_CONTENT_WIDTH, 28f, Alignment.LMID)
-        y += 34f
-        addRichPanelLine(panel, "Design type:", layout.manufacturer, y)
-        y += 32f
-        y += addWingDescription(panel, layout.descriptionText, y) + 10f
-        priceLabel()?.let { price ->
-            addInlineHighlight(panel, "Sells for:", price, " per unit.", y)
-            y += WING_LINE_HEIGHT
-        }
-        addInlineHighlight(panel, "You own a total of", record.ownedCount.toString(), " fighter LPCs of this type.", y)
-        y += WING_LINE_HEIGHT + 10f
-
-        addWingSectionHeading(panel, "Technical data", y)
-        y += SECTION_HEADING_HEIGHT + 10f
-        for (row in layout.technicalRows) {
-            addWingStatRow(panel, row, y)
-            y += WING_GRID_ROW_HEIGHT
-        }
-        y += 10f
-        y = addWingLoadoutLine(panel, "System:", systemLines, y)
-        y = addWingLoadoutLine(panel, "Armaments:", armamentLines, y)
-        panel.position.setSize(WING_WIDTH, StockReviewTooltipPanel.capHeight(y + WING_PAD_BOTTOM, WING_LINE_HEIGHT))
-        tooltip.addCustom(panel, 0f)
+        StockReviewWingTooltipRenderer.addTooltip(tooltip, layout, record.ownedCount, priceLabel())
     }
 
     private fun createWeaponTooltip(tooltip: TooltipMakerAPI) {
@@ -377,22 +348,6 @@ class StockReviewItemTooltip private constructor(
     companion object {
         private const val VANILLA_TOOLTIP_WIDTH = 400f
         private const val CONTENT_WIDTH = VANILLA_TOOLTIP_WIDTH * 1.25f
-        private const val WING_WIDTH = 560f
-        private const val WING_PAD_X = 16f
-        private const val WING_PAD_TOP = 10f
-        private const val WING_PAD_BOTTOM = 16f
-        private const val WING_CONTENT_WIDTH = WING_WIDTH - 2f * WING_PAD_X
-        private const val WING_LINE_HEIGHT = 23f
-        private const val WING_GRID_ROW_HEIGHT = 22f
-        private const val WING_MIN_LABEL_WIDTH = 116f
-        private const val WING_MAX_LABEL_WIDTH = 318f
-        private const val WING_MIN_VALUE_WIDTH = 118f
-        private const val WING_LOADOUT_LABEL_WIDTH = 108f
-        private const val WING_LOADOUT_VALUE_X = WING_PAD_X + WING_LOADOUT_LABEL_WIDTH
-        private const val WING_LOADOUT_VALUE_WIDTH = WING_CONTENT_WIDTH - WING_LOADOUT_LABEL_WIDTH
-        private const val WING_LOADOUT_ROW_HEIGHT = 22f
-        private const val WING_LOADOUT_MAX_LINES = 4
-        private const val WING_MAX_HEIGHT = 860f
         private const val OUTER_PAD_X = 16f
         private const val OUTER_PAD_TOP = 8f
         private const val OUTER_PAD_BOTTOM = OUTER_PAD_X
@@ -614,94 +569,6 @@ class StockReviewItemTooltip private constructor(
                 profile.wingArmaments,
             )
         }
-
-        private fun addWingSectionHeading(panel: CustomPanelAPI, text: String, y: Float) {
-            val heading = StockReviewTooltipPanel.createSectionBand(WING_CONTENT_WIDTH, SECTION_HEADING_HEIGHT)
-            addPanelLabel(heading, text, textColor(), 0f, 0f, WING_CONTENT_WIDTH, SECTION_HEADING_HEIGHT, Alignment.MID)
-            panel.addComponent(heading).inTL(WING_PAD_X, y)
-        }
-
-        private fun addWingStatRow(panel: CustomPanelAPI, row: StockReviewTooltipStatRow, y: Float) {
-            StockReviewTooltipPanel.addStatRow(
-                panel,
-                row.label,
-                row.value,
-                textColor(),
-                highlightColor(),
-                WING_PAD_X,
-                y,
-                WING_CONTENT_WIDTH,
-                WING_GRID_ROW_HEIGHT,
-                WING_MIN_LABEL_WIDTH,
-                WING_MAX_LABEL_WIDTH,
-                WING_MIN_VALUE_WIDTH,
-            )
-        }
-
-        private fun addWingLoadoutLine(panel: CustomPanelAPI, label: String, lines: List<String>, y: Float): Float {
-            addPanelLabel(panel, label, textColor(), WING_PAD_X, y, WING_LOADOUT_LABEL_WIDTH, WING_LOADOUT_ROW_HEIGHT, Alignment.LMID)
-            addPanelLines(
-                panel,
-                lines,
-                highlightColor(),
-                WING_LOADOUT_VALUE_X,
-                y,
-                WING_LOADOUT_VALUE_WIDTH,
-                WING_LOADOUT_ROW_HEIGHT,
-            )
-            return y + maxOf(1, lines.size) * WING_LOADOUT_ROW_HEIGHT
-        }
-
-        private fun addWingDescription(panel: CustomPanelAPI, text: String, y: Float): Float {
-            if (!hasText(text)) {
-                return WING_LINE_HEIGHT
-            }
-            val content = panel.createUIElement(WING_CONTENT_WIDTH, WING_MAX_HEIGHT, false)
-            content.setParaFontDefault()
-            content.setParaFontColor(textColor())
-            val paragraphs = text.trim()
-                .split(Regex("\\n\\s*\\n"))
-                .map { it.trim() }
-                .filter { it.isNotBlank() }
-            for (index in paragraphs.indices) {
-                content.addPara(tooltipFormat(paragraphs[index]), if (index == 0) 0f else SMALL_PAD, textColor())
-            }
-            val height = maxOf(WING_LINE_HEIGHT, content.heightSoFar)
-            content.position.setSize(WING_CONTENT_WIDTH, height)
-            panel.addUIElement(content).inTL(WING_PAD_X, y)
-            return height
-        }
-
-        private fun addRichPanelLine(panel: CustomPanelAPI, prefix: String, value: String, y: Float) {
-            addPanelLabel(panel, prefix, textColor(), WING_PAD_X, y, 126f, WING_LINE_HEIGHT, Alignment.LMID)
-            addPanelLabel(panel, value, highlightColor(), WING_PAD_X + 126f, y, WING_CONTENT_WIDTH - 126f, WING_LINE_HEIGHT, Alignment.LMID)
-        }
-
-        private fun addInlineHighlight(panel: CustomPanelAPI, prefix: String, value: String, suffix: String, y: Float) {
-            addPanelLabel(panel, prefix, textColor(), WING_PAD_X, y, 154f, WING_LINE_HEIGHT, Alignment.LMID)
-            addPanelLabel(panel, value, highlightColor(), WING_PAD_X + 154f, y, 80f, WING_LINE_HEIGHT, Alignment.LMID)
-            addPanelLabel(panel, suffix, textColor(), WING_PAD_X + 234f, y, WING_CONTENT_WIDTH - 234f, WING_LINE_HEIGHT, Alignment.LMID)
-        }
-
-        private fun addPanelLines(
-            parent: CustomPanelAPI,
-            lines: List<String>,
-            color: Color,
-            x: Float,
-            y: Float,
-            width: Float,
-            lineHeight: Float,
-        ) {
-            StockReviewTooltipPanel.addLines(parent, lines, color, x, y, width, lineHeight)
-        }
-
-        private fun measuredPanelLines(
-            panel: CustomPanelAPI,
-            text: String,
-            width: Float,
-            lineHeight: Float,
-            maxLines: Int,
-        ): List<String> = StockReviewTooltipPanel.wrapLines(panel, text, highlightColor(), width, lineHeight, maxLines)
 
         private fun wingTitle(spec: FighterWingSpecAPI): String {
             val name = spec.wingName?.takeIf { hasText(it) } ?: spec.id

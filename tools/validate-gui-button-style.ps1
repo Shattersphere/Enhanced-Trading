@@ -81,6 +81,7 @@ $stockReviewShipCatalogDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows
 $stockReviewTradeSummaryRendererPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryRenderer.kt"
 $stockReviewTradeSummaryFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryFields.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
+$stockReviewWingTooltipRendererPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewWingTooltipRenderer.kt"
 $stockReviewTooltipPanelPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewTooltipPanel.kt"
 $stockReviewShipTooltipPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipTooltip.kt"
 $stockReviewItemInfoFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoFields.kt"
@@ -520,6 +521,7 @@ if ($itemRowFrameText -notmatch "StockReviewRowSpecs\.item\(label, cells, action
 }
 
 $tooltipText = Get-Content -LiteralPath $stockReviewTooltipPath -Raw
+$wingTooltipRendererText = Get-Content -LiteralPath $stockReviewWingTooltipRendererPath -Raw
 $tooltipPanelText = Get-Content -LiteralPath $stockReviewTooltipPanelPath -Raw
 $shipTooltipText = Get-Content -LiteralPath $stockReviewShipTooltipPath -Raw
 $wimGuiTooltipText = Get-Content -LiteralPath $wimGuiTooltipPath -Raw
@@ -538,7 +540,7 @@ if ($wimGuiTooltipText -notmatch "MAX_SCREEN_HEIGHT_FRACTION = 0\.95f" -or
     $tooltipPanelText -notmatch "WimGuiTooltip\.capHeight\(height\)" -or
     $tooltipPanelText -notmatch "fun addStatRow\(" -or
     $tooltipPanelText -notmatch "measuredTextWidth" -or
-    $tooltipText -notmatch "StockReviewTooltipPanel\.capHeight" -or
+    $wingTooltipRendererText -notmatch "StockReviewTooltipPanel\.capHeight" -or
     $tooltipText -notmatch "WimGuiText\.wrapToWidth") {
     throw "Stock-review and generic GUI tooltips must share the 95-percent screen-height cap and measured wrapped truncation policy."
 }
@@ -549,9 +551,10 @@ if ($shipTooltipText -match "data class TooltipLayout" -or
     $shipTooltipText -notmatch "WimGuiText\.wrapToWidth") {
     throw "Stock-review ship tooltip must use measured wrapping and post-render height sizing, not a separate estimated layout pass."
 }
-if ($tooltipText -match "private const val WING_LABEL_WIDTH|private const val GRID_LABEL_WIDTH" -or
-    $tooltipText -notmatch "WING_MIN_LABEL_WIDTH" -or
+if (($tooltipText + $wingTooltipRendererText) -match "private const val WING_LABEL_WIDTH|private const val GRID_LABEL_WIDTH" -or
+    $wingTooltipRendererText -notmatch "MIN_LABEL_WIDTH" -or
     $tooltipText -notmatch "GRID_MIN_LABEL_WIDTH" -or
+    $wingTooltipRendererText -notmatch "StockReviewTooltipPanel\.addStatRow" -or
     $tooltipText -notmatch "StockReviewTooltipPanel\.addStatRow") {
     throw "Stock-review weapon and wing tooltip stat rows must use measured dynamic label/value splits."
 }
