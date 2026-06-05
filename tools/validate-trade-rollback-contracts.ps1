@@ -115,7 +115,22 @@ foreach ($needle in @(
 }
 
 $plan = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/StockPurchasePlan.kt"
-Assert-Contains "StockPurchasePlan.kt" $plan 'totalCost = TradeMoney.safeAdd(totalCost, TradeMoney.lineTotal(source.unitPrice, quantity))'
+foreach ($needle in @(
+    'val lineCost = TradeMoney.lineTotal(source.unitPrice, quantity)',
+    'if (lineCost < 0L) continue',
+    'lines.add(StockPurchaseLine(source, quantity))',
+    'remaining -= quantity',
+    'totalCost = TradeMoney.safeAdd(totalCost, lineCost)'
+)) {
+    Assert-Contains "StockPurchasePlan.kt invalid-price guard" $plan $needle
+}
+Assert-Order "StockPurchasePlan.kt invalid-price guard" $plan @(
+    'val lineCost = TradeMoney.lineTotal(source.unitPrice, quantity)',
+    'if (lineCost < 0L) continue',
+    'lines.add(StockPurchaseLine(source, quantity))',
+    'remaining -= quantity',
+    'totalCost = TradeMoney.safeAdd(totalCost, lineCost)'
+)
 
 $money = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/TradeMoney.kt"
 foreach ($needle in @(

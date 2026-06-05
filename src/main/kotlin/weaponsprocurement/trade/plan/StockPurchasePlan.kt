@@ -21,10 +21,12 @@ class StockPurchasePlan private constructor(
                 if (remaining <= 0) break
                 val quantity = remaining.coerceAtMost(source.available)
                 if (quantity <= 0) continue
+                val lineCost = TradeMoney.lineTotal(source.unitPrice, quantity)
+                if (lineCost < 0L) continue
                 lines.add(StockPurchaseLine(source, quantity))
                 remaining -= quantity
                 totalQuantity += quantity
-                totalCost = TradeMoney.safeAdd(totalCost, TradeMoney.lineTotal(source.unitPrice, quantity))
+                totalCost = TradeMoney.safeAdd(totalCost, lineCost)
                 totalSpace += source.unitCargoSpace * quantity
             }
             return StockPurchasePlan(lines, totalQuantity, totalCost, totalSpace)
