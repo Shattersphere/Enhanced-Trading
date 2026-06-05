@@ -41,13 +41,7 @@ class FixerMarketObservedCatalog {
         while (iterator.hasNext()) {
             val entry = iterator.next()
             val itemKey = entry.key
-            val encoded = entry.value
-            if (!FixerCatalogPolicy.isSafeItem(itemKey)) {
-                iterator.remove()
-                pruned++
-                continue
-            }
-            val item = decode(encoded)
+            val item = decodePersistentItem(itemKey, entry.value)
             if (item == null) {
                 iterator.remove()
                 pruned++
@@ -71,17 +65,12 @@ class FixerMarketObservedCatalog {
     private fun pruneInvalidPersistentEntries(catalog: MutableMap<String, String>) {
         if (catalog.isEmpty()) return
         var pruned = 0
-        for ((itemKey, encoded) in catalog) {
-            if (!FixerCatalogPolicy.isSafeItem(itemKey) || decode(encoded) == null) {
-                pruned++
-            }
-        }
-        if (pruned <= 0) return
         val iterator = catalog.entries.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
-            if (!FixerCatalogPolicy.isSafeItem(entry.key) || decode(entry.value) == null) {
+            if (decodePersistentItem(entry.key, entry.value) == null) {
                 iterator.remove()
+                pruned++
             }
         }
         logPrunedEntries(pruned)
@@ -170,6 +159,11 @@ class FixerMarketObservedCatalog {
             } catch (_: RuntimeException) {
                 null
             }
+        }
+
+        private fun decodePersistentItem(itemKey: String?, encoded: String?): ObservedItem? {
+            if (!FixerCatalogPolicy.isSafeItem(itemKey)) return null
+            return decode(encoded)
         }
 
         private fun sanitizeUnitCargoSpace(unitCargoSpace: Float): Float {

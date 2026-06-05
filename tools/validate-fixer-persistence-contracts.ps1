@@ -45,7 +45,9 @@ Assert-NotMatch "FixerMarketObservedCatalog.kt" $catalog '\bSerializable\b'
 
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerCatalogPolicy.isEligibleObservedItem(itemKey, blacklist)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerCatalogPolicy.isSafeItem(itemKey)'
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'decode(encoded) == null'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'private fun decodePersistentItem(itemKey: String?, encoded: String?): ObservedItem?'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!FixerCatalogPolicy.isSafeItem(itemKey)) return null'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'return decode(encoded)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!FixerCatalogPolicy.isBanned(blacklist, itemKey))'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'Collections.unmodifiableMap(result)'
 
