@@ -86,6 +86,7 @@ python scripts/update-repo-map.py --write
   - `tools/validate-ship-trading-contracts.ps1`
   - `tools/validate-source-semantics-contracts.ps1`
   - `tools/validate-trade-rollback-contracts.ps1`
+  - `tools/validate-validation-assertions.ps1`
 - `.gitignore`
 - `AGENTS.md`
 - `build.gradle.kts`

@@ -124,12 +124,16 @@ function Assert-ObjectKeys {
         Add-Failure "$Label is missing"
         return
     }
+    $hasUnsupportedKey = $false
     foreach ($key in $Object.PSObject.Properties.Name) {
         if ($AllowedKeys -notcontains $key) {
+            $hasUnsupportedKey = $true
             Add-Failure "$Label has unsupported key '$key'"
         }
     }
-    Add-Pass "$Label has only supported keys"
+    if (-not $hasUnsupportedKey) {
+        Add-Pass "$Label has only supported keys"
+    }
 }
 
 function Assert-StringArray {
@@ -143,14 +147,18 @@ function Assert-StringArray {
         return
     }
     $values = @($Object.$PropertyName)
+    $allEntriesValid = $true
     foreach ($value in $values) {
         if ($value -is [string] -and -not [string]::IsNullOrWhiteSpace($value)) {
             Add-Pass "$PropertyName entry '$value' is a non-empty string"
         } else {
+            $allEntriesValid = $false
             Add-Failure "$PropertyName entries must be non-empty strings"
         }
     }
-    Add-Pass "$PropertyName is a string list with $($values.Count) entr$(if ($values.Count -eq 1) { 'y' } else { 'ies' })"
+    if ($allEntriesValid) {
+        Add-Pass "$PropertyName is a string list with $($values.Count) entr$(if ($values.Count -eq 1) { 'y' } else { 'ies' })"
+    }
 }
 
 function Assert-Order {

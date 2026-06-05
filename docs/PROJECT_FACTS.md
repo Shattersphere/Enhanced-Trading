@@ -51,27 +51,28 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 
 | Purpose | Command | Working directory | Notes |
 |---|---|---|---|
-| List files | `rg --files` | repo root | Search before opening large docs/archive. |
-| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires Starsector path; optional Shatter Lib override. |
+| List files | `rg --files` | repo root | Search first. |
+| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires Starsector path. |
 | Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Local iteration only. |
 | Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector/dependency API jars. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
+| Assertion helper validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-validation-assertions.ps1` | repo root | Shared assertion behavior. |
 | Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/JSON/item-key/trade-money gates. |
-| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, encoding, lifecycle/policy gates. |
-| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, hooks, diagnostics, credit/cargo guards. |
-| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer separation, rehydration, dispatch. |
-| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local exact-member snapshot/trade/mutation, remote gate. |
-| Runtime evidence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-runtime-evidence-contracts.ps1` | repo root | Evidence helper gates. |
+| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save/policy gates. |
+| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback/log gates. |
+| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Source-mode gates. |
+| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local ship gates. |
+| Runtime evidence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-runtime-evidence-contracts.ps1` | repo root | Evidence gates. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |
 | Update repo map | `python scripts/update-repo-map.py --write` | repo root | Run after tracked structure changes. |
 | Deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | repo root | In scope only for runtime/package changes. |
 | Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | repo root | No-build queue/status/blocker report. |
-| Deploy parity check | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | repo root | Source/live clean-package parity plus Shatter Lib API freshness. |
+| Deploy parity check | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | repo root | Source/live parity. |
 | Live GUI class validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1` | repo root | Run after runtime deploys. |
-| Runtime evidence report | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\collect-runtime-validation-evidence.ps1` | repo root | Summarizes deploy/live/log evidence; require gates via switches. |
+| Runtime evidence report | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\collect-runtime-validation-evidence.ps1` | repo root | Summarizes deploy/log proof. |
 | Public export | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\export-public.ps1` | repo root | Public release/export only. |
 
 ## Paths

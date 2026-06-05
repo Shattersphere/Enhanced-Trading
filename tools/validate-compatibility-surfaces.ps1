@@ -149,6 +149,7 @@ Assert-Contains "StockSubmarketAccess.kt" $submarketAccess 'Submarkets.LOCAL_RES
 $sanity = Read-Text ".github/workflows/sanity.yml"
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-compatibility-surfaces.ps1'
+Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-validation-assertions.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-fixer-persistence-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-trade-rollback-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-source-semantics-contracts.ps1'
