@@ -15,6 +15,7 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Build environment | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | Dependency/path checks | Resolved Starsector, LunaLib, LazyLib paths | low/medium; requires local install |
 | GUI button style | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | GUI/button rendering changes | Pass/fail | low |
 | Kotlin/source boundary | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | Source/package/build boundary changes | Pass/fail and skipped jar/export checks | low/medium |
+| Compatibility surfaces | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-compatibility-surfaces.ps1` | Changing ids, config keys, data paths, plugin/rule paths, validators, CI, or modernization docs | Pass/fail by protected surface | low |
 | Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | Runtime deploy troubleshooting | Queue/lock/staging status | low; requires Starsector path |
 | Deploy parity | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | Runtime changes when live parity matters | Current/stale source/live state | medium; requires Starsector path |
 | Runtime deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | Runtime changes that need live validation | Deploy or queued deploy result | high; writes live mod target |
@@ -39,3 +40,4 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 
 - Runtime UI, LunaLib behavior, campaign interactions, rollback safety, and Starsector classloader behavior require in-game evidence; compile and jar parity are not enough.
 - No dedicated unit-test suite is declared in the current Gradle build.
+- `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.

@@ -12,6 +12,7 @@ Use this map before loading large or historical docs. Active docs stay short; de
 | `docs/REPO_MAP.md` | Major repo layout and generated path inventory | Navigation, broad edits, unfamiliar subsystem | active |
 | `docs/ARCHITECTURE.md` | Stable architecture overview and subsystem boundaries | Architecture or subsystem-boundary question | active |
 | `docs/CODE_QUALITY.md` | Concise code standards | Non-trivial implementation/refactor/review | active |
+| `docs/CODEBASE_QUALITY_MODERNIZATION_PLAN.md` | Repo-specific modernization roadmap, compatibility map, risk register, and cleanup stop criteria | Choosing or executing bounded cleanup/modernization work | active |
 | `.agent/DOC_SYSTEM.md` | Doc upkeep, budgets, archive, and routing rules | Durable-doc, archive, or guidance-routing update | active |
 | `INIT_AGENT_PROMPT.md` | Template re-sync prompt | Template sync or reinitialization only | active |
 

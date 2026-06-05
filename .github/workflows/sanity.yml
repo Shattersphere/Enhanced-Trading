@@ -66,6 +66,10 @@ jobs:
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1
 
+      - name: Validate compatibility surfaces
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-compatibility-surfaces.ps1
+
       - name: Reject stale stock-review pending purchase class
         shell: pwsh
         run: |
@@ -75,4 +79,4 @@ jobs:
 
       - name: Validate committed jar stale classes
         shell: pwsh
-        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\weapons-procurement.jar -Label Repo
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo

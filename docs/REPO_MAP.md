@@ -15,7 +15,7 @@ python scripts/update-repo-map.py --write
 | `data/` | Starsector rules, config, Luna settings, and runtime data. |
 | `graphics/` | Runtime mod assets when present. |
 | `tools/` | Build/deploy/validation/public-export helpers. |
-| `docs/` | Template-synced source-of-truth docs, checks, repo map, architecture, and quality standards. |
+| `docs/` | Template-synced source-of-truth docs, checks, repo map, architecture, modernization plan, and quality standards. |
 | `.agent/` | Private agent-facing state, workflow, release, shared-library, and archive docs. |
 | `.github/workflows/` | Public-safe repository sanity workflow. |
 | `jars/` | Generated runtime jar output. |
@@ -48,6 +48,7 @@ python scripts/update-repo-map.py --write
   - `docs/ASSET_PROVENANCE.md`
   - `docs/CHECKS.md`
   - `docs/CODE_QUALITY.md`
+  - `docs/CODEBASE_QUALITY_MODERNIZATION_PLAN.md`
   - `docs/DIRECTORY_DOC_POLICY.md`
   - `docs/PROJECT_FACTS.md`
   - `docs/REPO_MAP.md`
@@ -72,6 +73,7 @@ python scripts/update-repo-map.py --write
   - `tools/analyze-trade-rollback-diagnostics.ps1`
   - `tools/deploy-live-mod.ps1`
   - `tools/export-public.ps1`
+  - `tools/validate-compatibility-surfaces.ps1`
   - `tools/validate-doc-links.ps1`
   - `tools/validate-gui-button-style.ps1`
   - `tools/validate-jar-classes.ps1`
