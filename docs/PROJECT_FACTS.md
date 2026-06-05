@@ -47,6 +47,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
 | Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock JSON, blacklist JSON, sort alias, and trade money guard. |
+| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save-key, string-map encoding, sanitization, blacklist/safety gates, and observed reference fallback guard. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |
@@ -98,6 +99,7 @@ Enhanced Trading consumes Shatter Lib at build/runtime. Keep `build.gradle.kts`,
 - Config schema/settings: Luna settings under `data/config/LunaSettings.csv`; stock/blacklist JSON in `data/config/`; debug hooks must stay disabled by default.
 - File formats/generated metadata: Starsector CSV/JSON data files, jar package contents, public export manifest.
 - Save/profile/user data impact: market observations, pending trade behavior, and any memory/persistent-state keys can affect campaign behavior.
+- Fixer's Market observed catalog is stored under `weaponsProcurement.fixerObservedCatalog.v1` as a `HashMap<String, String>` using `baseUnitPrice|unitCargoSpace`; key/schema changes require explicit migration approval and runtime save proof.
 - Public API/CLI/config compatibility: `build.ps1`, deploy scripts, validation scripts, `mod_info.json`, public docs, and curated export behavior.
 
 ## Known-Good Baseline

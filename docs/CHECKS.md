@@ -17,6 +17,7 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Kotlin/source boundary | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | Source/package/build boundary changes | Pass/fail and skipped jar/export checks | low/medium |
 | Compatibility surfaces | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-compatibility-surfaces.ps1` | Changing ids, config keys, data paths, plugin/rule paths, validators, CI, or modernization docs | Pass/fail by protected surface | low |
 | Config contracts | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | Changing Luna settings, stock JSON, blacklist JSON, config parsers, sort aliases, or trade money guards | Pass/fail by config contract | low |
+| Fixer persistence contracts | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | Changing Fixer's Market observed catalog storage, policy gating, theoretical reference fallback, or save-key docs | Pass/fail by save/persistence contract | low |
 | Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | Runtime deploy troubleshooting | Queue/lock/staging status | low; requires Starsector path |
 | Deploy parity | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | Runtime changes when live parity matters | Current/stale source/live state | medium; requires Starsector path |
 | Runtime deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | Runtime changes that need live validation | Deploy or queued deploy result | high; writes live mod target |
@@ -43,3 +44,4 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 - No dedicated unit-test suite is declared in the current Gradle build.
 - `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.
 - `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency; it does not prove LunaLib runtime UI behavior.
+- `tools/validate-fixer-persistence-contracts.ps1` is static contract coverage for the current Fixer observed-catalog save key, string-map encoding, sanitization, and blacklist/safety gates; it does not prove save migration in a live campaign.

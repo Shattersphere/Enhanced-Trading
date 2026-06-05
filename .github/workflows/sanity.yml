@@ -74,6 +74,10 @@ jobs:
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1
 
+      - name: Validate Fixer persistence contracts
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1
+
       - name: Reject stale stock-review pending purchase class
         shell: pwsh
         run: |
