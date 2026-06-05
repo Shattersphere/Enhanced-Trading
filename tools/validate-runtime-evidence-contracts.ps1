@@ -98,11 +98,11 @@ $rollbackLog = New-TempLogPath "wp-runtime-evidence-rollback-contract.log"
 $shipLog = New-TempLogPath "wp-runtime-evidence-ship-contract.log"
 try {
     @(
-        "WP_STOCK_REVIEW_ROLLBACK status=PASS failedStep=after-source-removal op=buy item=W:test quantity=1 creditsRestored=true countsRestored=true touched=true",
-        "WP_STOCK_REVIEW_ROLLBACK status=PASS failedStep=after-player-cargo-remove op=buy item=W:test quantity=1 creditsRestored=true countsRestored=true touched=true",
-        "WP_STOCK_REVIEW_ROLLBACK status=PASS failedStep=after-player-cargo-add op=buy item=W:test quantity=1 creditsRestored=true countsRestored=true touched=true",
-        "WP_STOCK_REVIEW_ROLLBACK status=PASS failedStep=after-target-cargo-add op=buy item=W:test quantity=1 creditsRestored=true countsRestored=true touched=true",
-        "WP_STOCK_REVIEW_ROLLBACK status=PASS failedStep=after-credit-mutation op=buy item=W:test quantity=1 creditsRestored=true countsRestored=true touched=true"
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=1 failedStep=after-source-removal restoredCargos=2 failedCargos=0 creditsRestored=true countsRestored=true creditsBefore=100 creditsAtFailure=50 creditsAfterRollback=100 touched=player",
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=1 failedStep=after-player-cargo-remove restoredCargos=2 failedCargos=0 creditsRestored=true countsRestored=true creditsBefore=100 creditsAtFailure=50 creditsAfterRollback=100 touched=player",
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=1 failedStep=after-player-cargo-add restoredCargos=2 failedCargos=0 creditsRestored=true countsRestored=true creditsBefore=100 creditsAtFailure=50 creditsAfterRollback=100 touched=player",
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=1 failedStep=after-target-cargo-add restoredCargos=2 failedCargos=0 creditsRestored=true countsRestored=true creditsBefore=100 creditsAtFailure=50 creditsAfterRollback=100 touched=player",
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=1 failedStep=after-credit-mutation restoredCargos=2 failedCargos=0 creditsRestored=true countsRestored=true creditsBefore=100 creditsAtFailure=50 creditsAfterRollback=100 touched=player"
     ) | Set-Content -LiteralPath $rollbackLog -Encoding UTF8
 
     $rollbackLiteral = ConvertTo-PowerShellLiteral -Value $rollbackLog
@@ -112,7 +112,21 @@ try {
         -ExpectedExitCode 0 `
         -ExpectedOutput @(
             "PASS: rollback diagnostic analysis completed.",
+            "operation=buy",
             "PASS: Runtime validation evidence collection completed."
+        )
+
+    @(
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=1 failedStep=after-source-removal creditsRestored=true countsRestored=true touched=player"
+    ) | Set-Content -LiteralPath $rollbackLog -Encoding UTF8
+
+    Invoke-CollectorCommand `
+        -Label "required rollback evidence rejects malformed records" `
+        -Command "`$env:STARSECTOR_DIRECTORY = ''; & $collectorLiteral -LogPath $rollbackLiteral -RequireRollbackPass -ExpectFailureStep @('after-source-removal')" `
+        -ExpectedExitCode 1 `
+        -ExpectedOutput @(
+            "Rollback diagnostic record missing required field",
+            "Runtime validation evidence collection failed."
         )
 
     @(

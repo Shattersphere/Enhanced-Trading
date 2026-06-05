@@ -70,6 +70,28 @@ foreach ($line in $lines) {
 }
 
 $failures = New-Object System.Collections.Generic.List[string]
+$requiredFields = @(
+    "status",
+    "operation",
+    "item",
+    "quantity",
+    "failedStep",
+    "restoredCargos",
+    "failedCargos",
+    "creditsRestored",
+    "countsRestored",
+    "creditsBefore",
+    "creditsAtFailure",
+    "creditsAfterRollback",
+    "touched"
+)
+foreach ($record in $records) {
+    foreach ($field in $requiredFields) {
+        if (-not $record.PSObject.Properties.Name.Contains($field) -or [string]::IsNullOrWhiteSpace([string]$record.$field)) {
+            $failures.Add("Rollback diagnostic record missing required field '$field'.")
+        }
+    }
+}
 $passCount = @($records | Where-Object { $_.status -eq "PASS" }).Count
 $failCount = @($records | Where-Object { $_.status -eq "FAIL" }).Count
 

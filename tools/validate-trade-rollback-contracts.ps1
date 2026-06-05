@@ -131,9 +131,13 @@ $analyzer = Read-Text "tools/analyze-trade-rollback-diagnostics.ps1"
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Select-String -LiteralPath $resolvedLog -Pattern "WP_STOCK_REVIEW_ROLLBACK"'
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer '$passCount = @($records | Where-Object { $_.status -eq "PASS" }).Count'
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer '$failCount = @($records | Where-Object { $_.status -eq "FAIL" }).Count'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Rollback diagnostic record missing required field'
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Missing passing rollback diagnostic for failure step'
+foreach ($field in @("status", "operation", "item", "quantity", "failedStep", "restoredCargos", "failedCargos", "creditsRestored", "countsRestored", "creditsBefore", "creditsAtFailure", "creditsAfterRollback", "touched")) {
+    Assert-Contains "analyze-trade-rollback-diagnostics.ps1 required field" $analyzer "`"$field`""
+}
 foreach ($field in @("failedStep", "operation", "item", "quantity", "creditsRestored", "countsRestored", "touched")) {
-    Assert-Contains "analyze-trade-rollback-diagnostics.ps1 field output" $analyzer "`$record.$field"
+    Assert-Contains "analyze-trade-rollback-diagnostics.ps1 output field" $analyzer "`$record.$field"
 }
 
 $configDocs = Read-Text "CONFIG.md"
