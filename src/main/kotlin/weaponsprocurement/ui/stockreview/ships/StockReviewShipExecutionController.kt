@@ -90,11 +90,23 @@ class StockReviewShipExecutionController(
             failures.add("not enough credits for ${trade.memberName}.")
             return false
         }
-        source.cargo.mothballedShips.removeFleetMember(member)
-        playerFleet.fleetData.addFleetMember(member)
-        credits.subtract(trade.unitPrice.toFloat())
-        reportShipTransaction(market, source, member, trade.unitPrice, true)
-        return true
+        return runShipMutation(trade, failures, "purchase") {
+            source.cargo.mothballedShips.removeFleetMember(member)
+            try {
+                playerFleet.fleetData.addFleetMember(member)
+            } catch (t: RuntimeException) {
+                source.cargo.mothballedShips.addFleetMember(member)
+                throw t
+            }
+            try {
+                credits.subtract(trade.unitPrice.toFloat())
+            } catch (t: RuntimeException) {
+                playerFleet.fleetData.removeFleetMember(member)
+                source.cargo.mothballedShips.addFleetMember(member)
+                throw t
+            }
+            reportShipTransaction(market, source, member, trade.unitPrice, true)
+        }
     }
 
     private fun executeSell(
@@ -110,11 +122,44 @@ class StockReviewShipExecutionController(
             failures.add("${trade.memberName} is no longer available to sell.")
             return false
         }
-        playerFleet.fleetData.removeFleetMember(member)
-        target.cargo.mothballedShips.addFleetMember(member)
-        playerFleet.cargo.credits.add(trade.unitPrice.toFloat())
-        reportShipTransaction(market, target, member, trade.unitPrice, false)
-        return true
+        val credits = playerFleet.cargo?.credits
+        if (credits == null) {
+            failures.add("credits are unavailable for ${trade.memberName}.")
+            return false
+        }
+        return runShipMutation(trade, failures, "sale") {
+            playerFleet.fleetData.removeFleetMember(member)
+            try {
+                target.cargo.mothballedShips.addFleetMember(member)
+            } catch (t: RuntimeException) {
+                playerFleet.fleetData.addFleetMember(member)
+                throw t
+            }
+            try {
+                credits.add(trade.unitPrice.toFloat())
+            } catch (t: RuntimeException) {
+                target.cargo.mothballedShips.removeFleetMember(member)
+                playerFleet.fleetData.addFleetMember(member)
+                throw t
+            }
+            reportShipTransaction(market, target, member, trade.unitPrice, false)
+        }
+    }
+
+    private fun runShipMutation(
+        trade: StockReviewPendingShipTrade,
+        failures: MutableList<String>,
+        operation: String,
+        mutation: () -> Unit,
+    ): Boolean {
+        return try {
+            mutation()
+            true
+        } catch (t: RuntimeException) {
+            LOG.warn("WP_STOCK_REVIEW ship $operation failed for ${trade.memberId}", t)
+            failures.add("could not complete ship $operation for ${trade.memberName}.")
+            false
+        }
     }
 
     private fun findTradeSubmarket(market: MarketAPI?, submarketId: String?, includeBlackMarket: Boolean): SubmarketAPI? {

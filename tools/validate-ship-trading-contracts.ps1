@@ -107,22 +107,50 @@ Assert-Order "StockReviewShipExecutionController.kt buy mutation order" $execute
     'failures.add("${trade.memberName} is no longer for sale.")',
     "val credits = playerFleet.cargo?.credits",
     'failures.add("not enough credits for ${trade.memberName}.")',
+    'return runShipMutation(trade, failures, "purchase")',
     "source.cargo.mothballedShips.removeFleetMember(member)",
     "playerFleet.fleetData.addFleetMember(member)",
     "credits.subtract(trade.unitPrice.toFloat())",
     "reportShipTransaction(market, source, member, trade.unitPrice, true)"
 )
+foreach ($needle in @(
+    "source.cargo.mothballedShips.addFleetMember(member)",
+    "playerFleet.fleetData.removeFleetMember(member)",
+    "throw t"
+)) {
+    Assert-Contains "StockReviewShipExecutionController.kt buy rollback guard" $executeBuy $needle
+}
 
 $executeSell = Get-Section $executionController "private fun executeSell(" "private fun findTradeSubmarket("
 Assert-Order "StockReviewShipExecutionController.kt sell mutation order" $executeSell @(
     "val target = findTradeSubmarket(market, trade.submarketId, includeBlackMarket)",
     "val member = findMember(playerFleet.fleetData?.membersListCopy, trade.memberId)",
     'failures.add("${trade.memberName} is no longer available to sell.")',
+    "val credits = playerFleet.cargo?.credits",
+    'failures.add("credits are unavailable for ${trade.memberName}.")',
+    'return runShipMutation(trade, failures, "sale")',
     "playerFleet.fleetData.removeFleetMember(member)",
     "target.cargo.mothballedShips.addFleetMember(member)",
-    "playerFleet.cargo.credits.add(trade.unitPrice.toFloat())",
+    "credits.add(trade.unitPrice.toFloat())",
     "reportShipTransaction(market, target, member, trade.unitPrice, false)"
 )
+foreach ($needle in @(
+    "playerFleet.fleetData.addFleetMember(member)",
+    "target.cargo.mothballedShips.removeFleetMember(member)",
+    "throw t"
+)) {
+    Assert-Contains "StockReviewShipExecutionController.kt sell rollback guard" $executeSell $needle
+}
+
+foreach ($needle in @(
+    "private fun runShipMutation(",
+    "mutation: () -> Unit",
+    "LOG.warn(`"WP_STOCK_REVIEW ship `$operation failed for",
+    'failures.add("could not complete ship $operation for ${trade.memberName}.")',
+    "return false"
+)) {
+    Assert-Contains "StockReviewShipExecutionController.kt mutation failure guard" $executionController $needle
+}
 
 Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "private fun findTradeSubmarket(market: MarketAPI?, submarketId: String?, includeBlackMarket: Boolean): SubmarketAPI?"
 Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "StockSubmarketAccess.isTradeEligible(it, includeBlackMarket)"
