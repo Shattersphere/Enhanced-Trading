@@ -82,6 +82,19 @@ $compatibilityIds = Read-Text "src/main/kotlin/weaponsprocurement/CompatibilityI
 foreach ($needle in @(
     'const val MOD_ID: String = "enhanced_trading"',
     'const val TRADE_HOTKEY: String = "wp_trade_hotkey"',
+    'const val UPDATE_INTERVAL_SECONDS: String = "wp.config.updateIntervalSeconds"',
+    'const val DIALOG_OPTION_ENABLED: String = "wp.config.dialogOptionEnabled"',
+    'const val SECTOR_MARKET_ENABLED: String = "wp.config.sectorMarketEnabled"',
+    'const val FIXERS_MARKET_ENABLED: String = "wp.config.fixersMarketEnabled"',
+    'const val FIXERS_MARKET_TAG_INFERENCE_ENABLED: String = "wp.config.fixersMarketTagInferenceEnabled"',
+    'const val SECTOR_MARKET_PRICE_MULTIPLIER: String = "wp.config.sectorMarketPriceMultiplier"',
+    'const val FIXERS_MARKET_PRICE_MULTIPLIER: String = "wp.config.fixersMarketPriceMultiplier"',
+    'const val DESIRED_SMALL_WEAPON_COUNT: String = "wp.config.desiredSmallWeaponCount"',
+    'const val DESIRED_MEDIUM_WEAPON_COUNT: String = "wp.config.desiredMediumWeaponCount"',
+    'const val DESIRED_LARGE_WEAPON_COUNT: String = "wp.config.desiredLargeWeaponCount"',
+    'const val DESIRED_FIGHTER_WING_COUNT: String = "wp.config.desiredFighterWingCount"',
+    'const val TRADE_HOTKEY: String = "wp.config.tradeHotkey"',
+    'const val DEBUG_UI_ENABLED: String = "wp.config.debugUiEnabled"',
     'const val TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"',
     'const val SHIP_CATALOG: String = "wp.debug.shipCatalog"',
     'const val SHIP_CATALOG_VIEW: String = "wp.debug.shipCatalogView"',
@@ -108,6 +121,24 @@ foreach ($needle in @(
     'KEY_DEBUG_SHIP_CATALOG_VIEW: String = CompatibilityIds.Diagnostics.SHIP_CATALOG_VIEW'
 )) {
     Assert-Contains "WeaponsProcurementConfig.kt" $settingsConfig $needle
+}
+
+foreach ($needle in @(
+    'KEY_UPDATE_INTERVAL = CompatibilityIds.SystemProperties.UPDATE_INTERVAL_SECONDS',
+    'KEY_DIALOG_OPTION_ENABLED = CompatibilityIds.SystemProperties.DIALOG_OPTION_ENABLED',
+    'KEY_SECTOR_MARKET_ENABLED = CompatibilityIds.SystemProperties.SECTOR_MARKET_ENABLED',
+    'KEY_FIXERS_MARKET_ENABLED = CompatibilityIds.SystemProperties.FIXERS_MARKET_ENABLED',
+    'KEY_FIXERS_MARKET_TAG_INFERENCE_ENABLED = CompatibilityIds.SystemProperties.FIXERS_MARKET_TAG_INFERENCE_ENABLED',
+    'KEY_SECTOR_MARKET_PRICE_MULTIPLIER = CompatibilityIds.SystemProperties.SECTOR_MARKET_PRICE_MULTIPLIER',
+    'KEY_FIXERS_MARKET_PRICE_MULTIPLIER = CompatibilityIds.SystemProperties.FIXERS_MARKET_PRICE_MULTIPLIER',
+    'KEY_DESIRED_SMALL_WEAPON_COUNT = CompatibilityIds.SystemProperties.DESIRED_SMALL_WEAPON_COUNT',
+    'KEY_DESIRED_MEDIUM_WEAPON_COUNT = CompatibilityIds.SystemProperties.DESIRED_MEDIUM_WEAPON_COUNT',
+    'KEY_DESIRED_LARGE_WEAPON_COUNT = CompatibilityIds.SystemProperties.DESIRED_LARGE_WEAPON_COUNT',
+    'KEY_DESIRED_FIGHTER_WING_COUNT = CompatibilityIds.SystemProperties.DESIRED_FIGHTER_WING_COUNT',
+    'KEY_TRADE_HOTKEY = CompatibilityIds.SystemProperties.TRADE_HOTKEY',
+    'KEY_DEBUG_UI_ENABLED = CompatibilityIds.SystemProperties.DEBUG_UI_ENABLED'
+)) {
+    Assert-Contains "WeaponsProcurementConfig.kt system-property bridge" $settingsConfig $needle
 }
 
 $stockConfig = Read-Text "src/main/kotlin/weaponsprocurement/config/StockReviewConfig.kt"

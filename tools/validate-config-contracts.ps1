@@ -114,6 +114,28 @@ foreach ($id in @(
         Add-Failure "WeaponsProcurementConfig $id must read CompatibilityIds.Luna"
     }
 }
+
+$systemPropertyContracts = @(
+    @{ Constant = "UPDATE_INTERVAL_SECONDS"; Value = "wp.config.updateIntervalSeconds"; LocalKey = "KEY_UPDATE_INTERVAL" },
+    @{ Constant = "DIALOG_OPTION_ENABLED"; Value = "wp.config.dialogOptionEnabled"; LocalKey = "KEY_DIALOG_OPTION_ENABLED" },
+    @{ Constant = "SECTOR_MARKET_ENABLED"; Value = "wp.config.sectorMarketEnabled"; LocalKey = "KEY_SECTOR_MARKET_ENABLED" },
+    @{ Constant = "FIXERS_MARKET_ENABLED"; Value = "wp.config.fixersMarketEnabled"; LocalKey = "KEY_FIXERS_MARKET_ENABLED" },
+    @{ Constant = "FIXERS_MARKET_TAG_INFERENCE_ENABLED"; Value = "wp.config.fixersMarketTagInferenceEnabled"; LocalKey = "KEY_FIXERS_MARKET_TAG_INFERENCE_ENABLED" },
+    @{ Constant = "SECTOR_MARKET_PRICE_MULTIPLIER"; Value = "wp.config.sectorMarketPriceMultiplier"; LocalKey = "KEY_SECTOR_MARKET_PRICE_MULTIPLIER" },
+    @{ Constant = "FIXERS_MARKET_PRICE_MULTIPLIER"; Value = "wp.config.fixersMarketPriceMultiplier"; LocalKey = "KEY_FIXERS_MARKET_PRICE_MULTIPLIER" },
+    @{ Constant = "DESIRED_SMALL_WEAPON_COUNT"; Value = "wp.config.desiredSmallWeaponCount"; LocalKey = "KEY_DESIRED_SMALL_WEAPON_COUNT" },
+    @{ Constant = "DESIRED_MEDIUM_WEAPON_COUNT"; Value = "wp.config.desiredMediumWeaponCount"; LocalKey = "KEY_DESIRED_MEDIUM_WEAPON_COUNT" },
+    @{ Constant = "DESIRED_LARGE_WEAPON_COUNT"; Value = "wp.config.desiredLargeWeaponCount"; LocalKey = "KEY_DESIRED_LARGE_WEAPON_COUNT" },
+    @{ Constant = "DESIRED_FIGHTER_WING_COUNT"; Value = "wp.config.desiredFighterWingCount"; LocalKey = "KEY_DESIRED_FIGHTER_WING_COUNT" },
+    @{ Constant = "TRADE_HOTKEY"; Value = "wp.config.tradeHotkey"; LocalKey = "KEY_TRADE_HOTKEY" },
+    @{ Constant = "DEBUG_UI_ENABLED"; Value = "wp.config.debugUiEnabled"; LocalKey = "KEY_DEBUG_UI_ENABLED" }
+)
+foreach ($contract in $systemPropertyContracts) {
+    Assert-Contains "CompatibilityIds.kt system-property key" $compatibilitySource "const val $($contract.Constant): String = `"$($contract.Value)`""
+    Assert-Contains "WeaponsProcurementConfig system-property key" $settingsSource "$($contract.LocalKey) = CompatibilityIds.SystemProperties.$($contract.Constant)"
+    Assert-Contains "WeaponsProcurementConfig system-property publisher" $settingsSource "System.setProperty($($contract.LocalKey),"
+}
+
 $lunaSettingIds = @($lunaIds | Where-Object { $_ -ne "wp_header" } | Sort-Object -Unique)
 foreach ($id in $sourceSettingIds) {
     if ($lunaSettingIds -notcontains $id) {

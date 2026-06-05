@@ -1,23 +1,24 @@
 # Codebase Quality Modernization Plan
 
-Target state: Enhanced Trading stays easy and safe to change because subsystem boundaries, compatibility surfaces, invariants, validation limits, and runtime risks are explicit. This is not a mandate for endless polishing, public release work, behavior redesign, remote ship trading, save/schema churn, or speculative abstraction.
+Target state: Enhanced Trading stays easy and safe to change because subsystem boundaries, compatibility surfaces, invariants, validation limits, and runtime risks are explicit. This is not a mandate for polishing, release work, redesign, remote ship trading, save/schema churn, or speculative abstraction.
 
 ## Repository Inventory
 
-Build/package flow: `build.ps1` delegates to Gradle/Kotlin JVM `2.1.20`, Java 17, `buildMod`, and writes `jars/enhanced-trading.jar`. `mod_info.json` loads that jar and declares LazyLib, LunaLib, and Shatter Lib.
+Build/package: `build.ps1` delegates to Gradle/Kotlin JVM `2.1.20`, Java 17, `buildMod`, and writes `jars/enhanced-trading.jar`. `mod_info.json` loads it and declares LazyLib, LunaLib, and Shatter Lib.
 
-Source is Kotlin under `src/main/kotlin`. Main packages are `weaponsprocurement.config`, `lifecycle`, `plugins`, `stock.fixer`, `stock.inventory`, `stock.item`, `stock.market`, `trade.execution`, `trade.plan`, `trade.quote`, shared `ui/WimGui*`, and `ui.stockreview.*`. The Starsector rule command is `com/fs/starfarer/api/impl/campaign/rulecmd/WP_OpenDialog`.
+Source is Kotlin under `src/main/kotlin`. Main packages: `weaponsprocurement.config`, `lifecycle`, `plugins`, `stock.fixer`, `stock.inventory`, `stock.item`, `stock.market`, `trade.execution`, `trade.plan`, `trade.quote`, `ui/WimGui*`, and `ui.stockreview.*`. Rule command: `com/fs/starfarer/api/impl/campaign/rulecmd/WP_OpenDialog`.
 
-Runtime entry points: `WeaponsProcurementModPlugin`, transient `StockReviewHotkeyScript`, transient `WeaponsProcurementFixerCatalogUpdater`, and `data/campaign/rules.csv`. Config/data surfaces are `data/config/LunaSettings.csv`, `enhanced_trading_stock.json`, `enhanced_trading_market_blacklist.json`, and `graphics/ui/wp_debug_empty_item.png`. No repo-defined hullmod, ability, weapon, ship, variant, wing, faction, market, or common-storage file is currently evidenced.
+Runtime entry points: `WeaponsProcurementModPlugin`, transient `StockReviewHotkeyScript`, transient `WeaponsProcurementFixerCatalogUpdater`, and `data/campaign/rules.csv`. Config/data: `data/config/LunaSettings.csv`, `enhanced_trading_stock.json`, `enhanced_trading_market_blacklist.json`, and `graphics/ui/wp_debug_empty_item.png`. No repo-defined hullmod, ability, weapon, ship, variant, wing, faction, market, or common-storage file is evidenced.
 
 ## Compatibility Map
 
-Do not change these without explicit approval and matching validation:
+Do not change without explicit approval and matching validation:
 
 - Mod identity and load path: `enhanced_trading`, `jars/enhanced-trading.jar`, `weaponsprocurement.plugins.WeaponsProcurementModPlugin`.
 - Rule/dialog path: `WP_OpenDialog`, `wp_marketOpenWeaponProcurement`, `wp_openWeaponProcurement`.
 - Item keys: `W:<weaponId>` and `F:<wingId>` from `StockItemType`. Raw ids are compatibility inputs only.
 - Luna keys: `wp_trade_hotkey`, `wp_enable_dialog_option`, `wp_enable_sector_market`, `wp_enable_fixers_market`, `wp_enable_fixers_market_tag_inference`, price multipliers, desired counts, and `wp_enable_debug_ui`.
+- Published system-property keys: `wp.config.*` values in `CompatibilityIds.SystemProperties`, covering update interval, source toggles, multipliers, desired counts, hotkey, and debug UI.
 - JSON paths/schema: `data/config/enhanced_trading_stock.json` fields `display`, `sources`, `desiredDefaults`, `perItem`, legacy `perWeapon`; blacklist keys `BANNED_FROM_SECTOR_MARKET`, `BANNED_FROM_FIXERS_MARKET`.
 - Save/custom data: `weaponsProcurement.fixerObservedCatalog.v1` in `FixerMarketObservedCatalog`, encoded as simple string maps.
 - Diagnostics: `wp.debug.failTradeStep`, `wp.debug.shipCatalog`, `wp.debug.shipCatalogView`, `WP_STOCK_REVIEW_ROLLBACK`, `WP_SHIP_CATALOG_DIAG`.
@@ -26,23 +27,23 @@ Do not change these without explicit approval and matching validation:
 
 ## Target Architecture
 
-Public compatibility layer: shipped ids, config keys, data paths, item-key parsing, and plugin/rule paths stay explicit and documented. Internal refactors must not rename or reinterpret them.
+Public compatibility layer: shipped ids, config keys, data paths, item-key parsing, and plugin/rule paths stay explicit. Refactors must not rename or reinterpret them.
 
 Source owner: `weaponsprocurement.CompatibilityIds`; validators check values and consumer references.
 
-Settings/config: `WeaponsProcurementConfig` is the Luna/System-property bridge. `StockReviewConfig` and `WeaponMarketBlacklist` own JSON loading, defaults, and legacy compatibility.
+Settings/config: `WeaponsProcurementConfig` is the Luna/System-property bridge and publishes documented `CompatibilityIds.SystemProperties` keys. `StockReviewConfig` and `WeaponMarketBlacklist` own JSON loading, defaults, and legacy compatibility.
 
 Campaign lifecycle: `WeaponsProcurementModPlugin` registers transient scripts only. `StockReviewHotkeyScript` owns market-backed opening and close/reopen. `WeaponsProcurementFixerCatalogUpdater` owns observed catalog updates and diagnostics.
 
-Stock/source/trade: `MarketStockService`, `GlobalWeaponMarketService`, `StockReviewQuoteBook`, `StockPurchaseService`, and `StockPurchaseExecutor` must keep Local, Sector Market, and Fixer's Market semantics distinct. Transaction callbacks are post-commit side effects.
+Stock/source/trade: `MarketStockService`, `GlobalWeaponMarketService`, `StockReviewQuoteBook`, `StockPurchaseService`, and `StockPurchaseExecutor` keep Local, Sector Market, and Fixer's Market semantics distinct. Transaction callbacks are post-commit side effects.
 
-GUI: `WimGui*` owns Starsector custom-panel quirks, button polling, scroll, modal input, text fitting, and tooltip caps. `StockReviewPanelPlugin` stays orchestration-only; rows/renderers/controllers own presentation details. Preserve event-gated button polling and sibling-safe anchoring.
+GUI: `WimGui*` owns Starsector custom-panel quirks, button polling, scroll, modal input, text fitting, and tooltip caps. `StockReviewPanelPlugin` stays orchestration-only; rows/renderers/controllers own presentation. Preserve event-gated polling and sibling-safe anchoring.
 
-Ships/fighters: ship trading remains local-only exact-member trading in `ui.stockreview.ships`. Fighter LPCs are item `WING` records with `F:` keys, not combat carrier behavior. Remote ship trading, refit, and combat HUD work require new design gates.
+Ships/fighters: ship trading remains local-only exact-member trading in `ui.stockreview.ships`. Fighter LPCs are item `WING` records with `F:` keys. Remote ship trading, refit, and combat HUD work require design gates.
 
 Persistence: keep Fixer catalog state simple, sanitized, and migration-aware. No save-key rename without approval.
 
-Validation/tooling/docs: validators must reflect the current architecture. `tools/lib/Validation.Assertions.ps1` owns shared PowerShell assertions; validators own repo contracts. Maintainer docs stay compact and link deep dives.
+Validation/tooling/docs: validators must reflect current architecture. `tools/lib/Validation.Assertions.ps1` owns shared PowerShell assertions; validators own repo contracts. Docs stay compact and link deep dives.
 
 ## Risk Register
 
@@ -54,24 +55,24 @@ Validation/tooling/docs: validators must reflect the current architecture. `tool
 | Source semantics | Local/Sector/Fixer services | wrong cargo drain/pricing | preserve static contracts and runtime matrix | validator plus manual trade matrix | active |
 | Fixer persistence | save key v1 | save compatibility loss | migration-before-change | static and runtime save proof | active |
 | Ship trading | exact-member local code | ship loss or remote leakage | static local-only gate plus in-game proof | validator plus ship buy/sell | active |
-| Settings/config | Luna and JSON loaders | broken user configs | compatibility and config-contract validators | static plus Luna runtime | active |
+| Settings/config | Luna, `wp.config.*`, and JSON loaders | broken user configs or stale internal settings readers | compatibility and config-contract validators | static plus Luna runtime | active |
 | Build/runtime dependency parity | installed Shatter Lib jar may lag checkout APIs | stale runtime dependency | API gates in build and deploy | build current Shatter Lib; deploy parity | active |
 | Public/export | curated export scripts | private leak/public breakage | explicit release gate | export/leak scan | parked |
 | Broad polish | many split UI owners | churn without value | avoid cosmetic moves | none unless touched | low-value |
 
 ## Workstreams And Roadmap
 
-Phase 0: keep validation and docs current before behavior edits. Exit when jar/CI validators match source, compatibility surfaces are documented, and known runtime gaps are explicit.
+Phase 0: keep validation/docs current before behavior edits. Exit when jar/CI validators match source, compatibility surfaces are documented, and gaps are explicit.
 
-Phase 1: do low-risk structure, constants, and documentation cleanup. Stop if a change becomes behavior-affecting.
+Phase 1: low-risk structure, constants, and docs cleanup. Stop if a change affects behavior.
 
 Phase 2: modernize one subsystem at a time: GUI rows, config parsing, local ship trading, or trade execution. Do not mix source-mode changes with UI polish.
 
-Phase 3: mature validation. Add cheap checks for real contracts, finish rollback runtime evidence, and record proof. Stop when checks duplicate stronger evidence.
+Phase 3: mature validation. Add cheap checks for contracts, finish rollback runtime evidence, and record proof.
 
-Phase 4: pursue Shatter Lib extraction, remote ship trading, public release, refit/combat integration, or profiling only with explicit human gates.
+Phase 4: pursue Shatter Lib extraction, remote ship trading, public release, refit/combat integration, or profiling only with human gates.
 
-Low-value work to avoid: package churn, cosmetic renames, broad helper extraction across runtime boundaries, public release edits during private cleanup, remote ship semantics as cleanup, or abstractions that do not remove real drift.
+Low-value work to avoid: package churn, cosmetic renames, broad helper extraction across runtime boundaries, release edits during private cleanup, remote ship semantics as cleanup, or abstractions that do not remove real drift.
 
 ## Validation Matrix
 
@@ -79,13 +80,13 @@ Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, Kotlin/GUI/j
 
 Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist matching. Config/Fixer/rollback/source/ship/evidence validators cover Luna/source keys, JSON schema, item keys, blacklist matching, `TradeMoney`, Fixer save gates, rollback hooks/schema, Local/Sector/Fixer separation, and local exact-member ship gates. Add runtime save/rollback/trade proof before migration or trade semantics changes. No unit-test suite is declared.
 
-Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live jar class validation.
+Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live class validation.
 
 Never conflate states: source changed, built, static-validated, deployed, parity-current, runtime-verified, benchmarked. UI, Luna behavior, campaign mutation, callbacks, and rollback cannot be proven outside Starsector.
 
 ## Definition Of Done
 
-Substantially complete means compatibility surfaces are documented and guarded, stale validators are fixed, high-risk subsystems have clear owners, runtime-sensitive behavior has matching validation guidance, and future cleanup can be selected as bounded tasks.
+Substantially complete means compatibility surfaces are documented and guarded, stale validators are fixed, high-risk subsystems have owners, runtime-sensitive behavior has validation guidance, and future cleanup can be selected as bounded tasks.
 
 Stop when remaining work is cosmetic, risky without behavior need, lacks practical validation, requires public release or save/schema changes, or adds abstraction without reducing maintenance cost.
 
