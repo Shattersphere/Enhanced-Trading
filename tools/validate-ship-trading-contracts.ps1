@@ -11,6 +11,7 @@ $executionController = Read-Text "$shipDir/StockReviewShipExecutionController.kt
 $pendingTrade = Read-Text "$shipDir/StockReviewPendingShipTrade.kt"
 $pendingTrades = Read-Text "$shipDir/StockReviewPendingShipTrades.kt"
 $tradeController = Read-Text "$shipDir/StockReviewShipTradeController.kt"
+$pricing = Read-Text "$shipDir/StockReviewShipPricing.kt"
 $sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
 $panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewPanelPlugin.kt"
 
@@ -175,6 +176,19 @@ foreach ($needle in @(
     "host.requestContentRebuild()"
 )) {
     Assert-Contains "StockReviewShipTradeController.kt stale selection contract" $tradeController $needle
+}
+
+foreach ($needle in @(
+    'val base = roundCredit(member?.baseBuyValue ?: 0f)',
+    'val tariff = tariffCredits(base, submarket?.tariff ?: 0f)',
+    'StockReviewShipPriceQuote(base, tariff, addCredits(base, tariff), submarket?.tariff ?: 0f)',
+    'Math.max(0, base - tariff)',
+    'Math.round(Math.max(0f, base * Math.max(0f, tariffRate)))',
+    'Math.max(0, Math.round(Math.max(0f, value)))',
+    'private fun addCredits(left: Int, right: Int): Int',
+    'Math.min(Int.MAX_VALUE.toLong(), left.toLong() + right.toLong()).toInt()'
+)) {
+    Assert-Contains "StockReviewShipPricing.kt non-negative quote contract" $pricing $needle
 }
 
 $shipBlackMarketToggle = Get-Section $sourceTransitionController "fun toggleBlackMarket()" "if (!state.getSourceMode().supportsBlackMarketToggle())"

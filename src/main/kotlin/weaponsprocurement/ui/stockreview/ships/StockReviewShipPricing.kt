@@ -8,7 +8,7 @@ object StockReviewShipPricing {
     fun buyQuote(member: FleetMemberAPI?, submarket: SubmarketAPI?): StockReviewShipPriceQuote {
         val base = roundCredit(member?.baseBuyValue ?: 0f)
         val tariff = tariffCredits(base, submarket?.tariff ?: 0f)
-        return StockReviewShipPriceQuote(base, tariff, base + tariff, submarket?.tariff ?: 0f)
+        return StockReviewShipPriceQuote(base, tariff, addCredits(base, tariff), submarket?.tariff ?: 0f)
     }
 
     @JvmStatic
@@ -23,6 +23,9 @@ object StockReviewShipPricing {
 
     private fun roundCredit(value: Float): Int =
         Math.max(0, Math.round(Math.max(0f, value)))
+
+    private fun addCredits(left: Int, right: Int): Int =
+        Math.min(Int.MAX_VALUE.toLong(), left.toLong() + right.toLong()).toInt()
 }
 
 class StockReviewShipPriceQuote(
