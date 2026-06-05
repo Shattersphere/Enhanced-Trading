@@ -34,6 +34,17 @@ Source of truth for exact project facts. Do not guess. Unknowns stay `TODO[unkno
 
 If `commit-and-push` is active but no usable trusted remote exists, commit locally when safe and report the push blocker. Public `Shattersphere-Mods` export or publishing is separate explicit release work.
 
+## Template Baselines And General Archives
+
+These external resources are read-authorized for explicit sync with the generic template. Do not edit them from this repo unless the user explicitly asks.
+
+| Resource | Path | Required use |
+|---|---|---|
+| Generic Template Repo | `D:\Sean Code Projects\General Projects\Generic Template Repo` | Source for repo-governance template updates. Sync only applicable guidance; preserve Starsector-specific facts and commands. |
+| Deploy Template | `D:\Sean Code Projects\General Projects\Deploy Template` | Reference for deploy workflow improvements. Keep Enhanced Trading deploy commands and Starsector live-target rules in this repo. |
+| Zipper Template | `D:\Sean Code Projects\General Projects\Zipper Template` | Reference for package/export/zip workflow improvements. Keep public export and leak checks project-specific. |
+| General Archives | `D:\Sean Code Projects\General Projects\Archives` | During explicit sync or relevant investigations, search/read targeted archive notes and promote current lessons only; do not bulk-copy history. |
+
 ## Commands
 
 Commands here are authoritative. If a command is unknown, leave it unknown rather than inventing one.
@@ -54,7 +65,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Update repo map | `python scripts/update-repo-map.py --write` | repo root | Run after tracked structure changes. |
 | Deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | repo root | In scope only for runtime/package changes. |
 | Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | repo root | No-build queue/status/blocker report. |
-| Deploy parity check | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | repo root | Cheap source/live clean-package parity. |
+| Deploy parity check | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | repo root | Source/live clean-package parity plus installed Shatter Lib API freshness. |
 | Live GUI class validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1` | repo root | Run after runtime deploys. |
 | Public export | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\export-public.ps1` | repo root | Public release/export only. |
 

@@ -18,9 +18,9 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Compatibility surfaces | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-compatibility-surfaces.ps1` | Changing ids, config keys, data paths, plugin/rule paths, validators, CI, or modernization docs | Pass/fail by protected surface | low |
 | Config contracts | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | Changing Luna settings, stock JSON, blacklist JSON, config parsers, sort aliases, or trade money guards | Pass/fail by config contract | low |
 | Fixer persistence contracts | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | Changing Fixer's Market observed catalog storage, policy gating, theoretical reference fallback, or save-key docs | Pass/fail by save/persistence contract | low |
-| Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | Runtime deploy troubleshooting | Queue/lock/staging status | low; requires Starsector path |
-| Deploy parity | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | Runtime changes when live parity matters | Current/stale source/live state | medium; requires Starsector path |
-| Runtime deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | Runtime changes that need live validation | Deploy or queued deploy result | high; writes live mod target |
+| Deploy status | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -Status` | Runtime deploy troubleshooting | Queue/lock/staging status and Shatter Lib runtime API state | low; requires Starsector path |
+| Deploy parity | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1 -CheckOnly -RequireCurrent` | Runtime changes when live parity matters | Current/stale source/live state plus Shatter Lib runtime API state | medium; requires Starsector path |
+| Runtime deploy | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\deploy-live-mod.ps1` | Runtime changes that need live validation | Deploy or queued deploy result | high; writes live mod target; blocks stale Shatter Lib API |
 | Live GUI classes | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-live-gui-classes.ps1` | After runtime deploys | Live jar class validation | medium |
 | Public export | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\export-public.ps1` | Explicit public release/export work | Export path and leak/boundary status | medium |
 | Rollback diagnostics | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\analyze-trade-rollback-diagnostics.ps1 -ExpectFailureStep after-source-removal,after-player-cargo-remove,after-player-cargo-add,after-target-cargo-add,after-credit-mutation -RequirePass` | Manual forced rollback validation | Pass/fail by failure step | high; requires runtime log evidence |
@@ -31,6 +31,10 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 - Standard change: run the relevant focused build/test/lint/validator for the touched surface.
 - Deep/risky/release work: plan first; run focused checks during development and broader checks at the end of a cohesive batch.
 - Release boundary: run source checks, package/export checks, leak checks, and any required runtime/deploy validation.
+
+## Baseline Workflow Sources
+
+During explicit sync with the generic template, compare against the Generic Template Repo and, only when deploy/package workflow is in scope, use the Deploy Template and Zipper Template listed in `docs/PROJECT_FACTS.md` as references. Preserve this repo's Starsector-specific deploy/export commands and validation gates.
 
 ## Evidence Rules
 
@@ -46,3 +50,4 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 - `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency; it does not prove LunaLib runtime UI behavior.
 - `tools/validate-fixer-persistence-contracts.ps1` is static contract coverage for the current Fixer observed-catalog save key, string-map encoding, sanitization, and blacklist/safety gates; it does not prove save migration in a live campaign.
 - Build validation checks required Shatter Lib API classes. If the installed mod is stale, build with `-ShatterLibDir <checkout>` for source/package proof; runtime still requires the installed mod to be current.
+- Deploy status, deploy parity, and runtime deploy now inspect the installed Shatter Lib jar for required API classes; a checkout override proves build only, not live runtime dependency parity.

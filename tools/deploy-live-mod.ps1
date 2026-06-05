@@ -43,6 +43,10 @@ $optionalItems = @(
     "graphics"
 )
 $items = @($requiredItems + $optionalItems)
+$requiredShatterLibRuntimeClasses = @(
+    "com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterItemTooltipContext.class",
+    "com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterTooltipContextLine.class"
+)
 
 function Get-DeployScopeHash {
     $scope = "$($repoRoot.ToLowerInvariant())|$($deployRoot.ToLowerInvariant())|$($deployName.ToLowerInvariant())"
@@ -133,6 +137,98 @@ function Write-DeployContentReport {
     Write-Host "Live missing deploy entries: $($Report.LiveMissingCount)"
     Write-Host "Deploy manifest differences: $($Report.DifferenceCount)"
     Write-Host "The live deploy target is $($Report.LiveState)"
+}
+
+function Test-ModInfoContainsId {
+    param(
+        [string]$Candidate,
+        [string]$ModId
+    )
+
+    $modInfo = Join-Path $Candidate "mod_info.json"
+    if (-not (Test-Path -LiteralPath $modInfo)) {
+        return $false
+    }
+    $text = Get-Content -LiteralPath $modInfo -Raw
+    return [regex]::IsMatch($text, ('"id"\s*:\s*"' + [regex]::Escape($ModId) + '"'), [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+}
+
+function Resolve-ShatterLibModRoot {
+    $modsRoot = Join-Path $StarsectorDir "mods"
+    if (-not (Test-Path -LiteralPath $modsRoot)) {
+        return $null
+    }
+
+    $candidates = @(Get-ChildItem -LiteralPath $modsRoot -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending)
+    foreach ($candidate in $candidates) {
+        if ($candidate.Name.Equals("Shatter Lib", [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $candidate.FullName
+        }
+    }
+    foreach ($candidate in $candidates) {
+        if ($candidate.Name.StartsWith("Shatter Lib-", [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $candidate.FullName
+        }
+    }
+    foreach ($candidate in $candidates) {
+        if (Test-ModInfoContainsId -Candidate $candidate.FullName -ModId "shatter_lib") {
+            return $candidate.FullName
+        }
+    }
+    return $null
+}
+
+function Get-ShatterLibRuntimeDependencyReport {
+    $modRoot = Resolve-ShatterLibModRoot
+    if ([string]::IsNullOrWhiteSpace($modRoot)) {
+        return [pscustomobject]@{
+            ModRoot = ""
+            JarPath = ""
+            MissingClasses = @($requiredShatterLibRuntimeClasses)
+            LiveState = "stale because Shatter Lib is not installed under the Starsector mods directory."
+        }
+    }
+
+    $jarPath = Join-Path $modRoot "jars\shatter-lib.jar"
+    if (-not (Test-Path -LiteralPath $jarPath)) {
+        return [pscustomobject]@{
+            ModRoot = $modRoot
+            JarPath = $jarPath
+            MissingClasses = @($requiredShatterLibRuntimeClasses)
+            LiveState = "stale because the installed Shatter Lib jar is missing."
+        }
+    }
+
+    $entries = @(Get-ZipEntryNames -Path $jarPath)
+    $missing = @($requiredShatterLibRuntimeClasses | Where-Object { $entries -notcontains $_ })
+    $state = if ($missing.Count -eq 0) {
+        "current because the installed Shatter Lib jar contains required Enhanced Trading API classes."
+    } else {
+        "stale because the installed Shatter Lib jar is missing required API classes: $($missing -join ', ')."
+    }
+
+    [pscustomobject]@{
+        ModRoot = $modRoot
+        JarPath = $jarPath
+        MissingClasses = $missing
+        LiveState = $state
+    }
+}
+
+function Write-RuntimeDependencyReport {
+    param([object]$Report)
+
+    Write-Host "Runtime dependency Shatter Lib root: $(if ([string]::IsNullOrWhiteSpace($Report.ModRoot)) { 'missing' } else { $Report.ModRoot })"
+    Write-Host "Runtime dependency Shatter Lib jar: $(if ([string]::IsNullOrWhiteSpace($Report.JarPath)) { 'missing' } else { $Report.JarPath })"
+    Write-Host "Runtime dependency missing Shatter Lib API classes: $($Report.MissingClasses.Count)"
+    Write-Host "The runtime dependency state is $($Report.LiveState)"
+}
+
+function Assert-RuntimeDependenciesCurrent {
+    $report = Get-ShatterLibRuntimeDependencyReport
+    if (!$report.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Runtime dependencies are not current: $($report.LiveState)"
+    }
 }
 
 function Assert-DeployJarBoundary {
@@ -422,6 +518,7 @@ function Publish-StagedDeploy {
 
     Assert-DeployRoot
     Assert-DeployJarBoundary -BaseRoot $StageRoot
+    Assert-RuntimeDependenciesCurrent
     New-Item -ItemType Directory -Force -Path $deployRoot | Out-Null
 
     foreach ($item in (Get-RelativeDeployItems)) {
@@ -504,14 +601,19 @@ if (($CheckOnly -or $Status) -and $QueuedWorker) {
 }
 if ($CheckOnly -or $Status) {
     $contentReport = Get-DeployContentReport
+    $runtimeDependencyReport = Get-ShatterLibRuntimeDependencyReport
     if ($CheckOnly) {
         Write-Host "Deploy check only; no files were modified."
         Write-DeployContentReport -Report $contentReport
     } else {
         Write-DeployQueueReport -ContentReport $contentReport
     }
+    Write-RuntimeDependencyReport -Report $runtimeDependencyReport
     if ($RequireCurrent -and !$contentReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "The live deploy target is not current: $($contentReport.LiveState)"
+    }
+    if ($RequireCurrent -and !$runtimeDependencyReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "The runtime dependencies are not current: $($runtimeDependencyReport.LiveState)"
     }
     exit 0
 }
@@ -540,6 +642,7 @@ if ($QueuedWorker) {
     $sourceProjectValue = if ([string]::IsNullOrWhiteSpace($SourceProject)) { $repoRoot } else { $SourceProject }
     Write-Host "Source project: $sourceProjectValue"
     Write-Host "Time of attempted deploy: $deployAttemptedAtValue"
+    Assert-RuntimeDependenciesCurrent
     $runId = Split-Path -Leaf $StagingRoot
     Write-DeployState -RunId $runId -ProcessId $PID -StageRoot $StagingRoot -Phase "waiting"
     $lastBlocker = ""
@@ -561,8 +664,9 @@ if ($QueuedWorker) {
     exit 0
 }
 
-Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "initialised" -Reset
 Assert-DeployJarBoundary -BaseRoot $repoRoot
+Assert-RuntimeDependenciesCurrent
+Write-DeployStatus -Path $deployStatusFile -Commit $deployCommit -Status "initialised" -Reset
 $stagedRoot = New-DeployStaging
 $blockerPath = Get-DeployBlocker
 if (-not [string]::IsNullOrWhiteSpace($blockerPath)) {
