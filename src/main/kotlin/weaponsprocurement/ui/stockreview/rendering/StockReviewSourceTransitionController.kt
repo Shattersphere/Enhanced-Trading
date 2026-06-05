@@ -95,6 +95,15 @@ class StockReviewSourceTransitionController(
             host.requestContentRebuild()
             return
         }
+        if (state.getSourceMode().isRemote()) {
+            state.toggleBlackMarket()
+            pendingTrades.clear()
+            localMarketIntent.clear()
+            clearSourceWarningAndReviewMode()
+            state.setListScrollOffset(0)
+            rebuildAndRender()
+            return
+        }
         val previousSnapshot = host.snapshot()
         val previousTrades = ArrayList(pendingTrades.asList())
         localMarketIntent.seedFromTrades(previousTrades)

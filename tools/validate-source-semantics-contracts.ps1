@@ -212,6 +212,31 @@ foreach ($needle in @(
     Assert-Contains "StockReviewExecutionController.kt source dispatch contract" $executionController $needle
 }
 
+$sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
+$blackMarketToggle = Get-Section $sourceTransitionController 'fun toggleBlackMarket()' 'fun resetAllTrades()'
+$itemBlackMarketToggle = Get-Section $blackMarketToggle 'if (!state.getSourceMode().supportsBlackMarketToggle())' 'val previousSnapshot = host.snapshot()'
+$remoteBlackMarketToggle = Get-Section $blackMarketToggle 'if (state.getSourceMode().isRemote()) {' 'val previousSnapshot = host.snapshot()'
+foreach ($needle in @(
+    'if (!state.getSourceMode().supportsBlackMarketToggle())',
+    'if (state.getSourceMode().isRemote()) {',
+    'pendingTrades.clear()',
+    'localMarketIntent.clear()',
+    'state.setListScrollOffset(0)',
+    'rebuildAndRender()',
+    'localMarketIntent.seedFromTrades(previousTrades)',
+    'StockReviewLocalMarketRebalancer.rebalanceBlackMarketToggle('
+)) {
+    Assert-Contains "StockReviewSourceTransitionController.kt source-filter transition contract" $blackMarketToggle $needle
+}
+Assert-Order "StockReviewSourceTransitionController.kt remote source-filter reset" $remoteBlackMarketToggle @(
+    'if (state.getSourceMode().isRemote()) {',
+    'state.toggleBlackMarket()',
+    'pendingTrades.clear()',
+    'localMarketIntent.clear()',
+    'rebuildAndRender()',
+    'return'
+)
+
 $rebalancer = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewLocalMarketRebalancer.kt"
 Assert-Contains "StockReviewLocalMarketRebalancer.kt" $rebalancer 'previousSnapshot?.getSourceMode() != StockSourceMode.LOCAL'
 Assert-Contains "StockReviewLocalMarketRebalancer.kt" $rebalancer 'currentSnapshot?.getSourceMode() != StockSourceMode.LOCAL'
