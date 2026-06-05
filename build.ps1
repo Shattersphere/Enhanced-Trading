@@ -1,5 +1,6 @@
 param(
     [string]$StarsectorDir = $env:STARSECTOR_DIRECTORY,
+    [string]$ShatterLibDir = $env:SHATTER_LIB_DIRECTORY,
     [switch]$SkipClean
 )
 
@@ -15,6 +16,9 @@ if (-not (Test-Path -LiteralPath $gradleWrapper)) {
 }
 
 $gradleArgs = @("--no-daemon", "-PstarsectorDir=$StarsectorDir")
+if (-not [string]::IsNullOrWhiteSpace($ShatterLibDir)) {
+    $gradleArgs += "-PshatterLibDir=$ShatterLibDir"
+}
 if (-not $SkipClean) {
     $gradleArgs += "clean"
 }

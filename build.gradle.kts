@@ -3,6 +3,7 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
+import java.util.zip.ZipFile
 
 plugins {
     kotlin("jvm") version "2.1.20"
@@ -21,6 +22,12 @@ fun configuredPath(name: String): String? =
 
 fun environmentPath(name: String): String? =
     System.getenv(name)?.takeIf { it.isNotBlank() }
+
+fun configuredDirectory(name: String): File? =
+    configuredPath(name)?.let { file(it) }
+
+fun environmentDirectory(name: String): File? =
+    environmentPath(name)?.let { file(it) }
 
 fun hasStarsectorCoreJars(dir: File): Boolean =
     File(dir, "starfarer.api.jar").isFile &&
@@ -96,6 +103,17 @@ fun resolveDependencyModDirectory(mod: RequiredMod): File {
     )
 }
 
+fun resolveShatterLibDirectory(): File =
+    configuredDirectory("shatterLibDir")
+        ?: environmentDirectory("SHATTER_LIB_DIRECTORY")
+        ?: resolveDependencyModDirectory(
+            RequiredMod(
+                displayName = "Shatter Lib",
+                folderPrefixes = listOf("Shatter Lib"),
+                modIds = listOf("shatter_lib"),
+            )
+        )
+
 val lunaLibDirectory = resolveDependencyModDirectory(
     RequiredMod(
         displayName = "LunaLib",
@@ -110,19 +128,32 @@ val lazyLibDirectory = resolveDependencyModDirectory(
         modIds = listOf("lw_lazylib"),
     )
 )
-val shatterLibDirectory = resolveDependencyModDirectory(
-    RequiredMod(
-        displayName = "Shatter Lib",
-        folderPrefixes = listOf("Shatter Lib"),
-        modIds = listOf("shatter_lib"),
-    )
-)
+val shatterLibDirectory = resolveShatterLibDirectory()
 
 fun dependencyJarTree(directory: File) =
     fileTree(File(directory, "jars")) {
         include("*.jar")
         include("internal/*.jar")
     }
+
+fun dependencyJarFiles(directory: File): List<File> =
+    dependencyJarTree(directory).files.sortedBy { it.absolutePath }
+
+fun shatterLibJarFiles(directory: File): List<File> {
+    val modJars = dependencyJarFiles(directory)
+    if (modJars.isNotEmpty()) return modJars
+    val checkoutJar = File(directory, "build/libs/shatter-lib.jar")
+    return if (checkoutJar.isFile) listOf(checkoutJar) else emptyList()
+}
+
+val shatterLibJars = shatterLibJarFiles(shatterLibDirectory)
+val requiredShatterLibClasses = listOf(
+    "com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterItemTooltipContext.class",
+    "com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterTooltipContextLine.class",
+)
+
+fun jarContainsEntry(jar: File, entryName: String): Boolean =
+    ZipFile(jar).use { zip -> zip.getEntry(entryName) != null }
 
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")
@@ -137,7 +168,7 @@ dependencies {
     )
     compileOnly(dependencyJarTree(lunaLibDirectory))
     compileOnly(dependencyJarTree(lazyLibDirectory))
-    compileOnly(dependencyJarTree(shatterLibDirectory))
+    compileOnly(files(shatterLibJars))
 }
 
 sourceSets {
@@ -159,6 +190,7 @@ tasks.register("validateLocalBuildEnvironment") {
         println("LunaLib: ${lunaLibDirectory.absolutePath}")
         println("LazyLib: ${lazyLibDirectory.absolutePath}")
         println("Shatter Lib: ${shatterLibDirectory.absolutePath}")
+        println("Shatter Lib jars: ${shatterLibJars.joinToString { it.absolutePath }}")
 
         require(starsectorDirectory.isDirectory) {
             "Missing Starsector directory: ${starsectorDirectory.absolutePath}"
@@ -172,7 +204,6 @@ tasks.register("validateLocalBuildEnvironment") {
         listOf(
             "LunaLib" to lunaLibDirectory,
             "LazyLib" to lazyLibDirectory,
-            "Shatter Lib" to shatterLibDirectory,
         ).forEach { (name, directory) ->
             val jarsDirectory = File(directory, "jars")
             require(jarsDirectory.isDirectory) {
@@ -180,6 +211,18 @@ tasks.register("validateLocalBuildEnvironment") {
             }
             require(dependencyJarTree(directory).files.isNotEmpty()) {
                 "$name has no compile jars under: ${jarsDirectory.absolutePath}"
+            }
+        }
+        require(shatterLibDirectory.isDirectory) {
+            "Missing Shatter Lib directory: ${shatterLibDirectory.absolutePath}"
+        }
+        require(shatterLibJars.isNotEmpty()) {
+            "Shatter Lib has no compile jar under jars/ or build/libs/shatter-lib.jar: ${shatterLibDirectory.absolutePath}"
+        }
+        requiredShatterLibClasses.forEach { className ->
+            require(shatterLibJars.any { jarContainsEntry(it, className) }) {
+                "Shatter Lib jar is stale or incompatible; missing $className. " +
+                    "Update the installed Shatter Lib mod or build with -PshatterLibDir=<checkout> / -ShatterLibDir <checkout>."
             }
         }
     }

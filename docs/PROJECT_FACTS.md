@@ -41,9 +41,9 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Purpose | Command | Working directory | Notes |
 |---|---|---|---|
 | List files | `rg --files` | repo root | Use targeted search before opening large docs or archives. |
-| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires `STARSECTOR_DIRECTORY` or `-StarsectorDir`. |
-| Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Useful for local iteration only. |
-| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector core jars plus LunaLib/LazyLib jars. |
+| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires `STARSECTOR_DIRECTORY` or `-StarsectorDir`; optional `-ShatterLibDir` / `SHATTER_LIB_DIRECTORY` overrides Shatter Lib compile jars. |
+| Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Useful for local iteration only; accepts the same path overrides as `Build`. |
+| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector core jars, dependency jars, and required Shatter Lib API classes. Optional `-PshatterLibDir=<path>` can point at the Shatter Lib checkout. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
 | Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock JSON, blacklist JSON, sort alias, and trade money guard. |
@@ -79,7 +79,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Kotlin stdlib | `2.1.20` compile-only | Kotlin runtime support | Build file compiles against it; Starsector runtime dependency handling also relies on installed dependency mods. |
 | LazyLib | installed Starsector mod, mod id `lw_lazylib` | Required dependency | Declared in `mod_info.json`; compile jars resolved from installed mod. |
 | LunaLib | installed Starsector mod, mod id `lunalib` | Required dependency/settings UI | Declared in `mod_info.json`; compile jars resolved from installed mod. |
-| Shatter Lib | installed Starsector mod, mod id `shatter_lib` | Required shared UI/runtime helpers | Declared in `mod_info.json`; compile jars resolved from installed mod. |
+| Shatter Lib | installed Starsector mod or explicit checkout override, mod id `shatter_lib` | Required shared UI/runtime helpers | Declared in `mod_info.json`; compile jars resolve from installed mod by default or `-PshatterLibDir`/`SHATTER_LIB_DIRECTORY`. |
 
 ## Shared Libraries
 

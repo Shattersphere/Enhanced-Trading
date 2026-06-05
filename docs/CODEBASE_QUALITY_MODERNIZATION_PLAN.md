@@ -55,7 +55,7 @@ Validation/tooling/docs: validators must reflect the current architecture. Maint
 | Fixer persistence | save key v1 | save compatibility loss | migration-before-change | static and runtime save proof | active |
 | Ship trading | exact-member local code | ship loss or remote leakage | local-only gate | in-game ship buy/sell | active |
 | Settings/config | Luna and JSON loaders | broken user configs | compatibility and config-contract validators | static plus Luna runtime | active |
-| Build dependency parity | installed Shatter Lib jar may lag checkout APIs | source/package validation blocked | align dependency before release/runtime proof | build with current Shatter Lib | active |
+| Build dependency parity | installed Shatter Lib jar may lag checkout APIs | stale runtime dependency | API gate plus checkout build override | build current Shatter Lib; runtime parity | active |
 | Public/export | curated export scripts | private leak/public breakage | explicit release gate | export/leak scan | parked |
 | Broad polish | many split UI owners | churn without value | avoid cosmetic moves | none unless touched | low-value |
 

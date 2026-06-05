@@ -11,8 +11,8 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Public doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | Public docs changes | Pass/fail | low |
 | Private doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | Agent/private docs changes | Pass/fail | low |
 | Diff whitespace | `git diff --check` | Any source/docs change before commit | Pass/fail | low |
-| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | Runtime/source changes | Build passed/failed; key error if failed | medium; requires Starsector path |
-| Build environment | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | Dependency/path checks | Resolved Starsector, LunaLib, LazyLib paths | low/medium; requires local install |
+| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | Runtime/source changes | Build passed/failed; key error if failed | medium; requires Starsector path; accepts `-ShatterLibDir` |
+| Build environment | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | Dependency/path checks | Resolved Starsector, dependency paths, and Shatter Lib API freshness | low/medium; requires local install |
 | GUI button style | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | GUI/button rendering changes | Pass/fail | low |
 | Kotlin/source boundary | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | Source/package/build boundary changes | Pass/fail and skipped jar/export checks | low/medium |
 | Compatibility surfaces | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-compatibility-surfaces.ps1` | Changing ids, config keys, data paths, plugin/rule paths, validators, CI, or modernization docs | Pass/fail by protected surface | low |
@@ -45,4 +45,4 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 - `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.
 - `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency; it does not prove LunaLib runtime UI behavior.
 - `tools/validate-fixer-persistence-contracts.ps1` is static contract coverage for the current Fixer observed-catalog save key, string-map encoding, sanitization, and blacklist/safety gates; it does not prove save migration in a live campaign.
-- Build validation also depends on the installed Shatter Lib jar matching the APIs consumed by this repo; `validateLocalBuildEnvironment` checks dependency presence, not API freshness.
+- Build validation checks required Shatter Lib API classes. If the installed mod is stale, build with `-ShatterLibDir <checkout>` for source/package proof; runtime still requires the installed mod to be current.
