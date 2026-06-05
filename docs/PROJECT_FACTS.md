@@ -52,15 +52,16 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Purpose | Command | Working directory | Notes |
 |---|---|---|---|
 | List files | `rg --files` | repo root | Use targeted search before opening large docs or archives. |
-| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires `STARSECTOR_DIRECTORY` or `-StarsectorDir`; optional `-ShatterLibDir` / `SHATTER_LIB_DIRECTORY` overrides Shatter Lib compile jars. |
-| Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Useful for local iteration only; accepts the same path overrides as `Build`. |
-| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector core jars, dependency jars, and Shatter Lib API classes. Optional `-PshatterLibDir=<path>` points at the checkout. |
+| Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires `STARSECTOR_DIRECTORY` or `-StarsectorDir`; optional `-ShatterLibDir` / `SHATTER_LIB_DIRECTORY`. |
+| Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Local iteration only; accepts the same path overrides as `Build`. |
+| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector, dependency, and Shatter Lib API jars. Optional `-PshatterLibDir=<path>`. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
-| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock JSON, blacklist JSON, item-key parsing, blacklist matching, sort aliases, and trade money guards. |
-| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, string-map encoding, sanitization, lifecycle/policy gates, blacklist safety, and observed fallback. |
-| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, forced-failure hooks, diagnostics, and credit/cargo mutation guards. |
-| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer stock-source separation, virtual Fixer stock, source rehydration, and source-mode dispatch. |
+| Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock/blacklist JSON, item keys, aliases, and trade-money guards. |
+| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, encoding, sanitization, lifecycle/policy gates, blacklist safety, observed fallback. |
+| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, forced-failure hooks, diagnostics, and credit/cargo guards. |
+| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer separation, virtual Fixer stock, source rehydration, dispatch. |
+| Ship trading contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1` | repo root | Local-only exact-member ship snapshot, pending trade, buy/sell mutation, and remote ship gate guard. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |

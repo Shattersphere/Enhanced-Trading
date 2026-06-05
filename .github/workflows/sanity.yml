@@ -86,6 +86,10 @@ jobs:
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1
 
+      - name: Validate ship trading contracts
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-ship-trading-contracts.ps1
+
       - name: Reject stale stock-review pending purchase class
         shell: pwsh
         run: |
