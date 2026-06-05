@@ -11,6 +11,8 @@ This file is active work only. Completed migrations, old public-release cleanup 
 - Cargo-cell weapon/LPC badges live in the standalone private `D:\Sean Mods\Weapon Badges` repo. Do not reintroduce badge helpers, generated badge sprites, count bridges, or `CargoStackView` patching tools here.
 - Template-synced project facts and checks now live in `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`. Use those as the source of truth for commands, paths, dependencies, Git mode, and shared-library authorization.
 - Live deploy/runtime proof is currently blocked by the installed Shatter Lib jar at `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar`, which is missing `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`. Build with the Shatter Lib checkout override for source/package proof only; do not claim live parity until the installed dependency is updated and deploy parity passes.
+- Recent pushed modernization baseline: `e92b77f` split weapon tooltip row building after earlier commits extracted stock tooltip models, icon-panel rendering, and wing tooltip rendering. Source/static checks passed for that work, but in-game tooltip acceptance was not run.
+- A requested sync with `D:\Sean Code Projects\General Projects\Generic Template Repo` was started only as read-only comparison before this handoff request superseded it. The template repo currently has uncommitted governance updates; future sync should be a separate docs/tooling task.
 
 ## Active Work
 
@@ -23,6 +25,7 @@ Scope:
 - Ship grid density, paging, hull-class text filtering, and filter modal layout.
 - Ship, weapon, and wing tooltip sizing, truncation, stat sourcing, and debug stress records.
 - Debug UI visibility behind the LunaLib debug toggle.
+- Source cleanup around tooltip owners only where it reduces real maintenance cost; current likely next split is weapon icon-grid rendering or cargo/context line construction out of `StockReviewItemTooltip`.
 
 Constraints:
 
@@ -30,12 +33,17 @@ Constraints:
 - Do not change item trade behavior while polishing ship UI.
 - Do not use obfuscated vanilla UI classes directly; use public APIs and custom-panel approximations.
 - Tooltips should stay within the screen and avoid premature mid-line truncation.
+- Preserve Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation for normal records; custom tooltip code is primarily for debug/stress records and repo-owned context/layout work.
 
 Done when:
 
 - The ship grid still uses the full available trade area cleanly.
 - Weapon, wing, and ship tooltips have in-game visual acceptance at common UI scales.
 - Debug weapon, wing, and ship stress records exercise worst-case content without clipping controls.
+
+Suggested next bounded source step:
+
+- Extract the weapon icon-grid renderer from `StockReviewItemTooltip` into a dedicated tooltip renderer class, update `tools/validate-gui-button-style.ps1` if ownership moves, rebuild `jars/enhanced-trading.jar`, and run GUI/Kotlin/jar validators. Runtime visual proof remains required before claiming tooltip behavior acceptance.
 
 ### 2. Runtime Rollback Fault Validation
 
@@ -87,6 +95,26 @@ Open release questions:
 Status: deferred new feature
 
 Do not add Sector Market or Fixer's Market ship trading as part of UI polish. Remote ship trading needs a separate design for ship identity, source draining, pricing, virtual availability, and failure handling.
+
+### 5. Generic Template Sync
+
+Status: requested, not yet implemented
+
+Scope:
+
+- Compare the current working tree of `D:\Sean Code Projects\General Projects\Generic Template Repo` against this repo's governance docs and scripts.
+- Import only template changes that improve doc routing, template hygiene checks, or maintainer workflows.
+- Preserve all Starsector-specific facts in `docs/PROJECT_FACTS.md`, validation commands in `docs/CHECKS.md`, deploy/live rules in `AGENTS.md`, and private release boundaries in `.agent/PUBLIC_RELEASE.md`.
+
+Validation:
+
+- `python scripts/check-template-state.py --initialized`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs`
+- `git diff --check`
+
+Gate:
+
+- Stop for human review before adopting template text that weakens Starsector deploy policy, public/private boundaries, shared-library gates, Git finalization mode, or compatibility-surface protection.
 
 ## Retired Or Completed
 

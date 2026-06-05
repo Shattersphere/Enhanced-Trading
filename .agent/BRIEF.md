@@ -12,6 +12,12 @@ The source tree is fully migrated to Gradle/Kotlin. `build.ps1` remains the norm
 
 The item-trading popup path is solid and functional as the current baseline. Ship trading is local-only behind the `Trade: Items` / `Trade: Ships` toggle; the current 4-column by 5-row ship grid layout is the user-confirmed solid baseline to preserve if this GUI regresses.
 
+Recent modernization work has focused on bounded, behavior-preserving hardening and cleanup:
+
+- Trade and ship execution guardrails now fail closed around unsafe credit/cargo mutations, exact-member ship mutation failures, nonfinite settings/cargo-space values, post-commit transaction reports, and Fixer catalog decoding.
+- Runtime dependency checks now surface stale installed Shatter Lib jars during deploy/parity workflows.
+- Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, and `StockReviewWeaponTooltipRows`. `StockReviewItemTooltip` remains the main orchestration/legacy renderer and is still a good next cleanup target.
+
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
 The repo has been synced with the generic template doc system. Exact facts now live in `docs/PROJECT_FACTS.md`, validation commands in `docs/CHECKS.md`, and generated orientation in `docs/REPO_MAP.md`.
@@ -19,7 +25,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `f772d5c7577f3966090e1e18d4745f464fc4bfad`
+- Known-good source commit: `e92b77f` (`Extract weapon tooltip row builder`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
@@ -37,6 +43,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 
 - Ship trading is local-only in its first implementation. Sector Market and Fixer's Market ship trading remain intentionally out of scope.
 - The ship grid layout is a good reference baseline; the public-API ship tooltip still needs in-game visual acceptance against the vanilla ship buy/sell screen after layout polish.
+- Tooltip cleanup remains source/static validated only. In-game visual proof is still required for weapon, wing, and ship tooltip layout acceptance.
 - Runtime rollback fault validation still needs in-game evidence.
 - Rollback diagnostics now emit structured `WP_STOCK_REVIEW_ROLLBACK` records; use `tools/analyze-trade-rollback-diagnostics.ps1` after a forced-failure run to verify restored cargo counts and credits.
 - Weapon Badges is standalone in `D:\Sean Mods\Weapon Badges`; do not reintroduce cargo-cell badge assets, core patching, or badge count publishing here.
@@ -44,7 +51,8 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - Luna settings, data/config files, graphics, and metadata matter; jar parity alone is not sufficient for data-heavy changes.
 - Public release to `Shattersphere-Mods` must be curated. Do not mirror this private repo because it contains agent docs and local/private references.
 - Live deploy/runtime validation is currently blocked until the installed Shatter Lib jar has the API classes required by the current Enhanced Trading jar: `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`.
+- A template sync request was interrupted by this handoff request. The named template repo has uncommitted governance updates; future sync should be a docs/tooling-only pass that preserves this repo's Starsector commands, compatibility surfaces, and deploy policy.
 
 ## Next Best Step
 
-For code/runtime work, inspect the short active `PLANS.md`, `docs/PROJECT_FACTS.md`, `docs/CHECKS.md`, and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. For shared-library work, read `.agent/SHARED_LIBRARIES.md` before inspecting Shatter Lib. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.
+For code/runtime work, inspect the short active `PLANS.md`, `docs/PROJECT_FACTS.md`, `docs/CHECKS.md`, and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. The best bounded source cleanup is to continue splitting `StockReviewItemTooltip` around weapon icon-grid rendering or cargo/context line building while preserving Shatter Lib tooltip delegation. For shared-library work, read `.agent/SHARED_LIBRARIES.md` before inspecting Shatter Lib. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.

@@ -30,6 +30,23 @@ The item-trading popup is the stable product baseline. Ship trading exists as a 
 
 Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation commands live in `docs/CHECKS.md`; generated orientation lives in `docs/REPO_MAP.md`. Do not assume `main` is a release boundary until you inspect `git status --short --branch`, `PLANS.md`, and the current diff.
 
+## Recent Work Snapshot
+
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `e92b77f` (`Extract weapon tooltip row builder`).
+
+Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
+
+- `StockReviewTooltipModels`: shared tooltip row/layout models.
+- `StockReviewTooltipIconPanelPlugin`: sprite-backed icon panel drawing for non-weapon tooltip icons.
+- `StockReviewWingTooltipRenderer`: fighter LPC tooltip rendering.
+- `StockReviewWeaponTooltipRows`: weapon primary/ancillary stat row derivation.
+
+`StockReviewItemTooltip` still owns the padded weapon tooltip shell, cargo/price/owned context, description/custom text handling, Shatter Lib context construction, and weapon icon-grid rendering. It remains a practical next cleanup target, but only through small extractions that preserve Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation and current debug/stress behavior.
+
+Runtime proof has not caught up to static/source cleanup because the live installed Shatter Lib jar is stale. Until `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar` contains `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`, build with the Shatter Lib checkout override for source/package proof only and do not claim live deploy parity.
+
+A generic-template sync was requested and started only as read-only comparison before the current handover request superseded it. The template repo currently has uncommitted governance updates. Treat template sync as a future docs/tooling task, not as source/runtime work.
+
 ## Document Map
 
 Use `.agent/INDEX.md` as the routing map. The high-value starting points are:
@@ -158,7 +175,7 @@ Shared UI owners:
 - `WimGuiModalPanelPlugin`: custom dialog lifecycle, content rebuild, input routing, and close behavior.
 - `WimGuiControls`: button/label/panel creation and binding registration.
 - `WimGuiButtonPoller`: fallback click detection for nested custom-panel buttons.
-- `WimGuiDialogTracker`: open/close/reopen state for modal dialogs.
+- Shatter Lib `DialogLifecycleTracker` and `KeyPressLatch`: dialog reopen/close state and hotkey edge detection used by `StockReviewHotkeyScript`.
 - `WimGuiText`: measured and approximate text fitting/wrapping helpers.
 - `WimGuiTooltip` and `StockReviewTooltipPanel`: tooltip sizing, shared panel styling, and max-height cap.
 
@@ -191,6 +208,16 @@ Hidden ship-catalog diagnostics remain controlled by system properties and shoul
 ## Tooltips
 
 Weapon and wing tooltips are custom panels inspired by vanilla cargo/refit tooltips. They use public APIs only.
+
+Normal item records delegate to Shatter Lib `ShatterWeaponTooltip` and `ShatterWingTooltip` with repo-owned context lines. Repo-local custom tooltip code remains important for debug/stress records and for layout pieces that Enhanced Trading owns. Keep this split intact unless a shared-library extraction is explicitly designed and validated.
+
+Current item-tooltip owners:
+
+- `StockReviewItemTooltip`: item tooltip orchestration, cargo/price/owned context, description/custom text, Shatter Lib context, and remaining weapon debug renderer shell.
+- `StockReviewWeaponTooltipRows`: weapon stat rows.
+- `StockReviewWingTooltipRenderer`: fighter LPC panel layout.
+- `StockReviewTooltipIconPanelPlugin`: sprite icon panel drawing.
+- `StockReviewTooltipPanel`: shared row/label/band primitives and max-height cap.
 
 Ship tooltips approximate vanilla's ship-sale tooltip without importing obfuscated UI classes. They use `FleetMemberAPI`, `ShipHullSpecAPI`, public stats, and custom panel drawing. If you adjust ship tooltip layout, test a small frigate, a large capital, and the debug ship.
 
@@ -229,6 +256,7 @@ Changelog entries must be user-facing and must not mention agents, private docs,
 - Remote ship trading is not designed.
 - Ship tooltip layout is custom and public-API-only, so exact vanilla parity is not expected.
 - Runtime rollback fault validation still needs in-game evidence.
+- Recent weapon/wing tooltip cleanup has source/static validation only. Visual acceptance in Starsector is still required.
 - Item/wing/ship tooltip stats must be audited against vanilla when new fields are added.
 - Filter modal/input handling is fragile because it mixes custom panels, input polling, dimmed background rendering, and Starsector focus behavior.
 - The repo tracks `jars/enhanced-trading.jar`; keep it consistent with source when runtime code changes.
@@ -276,6 +304,6 @@ Prepare public export:
 
 ## Recommended Next Steps
 
-Recommended: stabilize and visually verify the current ship tooltip/filter polish before expanding ship trading. The grid baseline is good, but tooltip and modal work remains the most likely user-visible source of regressions.
+Recommended: continue one bounded tooltip cleanup before expanding scope. The best next source-safe chunk is extracting weapon icon-grid rendering or cargo/context line construction from `StockReviewItemTooltip`, then running GUI/Kotlin/jar checks and recording that runtime visual proof is still outstanding.
 
-After that, perform rollback fault validation for item trades and update `.agent/BRIEF.md` with the verified runtime result.
+After the stale installed Shatter Lib dependency is resolved, deploy/parity-check the mod, visually smoke weapon/wing/ship tooltips and the 4x5 ship grid, then perform rollback fault validation for item trades and update `.agent/BRIEF.md` with the verified runtime result.
