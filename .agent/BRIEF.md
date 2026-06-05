@@ -1,6 +1,6 @@
 # Enhanced Trading Brief
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## Current State
 
@@ -19,7 +19,8 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Template-sync baseline before this docs update: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
+- Known-good source commit: `f772d5c7577f3966090e1e18d4745f464fc4bfad`
+- Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
 ## Collaboration Notes
@@ -42,6 +43,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - Starsector classloading can keep stale jar/class state until restart.
 - Luna settings, data/config files, graphics, and metadata matter; jar parity alone is not sufficient for data-heavy changes.
 - Public release to `Shattersphere-Mods` must be curated. Do not mirror this private repo because it contains agent docs and local/private references.
+- Live deploy/runtime validation is currently blocked until the installed Shatter Lib jar has the API classes required by the current Enhanced Trading jar.
 
 ## Next Best Step
 

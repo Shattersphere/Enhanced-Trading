@@ -13,11 +13,21 @@ Goal:
 
 Required steps:
 1. Start with git status --short --branch.
-2. Compare against D:\Sean Code Projects\General Projects\Generic Template Repo.
+2. Compare against D:\Sean Code Projects\General Projects\Generic Template Repo. Inspect that repo's git status first; its current worktree may include the intended sync baseline.
 3. Use the baseline resources listed in docs/PROJECT_FACTS.md only as references: Generic Template Repo for governance, Deploy Template for deploy workflow ideas, Zipper Template for package/export workflow ideas, and targeted General Archives notes for reusable lessons.
-4. Add only useful template docs/scripts, customized with repo evidence.
+4. Add only useful template docs/scripts, customized with repo evidence. Do not replace Starsector-specific facts, checks, deploy rules, compatibility maps, or shared-library gates with generic placeholders.
 5. Keep frequently-read current/workflow docs under the repo budget; route active work to PLANS.md, parked work to .agent/BACKLOG.md, stable facts to docs, and evidence-heavy history to .agent/archive/.
 6. Run python scripts/update-repo-map.py --write after tracked structure changes.
 7. Run python scripts/check-template-state.py --initialized and relevant doc checks.
 8. Do not edit Shatter Lib unless .agent/SHARED_LIBRARIES.md edit gate is satisfied; write a Shatter Lib task packet instead if it is not.
+9. Do not downgrade repo-specific safety improvements just to match the template exactly.
+
+Do not:
+- create public remotes or publish anything;
+- deploy to guessed targets;
+- bulk-copy raw archive history;
+- replace unresolved-fact markers with guesses;
+- edit external projects except for the explicitly named template/reference repos and authorized shared-library workflows.
+
+Final report should include synced surfaces, intentionally skipped generic template parts, checks run, runtime/deploy proof status, and remaining unknowns.
 ```

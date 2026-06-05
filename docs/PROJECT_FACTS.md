@@ -122,9 +122,9 @@ Enhanced Trading consumes Shatter Lib at build/runtime. Keep `build.gradle.kts`,
 
 ## Known-Good Baseline
 
-- Commit: `ce7626ababe76fec55567562352ff3fd2789c14f`
-- Build/check status: build passed with `-ShatterLibDir` checkout override; installed Shatter Lib path correctly fails stale API gate.
-- Runtime/manual validation: not run for this build-tooling batch.
+- Commit: `f772d5c7577f3966090e1e18d4745f464fc4bfad`
+- Build/check status: trade rollback, source semantics, compatibility surfaces, Kotlin migration, full build with `-ShatterLibDir` checkout override, repo jar classes, and `git diff --check` passed.
+- Runtime/manual validation: not run; live runtime proof remains gated by the installed Shatter Lib API state.
 - Date: 2026-06-06
 
 ## Open Fact Questions
