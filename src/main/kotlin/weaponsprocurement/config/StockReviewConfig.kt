@@ -73,6 +73,22 @@ class StockReviewConfig private constructor(
         private const val DEFAULT_MEDIUM_WEAPON_COUNT = 8
         private const val DEFAULT_LARGE_WEAPON_COUNT = 4
         private const val DEFAULT_FIGHTER_WING_COUNT = 4
+        private const val DEFAULT_SORT_MODE = "NEED"
+
+        private const val JSON_DESIRED_DEFAULTS = "desiredDefaults"
+        private const val JSON_DISPLAY = "display"
+        private const val JSON_SOURCES = "sources"
+        private const val JSON_PER_WEAPON = "perWeapon"
+        private const val JSON_PER_ITEM = "perItem"
+        private const val JSON_DEFAULT_SORT = "defaultSort"
+        private const val JSON_INCLUDE_CURRENT_MARKET_STORAGE = "includeCurrentMarketStorage"
+        private const val JSON_INCLUDE_BLACK_MARKET = "includeBlackMarket"
+        private const val JSON_SMALL_WEAPON = "smallWeapon"
+        private const val JSON_MEDIUM_WEAPON = "mediumWeapon"
+        private const val JSON_LARGE_WEAPON = "largeWeapon"
+        private const val JSON_FIGHTER_WING = "fighterWing"
+        private const val JSON_DESIRED = "desired"
+        private const val JSON_IGNORED = "ignored"
 
         @JvmStatic
         fun load(): StockReviewConfig {
@@ -101,31 +117,31 @@ class StockReviewConfig private constructor(
         }
 
         private fun fromJson(json: JSONObject): StockReviewConfig {
-            val desiredDefaults = json.optJSONObject("desiredDefaults")
+            val desiredDefaults = json.optJSONObject(JSON_DESIRED_DEFAULTS)
             val small = WeaponsProcurementConfig.desiredSmallWeaponCount(
-                clampDesired(optInt(desiredDefaults, "smallWeapon", DEFAULT_SMALL_WEAPON_COUNT))
+                clampDesired(optInt(desiredDefaults, JSON_SMALL_WEAPON, DEFAULT_SMALL_WEAPON_COUNT))
             )
             val medium = WeaponsProcurementConfig.desiredMediumWeaponCount(
-                clampDesired(optInt(desiredDefaults, "mediumWeapon", DEFAULT_MEDIUM_WEAPON_COUNT))
+                clampDesired(optInt(desiredDefaults, JSON_MEDIUM_WEAPON, DEFAULT_MEDIUM_WEAPON_COUNT))
             )
             val large = WeaponsProcurementConfig.desiredLargeWeaponCount(
-                clampDesired(optInt(desiredDefaults, "largeWeapon", DEFAULT_LARGE_WEAPON_COUNT))
+                clampDesired(optInt(desiredDefaults, JSON_LARGE_WEAPON, DEFAULT_LARGE_WEAPON_COUNT))
             )
             val fighterWing = WeaponsProcurementConfig.desiredFighterWingCount(
-                clampDesired(optInt(desiredDefaults, "fighterWing", DEFAULT_FIGHTER_WING_COUNT))
+                clampDesired(optInt(desiredDefaults, JSON_FIGHTER_WING, DEFAULT_FIGHTER_WING_COUNT))
             )
 
-            val sources = json.optJSONObject("sources")
-            val includeStorage = optBoolean(sources, "includeCurrentMarketStorage", true)
-            val includeBlackMarket = optBoolean(sources, "includeBlackMarket", true)
+            val sources = json.optJSONObject(JSON_SOURCES)
+            val includeStorage = optBoolean(sources, JSON_INCLUDE_CURRENT_MARKET_STORAGE, true)
+            val includeBlackMarket = optBoolean(sources, JSON_INCLUDE_BLACK_MARKET, true)
 
-            val display = json.optJSONObject("display")
-            val sortMode = StockSortMode.fromConfig(optString(display, "defaultSort", "NEED"))
+            val display = json.optJSONObject(JSON_DISPLAY)
+            val sortMode = StockSortMode.fromConfig(optString(display, JSON_DEFAULT_SORT, DEFAULT_SORT_MODE))
 
             val overrides = HashMap<String, Int>()
             val ignored = HashMap<String, Boolean>()
-            readPerItemOverrides(json.optJSONObject("perWeapon"), overrides, ignored, medium)
-            readPerItemOverrides(json.optJSONObject("perItem"), overrides, ignored, medium)
+            readPerItemOverrides(json.optJSONObject(JSON_PER_WEAPON), overrides, ignored, medium)
+            readPerItemOverrides(json.optJSONObject(JSON_PER_ITEM), overrides, ignored, medium)
 
             return StockReviewConfig(
                 small,
@@ -162,11 +178,11 @@ class StockReviewConfig private constructor(
             val names = JSONObject.getNames(json) ?: return
             for (itemKey in names) {
                 val itemConfig = json.optJSONObject(itemKey) ?: continue
-                if (itemConfig.has("desired")) {
-                    desired[itemKey] = clampDesired(itemConfig.optInt("desired", defaultDesired))
+                if (itemConfig.has(JSON_DESIRED)) {
+                    desired[itemKey] = clampDesired(itemConfig.optInt(JSON_DESIRED, defaultDesired))
                 }
-                if (itemConfig.has("ignored")) {
-                    ignored[itemKey] = itemConfig.optBoolean("ignored", false)
+                if (itemConfig.has(JSON_IGNORED)) {
+                    ignored[itemKey] = itemConfig.optBoolean(JSON_IGNORED, false)
                 }
             }
         }

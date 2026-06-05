@@ -165,6 +165,35 @@ foreach ($needle in @(
 }
 
 $stockReviewConfigSource = Read-Text "src/main/kotlin/weaponsprocurement/config/StockReviewConfig.kt"
+foreach ($needle in @(
+    'private const val JSON_DESIRED_DEFAULTS = "desiredDefaults"',
+    'private const val JSON_DISPLAY = "display"',
+    'private const val JSON_SOURCES = "sources"',
+    'private const val JSON_PER_WEAPON = "perWeapon"',
+    'private const val JSON_PER_ITEM = "perItem"',
+    'private const val JSON_DEFAULT_SORT = "defaultSort"',
+    'private const val JSON_INCLUDE_CURRENT_MARKET_STORAGE = "includeCurrentMarketStorage"',
+    'private const val JSON_INCLUDE_BLACK_MARKET = "includeBlackMarket"',
+    'private const val JSON_SMALL_WEAPON = "smallWeapon"',
+    'private const val JSON_MEDIUM_WEAPON = "mediumWeapon"',
+    'private const val JSON_LARGE_WEAPON = "largeWeapon"',
+    'private const val JSON_FIGHTER_WING = "fighterWing"',
+    'private const val JSON_DESIRED = "desired"',
+    'private const val JSON_IGNORED = "ignored"'
+)) {
+    Assert-Contains "StockReviewConfig.kt stock JSON schema constants" $stockReviewConfigSource $needle
+}
+foreach ($needle in @(
+    'json.optJSONObject(JSON_DESIRED_DEFAULTS)',
+    'json.optJSONObject(JSON_SOURCES)',
+    'json.optJSONObject(JSON_DISPLAY)',
+    'json.optJSONObject(JSON_PER_WEAPON)',
+    'json.optJSONObject(JSON_PER_ITEM)',
+    'itemConfig.has(JSON_DESIRED)',
+    'itemConfig.has(JSON_IGNORED)'
+)) {
+    Assert-Contains "StockReviewConfig.kt stock JSON parser uses schema constants" $stockReviewConfigSource $needle
+}
 Assert-Contains "StockReviewConfig.kt desired override contract" $stockReviewConfigSource 'private fun desiredOverride(itemType: StockItemType, itemId: String?): Int?'
 Assert-Order "StockReviewConfig.kt typed/raw override priority" $stockReviewConfigSource @(
     'val typedOverride = desiredOverrides[itemType.key(itemId)]',

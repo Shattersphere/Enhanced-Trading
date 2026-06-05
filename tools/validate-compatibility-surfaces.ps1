@@ -113,11 +113,18 @@ foreach ($needle in @(
 $stockConfig = Read-Text "src/main/kotlin/weaponsprocurement/config/StockReviewConfig.kt"
 foreach ($needle in @(
     'CONFIG_PATH = CompatibilityIds.ConfigFiles.STOCK_REVIEW',
-    'json.optJSONObject("desiredDefaults")',
-    'json.optJSONObject("perWeapon")',
-    'json.optJSONObject("perItem")',
-    'optBoolean(sources, "includeCurrentMarketStorage", true)',
-    'optBoolean(sources, "includeBlackMarket", true)'
+    'private const val JSON_DESIRED_DEFAULTS = "desiredDefaults"',
+    'private const val JSON_DISPLAY = "display"',
+    'private const val JSON_SOURCES = "sources"',
+    'private const val JSON_PER_WEAPON = "perWeapon"',
+    'private const val JSON_PER_ITEM = "perItem"',
+    'private const val JSON_INCLUDE_CURRENT_MARKET_STORAGE = "includeCurrentMarketStorage"',
+    'private const val JSON_INCLUDE_BLACK_MARKET = "includeBlackMarket"',
+    'json.optJSONObject(JSON_DESIRED_DEFAULTS)',
+    'json.optJSONObject(JSON_PER_WEAPON)',
+    'json.optJSONObject(JSON_PER_ITEM)',
+    'optBoolean(sources, JSON_INCLUDE_CURRENT_MARKET_STORAGE, true)',
+    'optBoolean(sources, JSON_INCLUDE_BLACK_MARKET, true)'
 )) {
     Assert-Contains "StockReviewConfig.kt" $stockConfig $needle
 }
