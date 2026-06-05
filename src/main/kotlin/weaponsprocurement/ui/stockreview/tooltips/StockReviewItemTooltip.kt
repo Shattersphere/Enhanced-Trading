@@ -17,15 +17,10 @@ import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
-import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterItemTooltipContext
-import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterTooltipContextLine
 import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWeaponTooltip
 import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWingTooltip
-import weaponsprocurement.trade.quote.CreditFormat
 import weaponsprocurement.stock.item.StockDebugItemProfile
 import weaponsprocurement.stock.item.StockDebugItemStat
-import weaponsprocurement.stock.item.StockItemStacks
-import weaponsprocurement.stock.item.SubmarketWeaponStock
 import weaponsprocurement.stock.item.WeaponStockRecord
 import java.awt.Color
 import java.util.Locale
@@ -36,6 +31,8 @@ import java.util.Locale
 class StockReviewItemTooltip private constructor(
     private val record: WeaponStockRecord,
 ) : TooltipMakerAPI.TooltipCreator {
+    private val itemContext = StockReviewItemTooltipContext(record)
+
     override fun isTooltipExpandable(tooltipParam: Any?): Boolean = false
 
     override fun getTooltipWidth(tooltipParam: Any?): Float =
@@ -73,7 +70,7 @@ class StockReviewItemTooltip private constructor(
             ?.takeIf { record.isWing() }
             ?.let { debugWingLayout(it) }
             ?: wingLayout(record, record.wingSpec ?: return)
-        StockReviewWingTooltipRenderer.addTooltip(tooltip, layout, record.ownedCount, priceLabel())
+        StockReviewWingTooltipRenderer.addTooltip(tooltip, layout, record.ownedCount, itemContext.priceLabel())
     }
 
     private fun createWeaponTooltip(tooltip: TooltipMakerAPI) {
@@ -137,19 +134,9 @@ class StockReviewItemTooltip private constructor(
     }
 
     private fun addCargoContext(tooltip: TooltipMakerAPI) {
-        val cargoSpace = cargoSpaceLabel()
-        if (hasText(cargoSpace)) {
-            addHighlightedPara(tooltip, "Cargo space: $cargoSpace per unit.", cargoSpace, SECTION_PAD)
+        for (line in itemContext.weaponCargoLines()) {
+            addHighlightedPara(tooltip, line.text, line.highlight, SECTION_PAD)
         }
-
-        val price = priceLabel()
-        if (hasText(price)) {
-            addHighlightedPara(tooltip, "Price: $price per unit.", price, SECTION_PAD)
-        }
-
-        val count = record.ownedCount.toString()
-        val plural = if (record.ownedCount == 1) "weapon" else "weapons"
-        addHighlightedPara(tooltip, "You own a total of $count $plural of this type.", count, SECTION_PAD)
     }
 
     private fun addIconGrid(
@@ -222,63 +209,7 @@ class StockReviewItemTooltip private constructor(
         label.setHighlightColor(highlightColor())
     }
 
-    private fun cargoSpaceLabel(): String? {
-        record.debugProfile?.cargoSpaceLabel?.let { return it }
-        val cargoSpace = unitCargoSpace()
-        return if (validNumber(cargoSpace)) formatOneDecimalTrim(cargoSpace) else null
-    }
-
-    private fun unitCargoSpace(): Float {
-        val stocks: List<SubmarketWeaponStock> = record.submarketStocks
-        for (stock in stocks) {
-            val value = stock.unitCargoSpace
-            if (validNumber(value) && value > 0f) {
-                return value
-            }
-        }
-        val reference = StockItemStacks.referenceUnitCargoSpace(record.itemType, record.itemId)
-        if (validNumber(reference) && reference > 0f) {
-            return reference
-        }
-        return Float.NaN
-    }
-
-    private fun priceLabel(): String? {
-        record.debugProfile?.priceLabel?.let { return it }
-        var price = record.cheapestPurchasableUnitPrice
-        if (price == Int.MAX_VALUE) {
-            price = StockItemStacks.referenceBaseUnitPrice(record.itemType, record.itemId)
-            if (price <= 0) {
-                price = Math.round(maxOf(0f, record.spec?.baseValue ?: 0f))
-            }
-        }
-        return if (price <= 0) null else CreditFormat.credits(price)
-    }
-
     private fun weaponRows(): StockReviewWeaponTooltipRows = StockReviewWeaponTooltipRows(record)
-
-    private fun shatterContext(): ShatterItemTooltipContext {
-        val lines = ArrayList<ShatterTooltipContextLine>()
-        if (!record.isWing()) {
-            cargoSpaceLabel()?.takeIf { hasText(it) }?.let { cargoSpace ->
-                lines.add(ShatterTooltipContextLine("Cargo space: $cargoSpace per unit.", cargoSpace))
-            }
-        }
-        priceLabel()?.takeIf { hasText(it) }?.let { price ->
-            val text = if (record.isWing()) "Sells for: $price per unit." else "Price: $price per unit."
-            lines.add(ShatterTooltipContextLine(text, price))
-        }
-        val count = record.ownedCount.toString()
-        val label = if (record.isWing()) {
-            "fighter LPCs"
-        } else if (record.ownedCount == 1) {
-            "weapon"
-        } else {
-            "weapons"
-        }
-        lines.add(ShatterTooltipContextLine("You own a total of $count $label of this type.", count))
-        return ShatterItemTooltipContext(includeDefaultCargoAndPrice = false, lines = lines)
-    }
 
     companion object {
         private const val VANILLA_TOOLTIP_WIDTH = 400f
@@ -323,21 +254,21 @@ class StockReviewItemTooltip private constructor(
                 return null
             }
             val itemId = record.itemId ?: return null
-            val local = StockReviewItemTooltip(record)
+            val context = StockReviewItemTooltipContext(record)
             if (record.isWing()) {
                 val spec = record.wingSpec ?: return null
                 return ShatterWingTooltip(
                     wingId = itemId,
                     spec = spec,
                     includeReplacementNotes = false,
-                    context = local.shatterContext(),
+                    context = context.shatterContext(),
                 )
             }
             val spec = record.spec ?: return null
             return ShatterWeaponTooltip(
                 weaponId = itemId,
                 spec = spec,
-                context = local.shatterContext(),
+                context = context.shatterContext(),
             )
         }
 
