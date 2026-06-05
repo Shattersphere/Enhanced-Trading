@@ -100,6 +100,21 @@ foreach ($needle in @(
     Assert-Contains "MarketStockService.kt builder merge metadata contract" $marketStock $needle
 }
 
+$submarketWeaponStock = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/SubmarketWeaponStock.kt"
+foreach ($needle in @(
+    'val sourceId: String?',
+    'get() = if (marketId.isNullOrEmpty()) {',
+    'submarketId',
+    '"$marketId|$submarketId"',
+    'fun sourceKey(itemKey: String?): String = (itemKey ?: "") + "|" + (sourceId ?: "")',
+    'fun matchesSource(requestedSourceId: String?): Boolean',
+    'if (requestedSourceId.isNullOrEmpty()) return false',
+    'if (requestedSourceId == sourceId) return true',
+    'return marketId.isNullOrEmpty() && requestedSourceId == submarketId'
+)) {
+    Assert-Contains "SubmarketWeaponStock.kt source identity contract" $submarketWeaponStock $needle
+}
+
 $submarketAccess = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/StockSubmarketAccess.kt"
 foreach ($needle in @(
     'if (isNonTradeSubmarket(id)) return false',
@@ -156,6 +171,15 @@ Assert-Contains "StockPurchaseService.kt" $purchaseService '" from the sector ma
 Assert-Contains "StockPurchaseService.kt" $purchaseService '"buy from sector market"'
 Assert-Contains "StockPurchaseService.kt" $purchaseService 'val sources = StockPurchaseMarketSources.collectLocalSources('
 Assert-Contains "StockPurchaseService.kt" $purchaseService '"buy from local market"'
+foreach ($needle in @(
+    'private fun localSubmarketId(sourceId: String?): String?',
+    'if (sourceId.isNullOrEmpty()) return null',
+    "val separator = sourceId.lastIndexOf('|')",
+    'if (separator < 0 || separator >= sourceId.length - 1) return sourceId',
+    'return sourceId.substring(separator + 1)'
+)) {
+    Assert-Contains "StockPurchaseService.kt local source-id compatibility contract" $purchaseService $needle
+}
 
 $executor = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseExecutor.kt"
 $fixerExecutor = Get-Section $executor 'fun buyFromFixersMarket(' 'fun buyPlan('
