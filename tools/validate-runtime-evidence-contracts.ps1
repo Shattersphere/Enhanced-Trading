@@ -73,6 +73,33 @@ foreach ($needle in @(
     Assert-Contains "collect-runtime-validation-evidence.ps1 contract" $collector $needle
 }
 
+$deployScript = Read-Text "tools/deploy-live-mod.ps1"
+foreach ($needle in @(
+    '$requiredShatterLibRuntimeClasses = @(',
+    '"com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterItemTooltipContext.class"',
+    '"com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterTooltipContextLine.class"',
+    'function Get-ShatterLibRuntimeDependencyReport',
+    'Runtime dependency missing Shatter Lib API classes:',
+    'The runtime dependency state is',
+    'Assert-RuntimeDependenciesCurrent',
+    'if ($RequireCurrent -and !$runtimeDependencyReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase))',
+    'throw "The runtime dependencies are not current: $($runtimeDependencyReport.LiveState)"'
+)) {
+    Assert-Contains "deploy-live-mod.ps1 runtime dependency contract" $deployScript $needle
+}
+Assert-Order "deploy-live-mod.ps1 check-only runtime dependency gate" $deployScript @(
+    '$runtimeDependencyReport = Get-ShatterLibRuntimeDependencyReport',
+    'Write-RuntimeDependencyReport -Report $runtimeDependencyReport',
+    'if ($RequireCurrent -and !$contentReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase))',
+    'if ($RequireCurrent -and !$runtimeDependencyReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase))'
+)
+Assert-Order "collect-runtime-validation-evidence.ps1 deploy parity gate" $collector @(
+    'if ($RequireDeployParity) {',
+    'Invoke-ValidationTool -Label "deploy parity" -ScriptName "deploy-live-mod.ps1" -Arguments @(',
+    '"-CheckOnly",',
+    '"-RequireCurrent"'
+)
+
 $shipAnalyzer = Read-Text "tools/analyze-ship-catalog-diagnostics.ps1"
 foreach ($needle in @(
     "function Get-RequiredIntField",
