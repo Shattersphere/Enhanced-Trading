@@ -17,27 +17,25 @@ import java.util.HashMap
 
 class MarketStockService {
     fun collectCurrentMarketItemStock(market: MarketAPI?, includeBlackMarket: Boolean): MarketStock {
-        val totals = HashMap<String, Int>()
-        val byItemKey = HashMap<String, MutableList<SubmarketWeaponStock>>()
+        val builder = MarketStockBuilder()
         val submarkets = market?.submarketsCopy
-        if (submarkets == null) return MarketStock(totals, byItemKey)
+        if (submarkets == null) return builder.build()
 
         for (submarket in submarkets) {
             if (!isTradeSubmarket(submarket, includeBlackMarket)) continue
             val cargo: CargoAPI = submarket.cargoNullOk ?: continue
             val stacks = cargo.stacksCopy ?: continue
             for (stack: CargoStackAPI in stacks) {
-                addVisibleStack(totals, byItemKey, market, submarket, stack, StockItemType.WEAPON)
-                addVisibleStack(totals, byItemKey, market, submarket, stack, StockItemType.WING)
+                addVisibleStack(builder, market, submarket, stack, StockItemType.WEAPON)
+                addVisibleStack(builder, market, submarket, stack, StockItemType.WING)
             }
         }
 
-        return MarketStock(totals, byItemKey)
+        return builder.build()
     }
 
     private fun addVisibleStack(
-        totals: MutableMap<String, Int>,
-        byItemKey: MutableMap<String, MutableList<SubmarketWeaponStock>>,
+        builder: MarketStockBuilder,
         market: MarketAPI,
         submarket: SubmarketAPI,
         stack: CargoStackAPI,
@@ -47,13 +45,8 @@ class MarketStockService {
         val itemKey = itemType.key(StockItemStacks.itemId(stack, itemType))
         val count = Math.round(stack.size)
         if (count <= 0) return
-        InventoryCountService.add(totals, itemKey, count)
-        var stocks = byItemKey[itemKey]
-        if (stocks == null) {
-            stocks = ArrayList()
-            byItemKey[itemKey] = stocks
-        }
-        stocks.add(
+        builder.add(
+            itemKey,
             SubmarketWeaponStock(
                 market.id,
                 market.name,
@@ -134,9 +127,10 @@ class MarketStockService {
         fun addAll(stock: MarketStock?) {
             if (stock == null) return
             for (id in stock.itemKeys()) {
+                val metadata = stock.getFixerCatalogMetadata(id)
                 val sources = stock.getSubmarketStocks(id)
                 for (i in sources.indices) {
-                    add(id, sources[i])
+                    add(id, sources[i], metadata)
                 }
             }
         }

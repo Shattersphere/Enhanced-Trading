@@ -82,13 +82,22 @@ Assert-NotContains "GlobalWeaponMarketService.kt Fixer Market contract" $fixerSe
 
 $marketStock = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/MarketStockService.kt"
 foreach ($needle in @(
+    'val builder = MarketStockBuilder()',
     'StockSubmarketAccess.isTradeEligible(submarket, includeBlackMarket)',
     'StockSubmarketAccess.isNonTradeSubmarket(submarketId)',
     'Submarkets.SUBMARKET_BLACK == submarketId',
     'StockItemStacks.isPurchasableItemStack(submarket, stack, itemType)',
+    'builder.add(',
+    'return builder.build()',
     'purchasableTotals(byItemKey)'
 )) {
     Assert-Contains "MarketStockService.kt real cargo stock contract" $marketStock $needle
+}
+foreach ($needle in @(
+    'val metadata = stock.getFixerCatalogMetadata(id)',
+    'add(id, sources[i], metadata)'
+)) {
+    Assert-Contains "MarketStockService.kt builder merge metadata contract" $marketStock $needle
 }
 
 $submarketAccess = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/StockSubmarketAccess.kt"
