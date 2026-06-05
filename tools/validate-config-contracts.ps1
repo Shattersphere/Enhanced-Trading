@@ -164,6 +164,24 @@ foreach ($needle in @(
     Assert-Contains "StockItemType item-key contract" $stockItemTypeSource $needle
 }
 
+$stockReviewConfigSource = Read-Text "src/main/kotlin/weaponsprocurement/config/StockReviewConfig.kt"
+Assert-Contains "StockReviewConfig.kt desired override contract" $stockReviewConfigSource 'private fun desiredOverride(itemType: StockItemType, itemId: String?): Int?'
+Assert-Order "StockReviewConfig.kt typed/raw override priority" $stockReviewConfigSource @(
+    'val typedOverride = desiredOverrides[itemType.key(itemId)]',
+    'if (typedOverride != null) return typedOverride',
+    'return desiredOverrides[itemId]'
+)
+Assert-Contains "StockReviewConfig.kt weapon override contract" $stockReviewConfigSource 'val override = desiredOverride(StockItemType.WEAPON, weaponId)'
+Assert-Contains "StockReviewConfig.kt wing override contract" $stockReviewConfigSource 'val override = desiredOverride(StockItemType.WING, wingId)'
+
+$desiredStockServiceSource = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/DesiredStockService.kt"
+Assert-Contains "DesiredStockService.kt wing desired contract" $desiredStockServiceSource 'fun desiredWingCount(wingId: String?): Int'
+Assert-Contains "DesiredStockService.kt wing desired contract" $desiredStockServiceSource 'return config.desiredFighterWingCount(wingId)'
+Assert-NotContains "DesiredStockService.kt wing desired contract" $desiredStockServiceSource 'FighterWingSpecAPI'
+
+$snapshotBuilderSource = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/WeaponStockSnapshotBuilder.kt"
+Assert-Contains "WeaponStockSnapshotBuilder.kt wing desired contract" $snapshotBuilderSource 'desiredStockService.desiredWingCount(itemId)'
+
 $blacklistSource = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponMarketBlacklist.kt"
 foreach ($needle in @(
     'private const val CONFIG_PATH = CompatibilityIds.ConfigFiles.MARKET_BLACKLIST',

@@ -26,8 +26,7 @@ class StockReviewConfig private constructor(
     private val ignoredItems: Map<String, Boolean> = Collections.unmodifiableMap(HashMap(ignoredItems))
 
     fun desiredCount(weaponId: String?, size: WeaponAPI.WeaponSize?): Int {
-        var override = desiredOverrides[StockItemType.WEAPON.key(weaponId)]
-        if (override == null) override = desiredOverrides[weaponId]
+        val override = desiredOverride(StockItemType.WEAPON, weaponId)
         if (override != null) return override
 
         if (WeaponAPI.WeaponSize.SMALL == size) return smallWeaponDesired
@@ -42,9 +41,14 @@ class StockReviewConfig private constructor(
     }
 
     fun desiredFighterWingCount(wingId: String?): Int {
-        var override = desiredOverrides[StockItemType.WING.key(wingId)]
-        if (override == null) override = desiredOverrides[wingId]
+        val override = desiredOverride(StockItemType.WING, wingId)
         return override ?: fighterWingDesired
+    }
+
+    private fun desiredOverride(itemType: StockItemType, itemId: String?): Int? {
+        val typedOverride = desiredOverrides[itemType.key(itemId)]
+        if (typedOverride != null) return typedOverride
+        return desiredOverrides[itemId]
     }
 
     fun isIncludeCurrentMarketStorage(): Boolean = includeCurrentMarketStorage

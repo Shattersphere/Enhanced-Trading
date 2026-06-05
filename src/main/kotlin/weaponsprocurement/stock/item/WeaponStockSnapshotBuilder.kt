@@ -66,7 +66,7 @@ class WeaponStockSnapshotBuilder {
             if (!shouldInclude(getCount(playerCargoCounts, itemKey), marketStock.getSubmarketStocks(itemKey))) continue
 
             val desiredCount = if (StockItemType.WING == itemType) {
-                desiredStockService.desiredWingCount(itemId, wingSpec)
+                desiredStockService.desiredWingCount(itemId)
             } else {
                 desiredStockService.desiredCount(itemId, spec)
             }
