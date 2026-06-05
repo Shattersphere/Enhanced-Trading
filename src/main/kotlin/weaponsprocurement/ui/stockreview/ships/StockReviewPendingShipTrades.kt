@@ -32,10 +32,12 @@ class StockReviewPendingShipTrades {
         return true
     }
 
-    fun reset(recordKey: String?) {
-        if (!recordKey.isNullOrEmpty() && tradesByKey.remove(recordKey) != null) {
-            revision++
+    fun reset(recordKey: String?): Boolean {
+        if (recordKey.isNullOrEmpty() || tradesByKey.remove(recordKey) == null) {
+            return false
         }
+        revision++
+        return true
     }
 
     fun clear() {

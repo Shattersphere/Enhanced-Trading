@@ -153,7 +153,10 @@ foreach ($needle in @(
     "val trade = StockReviewPendingShipTrade.fromRecord(record) ?: return false",
     "if (tradesByKey.remove(trade.recordKey) == null)",
     "tradesByKey[trade.recordKey] = trade",
+    "fun reset(recordKey: String?): Boolean",
+    "return false",
     "tradesByKey.remove(recordKey)",
+    "return true",
     "Collections.unmodifiableList(result)"
 )) {
     Assert-Contains "StockReviewPendingShipTrades.kt pending collection contract" $pendingTrades $needle
@@ -163,7 +166,8 @@ foreach ($needle in @(
     "val record = host.shipSnapshot().getRecord(action.getItemKey())",
     'host.postMessage("That ship is no longer available.")',
     "if (pendingTrades.toggle(record))",
-    "pendingTrades.reset(action.getItemKey())"
+    "if (pendingTrades.reset(action.getItemKey()))",
+    "host.requestContentRebuild()"
 )) {
     Assert-Contains "StockReviewShipTradeController.kt stale selection contract" $tradeController $needle
 }

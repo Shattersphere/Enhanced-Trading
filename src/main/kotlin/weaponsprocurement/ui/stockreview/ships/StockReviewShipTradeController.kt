@@ -25,7 +25,8 @@ class StockReviewShipTradeController(
     }
 
     fun resetShipPlan(action: StockReviewAction) {
-        pendingTrades.reset(action.getItemKey())
-        host.requestContentRebuild()
+        if (pendingTrades.reset(action.getItemKey())) {
+            host.requestContentRebuild()
+        }
     }
 }
