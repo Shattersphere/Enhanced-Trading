@@ -456,7 +456,10 @@ function Write-DeployState {
 }
 
 function Write-DeployQueueReport {
-    param([object]$ContentReport)
+    param(
+        [object]$ContentReport,
+        [object]$RuntimeDependencyReport
+    )
 
     if ($CleanStaleStaging) {
         Write-Host "Deploy status and stale staging cleanup."
@@ -493,10 +496,12 @@ function Write-DeployQueueReport {
     }
 
     $blocker = Get-DeployBlocker
-    if ([string]::IsNullOrWhiteSpace($blocker)) {
-        Write-Host "Current deploy blocker: none"
-    } else {
+    if (![string]::IsNullOrWhiteSpace($blocker)) {
         Write-Host "Current deploy blocker: $blocker"
+    } elseif ($null -ne $RuntimeDependencyReport -and !$RuntimeDependencyReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase)) {
+        Write-Host "Current deploy blocker: runtime dependencies are not current: $($RuntimeDependencyReport.LiveState)"
+    } else {
+        Write-Host "Current deploy blocker: none"
     }
 
     $staging = @(Get-ScopedStagingDirectories)
@@ -606,7 +611,7 @@ if ($CheckOnly -or $Status) {
         Write-Host "Deploy check only; no files were modified."
         Write-DeployContentReport -Report $contentReport
     } else {
-        Write-DeployQueueReport -ContentReport $contentReport
+        Write-DeployQueueReport -ContentReport $contentReport -RuntimeDependencyReport $runtimeDependencyReport
     }
     Write-RuntimeDependencyReport -Report $runtimeDependencyReport
     if ($RequireCurrent -and !$contentReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase)) {

@@ -81,6 +81,8 @@ foreach ($needle in @(
     'function Get-ShatterLibRuntimeDependencyReport',
     'Runtime dependency missing Shatter Lib API classes:',
     'The runtime dependency state is',
+    'Current deploy blocker: runtime dependencies are not current:',
+    'Write-DeployQueueReport -ContentReport $contentReport -RuntimeDependencyReport $runtimeDependencyReport',
     'Assert-RuntimeDependenciesCurrent',
     'if ($RequireCurrent -and !$runtimeDependencyReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase))',
     'throw "The runtime dependencies are not current: $($runtimeDependencyReport.LiveState)"'
