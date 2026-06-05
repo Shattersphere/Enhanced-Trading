@@ -182,8 +182,8 @@ class StockReviewItemTooltip private constructor(
         addHighlightedPara(tooltip, "You own a total of $count $plural of this type.", count, SECTION_PAD)
     }
 
-    private fun primaryRows(spec: WeaponSpecAPI): List<StatRow> {
-        val rows = ArrayList<StatRow>()
+    private fun primaryRows(spec: WeaponSpecAPI): List<StockReviewTooltipStatRow> {
+        val rows = ArrayList<StockReviewTooltipStatRow>()
         addRow(rows, "Primary role", format(spec.primaryRoleStr))
         addRow(rows, "Mount type", format(spec.size) + ", " + format(spec.mountType))
         addMountNotes(rows, spec)
@@ -202,8 +202,8 @@ class StockReviewItemTooltip private constructor(
         return rows
     }
 
-    private fun ancillaryRows(spec: WeaponSpecAPI): List<StatRow> {
-        val rows = ArrayList<StatRow>()
+    private fun ancillaryRows(spec: WeaponSpecAPI): List<StockReviewTooltipStatRow> {
+        val rows = ArrayList<StockReviewTooltipStatRow>()
         val damageType = spec.damageType
         addRow(rows, "Damage type", damageType?.displayName ?: "?")
         addRow(rows, "", damageMultiplierLabel(damageType))
@@ -230,7 +230,7 @@ class StockReviewItemTooltip private constructor(
     private fun addIconGrid(
         tooltip: TooltipMakerAPI,
         spriteName: String?,
-        rows: List<StatRow>,
+        rows: List<StockReviewTooltipStatRow>,
         weaponTile: Boolean,
         motifType: WeaponAPI.WeaponType?,
         pad: Float,
@@ -256,12 +256,12 @@ class StockReviewItemTooltip private constructor(
         tooltip.addSpacer(GRID_BOTTOM_PAD)
     }
 
-    private fun cappedRows(rows: List<StatRow>, maxRows: Int): List<StatRow> {
+    private fun cappedRows(rows: List<StockReviewTooltipStatRow>, maxRows: Int): List<StockReviewTooltipStatRow> {
         if (rows.size <= maxRows) {
             return rows
         }
         val capped = ArrayList(rows.subList(0, maxOf(1, maxRows)))
-        capped[capped.size - 1] = StatRow("", "...")
+        capped[capped.size - 1] = StockReviewTooltipStatRow("", "...")
         return capped
     }
 
@@ -374,24 +374,6 @@ class StockReviewItemTooltip private constructor(
         return if (validNumber(energy) && energy > 0f) Math.round(energy).toString() else "0"
     }
 
-    private data class StatRow(
-        val label: String = "",
-        val value: String = "",
-    )
-
-    private data class WingTooltipLayout(
-        val title: String,
-        val manufacturer: String,
-        val descriptionText: String,
-        val descriptionLines: List<String>,
-        val technicalRows: List<StatRow>,
-        val systemText: String,
-        val systemLines: List<String>,
-        val armamentsText: String,
-        val armamentLines: List<String>,
-        val height: Float,
-    )
-
     companion object {
         private const val VANILLA_TOOLTIP_WIDTH = 400f
         private const val CONTENT_WIDTH = VANILLA_TOOLTIP_WIDTH * 1.25f
@@ -409,7 +391,6 @@ class StockReviewItemTooltip private constructor(
         private const val WING_LOADOUT_VALUE_X = WING_PAD_X + WING_LOADOUT_LABEL_WIDTH
         private const val WING_LOADOUT_VALUE_WIDTH = WING_CONTENT_WIDTH - WING_LOADOUT_LABEL_WIDTH
         private const val WING_LOADOUT_ROW_HEIGHT = 22f
-        private const val WING_DESCRIPTION_MAX_LINES = 9
         private const val WING_LOADOUT_MAX_LINES = 4
         private const val WING_MAX_HEIGHT = 860f
         private const val OUTER_PAD_X = 16f
@@ -436,9 +417,6 @@ class StockReviewItemTooltip private constructor(
         private const val MAX_ICON_GRID_ROWS = 10
         private const val DESCRIPTION_MAX_LINES = 4
         private const val CUSTOM_TEXT_MAX_LINES = 3
-        private const val WING_DESCRIPTION_CHAR_WIDTH = 7.4f
-        private const val WING_LOADOUT_CHAR_WIDTH = 6.9f
-
         @JvmStatic
         @Suppress("UNUSED_PARAMETER")
         fun forRecord(record: WeaponStockRecord?, toggleText: String?): TooltipMakerAPI.TooltipCreator? {
@@ -473,7 +451,7 @@ class StockReviewItemTooltip private constructor(
             )
         }
 
-        private fun addStatRow(panel: CustomPanelAPI, x: Float, y: Float, width: Float, height: Float, row: StatRow?) {
+        private fun addStatRow(panel: CustomPanelAPI, x: Float, y: Float, width: Float, height: Float, row: StockReviewTooltipStatRow?) {
             if (row == null) {
                 return
             }
@@ -536,7 +514,7 @@ class StockReviewItemTooltip private constructor(
 
         private fun damageLabel(spec: WeaponSpecAPI): String = if (spec.hasTag("damage_special")) "Special" else "Damage"
 
-        private fun addMountNotes(rows: MutableList<StatRow>, spec: WeaponSpecAPI) {
+        private fun addMountNotes(rows: MutableList<StockReviewTooltipStatRow>, spec: WeaponSpecAPI) {
             val required = requiredMountSlots(spec)
             if (hasText(required)) {
                 addRow(rows, "", required)
@@ -592,22 +570,22 @@ class StockReviewItemTooltip private constructor(
             return parts.joinToString(", ")
         }
 
-        private fun addRow(rows: MutableList<StatRow>, label: String, value: String?) {
+        private fun addRow(rows: MutableList<StockReviewTooltipStatRow>, label: String, value: String?) {
             if (!hasMeaningful(value)) {
                 return
             }
-            rows.add(StatRow(label, value ?: ""))
+            rows.add(StockReviewTooltipStatRow(label, value ?: ""))
         }
 
-        private fun debugRows(rows: List<StockDebugItemStat>): List<StatRow> =
-            rows.map { StatRow(it.label, it.value) }
+        private fun debugRows(rows: List<StockDebugItemStat>): List<StockReviewTooltipStatRow> =
+            rows.map { StockReviewTooltipStatRow(it.label, it.value) }
 
-        private fun wingLayout(record: WeaponStockRecord, spec: FighterWingSpecAPI): WingTooltipLayout {
+        private fun wingLayout(record: WeaponStockRecord, spec: FighterWingSpecAPI): StockReviewWingTooltipLayout {
             val variant = spec.variant
             val hull = variant?.hullSpec
             val manufacturer = hull?.manufacturer?.takeIf { hasText(it) } ?: "Unknown"
             val description = wingDescription(hull?.descriptionId)
-            val rows = ArrayList<StatRow>()
+            val rows = ArrayList<StockReviewTooltipStatRow>()
             addRow(rows, "Primary role", spec.roleDesc?.takeIf { hasText(it) } ?: format(spec.role))
             addRow(rows, "Ordnance points", record.wingOpCostLabel)
             addRow(rows, "Crew per fighter", integer(hull?.minCrew))
@@ -623,11 +601,11 @@ class StockReviewItemTooltip private constructor(
             addRow(rows, "Shield arc", shieldArc(hull?.shieldSpec?.arc))
             val system = wingSystemLabel(hull?.shipSystemId)
             val armaments = wingArmamentsLabel(spec)
-            return buildWingTooltipLayout(wingTitle(spec), manufacturer, description, rows, system, armaments)
+            return StockReviewWingTooltipLayout(wingTitle(spec), manufacturer, description, rows, system, armaments)
         }
 
-        private fun debugWingLayout(profile: StockDebugItemProfile): WingTooltipLayout {
-            return buildWingTooltipLayout(
+        private fun debugWingLayout(profile: StockDebugItemProfile): StockReviewWingTooltipLayout {
+            return StockReviewWingTooltipLayout(
                 profile.tooltipTitle,
                 profile.manufacturer,
                 profile.description,
@@ -637,43 +615,13 @@ class StockReviewItemTooltip private constructor(
             )
         }
 
-        private fun buildWingTooltipLayout(
-            title: String,
-            manufacturer: String,
-            description: String,
-            technicalRows: List<StatRow>,
-            system: String,
-            armaments: String,
-        ): WingTooltipLayout {
-            val descriptionLines = wrapWingDescription(description)
-            val systemLines = wrapWingLoadout(system)
-            val armamentLines = wrapWingLoadout(armaments)
-            val height = (
-                WING_PAD_TOP +
-                    34f +
-                    32f +
-                    maxOf(1, descriptionLines.size) * WING_LINE_HEIGHT +
-                    10f +
-                    WING_LINE_HEIGHT * 2f +
-                    10f +
-                    SECTION_HEADING_HEIGHT +
-                    10f +
-                    technicalRows.size * WING_GRID_ROW_HEIGHT +
-                    10f +
-                    maxOf(1, systemLines.size) * WING_LOADOUT_ROW_HEIGHT +
-                    maxOf(1, armamentLines.size) * WING_LOADOUT_ROW_HEIGHT +
-                    WING_PAD_BOTTOM
-                ).coerceAtMost(StockReviewTooltipPanel.capHeight(WING_MAX_HEIGHT))
-            return WingTooltipLayout(title, manufacturer, description, descriptionLines, technicalRows, system, systemLines, armaments, armamentLines, height)
-        }
-
         private fun addWingSectionHeading(panel: CustomPanelAPI, text: String, y: Float) {
             val heading = StockReviewTooltipPanel.createSectionBand(WING_CONTENT_WIDTH, SECTION_HEADING_HEIGHT)
             addPanelLabel(heading, text, textColor(), 0f, 0f, WING_CONTENT_WIDTH, SECTION_HEADING_HEIGHT, Alignment.MID)
             panel.addComponent(heading).inTL(WING_PAD_X, y)
         }
 
-        private fun addWingStatRow(panel: CustomPanelAPI, row: StatRow, y: Float) {
+        private fun addWingStatRow(panel: CustomPanelAPI, row: StockReviewTooltipStatRow, y: Float) {
             StockReviewTooltipPanel.addStatRow(
                 panel,
                 row.label,
@@ -746,12 +694,6 @@ class StockReviewItemTooltip private constructor(
         ) {
             StockReviewTooltipPanel.addLines(parent, lines, color, x, y, width, lineHeight)
         }
-
-        private fun wrapWingDescription(text: String): List<String> =
-            WimGuiText.wrap(text, WimGuiText.estimatedChars(WING_CONTENT_WIDTH - 8f, 0f, WING_DESCRIPTION_CHAR_WIDTH), WING_DESCRIPTION_MAX_LINES)
-
-        private fun wrapWingLoadout(text: String): List<String> =
-            WimGuiText.wrap(text, WimGuiText.estimatedChars(WING_LOADOUT_VALUE_WIDTH - 8f, 0f, WING_LOADOUT_CHAR_WIDTH), WING_LOADOUT_MAX_LINES)
 
         private fun measuredPanelLines(
             panel: CustomPanelAPI,
