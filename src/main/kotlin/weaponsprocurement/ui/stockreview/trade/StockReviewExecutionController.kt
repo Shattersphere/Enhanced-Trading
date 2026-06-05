@@ -223,7 +223,8 @@ class StockReviewExecutionController(
         if (record == null || record.submarketStocks.isEmpty()) {
             return 1f
         }
-        return maxOf(1f, record.submarketStocks[0].unitCargoSpace)
+        val unitCargoSpace = record.submarketStocks[0].unitCargoSpace
+        return if (unitCargoSpace <= 0f || unitCargoSpace.isNaN() || unitCargoSpace.isInfinite()) 1f else maxOf(1f, unitCargoSpace)
     }
 
     companion object {

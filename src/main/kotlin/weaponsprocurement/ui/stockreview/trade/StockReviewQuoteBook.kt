@@ -191,7 +191,7 @@ class StockReviewQuoteBook(private val snapshot: WeaponStockSnapshot?) {
         val record = findRecord(itemKey)
         if (record != null) {
             for (stock in record.submarketStocks) {
-                if (stock.unitCargoSpace > 0f) {
+                if (stock.unitCargoSpace > 0f && !stock.unitCargoSpace.isNaN() && !stock.unitCargoSpace.isInfinite()) {
                     result = stock.unitCargoSpace
                     break
                 }

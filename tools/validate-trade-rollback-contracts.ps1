@@ -108,6 +108,8 @@ foreach ($needle in @(
     'fun canMutateCredits(credits: Long): StockPurchaseService.PurchaseResult?',
     'TradeMoney.canExecuteCreditMutation(credits)',
     'fun canCompletePurchase(',
+    'if (totalSpace < 0f || totalSpace.isNaN() || totalSpace.isInfinite())',
+    'StockPurchaseService.PurchaseResult.failure("Order cargo space is invalid.")',
     'validation = canAfford(playerCargo, totalCost)',
     'return validation ?: hasCargoSpace(playerCargo, totalSpace)'
 )) {
@@ -151,6 +153,7 @@ foreach ($needle in @(
 )) {
     Assert-Contains "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook $needle
 }
+Assert-Contains "StockReviewQuoteBook.kt fallback cargo guard" $quoteBook 'if (stock.unitCargoSpace > 0f && !stock.unitCargoSpace.isNaN() && !stock.unitCargoSpace.isInfinite())'
 Assert-Order "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook @(
     'val cost = TradeMoney.lineTotal(stock.unitPrice, quantity)',
     'if (cost < 0L) continue',

@@ -80,6 +80,9 @@ class StockPurchaseChecks private constructor() {
 
         @JvmStatic
         fun hasCargoSpace(playerCargo: CargoAPI, totalSpace: Float): StockPurchaseService.PurchaseResult? {
+            if (totalSpace < 0f || totalSpace.isNaN() || totalSpace.isInfinite()) {
+                return StockPurchaseService.PurchaseResult.failure("Order cargo space is invalid.")
+            }
             return if (playerCargo.spaceLeft + 0.01f < totalSpace) {
                 StockPurchaseService.PurchaseResult.failure(
                     "Need " + Math.round(totalSpace) + " cargo space for this order."

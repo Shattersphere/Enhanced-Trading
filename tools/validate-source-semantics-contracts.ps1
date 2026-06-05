@@ -221,6 +221,13 @@ foreach ($needle in @(
 )) {
     Assert-Contains "StockReviewExecutionController.kt source dispatch contract" $executionController $needle
 }
+foreach ($needle in @(
+    'private fun virtualUnitCargoSpace(itemKey: String?): Float',
+    'val unitCargoSpace = record.submarketStocks[0].unitCargoSpace',
+    'return if (unitCargoSpace <= 0f || unitCargoSpace.isNaN() || unitCargoSpace.isInfinite()) 1f else maxOf(1f, unitCargoSpace)'
+)) {
+    Assert-Contains "StockReviewExecutionController.kt virtual cargo-space guard" $executionController $needle
+}
 $stockSourcesSection = Get-Section $executionController 'private fun stockSources(' 'private fun virtualUnitPrice('
 foreach ($needle in @(
     'val snapshot = host.snapshot()',
