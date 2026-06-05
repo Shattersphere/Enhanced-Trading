@@ -21,7 +21,7 @@ Do not change without explicit approval and matching validation:
 - Published system-property keys: `wp.config.*` values in `CompatibilityIds.SystemProperties`, covering update interval, source toggles, multipliers, desired counts, hotkey, and debug UI.
 - JSON paths/schema: `data/config/enhanced_trading_stock.json` fields `display`, `sources`, `desiredDefaults`, `perItem`, legacy `perWeapon`; blacklist keys `BANNED_FROM_SECTOR_MARKET`, `BANNED_FROM_FIXERS_MARKET`.
 - Save/custom data: `weaponsProcurement.fixerObservedCatalog.v1` in `FixerMarketObservedCatalog`, encoded as simple string maps.
-- Diagnostics: `wp.debug.failTradeStep`, `wp.debug.shipCatalog`, `wp.debug.shipCatalogView`, `WP_STOCK_REVIEW_ROLLBACK`, `WP_SHIP_CATALOG_DIAG`.
+- Diagnostics: `wp.debug.failTradeStep`, `wp.debug.shipCatalog`, `wp.debug.shipCatalogView`, debug item IDs, `WP_STOCK_REVIEW_ROLLBACK`, `WP_SHIP_CATALOG_DIAG`.
 - Source semantics: Starsector `SUBMARKET_OPEN`, `GENERIC_MILITARY`, `SUBMARKET_BLACK`, `SUBMARKET_STORAGE`, `LOCAL_RESOURCES`, plus virtual `wp_fixers_market`.
 - Reflection/classloader-sensitive names: rule command class path and jar/live class validator lists.
 
@@ -37,7 +37,7 @@ Campaign lifecycle: `WeaponsProcurementModPlugin` registers transient scripts on
 
 Stock/source/trade: `MarketStockService`, `GlobalWeaponMarketService`, `StockReviewQuoteBook`, `StockPurchaseService`, and `StockPurchaseExecutor` keep Local, Sector Market, and Fixer's Market semantics distinct. Transaction callbacks are post-commit side effects.
 
-GUI: `WimGui*` owns Starsector custom-panel quirks, button polling, scroll, modal input, text fitting, and tooltip caps. `StockReviewPanelPlugin` stays orchestration-only; rows/renderers/controllers own presentation. Preserve event-gated polling and sibling-safe anchoring.
+GUI: `WimGui*` owns custom-panel quirks, button polling, scroll, modal input, text fitting, and tooltip caps. `StockReviewPanelPlugin` stays orchestration-only; rows/renderers/controllers own presentation. Preserve event-gated polling and sibling-safe anchoring.
 
 Ships/fighters: ship trading remains local-only exact-member trading in `ui.stockreview.ships`. Fighter LPCs are item `WING` records with `F:` keys. Remote ship trading, refit, and combat HUD work require design gates.
 
@@ -80,7 +80,7 @@ Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, Kotlin/GUI/j
 
 Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist matching. Config/Fixer/rollback/source/ship/evidence validators cover Luna/source keys, JSON schema, item keys, blacklist matching, `TradeMoney`, Fixer save gates, rollback hooks/schema, Local/Sector/Fixer separation, and local exact-member ship gates. Add runtime save/rollback/trade proof before migration or trade semantics changes. No unit-test suite is declared.
 
-Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live class validation.
+Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live classes.
 
 Never conflate states: source changed, built, static-validated, deployed, parity-current, runtime-verified, benchmarked. UI, Luna behavior, campaign mutation, callbacks, and rollback cannot be proven outside Starsector.
 

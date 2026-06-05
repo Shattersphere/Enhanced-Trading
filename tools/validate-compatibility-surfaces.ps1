@@ -98,6 +98,8 @@ foreach ($needle in @(
     'const val TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"',
     'const val SHIP_CATALOG: String = "wp.debug.shipCatalog"',
     'const val SHIP_CATALOG_VIEW: String = "wp.debug.shipCatalogView"',
+    'const val DEBUG_WEAPON_ID: String = "wp_debug_worst_case_weapon"',
+    'const val DEBUG_WING_ID: String = "wp_debug_worst_case_wing"',
     'const val STOCK_REVIEW: String = "data/config/enhanced_trading_stock.json"',
     'const val MARKET_BLACKLIST: String = "data/config/enhanced_trading_market_blacklist.json"',
     'const val WEAPON_PREFIX: String = "W:"',
@@ -121,6 +123,15 @@ foreach ($needle in @(
     'KEY_DEBUG_SHIP_CATALOG_VIEW: String = CompatibilityIds.Diagnostics.SHIP_CATALOG_VIEW'
 )) {
     Assert-Contains "WeaponsProcurementConfig.kt" $settingsConfig $needle
+}
+
+$debugItems = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rows/StockReviewDebugItemRecords.kt"
+foreach ($needle in @(
+    'EMPTY_ICON = CompatibilityIds.Diagnostics.DEBUG_EMPTY_ITEM_ICON',
+    'DEBUG_WEAPON_ID = CompatibilityIds.Diagnostics.DEBUG_WEAPON_ID',
+    'DEBUG_WING_ID = CompatibilityIds.Diagnostics.DEBUG_WING_ID'
+)) {
+    Assert-Contains "StockReviewDebugItemRecords.kt diagnostic id bridge" $debugItems $needle
 }
 
 foreach ($needle in @(
@@ -188,6 +199,7 @@ $sanity = Read-Text ".github/workflows/sanity.yml"
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-compatibility-surfaces.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-validation-assertions.ps1'
+Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-config-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-fixer-persistence-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-trade-rollback-contracts.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-source-semantics-contracts.ps1'
