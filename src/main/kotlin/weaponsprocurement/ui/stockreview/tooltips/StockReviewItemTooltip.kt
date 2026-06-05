@@ -3,7 +3,6 @@ package weaponsprocurement.ui.stockreview.tooltips
 import weaponsprocurement.ui.WimGuiText
 import weaponsprocurement.ui.WimGuiPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
-import weaponsprocurement.ui.stockreview.rendering.StockReviewIconLayout
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.rendering.StockReviewWeaponIconPlugin
 import com.fs.starfarer.api.Global
@@ -17,10 +16,8 @@ import com.fs.starfarer.api.loading.ProjectileWeaponSpecAPI
 import com.fs.starfarer.api.loading.WeaponSpecAPI
 import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
-import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
-import com.shattersphere.shatterlib.starsector.ui.StarsectorSpritePainter
 import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterItemTooltipContext
 import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterTooltipContextLine
 import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWeaponTooltip
@@ -247,7 +244,7 @@ class StockReviewItemTooltip private constructor(
         val icon = panel.createCustomPanel(
             ICON_SIZE,
             ICON_SIZE,
-            if (weaponTile) StockReviewWeaponIconPlugin(spriteName, motifType) else IconPanelPlugin(spriteName),
+            if (weaponTile) StockReviewWeaponIconPlugin(spriteName, motifType) else StockReviewTooltipIconPanelPlugin(spriteName, ICON_INSET),
         )
         panel.addComponent(icon).inTL(ICON_LEFT, minOf(ICON_TOP, maxOf(0f, height - ICON_SIZE)))
 
@@ -380,9 +377,7 @@ class StockReviewItemTooltip private constructor(
     private data class StatRow(
         val label: String = "",
         val value: String = "",
-    ) {
-        fun isSpacer(): Boolean = label.isEmpty() && value.isEmpty()
-    }
+    )
 
     private data class WingTooltipLayout(
         val title: String,
@@ -396,38 +391,6 @@ class StockReviewItemTooltip private constructor(
         val armamentLines: List<String>,
         val height: Float,
     )
-
-    private class IconPanelPlugin(private val spriteName: String?) : BaseCustomUIPanelPlugin() {
-        private var position: PositionAPI? = null
-
-        override fun positionChanged(position: PositionAPI?) {
-            this.position = position
-        }
-
-        override fun render(alphaMult: Float) {
-            val currentPosition = position ?: return
-            val x = currentPosition.x
-            val y = currentPosition.y
-            val width = currentPosition.width
-            val height = currentPosition.height
-            renderSprite(x, y, width, height, ICON_INSET, alphaMult)
-        }
-
-        private fun renderSprite(x: Float, y: Float, width: Float, height: Float, inset: Float, alphaMult: Float) {
-            val maxWidth = maxOf(1f, width - 2f * inset)
-            val maxHeight = maxOf(1f, height - 2f * inset)
-            StarsectorSpritePainter.renderFittedSprite(
-                spriteName,
-                Color.WHITE,
-                StockReviewIconLayout.visualCenterX(x, width),
-                y + height * 0.5f,
-                maxWidth,
-                maxHeight,
-                alphaMult,
-            )
-        }
-
-    }
 
     companion object {
         private const val VANILLA_TOOLTIP_WIDTH = 400f
@@ -473,7 +436,6 @@ class StockReviewItemTooltip private constructor(
         private const val MAX_ICON_GRID_ROWS = 10
         private const val DESCRIPTION_MAX_LINES = 4
         private const val CUSTOM_TEXT_MAX_LINES = 3
-        private const val ESTIMATED_DESCRIPTION_CHAR_WIDTH = 8f
         private const val WING_DESCRIPTION_CHAR_WIDTH = 7.4f
         private const val WING_LOADOUT_CHAR_WIDTH = 6.9f
 
@@ -882,13 +844,6 @@ class StockReviewItemTooltip private constructor(
             return Math.round(value).toString()
         }
 
-        @Suppress("unused")
-        private fun addSpacer(rows: MutableList<StatRow>) {
-            if (rows.isNotEmpty() && !rows[rows.size - 1].isSpacer()) {
-                rows.add(StatRow("", ""))
-            }
-        }
-
         private fun splitHighlights(highlight: String?): Array<String> {
             val source = highlight?.takeIf { hasText(it) } ?: return emptyArray()
             val result = ArrayList<String>()
@@ -908,54 +863,6 @@ class StockReviewItemTooltip private constructor(
         private fun mutedColor(): Color = StockReviewTooltipPanel.MUTED
 
         private fun highlightColor(): Color = Misc.getHighlightColor()
-
-        private fun truncateDescription(text: String?): String? {
-            if (!hasText(text)) {
-                return text
-            }
-            return truncateForLines(text, DESCRIPTION_MAX_LINES, CONTENT_WIDTH)
-        }
-
-        private fun truncateForLines(text: String?, maxLines: Int, width: Float): String {
-            val source = text?.takeIf { hasText(it) } ?: return text ?: ""
-            val normalized = source.trim().replace(Regex("\\s+"), " ")
-            if (maxLines <= 0) {
-                return normalized
-            }
-            var charsPerLine = maxOf(32, Math.floor((CONTENT_WIDTH / ESTIMATED_DESCRIPTION_CHAR_WIDTH).toDouble()).toInt())
-            if (validNumber(width) && width > 0f) {
-                charsPerLine = maxOf(32, Math.floor((width / ESTIMATED_DESCRIPTION_CHAR_WIDTH).toDouble()).toInt())
-            }
-            val words = normalized.split(" ")
-            val result = StringBuilder(normalized.length)
-            var line = 1
-            var lineChars = 0
-            var truncated = false
-            for (word in words) {
-                if (word.isEmpty()) {
-                    continue
-                }
-                var addedChars = if (lineChars <= 0) word.length else word.length + 1
-                if (lineChars > 0 && lineChars + addedChars > charsPerLine) {
-                    line++
-                    lineChars = 0
-                    addedChars = word.length
-                }
-                if (line > maxLines) {
-                    truncated = true
-                    break
-                }
-                if (result.isNotEmpty()) {
-                    result.append(' ')
-                }
-                result.append(word)
-                lineChars += addedChars
-            }
-            if (!truncated && result.length == normalized.length) {
-                return normalized
-            }
-            return trimForEllipsis(result.toString()) + "..."
-        }
 
         private fun visibleHighlights(text: String?, highlights: Array<String>?): Array<String> {
             if (!hasText(text) || highlights == null || highlights.isEmpty()) {
@@ -1015,17 +922,6 @@ class StockReviewItemTooltip private constructor(
                 }
             }
             return "?"
-        }
-
-        private fun trimForEllipsis(value: String?): String {
-            if (value == null) {
-                return ""
-            }
-            var trimmed = value.trim()
-            while (trimmed.endsWith(",") || trimmed.endsWith(";") || trimmed.endsWith(":") || trimmed.endsWith(".")) {
-                trimmed = trimmed.substring(0, trimmed.length - 1).trim()
-            }
-            return trimmed
         }
 
         private fun tooltipFormat(value: String?): String = value?.replace("%", "%%") ?: ""
