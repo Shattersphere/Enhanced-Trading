@@ -77,7 +77,7 @@ Low-value work to avoid: package churn, cosmetic renames, broad helper extractio
 
 Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, `validate-kotlin-migration.ps1`, `validate-gui-button-style.ps1`, `validate-jar-classes.ps1`, `validate-compatibility-surfaces.ps1`, `validate-config-contracts.ps1`, `validate-fixer-persistence-contracts.ps1`, `validate-doc-links.ps1`, `export-public.ps1`, `git diff --check`, deploy parity.
 
-Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist display-name matching. `validate-config-contracts.ps1` now statically covers Luna/source keys, JSON schema, typed and legacy item keys, blacklist key/raw/display-name matching, sort aliases, and core `TradeMoney` guards. `validate-fixer-persistence-contracts.ps1` guards current Fixer observed-catalog save contracts; add runtime save proof before any migration. No dedicated unit-test suite is currently declared.
+Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist display-name matching. `validate-config-contracts.ps1` covers Luna/source keys, JSON schema, item keys, blacklist matching, sort aliases, and `TradeMoney` guards. `validate-fixer-persistence-contracts.ps1` guards current Fixer observed-catalog save key, string encoding, lifecycle/policy gates, and observed-reference fallback; add runtime save proof before any migration. No dedicated unit-test suite is currently declared.
 
 Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live jar class validation.
 
