@@ -118,12 +118,23 @@ class FixerMarketObservedCatalog {
         private fun rawCatalog(sector: SectorAPI?): MutableMap<String, String>? {
             val persistentData = sector?.persistentData ?: return null
             val existing = persistentData[PERSISTENT_KEY]
+            if (existing is MutableMap<*, *> && containsOnlyStringEntries(existing)) {
+                @Suppress("UNCHECKED_CAST")
+                return existing as MutableMap<String, String>
+            }
             if (existing is Map<*, *>) {
                 return sanitizedCatalog(sector, existing)
             }
             val catalog = HashMap<String, String>()
             persistentData[PERSISTENT_KEY] = catalog
             return catalog
+        }
+
+        private fun containsOnlyStringEntries(existing: Map<*, *>): Boolean {
+            for ((key, value) in existing) {
+                if (key !is String || value !is String) return false
+            }
+            return true
         }
 
         private fun sanitizedCatalog(sector: SectorAPI, existing: Map<*, *>): MutableMap<String, String> {

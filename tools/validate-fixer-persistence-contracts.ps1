@@ -34,6 +34,8 @@ $catalog = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerMarket
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'PERSISTENT_KEY = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_KEY'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'VALUE_SEPARATOR = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_VALUE_SEPARATOR'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'existing is Map<*, *>'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'existing is MutableMap<*, *> && containsOnlyStringEntries(existing)'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'return existing as MutableMap<String, String>'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'sanitizedCatalog(sector, existing)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'val catalog = HashMap<String, String>()'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'persistentData[PERSISTENT_KEY] = catalog'
