@@ -163,8 +163,8 @@ class FixerMarketObservedCatalog {
             if (value == null) return null
             val parts = value.split(VALUE_SEPARATOR, limit = 2)
             return try {
-                val baseUnitPrice = if (parts.isNotEmpty()) parts[0].toInt() else 0
-                val unitCargoSpace = if (parts.size > 1) parts[1].toFloat() else 1f
+                val baseUnitPrice = if (parts.isNotEmpty()) parts[0].trim().toInt() else 0
+                val unitCargoSpace = if (parts.size > 1) parts[1].trim().toFloat() else 1f
                 if (!isFinite(unitCargoSpace)) return null
                 ObservedItem.create(Math.max(0, baseUnitPrice), sanitizeUnitCargoSpace(unitCargoSpace))
             } catch (_: RuntimeException) {
