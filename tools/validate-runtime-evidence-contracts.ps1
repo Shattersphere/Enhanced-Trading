@@ -155,6 +155,22 @@ try {
         )
 
     @(
+        "WP_STOCK_REVIEW_ROLLBACK status=PASS operation=buy item=W:test quantity=not_int failedStep=after-source-removal restoredCargos=two failedCargos=0 creditsRestored=maybe countsRestored=true creditsBefore=100 creditsAtFailure=not_number creditsAfterRollback=100 touched=player"
+    ) | Set-Content -LiteralPath $rollbackLog -Encoding UTF8
+
+    Invoke-CollectorCommand `
+        -Label "required rollback evidence rejects malformed typed fields" `
+        -Command "`$env:STARSECTOR_DIRECTORY = ''; & $collectorLiteral -LogPath $rollbackLiteral -RequireRollbackPass -ExpectFailureStep @('after-source-removal')" `
+        -ExpectedExitCode 1 `
+        -ExpectedOutput @(
+            "Rollback diagnostic field 'quantity' is not an integer",
+            "Rollback diagnostic field 'restoredCargos' is not an integer",
+            "Rollback diagnostic field 'creditsRestored' is not a boolean",
+            "Rollback diagnostic field 'creditsAtFailure' is not a number",
+            "Runtime validation evidence collection failed."
+        )
+
+    @(
         "WP_SHIP_CATALOG_DIAG PASS summary observedHullTypes=0 theoreticalHullTypes=2 common=2 uncommon=0 rare=0 veryRare=0",
         "WP_SHIP_CATALOG_DIAG theoretical hull=hull_alpha",
         "WP_SHIP_CATALOG_DIAG theoretical hull=hull_beta"

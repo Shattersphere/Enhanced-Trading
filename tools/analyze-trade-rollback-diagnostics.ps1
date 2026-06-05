@@ -6,6 +6,31 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Test-IntegerText {
+    param([string]$Value)
+
+    $parsed = 0
+    return [int]::TryParse($Value, [ref]$parsed)
+}
+
+function Test-FloatText {
+    param([string]$Value)
+
+    $parsed = 0.0
+    return [double]::TryParse(
+        $Value,
+        [System.Globalization.NumberStyles]::Float,
+        [System.Globalization.CultureInfo]::InvariantCulture,
+        [ref]$parsed
+    )
+}
+
+function Test-BooleanText {
+    param([string]$Value)
+
+    return @("true", "false") -contains $Value.ToLowerInvariant()
+}
+
 function Write-Gate {
     param(
         [string]$Status,
@@ -96,6 +121,30 @@ foreach ($record in $records) {
         @("PASS", "FAIL") -notcontains $record.status
     ) {
         $failures.Add("Rollback diagnostic record has unsupported status '$($record.status)'.")
+    }
+    foreach ($field in @("quantity", "restoredCargos", "failedCargos")) {
+        if ($record.PSObject.Properties.Name.Contains($field) -and
+            -not [string]::IsNullOrWhiteSpace([string]$record.$field) -and
+            -not (Test-IntegerText -Value ([string]$record.$field))
+        ) {
+            $failures.Add("Rollback diagnostic field '$field' is not an integer: '$($record.$field)'.")
+        }
+    }
+    foreach ($field in @("creditsRestored", "countsRestored")) {
+        if ($record.PSObject.Properties.Name.Contains($field) -and
+            -not [string]::IsNullOrWhiteSpace([string]$record.$field) -and
+            -not (Test-BooleanText -Value ([string]$record.$field))
+        ) {
+            $failures.Add("Rollback diagnostic field '$field' is not a boolean: '$($record.$field)'.")
+        }
+    }
+    foreach ($field in @("creditsBefore", "creditsAtFailure", "creditsAfterRollback")) {
+        if ($record.PSObject.Properties.Name.Contains($field) -and
+            -not [string]::IsNullOrWhiteSpace([string]$record.$field) -and
+            -not (Test-FloatText -Value ([string]$record.$field))
+        ) {
+            $failures.Add("Rollback diagnostic field '$field' is not a number: '$($record.$field)'.")
+        }
     }
 }
 $passCount = @($records | Where-Object { $_.status -eq "PASS" }).Count
