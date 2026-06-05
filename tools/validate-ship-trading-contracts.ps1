@@ -11,6 +11,7 @@ $executionController = Read-Text "$shipDir/StockReviewShipExecutionController.kt
 $pendingTrade = Read-Text "$shipDir/StockReviewPendingShipTrade.kt"
 $pendingTrades = Read-Text "$shipDir/StockReviewPendingShipTrades.kt"
 $tradeController = Read-Text "$shipDir/StockReviewShipTradeController.kt"
+$sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
 
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Builds the local-only ship trade snapshot"
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Remote ship trading needs separate source semantics before being added."
@@ -171,6 +172,24 @@ foreach ($needle in @(
 )) {
     Assert-Contains "StockReviewShipTradeController.kt stale selection contract" $tradeController $needle
 }
+
+$shipBlackMarketToggle = Get-Section $sourceTransitionController "fun toggleBlackMarket()" "if (!state.getSourceMode().supportsBlackMarketToggle())"
+foreach ($needle in @(
+    "if (state.isShipTrading()) {",
+    "state.toggleBlackMarket()",
+    "pendingShipTrades.clear()",
+    "host.rebuildSnapshot()",
+    "host.requestContentRebuild()",
+    "return"
+)) {
+    Assert-Contains "StockReviewSourceTransitionController.kt ship source-filter contract" $shipBlackMarketToggle $needle
+}
+Assert-Order "StockReviewSourceTransitionController.kt ship source-filter contract" $shipBlackMarketToggle @(
+    "state.toggleBlackMarket()",
+    "pendingShipTrades.clear()",
+    "host.rebuildSnapshot()",
+    "host.requestContentRebuild()"
+)
 
 if ($failures.Count -gt 0) {
     throw "Ship trading contract validation failed with $($failures.Count) failure(s)."

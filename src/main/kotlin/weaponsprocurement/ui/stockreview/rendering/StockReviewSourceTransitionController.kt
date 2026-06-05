@@ -84,6 +84,7 @@ class StockReviewSourceTransitionController(
     fun toggleBlackMarket() {
         if (state.isShipTrading()) {
             state.toggleBlackMarket()
+            pendingShipTrades.clear()
             clearSourceWarningAndReviewMode()
             state.setListScrollOffset(0)
             host.rebuildSnapshot()
