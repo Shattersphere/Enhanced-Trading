@@ -57,7 +57,7 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 - No dedicated unit-test suite is declared in the current Gradle build.
 - `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.
 - `tools/validate-validation-assertions.ps1` guards shared assertion helper behavior; it does not validate any Starsector runtime contract by itself.
-- `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency, item-key parsing, blacklist matching, and trade-money guards; it does not prove LunaLib runtime UI behavior.
+- `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency, item-key parsing, blacklist matching, finite numeric settings, and trade-money guards; it does not prove LunaLib runtime UI behavior.
 - `tools/validate-fixer-persistence-contracts.ps1` is static contract coverage for the current Fixer observed-catalog save key, string-map encoding, sanitization, lifecycle gating, policy denylist, and blacklist/safety gates; it does not prove save migration in a live campaign.
 - `tools/validate-trade-rollback-contracts.ps1` is static contract coverage for rollback journal order, debug failure steps, diagnostic fields, quote-source guards, credit/cargo guards, and post-commit transaction-report isolation; it does not prove rollback succeeds in a live campaign.
 - `tools/validate-source-semantics-contracts.ps1` is static contract coverage for Local/Sector/Fixer source separation, virtual Fixer stock, real-cargo source rehydration, and source-mode dispatch; it does not prove live market mutation.

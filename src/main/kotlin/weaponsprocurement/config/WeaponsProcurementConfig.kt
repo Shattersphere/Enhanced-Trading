@@ -62,6 +62,7 @@ object WeaponsProcurementConfig {
     private const val MAX_CONFIG_LOGS = 10
     private var configLogs = 0
     private var configErrorLogged = false
+    private var invalidNumberLogged = false
 
     @JvmStatic
     fun refreshAndPublishUpdateIntervalSeconds(): Float = refreshAndPublishSettings()
@@ -187,11 +188,9 @@ object WeaponsProcurementConfig {
 
     private fun readMultiplier(propertyKey: String, defaultValue: Float): Float {
         return try {
-            clamp(
-                System.getProperty(propertyKey, defaultValue.toString()).toFloat(),
-                MIN_REMOTE_MARKET_PRICE_MULTIPLIER,
-                MAX_REMOTE_MARKET_PRICE_MULTIPLIER,
-            )
+            val value = System.getProperty(propertyKey, defaultValue.toString()).toFloat()
+            if (!isFinite(value)) return defaultValue
+            clamp(value, MIN_REMOTE_MARKET_PRICE_MULTIPLIER, MAX_REMOTE_MARKET_PRICE_MULTIPLIER)
         } catch (_: RuntimeException) {
             defaultValue
         }
@@ -256,7 +255,12 @@ object WeaponsProcurementConfig {
 
     private fun readDoubleSetting(settingId: String): Double? {
         return try {
-            LunaSettings.getDouble(MOD_ID, settingId)
+            val value = LunaSettings.getDouble(MOD_ID, settingId) ?: return null
+            if (!isFinite(value)) {
+                logInvalidNumber(settingId, value.toString())
+                return null
+            }
+            value
         } catch (t: RuntimeException) {
             logConfigReadError(settingId, t)
             null
@@ -288,6 +292,13 @@ object WeaponsProcurementConfig {
         }
     }
 
+    private fun logInvalidNumber(settingId: String, value: String) {
+        if (!invalidNumberLogged) {
+            invalidNumberLogged = true
+            LOG.warn("WP_CONFIG ignored non-finite numeric setting settingId=$settingId value=$value")
+        }
+    }
+
     private fun readPublishedDesiredWeaponCount(propertyKey: String, fallback: Int): Int {
         return clamp(readPublishedInt(propertyKey, fallback), MIN_DESIRED_WEAPON_COUNT, MAX_DESIRED_WEAPON_COUNT)
     }
@@ -303,4 +314,8 @@ object WeaponsProcurementConfig {
     private fun clamp(value: Float, min: Float, max: Float): Float = maxOf(min, minOf(max, value))
 
     private fun clamp(value: Int, min: Int, max: Int): Int = maxOf(min, minOf(max, value))
+
+    private fun isFinite(value: Double): Boolean = !value.isNaN() && !value.isInfinite()
+
+    private fun isFinite(value: Float): Boolean = !value.isNaN() && !value.isInfinite()
 }

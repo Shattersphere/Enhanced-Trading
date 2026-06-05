@@ -135,6 +135,17 @@ foreach ($contract in $systemPropertyContracts) {
     Assert-Contains "WeaponsProcurementConfig system-property key" $settingsSource "$($contract.LocalKey) = CompatibilityIds.SystemProperties.$($contract.Constant)"
     Assert-Contains "WeaponsProcurementConfig system-property publisher" $settingsSource "System.setProperty($($contract.LocalKey),"
 }
+foreach ($needle in @(
+    "private var invalidNumberLogged = false",
+    "if (!isFinite(value)) return defaultValue",
+    "if (!isFinite(value)) {",
+    "logInvalidNumber(settingId, value.toString())",
+    'LOG.warn("WP_CONFIG ignored non-finite numeric setting settingId=$settingId value=$value")',
+    "private fun isFinite(value: Double): Boolean = !value.isNaN() && !value.isInfinite()",
+    "private fun isFinite(value: Float): Boolean = !value.isNaN() && !value.isInfinite()"
+)) {
+    Assert-Contains "WeaponsProcurementConfig finite numeric setting guard" $settingsSource $needle
+}
 
 $lunaSettingIds = @($lunaIds | Where-Object { $_ -ne "wp_header" } | Sort-Object -Unique)
 foreach ($id in $sourceSettingIds) {
