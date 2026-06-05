@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import org.apache.log4j.Logger
+import weaponsprocurement.stock.market.StockSubmarketAccess
 
 /**
  * Confirms queued exact-member ship trades. The FleetMember id must still exist in the
@@ -20,6 +21,7 @@ class StockReviewShipExecutionController(
     interface Host {
         fun market(): MarketAPI?
         fun playerFleet(): CampaignFleetAPI?
+        fun includeBlackMarket(): Boolean
         fun rebuildSnapshot()
         fun requestContentRebuild()
         fun refreshVanillaCargoScreen()
@@ -37,6 +39,7 @@ class StockReviewShipExecutionController(
         }
         val market = host.market()
         val playerFleet = host.playerFleet()
+        val includeBlackMarket = host.includeBlackMarket()
         if (market == null || playerFleet == null) {
             host.postMessage("Ship trades require an active market and player fleet.")
             host.requestContentRebuild()
@@ -46,9 +49,9 @@ class StockReviewShipExecutionController(
         val executed = ArrayList<StockReviewPendingShipTrade>()
         for (trade in trades) {
             val ok = if (trade.isBuy()) {
-                executeBuy(market, playerFleet, trade, failures)
+                executeBuy(market, playerFleet, includeBlackMarket, trade, failures)
             } else {
-                executeSell(market, playerFleet, trade, failures)
+                executeSell(market, playerFleet, includeBlackMarket, trade, failures)
             }
             if (ok) {
                 executed.add(trade)
@@ -72,10 +75,11 @@ class StockReviewShipExecutionController(
     private fun executeBuy(
         market: MarketAPI,
         playerFleet: CampaignFleetAPI,
+        includeBlackMarket: Boolean,
         trade: StockReviewPendingShipTrade,
         failures: MutableList<String>,
     ): Boolean {
-        val source = findSubmarket(market, trade.submarketId)
+        val source = findTradeSubmarket(market, trade.submarketId, includeBlackMarket)
         val member = findMember(source?.cargoNullOk?.mothballedShips?.membersListCopy, trade.memberId)
         if (source == null || member == null) {
             failures.add("${trade.memberName} is no longer for sale.")
@@ -96,10 +100,11 @@ class StockReviewShipExecutionController(
     private fun executeSell(
         market: MarketAPI,
         playerFleet: CampaignFleetAPI,
+        includeBlackMarket: Boolean,
         trade: StockReviewPendingShipTrade,
         failures: MutableList<String>,
     ): Boolean {
-        val target = findSubmarket(market, trade.submarketId)
+        val target = findTradeSubmarket(market, trade.submarketId, includeBlackMarket)
         val member = findMember(playerFleet.fleetData?.membersListCopy, trade.memberId)
         if (target == null || member == null) {
             failures.add("${trade.memberName} is no longer available to sell.")
@@ -112,9 +117,10 @@ class StockReviewShipExecutionController(
         return true
     }
 
-    private fun findSubmarket(market: MarketAPI?, submarketId: String?): SubmarketAPI? {
+    private fun findTradeSubmarket(market: MarketAPI?, submarketId: String?, includeBlackMarket: Boolean): SubmarketAPI? {
         if (market == null || submarketId.isNullOrEmpty()) return null
-        return market.submarketsCopy?.firstOrNull { it?.specId == submarketId }
+        return market.submarketsCopy
+            ?.firstOrNull { it?.specId == submarketId && StockSubmarketAccess.isTradeEligible(it, includeBlackMarket) }
     }
 
     private fun findMember(members: List<FleetMemberAPI>?, memberId: String): FleetMemberAPI? =

@@ -218,6 +218,8 @@ class StockReviewPanelPlugin(
 
     override fun playerFleet() = sector()?.playerFleet
 
+    override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarket()
+
     override fun postMessage(message: String?) {
         reportMessage(message)
     }

@@ -12,6 +12,7 @@ $pendingTrade = Read-Text "$shipDir/StockReviewPendingShipTrade.kt"
 $pendingTrades = Read-Text "$shipDir/StockReviewPendingShipTrades.kt"
 $tradeController = Read-Text "$shipDir/StockReviewShipTradeController.kt"
 $sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
+$panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewPanelPlugin.kt"
 
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Builds the local-only ship trade snapshot"
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Remote ship trading needs separate source semantics before being added."
@@ -78,6 +79,7 @@ Assert-Contains "StockReviewShipExecutionController.kt exact-member contract" $e
 Assert-Contains "StockReviewShipExecutionController.kt exact-member contract" $executionController "source/player list at confirm time or the trade fails cleanly"
 Assert-Contains "StockReviewShipExecutionController.kt host contract" $executionController "fun market(): MarketAPI?"
 Assert-Contains "StockReviewShipExecutionController.kt host contract" $executionController "fun playerFleet(): CampaignFleetAPI?"
+Assert-Contains "StockReviewShipExecutionController.kt host contract" $executionController "fun includeBlackMarket(): Boolean"
 Assert-Contains "StockReviewShipExecutionController.kt host contract" $executionController 'host.postMessage("Ship trades require an active market and player fleet.")'
 
 $confirm = Get-Section $executionController "fun confirmPendingShipTrades()" "private fun executeBuy("
@@ -85,8 +87,9 @@ foreach ($needle in @(
     "val trades = pendingTrades.asList()",
     "val market = host.market()",
     "val playerFleet = host.playerFleet()",
-    "executeBuy(market, playerFleet, trade, failures)",
-    "executeSell(market, playerFleet, trade, failures)",
+    "val includeBlackMarket = host.includeBlackMarket()",
+    "executeBuy(market, playerFleet, includeBlackMarket, trade, failures)",
+    "executeSell(market, playerFleet, includeBlackMarket, trade, failures)",
     "pendingTrades.reset(trade.recordKey)",
     "host.refreshVanillaCargoScreen()",
     "host.rebuildSnapshot()",
@@ -98,7 +101,7 @@ foreach ($needle in @(
 
 $executeBuy = Get-Section $executionController "private fun executeBuy(" "private fun executeSell("
 Assert-Order "StockReviewShipExecutionController.kt buy mutation order" $executeBuy @(
-    "val source = findSubmarket(market, trade.submarketId)",
+    "val source = findTradeSubmarket(market, trade.submarketId, includeBlackMarket)",
     "val member = findMember(source?.cargoNullOk?.mothballedShips?.membersListCopy, trade.memberId)",
     'failures.add("${trade.memberName} is no longer for sale.")',
     "val credits = playerFleet.cargo?.credits",
@@ -109,9 +112,9 @@ Assert-Order "StockReviewShipExecutionController.kt buy mutation order" $execute
     "reportShipTransaction(market, source, member, trade.unitPrice, true)"
 )
 
-$executeSell = Get-Section $executionController "private fun executeSell(" "private fun findSubmarket("
+$executeSell = Get-Section $executionController "private fun executeSell(" "private fun findTradeSubmarket("
 Assert-Order "StockReviewShipExecutionController.kt sell mutation order" $executeSell @(
-    "val target = findSubmarket(market, trade.submarketId)",
+    "val target = findTradeSubmarket(market, trade.submarketId, includeBlackMarket)",
     "val member = findMember(playerFleet.fleetData?.membersListCopy, trade.memberId)",
     'failures.add("${trade.memberName} is no longer available to sell.")',
     "playerFleet.fleetData.removeFleetMember(member)",
@@ -120,7 +123,8 @@ Assert-Order "StockReviewShipExecutionController.kt sell mutation order" $execut
     "reportShipTransaction(market, target, member, trade.unitPrice, false)"
 )
 
-Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "return market.submarketsCopy?.firstOrNull { it?.specId == submarketId }"
+Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "private fun findTradeSubmarket(market: MarketAPI?, submarketId: String?, includeBlackMarket: Boolean): SubmarketAPI?"
+Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "StockSubmarketAccess.isTradeEligible(it, includeBlackMarket)"
 Assert-Contains "StockReviewShipExecutionController.kt member lookup" $executionController "members?.firstOrNull { it?.id == memberId }"
 Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "PlayerMarketTransaction(market, submarket, tradeMode(submarket))"
 Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "PlayerMarketTransaction.ShipSaleInfo(member, unitPrice.toFloat())"
@@ -190,6 +194,8 @@ Assert-Order "StockReviewSourceTransitionController.kt ship source-filter contra
     "host.rebuildSnapshot()",
     "host.requestContentRebuild()"
 )
+
+Assert-Contains "StockReviewPanelPlugin.kt ship execution host contract" $panelPlugin "override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarket()"
 
 if ($failures.Count -gt 0) {
     throw "Ship trading contract validation failed with $($failures.Count) failure(s)."
