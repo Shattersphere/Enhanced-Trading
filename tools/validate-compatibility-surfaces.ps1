@@ -183,6 +183,7 @@ $sanity = Read-Text ".github/workflows/sanity.yml"
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-compatibility-surfaces.ps1'
 Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-fixer-persistence-contracts.ps1'
+Assert-Contains ".github/workflows/sanity.yml" $sanity 'validate-trade-rollback-contracts.ps1'
 if ($sanity.Contains("weapons-procurement.jar")) {
     Add-Failure ".github/workflows/sanity.yml must not reference weapons-procurement.jar"
 } else {

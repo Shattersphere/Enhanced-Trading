@@ -1,0 +1,244 @@
+param()
+
+$ErrorActionPreference = "Stop"
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$failures = New-Object System.Collections.Generic.List[string]
+
+function Add-Failure {
+    param([string]$Message)
+    $script:failures.Add($Message)
+    Write-Host "FAIL: $Message"
+}
+
+function Add-Pass {
+    param([string]$Message)
+    Write-Host "PASS: $Message"
+}
+
+function Resolve-RepoPath {
+    param([string]$RelativePath)
+    Join-Path $repoRoot $RelativePath
+}
+
+function Read-Text {
+    param([string]$RelativePath)
+    $path = Resolve-RepoPath $RelativePath
+    if (-not (Test-Path -LiteralPath $path)) {
+        Add-Failure "$RelativePath is missing"
+        return ""
+    }
+    return Get-Content -LiteralPath $path -Raw
+}
+
+function Assert-Contains {
+    param(
+        [string]$Label,
+        [string]$Content,
+        [string]$Expected
+    )
+    if ($Content.Contains($Expected)) {
+        Add-Pass "$Label contains $Expected"
+    } else {
+        Add-Failure "$Label missing $Expected"
+    }
+}
+
+function Assert-Order {
+    param(
+        [string]$Label,
+        [string]$Content,
+        [string[]]$ExpectedOrder
+    )
+    $lastIndex = -1
+    foreach ($needle in $ExpectedOrder) {
+        $index = $Content.IndexOf($needle, [System.StringComparison]::Ordinal)
+        if ($index -lt 0) {
+            Add-Failure "$Label missing ordered token $needle"
+            return
+        }
+        if ($index -le $lastIndex) {
+            Add-Failure "$Label token $needle appears out of order"
+            return
+        }
+        $lastIndex = $index
+    }
+    Add-Pass "$Label keeps required order"
+}
+
+function Assert-RegexCount {
+    param(
+        [string]$Label,
+        [string]$Content,
+        [string]$Pattern,
+        [int]$ExpectedCount
+    )
+    $count = @([regex]::Matches($Content, $Pattern)).Count
+    if ($count -eq $ExpectedCount) {
+        Add-Pass "$Label has $ExpectedCount match(es) for $Pattern"
+    } else {
+        Add-Failure "$Label expected $ExpectedCount match(es) for $Pattern but found $count"
+    }
+}
+
+function Get-Section {
+    param(
+        [string]$Content,
+        [string]$StartToken,
+        [string]$EndToken
+    )
+    $start = $Content.IndexOf($StartToken, [System.StringComparison]::Ordinal)
+    if ($start -lt 0) {
+        Add-Failure "missing section start $StartToken"
+        return ""
+    }
+    $end = $Content.IndexOf($EndToken, $start + $StartToken.Length, [System.StringComparison]::Ordinal)
+    if ($end -lt 0) {
+        Add-Failure "missing section end $EndToken"
+        return $Content.Substring($start)
+    }
+    return $Content.Substring($start, $end - $start)
+}
+
+$steps = @(
+    "after-source-removal",
+    "after-player-cargo-remove",
+    "after-player-cargo-add",
+    "after-target-cargo-add",
+    "after-credit-mutation"
+)
+
+$compatibilityIds = Read-Text "src/main/kotlin/weaponsprocurement/CompatibilityIds.kt"
+Assert-Contains "CompatibilityIds.kt" $compatibilityIds 'const val TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"'
+
+$config = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponsProcurementConfig.kt"
+Assert-Contains "WeaponsProcurementConfig.kt" $config 'const val KEY_DEBUG_TRADE_FAILURE_STEP: String = CompatibilityIds.Diagnostics.TRADE_FAILURE_STEP'
+Assert-Contains "WeaponsProcurementConfig.kt" $config 'System.setProperty(KEY_DEBUG_TRADE_FAILURE_STEP, debugTradeFailureStep)'
+Assert-Contains "WeaponsProcurementConfig.kt" $config 'fun debugTradeFailureStep(): String = normalizeDebugTradeFailureStep(System.getProperty(KEY_DEBUG_TRADE_FAILURE_STEP, ""))'
+Assert-Contains "WeaponsProcurementConfig.kt" $config 'if (value.isEmpty() || value.equals("none", ignoreCase = true))'
+Assert-Contains "WeaponsProcurementConfig.kt" $config 'if (value == "*")'
+foreach ($step in $steps) {
+    Assert-Contains "WeaponsProcurementConfig.kt accepted failure step" $config "`"$step`""
+}
+Assert-Contains "WeaponsProcurementConfig.kt" $config 'LOG.warn("WP_CONFIG ignored unknown debug trade failure step: $value")'
+
+$luna = Read-Text "data/config/LunaSettings.csv"
+if ($luna.Contains("wp.debug.failTradeStep")) {
+    Add-Failure "LunaSettings.csv must not expose wp.debug.failTradeStep"
+} else {
+    Add-Pass "LunaSettings.csv does not expose wp.debug.failTradeStep"
+}
+
+$executor = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseExecutor.kt"
+foreach ($step in $steps) {
+    $constantName = "FAIL_" + $step.ToUpperInvariant().Replace("-", "_")
+    Assert-Contains "StockPurchaseExecutor.kt failure constant" $executor "private const val $constantName = `"$step`""
+}
+Assert-RegexCount "StockPurchaseExecutor.kt maybeFail call sites" $executor '\bmaybeFail\(FAIL_' 8
+Assert-Contains "StockPurchaseExecutor.kt" $executor 'val requested = WeaponsProcurementConfig.debugTradeFailureStep()'
+Assert-Contains "StockPurchaseExecutor.kt" $executor 'if (step.equals(requested, ignoreCase = true) || "*" == requested)'
+Assert-Contains "StockPurchaseExecutor.kt" $executor 'throw RuntimeException("WP debug forced trade failure at $step")'
+
+$sellToMarket = Get-Section $executor 'fun sellToMarket(' 'fun buyFromFixersMarket('
+$buyFromFixersMarket = Get-Section $executor 'fun buyFromFixersMarket(' 'fun buyPlan('
+$buyPlan = Get-Section $executor 'fun buyPlan(' 'private fun buyPlanStillAvailable('
+
+Assert-Order "sellToMarket rollback sequence" $sellToMarket @(
+    'journal.recordCargo(playerCargo, "player cargo")',
+    'journal.recordCargo(target.cargo, "sell target " + marketLabel(market, target.submarket))',
+    'StockItemCargo.removeItem(playerCargo, itemType, itemId, quantity)',
+    'maybeFail(FAIL_AFTER_PLAYER_CARGO_REMOVE)',
+    'playerCargo.credits.add(credits.toFloat())',
+    'maybeFail(FAIL_AFTER_CREDIT_MUTATION)',
+    'StockItemCargo.addItem(target.cargo, itemType, itemId, quantity)',
+    'maybeFail(FAIL_AFTER_TARGET_CARGO_ADD)',
+    'StockMarketTransactionReporter.reportItemTransaction('
+)
+
+Assert-Order "buyFromFixersMarket rollback sequence" $buyFromFixersMarket @(
+    'journal.recordCargo(playerCargo, "player cargo")',
+    'StockItemCargo.addItem(playerCargo, itemType, itemId, quantity)',
+    'maybeFail(FAIL_AFTER_PLAYER_CARGO_ADD)',
+    'playerCargo.credits.subtract(totalCost.toFloat())',
+    'maybeFail(FAIL_AFTER_CREDIT_MUTATION)',
+    'StockPurchaseChecks.addCampaignMessage(message)'
+)
+
+Assert-Order "buyPlan rollback sequence" $buyPlan @(
+    'journal.recordCargo(playerCargo, "player cargo")',
+    'journal.recordCargo(line.source.cargo, "buy source " + sourceLabel(line.source, fallbackMarket))',
+    'StockItemCargo.removeItem(sourceCargo, itemType, itemId, line.quantity)',
+    'maybeFail(FAIL_AFTER_SOURCE_REMOVAL)',
+    'reportLines.add(',
+    'StockItemCargo.addItem(playerCargo, itemType, itemId, checkedPlan.totalQuantity)',
+    'maybeFail(FAIL_AFTER_PLAYER_CARGO_ADD)',
+    'playerCargo.credits.subtract(checkedPlan.totalCost.toFloat())',
+    'maybeFail(FAIL_AFTER_CREDIT_MUTATION)',
+    'flushTransactionReports(log, reportLines)'
+)
+
+foreach ($needle in @(
+    'journal?.rollback(itemType, itemId) ?: RollbackReport.none()',
+    '"WP_STOCK_REVIEW_ROLLBACK status=" + report.status',
+    '" failedStep=" + failureStepToken()',
+    '" restoredCargos=" + report.restoredCargos',
+    '" failedCargos=" + report.failedCargos',
+    '" creditsRestored=" + report.creditsRestored',
+    '" countsRestored=" + report.countsRestored',
+    '" creditsBefore=" + formatFloat(report.creditsBefore)',
+    '" creditsAtFailure=" + formatFloat(report.creditsAtFailure)',
+    '" creditsAfterRollback=" + formatFloat(report.creditsAfterRollback)',
+    '" touched=" + report.touchedSummary()',
+    'StockItemCargo.reconcileItemCount(snapshot.cargo, itemType, itemId, snapshot.itemCountBefore)',
+    'playerCargo.credits.set(creditsBefore)',
+    'get() = if (failedCargos == 0 && creditsRestored && countsRestored) "PASS" else "FAIL"',
+    'for (ch in label)',
+    'for (ch in raw)'
+)) {
+    Assert-Contains "StockPurchaseExecutor.kt rollback contract" $executor $needle
+}
+
+$checks = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseChecks.kt"
+foreach ($needle in @(
+    'fun canMutateCredits(credits: Long): StockPurchaseService.PurchaseResult?',
+    'TradeMoney.canExecuteCreditMutation(credits)',
+    'fun canCompletePurchase(',
+    'validation = canAfford(playerCargo, totalCost)',
+    'return validation ?: hasCargoSpace(playerCargo, totalSpace)'
+)) {
+    Assert-Contains "StockPurchaseChecks.kt credit/cargo guard" $checks $needle
+}
+
+$plan = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/StockPurchasePlan.kt"
+Assert-Contains "StockPurchasePlan.kt" $plan 'totalCost = TradeMoney.safeAdd(totalCost, TradeMoney.lineTotal(source.unitPrice, quantity))'
+
+$money = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/TradeMoney.kt"
+foreach ($needle in @(
+    'MAX_EXECUTABLE_CREDITS: Long = 2147483647L',
+    'if (unitPrice < 0 || quantity < 0) return -1L',
+    'if (right > 0L && left > Long.MAX_VALUE - right) return Long.MAX_VALUE',
+    'return credits in 0L..MAX_EXECUTABLE_CREDITS'
+)) {
+    Assert-Contains "TradeMoney.kt" $money $needle
+}
+
+$analyzer = Read-Text "tools/analyze-trade-rollback-diagnostics.ps1"
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Select-String -LiteralPath $resolvedLog -Pattern "WP_STOCK_REVIEW_ROLLBACK"'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer '$passCount = @($records | Where-Object { $_.status -eq "PASS" }).Count'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer '$failCount = @($records | Where-Object { $_.status -eq "FAIL" }).Count'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Missing passing rollback diagnostic for failure step'
+foreach ($field in @("failedStep", "operation", "item", "quantity", "creditsRestored", "countsRestored", "touched")) {
+    Assert-Contains "analyze-trade-rollback-diagnostics.ps1 field output" $analyzer "`$record.$field"
+}
+
+$configDocs = Read-Text "CONFIG.md"
+foreach ($step in $steps) {
+    Assert-Contains "CONFIG.md rollback accepted step" $configDocs $step
+}
+Assert-Contains "CONFIG.md" $configDocs 'Leave the property unset, empty, or `none` for normal play and public packages.'
+Assert-Contains "CONFIG.md" $configDocs 'WP_STOCK_REVIEW_ROLLBACK'
+
+if ($failures.Count -gt 0) {
+    throw "Trade rollback contract validation failed with $($failures.Count) failure(s)."
+}
+
+Write-Host "Trade rollback contract validation passed."

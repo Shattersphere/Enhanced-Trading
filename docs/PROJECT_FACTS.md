@@ -59,6 +59,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
 | Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock JSON, blacklist JSON, item-key parsing, blacklist matching, sort aliases, and trade money guards. |
 | Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save-key, string-map encoding, sanitization, lifecycle/policy gates, blacklist safety, and observed reference fallback guard. |
+| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback journal order, forced-failure hooks, diagnostic fields, and credit/cargo mutation guards. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |

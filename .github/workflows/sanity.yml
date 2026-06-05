@@ -78,6 +78,10 @@ jobs:
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1
 
+      - name: Validate trade rollback contracts
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1
+
       - name: Reject stale stock-review pending purchase class
         shell: pwsh
         run: |
