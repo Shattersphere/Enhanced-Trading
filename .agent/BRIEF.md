@@ -16,7 +16,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 
 - Trade and ship execution guardrails now fail closed around unsafe credit/cargo mutations, exact-member ship mutation failures, nonfinite settings/cargo-space values, post-commit transaction reports, and Fixer catalog decoding.
 - Runtime dependency checks now surface stale installed Shatter Lib jars during deploy/parity workflows.
-- Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, and `StockReviewWeaponTooltipIconGridRenderer`. `StockReviewItemTooltip` remains the main orchestration/legacy renderer and is still a possible cleanup target.
+- Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, `StockReviewWeaponTooltipIconGridRenderer`, and `StockReviewWeaponTooltipTextRenderer`. `StockReviewItemTooltip` remains the main orchestration/legacy renderer and is still a possible cleanup target.
 
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
@@ -25,7 +25,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `672f6b8` (`Extract weapon tooltip icon grid renderer`)
+- Known-good source commit: `1ee8d0d` (`Extract weapon tooltip text renderer`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
@@ -55,4 +55,4 @@ The repo has been synced with the generic template doc system. Exact facts now l
 
 ## Next Best Step
 
-For code/runtime work, inspect the short active `PLANS.md`, `docs/PROJECT_FACTS.md`, `docs/CHECKS.md`, and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. The next bounded tooltip cleanup, if another source-only pass is still worth it, is to split weapon description/custom-text handling or debug wing layout construction out of `StockReviewItemTooltip` while preserving Shatter Lib tooltip delegation. For shared-library work, read `.agent/SHARED_LIBRARIES.md` before inspecting Shatter Lib. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.
+For code/runtime work, inspect the short active `PLANS.md`, `docs/PROJECT_FACTS.md`, `docs/CHECKS.md`, and the relevant archive deep dive through `.agent/archive/INDEX.md`. Treat archives as historical unless their status says active-reference. The next bounded tooltip cleanup, if another source-only pass is still worth it, is to split debug wing layout construction out of `StockReviewItemTooltip` while preserving Shatter Lib tooltip delegation. For shared-library work, read `.agent/SHARED_LIBRARIES.md` before inspecting Shatter Lib. For public release/export work, start with `.agent/PUBLIC_RELEASE.md`. For docs-only work, use the docs-only checks and avoid deployment.
