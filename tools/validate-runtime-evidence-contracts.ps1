@@ -130,6 +130,19 @@ try {
         )
 
     @(
+        "WP_STOCK_REVIEW_ROLLBACK status=MAYBE operation=buy item=W:test quantity=1 failedStep=after-source-removal restoredCargos=2 failedCargos=0 creditsRestored=true countsRestored=true creditsBefore=100 creditsAtFailure=50 creditsAfterRollback=100 touched=player"
+    ) | Set-Content -LiteralPath $rollbackLog -Encoding UTF8
+
+    Invoke-CollectorCommand `
+        -Label "required rollback evidence rejects unsupported status" `
+        -Command "`$env:STARSECTOR_DIRECTORY = ''; & $collectorLiteral -LogPath $rollbackLiteral -RequireRollbackPass -ExpectFailureStep @('after-source-removal')" `
+        -ExpectedExitCode 1 `
+        -ExpectedOutput @(
+            "Rollback diagnostic record has unsupported status 'MAYBE'",
+            "Runtime validation evidence collection failed."
+        )
+
+    @(
         "WP_SHIP_CATALOG_DIAG PASS summary observedHullTypes=0 theoreticalHullTypes=2 common=2 uncommon=0 rare=0 veryRare=0",
         "WP_SHIP_CATALOG_DIAG theoretical hull=hull_alpha",
         "WP_SHIP_CATALOG_DIAG theoretical hull=hull_beta"

@@ -132,7 +132,11 @@ Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Select-Strin
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer '$passCount = @($records | Where-Object { $_.status -eq "PASS" }).Count'
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer '$failCount = @($records | Where-Object { $_.status -eq "FAIL" }).Count'
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Rollback diagnostic record missing required field'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Rollback diagnostic record has unsupported status'
 Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'Missing passing rollback diagnostic for failure step'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'operation=$($record.operation)'
+Assert-Contains "analyze-trade-rollback-diagnostics.ps1" $analyzer 'operation={1}'
+Assert-NotMatch "analyze-trade-rollback-diagnostics.ps1 output field" $analyzer '\$record\.op(?!eration)'
 foreach ($field in @("status", "operation", "item", "quantity", "failedStep", "restoredCargos", "failedCargos", "creditsRestored", "countsRestored", "creditsBefore", "creditsAtFailure", "creditsAfterRollback", "touched")) {
     Assert-Contains "analyze-trade-rollback-diagnostics.ps1 required field" $analyzer "`"$field`""
 }

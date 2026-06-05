@@ -91,6 +91,12 @@ foreach ($record in $records) {
             $failures.Add("Rollback diagnostic record missing required field '$field'.")
         }
     }
+    if ($record.PSObject.Properties.Name.Contains("status") -and
+        -not [string]::IsNullOrWhiteSpace([string]$record.status) -and
+        @("PASS", "FAIL") -notcontains $record.status
+    ) {
+        $failures.Add("Rollback diagnostic record has unsupported status '$($record.status)'.")
+    }
 }
 $passCount = @($records | Where-Object { $_.status -eq "PASS" }).Count
 $failCount = @($records | Where-Object { $_.status -eq "FAIL" }).Count

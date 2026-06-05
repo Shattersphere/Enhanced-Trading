@@ -29,6 +29,7 @@ python scripts/update-repo-map.py --write
     - `.agent/archive/deep-dives/`
     - `.agent/archive/history/`
       - `.agent/archive/history/snapshots/`
+    - `.agent/archive/retired-plans/`
   - `.agent/ARCHITECTURE_MAP.md`
   - `.agent/BACKLOG.md`
   - `.agent/BRIEF.md`
