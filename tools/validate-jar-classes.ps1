@@ -248,6 +248,15 @@ $forbiddenClasses = @(
     'weaponsprocurement/internal/WeaponsProcurementCountUpdater.class'
 )
 
+$forbiddenPackagePrefixes = @(
+    'com/shattersphere/',
+    'kotlin/',
+    'kotlinx/',
+    'lunalib/',
+    'org/jetbrains/',
+    'org/lazywizard/'
+)
+
 if (-not (Test-Path -LiteralPath $JarPath)) {
     throw "$Label jar not found: $JarPath"
 }
@@ -279,6 +288,20 @@ foreach ($class in $forbiddenClasses) {
 
 if ($stale.Count -gt 0) {
     throw "$Label jar contains stale GUI classes: $($stale -join ', ')"
+}
+
+$dependencyLeaks = @()
+foreach ($entry in $entries) {
+    foreach ($prefix in $forbiddenPackagePrefixes) {
+        if ($entry.StartsWith($prefix, [System.StringComparison]::Ordinal)) {
+            $dependencyLeaks += $entry
+            break
+        }
+    }
+}
+
+if ($dependencyLeaks.Count -gt 0) {
+    throw "$Label jar contains bundled dependency classes: $((@($dependencyLeaks | Select-Object -First 20)) -join ', ')"
 }
 
 Write-Host "$Label jar class validation passed."
