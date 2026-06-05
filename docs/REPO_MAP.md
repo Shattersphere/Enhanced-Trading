@@ -81,6 +81,7 @@ python scripts/update-repo-map.py --write
   - `tools/validate-jar-classes.ps1`
   - `tools/validate-kotlin-migration.ps1`
   - `tools/validate-live-gui-classes.ps1`
+  - `tools/validate-source-semantics-contracts.ps1`
   - `tools/validate-trade-rollback-contracts.ps1`
 - `.gitignore`
 - `AGENTS.md`

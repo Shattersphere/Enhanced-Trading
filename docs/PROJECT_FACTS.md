@@ -40,10 +40,10 @@ These external resources are read-authorized for explicit sync with the generic 
 
 | Resource | Path | Required use |
 |---|---|---|
-| Generic Template Repo | `D:\Sean Code Projects\General Projects\Generic Template Repo` | Source for repo-governance template updates. Sync only applicable guidance; preserve Starsector-specific facts and commands. |
-| Deploy Template | `D:\Sean Code Projects\General Projects\Deploy Template` | Reference for deploy workflow improvements. Keep Enhanced Trading deploy commands and Starsector live-target rules in this repo. |
-| Zipper Template | `D:\Sean Code Projects\General Projects\Zipper Template` | Reference for package/export/zip workflow improvements. Keep public export and leak checks project-specific. |
-| General Archives | `D:\Sean Code Projects\General Projects\Archives` | During explicit sync or relevant investigations, search/read targeted archive notes and promote current lessons only; do not bulk-copy history. |
+| Generic Template Repo | `D:\Sean Code Projects\General Projects\Generic Template Repo` | Source for repo-governance updates; preserve Starsector facts and commands. |
+| Deploy Template | `D:\Sean Code Projects\General Projects\Deploy Template` | Reference for deploy workflow improvements; keep live-target rules here. |
+| Zipper Template | `D:\Sean Code Projects\General Projects\Zipper Template` | Reference for package/export/zip workflow improvements; keep leak checks project-specific. |
+| General Archives | `D:\Sean Code Projects\General Projects\Archives` | Search targeted archive notes during explicit sync/investigation; do not bulk-copy history. |
 
 ## Commands
 
@@ -54,12 +54,13 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | List files | `rg --files` | repo root | Use targeted search before opening large docs or archives. |
 | Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires `STARSECTOR_DIRECTORY` or `-StarsectorDir`; optional `-ShatterLibDir` / `SHATTER_LIB_DIRECTORY` overrides Shatter Lib compile jars. |
 | Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Useful for local iteration only; accepts the same path overrides as `Build`. |
-| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector core jars, dependency jars, and required Shatter Lib API classes. Optional `-PshatterLibDir=<path>` can point at the Shatter Lib checkout. |
+| Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector core jars, dependency jars, and Shatter Lib API classes. Optional `-PshatterLibDir=<path>` points at the checkout. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
 | Config contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-config-contracts.ps1` | repo root | Luna/settings, stock JSON, blacklist JSON, item-key parsing, blacklist matching, sort aliases, and trade money guards. |
-| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save-key, string-map encoding, sanitization, lifecycle/policy gates, blacklist safety, and observed reference fallback guard. |
-| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback journal order, forced-failure hooks, diagnostic fields, and credit/cargo mutation guards. |
+| Fixer persistence contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-fixer-persistence-contracts.ps1` | repo root | Save key, string-map encoding, sanitization, lifecycle/policy gates, blacklist safety, and observed fallback. |
+| Trade rollback contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-trade-rollback-contracts.ps1` | repo root | Rollback order, forced-failure hooks, diagnostics, and credit/cargo mutation guards. |
+| Source semantics contract validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-source-semantics-contracts.ps1` | repo root | Local/Sector/Fixer stock-source separation, virtual Fixer stock, source rehydration, and source-mode dispatch. |
 | Documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | repo root | Public docs by default. |
 | Private documentation link validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | repo root | Includes agent/private docs. |
 | Template/doc-system hygiene | `python scripts/check-template-state.py --initialized` | repo root | Run after template sync or doc-system edits. |

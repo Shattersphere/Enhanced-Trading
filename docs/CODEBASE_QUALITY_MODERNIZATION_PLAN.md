@@ -51,7 +51,7 @@ Validation/tooling/docs: validators must reflect the current architecture. Maint
 | Validator/CI drift | stale jar/class checks | false failures or ignored checks | keep validator lists current | jar, Kotlin, GUI, compatibility validators | active |
 | GUI/classloader | `WimGui*`, UI deep dive | crashes, clipping, stale classes | bounded UI edits | GUI validator, jar/live class, in-game | active |
 | Trade rollback | `StockPurchaseExecutor`, analyzer | cargo/credit corruption | static contract guard plus forced-failure matrix | validator plus runtime analyzer | active |
-| Source semantics | Local/Sector/Fixer services | wrong cargo drain/pricing | preserve contracts | build plus manual trade matrix | active |
+| Source semantics | Local/Sector/Fixer services | wrong cargo drain/pricing | preserve static contracts and runtime matrix | validator plus manual trade matrix | active |
 | Fixer persistence | save key v1 | save compatibility loss | migration-before-change | static and runtime save proof | active |
 | Ship trading | exact-member local code | ship loss or remote leakage | local-only gate | in-game ship buy/sell | active |
 | Settings/config | Luna and JSON loaders | broken user configs | compatibility and config-contract validators | static plus Luna runtime | active |
@@ -75,9 +75,9 @@ Low-value work to avoid: package churn, cosmetic renames, broad helper extractio
 
 ## Validation Matrix
 
-Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, Kotlin/GUI/jar/compat/config/Fixer/rollback validators, doc links, `export-public.ps1`, `git diff --check`, deploy parity.
+Static/build/package: `build.ps1`, `validateLocalBuildEnvironment`, Kotlin/GUI/jar/compat/config/Fixer/rollback/source validators, doc links, `export-public.ps1`, `git diff --check`, deploy parity.
 
-Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist display-name matching. Config/Fixer/rollback validators cover Luna/source keys, JSON schema, item keys, blacklist matching, sort aliases, `TradeMoney`, Fixer save encoding/gates, rollback journal order, forced-failure hooks, and diagnostic fields. Add runtime save/rollback proof before migration or trade semantics changes. No unit-test suite is currently declared.
+Pure logic candidates: `StockItemType`, `TradeMoney`, `StockReviewConfig`, `WeaponMarketBlacklist`, and blacklist display-name matching. Config/Fixer/rollback/source validators cover Luna/source keys, JSON schema, item keys, blacklist matching, `TradeMoney`, Fixer save gates, rollback hooks/fields, and Local/Sector/Fixer source separation. Add runtime save/rollback/trade proof before migration or trade semantics changes. No unit-test suite is declared.
 
 Manual Starsector checks: F8 open/close, dialog option, Luna settings, Local/Sector/Fixer buys, legal/black sells, mixed plans, stale stock, rollback forced failures, local ship buy/sell, ship grid/tooltip/filter, and live jar class validation.
 
