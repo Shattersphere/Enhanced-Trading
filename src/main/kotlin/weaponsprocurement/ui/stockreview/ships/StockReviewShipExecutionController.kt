@@ -94,13 +94,13 @@ class StockReviewShipExecutionController(
             source.cargo.mothballedShips.removeFleetMember(member)
             try {
                 playerFleet.fleetData.addFleetMember(member)
-            } catch (t: RuntimeException) {
+            } catch (t: Throwable) {
                 source.cargo.mothballedShips.addFleetMember(member)
                 throw t
             }
             try {
                 credits.subtract(trade.unitPrice.toFloat())
-            } catch (t: RuntimeException) {
+            } catch (t: Throwable) {
                 playerFleet.fleetData.removeFleetMember(member)
                 source.cargo.mothballedShips.addFleetMember(member)
                 throw t
@@ -131,13 +131,13 @@ class StockReviewShipExecutionController(
             playerFleet.fleetData.removeFleetMember(member)
             try {
                 target.cargo.mothballedShips.addFleetMember(member)
-            } catch (t: RuntimeException) {
+            } catch (t: Throwable) {
                 playerFleet.fleetData.addFleetMember(member)
                 throw t
             }
             try {
                 credits.add(trade.unitPrice.toFloat())
-            } catch (t: RuntimeException) {
+            } catch (t: Throwable) {
                 target.cargo.mothballedShips.removeFleetMember(member)
                 playerFleet.fleetData.addFleetMember(member)
                 throw t
@@ -155,7 +155,7 @@ class StockReviewShipExecutionController(
         return try {
             mutation()
             true
-        } catch (t: RuntimeException) {
+        } catch (t: Throwable) {
             LOG.warn("WP_STOCK_REVIEW ship $operation failed for ${trade.memberId}", t)
             failures.add("could not complete ship $operation for ${trade.memberName}.")
             false
@@ -190,7 +190,7 @@ class StockReviewShipExecutionController(
                 transaction.creditValue = -unitPrice.toFloat()
             }
             plugin.reportPlayerMarketTransaction(transaction)
-        } catch (t: RuntimeException) {
+        } catch (t: Throwable) {
             LOG.warn("WP_STOCK_REVIEW ship transaction report failed for ${member.id} at ${submarket.specId}", t)
         }
     }

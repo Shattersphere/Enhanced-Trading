@@ -145,12 +145,15 @@ foreach ($needle in @(
 foreach ($needle in @(
     "private fun runShipMutation(",
     "mutation: () -> Unit",
+    "catch (t: Throwable)",
     "LOG.warn(`"WP_STOCK_REVIEW ship `$operation failed for",
     'failures.add("could not complete ship $operation for ${trade.memberName}.")',
     "return false"
 )) {
     Assert-Contains "StockReviewShipExecutionController.kt mutation failure guard" $executionController $needle
 }
+Assert-RegexCount "StockReviewShipExecutionController.kt throwable rollback/report guards" $executionController 'catch \(t: Throwable\)' 6
+Assert-NotContains "StockReviewShipExecutionController.kt throwable rollback/report guards" $executionController 'catch (t: RuntimeException)'
 
 Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "private fun findTradeSubmarket(market: MarketAPI?, submarketId: String?, includeBlackMarket: Boolean): SubmarketAPI?"
 Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "StockSubmarketAccess.isTradeEligible(it, includeBlackMarket)"
