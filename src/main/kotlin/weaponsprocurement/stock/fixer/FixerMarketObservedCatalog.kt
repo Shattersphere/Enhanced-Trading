@@ -3,6 +3,7 @@ package weaponsprocurement.stock.fixer
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import org.apache.log4j.Logger
+import weaponsprocurement.CompatibilityIds
 import weaponsprocurement.config.WeaponMarketBlacklist
 import weaponsprocurement.stock.item.SubmarketWeaponStock
 import weaponsprocurement.stock.market.MarketStockService
@@ -101,8 +102,8 @@ class FixerMarketObservedCatalog {
 
     companion object {
         private val LOG: Logger = Logger.getLogger(FixerMarketObservedCatalog::class.java)
-        private const val PERSISTENT_KEY = "weaponsProcurement.fixerObservedCatalog.v1"
-        private const val VALUE_SEPARATOR = "|"
+        private const val PERSISTENT_KEY = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_KEY
+        private const val VALUE_SEPARATOR = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_VALUE_SEPARATOR
 
         private var migrationLogged = false
         private var pruneLogged = false

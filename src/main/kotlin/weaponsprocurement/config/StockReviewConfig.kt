@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.combat.WeaponAPI
 import org.apache.log4j.Logger
 import org.json.JSONObject
+import weaponsprocurement.CompatibilityIds
 import weaponsprocurement.stock.item.OwnedSourcePolicy
 import weaponsprocurement.stock.item.StockItemType
 import weaponsprocurement.stock.item.StockSortMode
@@ -62,7 +63,7 @@ class StockReviewConfig private constructor(
 
     companion object {
         private val LOG: Logger = Logger.getLogger(StockReviewConfig::class.java)
-        private const val CONFIG_PATH = "data/config/enhanced_trading_stock.json"
+        private const val CONFIG_PATH = CompatibilityIds.ConfigFiles.STOCK_REVIEW
 
         private const val DEFAULT_SMALL_WEAPON_COUNT = 16
         private const val DEFAULT_MEDIUM_WEAPON_COUNT = 8

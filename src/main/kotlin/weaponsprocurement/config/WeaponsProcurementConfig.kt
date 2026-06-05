@@ -2,6 +2,7 @@ package weaponsprocurement.config
 
 import lunalib.lunaSettings.LunaSettings
 import org.apache.log4j.Logger
+import weaponsprocurement.CompatibilityIds
 import java.util.Locale
 
 /**
@@ -11,36 +12,36 @@ import java.util.Locale
 object WeaponsProcurementConfig {
     private val LOG: Logger = Logger.getLogger(WeaponsProcurementConfig::class.java)
 
-    private const val MOD_ID = "enhanced_trading"
-    private const val SETTING_UPDATE_INTERVAL = "wp_update_interval_seconds"
-    private const val SETTING_ENABLE_DIALOG_OPTION = "wp_enable_dialog_option"
-    private const val SETTING_ENABLE_SECTOR_MARKET = "wp_enable_sector_market"
-    private const val SETTING_ENABLE_FIXERS_MARKET = "wp_enable_fixers_market"
-    private const val SETTING_ENABLE_FIXERS_MARKET_TAG_INFERENCE = "wp_enable_fixers_market_tag_inference"
-    private const val SETTING_SECTOR_MARKET_PRICE_MULTIPLIER = "wp_sector_market_price_multiplier"
-    private const val SETTING_FIXERS_MARKET_PRICE_MULTIPLIER = "wp_fixers_market_price_multiplier"
-    private const val SETTING_DESIRED_SMALL_WEAPON_COUNT = "wp_desired_small_weapon_count"
-    private const val SETTING_DESIRED_MEDIUM_WEAPON_COUNT = "wp_desired_medium_weapon_count"
-    private const val SETTING_DESIRED_LARGE_WEAPON_COUNT = "wp_desired_large_weapon_count"
-    private const val SETTING_DESIRED_FIGHTER_WING_COUNT = "wp_desired_fighter_wing_count"
-    private const val SETTING_TRADE_HOTKEY = "wp_trade_hotkey"
-    private const val SETTING_ENABLE_DEBUG_UI = "wp_enable_debug_ui"
-    private const val KEY_UPDATE_INTERVAL = "wp.config.updateIntervalSeconds"
-    private const val KEY_DIALOG_OPTION_ENABLED = "wp.config.dialogOptionEnabled"
-    private const val KEY_SECTOR_MARKET_ENABLED = "wp.config.sectorMarketEnabled"
-    private const val KEY_FIXERS_MARKET_ENABLED = "wp.config.fixersMarketEnabled"
-    private const val KEY_FIXERS_MARKET_TAG_INFERENCE_ENABLED = "wp.config.fixersMarketTagInferenceEnabled"
-    private const val KEY_SECTOR_MARKET_PRICE_MULTIPLIER = "wp.config.sectorMarketPriceMultiplier"
-    private const val KEY_FIXERS_MARKET_PRICE_MULTIPLIER = "wp.config.fixersMarketPriceMultiplier"
-    private const val KEY_DESIRED_SMALL_WEAPON_COUNT = "wp.config.desiredSmallWeaponCount"
-    private const val KEY_DESIRED_MEDIUM_WEAPON_COUNT = "wp.config.desiredMediumWeaponCount"
-    private const val KEY_DESIRED_LARGE_WEAPON_COUNT = "wp.config.desiredLargeWeaponCount"
-    private const val KEY_DESIRED_FIGHTER_WING_COUNT = "wp.config.desiredFighterWingCount"
-    private const val KEY_TRADE_HOTKEY = "wp.config.tradeHotkey"
-    private const val KEY_DEBUG_UI_ENABLED = "wp.config.debugUiEnabled"
-    const val KEY_DEBUG_TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"
-    const val KEY_DEBUG_SHIP_CATALOG: String = "wp.debug.shipCatalog"
-    const val KEY_DEBUG_SHIP_CATALOG_VIEW: String = "wp.debug.shipCatalogView"
+    private const val MOD_ID = CompatibilityIds.MOD_ID
+    private const val SETTING_UPDATE_INTERVAL = CompatibilityIds.Luna.UPDATE_INTERVAL_SECONDS
+    private const val SETTING_ENABLE_DIALOG_OPTION = CompatibilityIds.Luna.ENABLE_DIALOG_OPTION
+    private const val SETTING_ENABLE_SECTOR_MARKET = CompatibilityIds.Luna.ENABLE_SECTOR_MARKET
+    private const val SETTING_ENABLE_FIXERS_MARKET = CompatibilityIds.Luna.ENABLE_FIXERS_MARKET
+    private const val SETTING_ENABLE_FIXERS_MARKET_TAG_INFERENCE = CompatibilityIds.Luna.ENABLE_FIXERS_MARKET_TAG_INFERENCE
+    private const val SETTING_SECTOR_MARKET_PRICE_MULTIPLIER = CompatibilityIds.Luna.SECTOR_MARKET_PRICE_MULTIPLIER
+    private const val SETTING_FIXERS_MARKET_PRICE_MULTIPLIER = CompatibilityIds.Luna.FIXERS_MARKET_PRICE_MULTIPLIER
+    private const val SETTING_DESIRED_SMALL_WEAPON_COUNT = CompatibilityIds.Luna.DESIRED_SMALL_WEAPON_COUNT
+    private const val SETTING_DESIRED_MEDIUM_WEAPON_COUNT = CompatibilityIds.Luna.DESIRED_MEDIUM_WEAPON_COUNT
+    private const val SETTING_DESIRED_LARGE_WEAPON_COUNT = CompatibilityIds.Luna.DESIRED_LARGE_WEAPON_COUNT
+    private const val SETTING_DESIRED_FIGHTER_WING_COUNT = CompatibilityIds.Luna.DESIRED_FIGHTER_WING_COUNT
+    private const val SETTING_TRADE_HOTKEY = CompatibilityIds.Luna.TRADE_HOTKEY
+    private const val SETTING_ENABLE_DEBUG_UI = CompatibilityIds.Luna.ENABLE_DEBUG_UI
+    private const val KEY_UPDATE_INTERVAL = CompatibilityIds.SystemProperties.UPDATE_INTERVAL_SECONDS
+    private const val KEY_DIALOG_OPTION_ENABLED = CompatibilityIds.SystemProperties.DIALOG_OPTION_ENABLED
+    private const val KEY_SECTOR_MARKET_ENABLED = CompatibilityIds.SystemProperties.SECTOR_MARKET_ENABLED
+    private const val KEY_FIXERS_MARKET_ENABLED = CompatibilityIds.SystemProperties.FIXERS_MARKET_ENABLED
+    private const val KEY_FIXERS_MARKET_TAG_INFERENCE_ENABLED = CompatibilityIds.SystemProperties.FIXERS_MARKET_TAG_INFERENCE_ENABLED
+    private const val KEY_SECTOR_MARKET_PRICE_MULTIPLIER = CompatibilityIds.SystemProperties.SECTOR_MARKET_PRICE_MULTIPLIER
+    private const val KEY_FIXERS_MARKET_PRICE_MULTIPLIER = CompatibilityIds.SystemProperties.FIXERS_MARKET_PRICE_MULTIPLIER
+    private const val KEY_DESIRED_SMALL_WEAPON_COUNT = CompatibilityIds.SystemProperties.DESIRED_SMALL_WEAPON_COUNT
+    private const val KEY_DESIRED_MEDIUM_WEAPON_COUNT = CompatibilityIds.SystemProperties.DESIRED_MEDIUM_WEAPON_COUNT
+    private const val KEY_DESIRED_LARGE_WEAPON_COUNT = CompatibilityIds.SystemProperties.DESIRED_LARGE_WEAPON_COUNT
+    private const val KEY_DESIRED_FIGHTER_WING_COUNT = CompatibilityIds.SystemProperties.DESIRED_FIGHTER_WING_COUNT
+    private const val KEY_TRADE_HOTKEY = CompatibilityIds.SystemProperties.TRADE_HOTKEY
+    private const val KEY_DEBUG_UI_ENABLED = CompatibilityIds.SystemProperties.DEBUG_UI_ENABLED
+    const val KEY_DEBUG_TRADE_FAILURE_STEP: String = CompatibilityIds.Diagnostics.TRADE_FAILURE_STEP
+    const val KEY_DEBUG_SHIP_CATALOG: String = CompatibilityIds.Diagnostics.SHIP_CATALOG
+    const val KEY_DEBUG_SHIP_CATALOG_VIEW: String = CompatibilityIds.Diagnostics.SHIP_CATALOG_VIEW
 
     private const val DEFAULT_UPDATE_INTERVAL_SEC = 0.20f
     private const val MIN_UPDATE_INTERVAL_SEC = 0.05f

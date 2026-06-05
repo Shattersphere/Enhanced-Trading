@@ -100,6 +100,7 @@ Enhanced Trading consumes Shatter Lib at build/runtime. Keep `build.gradle.kts`,
 - File formats/generated metadata: Starsector CSV/JSON data files, jar package contents, public export manifest.
 - Save/profile/user data impact: market observations, pending trade behavior, and any memory/persistent-state keys can affect campaign behavior.
 - Fixer's Market observed catalog is stored under `weaponsProcurement.fixerObservedCatalog.v1` as a `HashMap<String, String>` using `baseUnitPrice|unitCargoSpace`; key/schema changes require explicit migration approval and runtime save proof.
+- Source owner for shipped IDs/keys/paths: `src/main/kotlin/weaponsprocurement/CompatibilityIds.kt`; validators should check literal values there and consumer classes should reference it.
 - Public API/CLI/config compatibility: `build.ps1`, deploy scripts, validation scripts, `mod_info.json`, public docs, and curated export behavior.
 
 ## Known-Good Baseline

@@ -3,6 +3,7 @@ package weaponsprocurement.config
 import com.fs.starfarer.api.Global
 import org.apache.log4j.Logger
 import org.json.JSONObject
+import weaponsprocurement.CompatibilityIds
 import weaponsprocurement.stock.item.StockItemSpecs
 import weaponsprocurement.stock.item.StockItemType
 import java.util.Collections
@@ -24,9 +25,9 @@ class WeaponMarketBlacklist private constructor(
 
     companion object {
         private val LOG: Logger = Logger.getLogger(WeaponMarketBlacklist::class.java)
-        private const val CONFIG_PATH = "data/config/enhanced_trading_market_blacklist.json"
-        private const val SECTOR_KEY = "BANNED_FROM_SECTOR_MARKET"
-        private const val FIXERS_KEY = "BANNED_FROM_FIXERS_MARKET"
+        private const val CONFIG_PATH = CompatibilityIds.ConfigFiles.MARKET_BLACKLIST
+        private const val SECTOR_KEY = CompatibilityIds.MarketBlacklist.SECTOR_KEY
+        private const val FIXERS_KEY = CompatibilityIds.MarketBlacklist.FIXERS_KEY
 
         private var cached: WeaponMarketBlacklist? = null
         private var errorLogged = false

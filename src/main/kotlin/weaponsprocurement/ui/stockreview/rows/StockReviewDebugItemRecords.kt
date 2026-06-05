@@ -1,5 +1,6 @@
 package weaponsprocurement.ui.stockreview.rows
 
+import weaponsprocurement.CompatibilityIds
 import weaponsprocurement.stock.item.StockCategory
 import weaponsprocurement.stock.item.StockDebugItemProfile
 import weaponsprocurement.stock.item.StockDebugItemStat
@@ -12,10 +13,10 @@ import java.util.Collections
  * gated behind debug UI and should exercise normal item row and tooltip paths.
  */
 object StockReviewDebugItemRecords {
-    const val EMPTY_ICON = "graphics/ui/wp_debug_empty_item.png"
+    const val EMPTY_ICON = CompatibilityIds.Diagnostics.DEBUG_EMPTY_ITEM_ICON
 
-    private const val DEBUG_WEAPON_ID = "wp_debug_worst_case_weapon"
-    private const val DEBUG_WING_ID = "wp_debug_worst_case_wing"
+    private const val DEBUG_WEAPON_ID = CompatibilityIds.Diagnostics.DEBUG_WEAPON_ID
+    private const val DEBUG_WING_ID = CompatibilityIds.Diagnostics.DEBUG_WING_ID
 
     private val weaponProfile = StockDebugItemProfile(
         EMPTY_ICON,

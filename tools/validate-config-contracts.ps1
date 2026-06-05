@@ -192,8 +192,36 @@ if (@($lunaIds | Where-Object { $_ -like "wp.debug.*" }).Count -gt 0) {
     Add-Pass "Developer debug JVM properties are not Luna settings"
 }
 
+$compatibilitySource = Read-Text "src/main/kotlin/weaponsprocurement/CompatibilityIds.kt"
+$lunaBlockMatch = [regex]::Match($compatibilitySource, '(?s)object Luna \{(.*?)\n    \}')
+if (-not $lunaBlockMatch.Success) {
+    Add-Failure "CompatibilityIds.kt missing Luna compatibility block"
+    $sourceSettingIds = @()
+} else {
+    $sourceSettingIds = @([regex]::Matches($lunaBlockMatch.Groups[1].Value, 'const val [A-Z0-9_]+: String = "([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+}
 $settingsSource = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponsProcurementConfig.kt"
-$sourceSettingIds = @([regex]::Matches($settingsSource, 'SETTING_[A-Z0-9_]+\s*=\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+foreach ($id in @(
+    "SETTING_UPDATE_INTERVAL",
+    "SETTING_ENABLE_DIALOG_OPTION",
+    "SETTING_ENABLE_SECTOR_MARKET",
+    "SETTING_ENABLE_FIXERS_MARKET",
+    "SETTING_ENABLE_FIXERS_MARKET_TAG_INFERENCE",
+    "SETTING_SECTOR_MARKET_PRICE_MULTIPLIER",
+    "SETTING_FIXERS_MARKET_PRICE_MULTIPLIER",
+    "SETTING_DESIRED_SMALL_WEAPON_COUNT",
+    "SETTING_DESIRED_MEDIUM_WEAPON_COUNT",
+    "SETTING_DESIRED_LARGE_WEAPON_COUNT",
+    "SETTING_DESIRED_FIGHTER_WING_COUNT",
+    "SETTING_TRADE_HOTKEY",
+    "SETTING_ENABLE_DEBUG_UI"
+)) {
+    if ($settingsSource.Contains("$id = CompatibilityIds.Luna.")) {
+        Add-Pass "WeaponsProcurementConfig $id reads CompatibilityIds.Luna"
+    } else {
+        Add-Failure "WeaponsProcurementConfig $id must read CompatibilityIds.Luna"
+    }
+}
 $lunaSettingIds = @($lunaIds | Where-Object { $_ -ne "wp_header" } | Sort-Object -Unique)
 foreach ($id in $sourceSettingIds) {
     if ($lunaSettingIds -notcontains $id) {

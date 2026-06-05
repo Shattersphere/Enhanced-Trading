@@ -28,6 +28,8 @@ Do not change these without explicit approval and matching validation:
 
 Public compatibility layer: shipped ids, config keys, data paths, item-key parsing, and plugin/rule paths stay explicit and documented. Internal refactors must not rename or reinterpret them.
 
+Source owner: `weaponsprocurement.CompatibilityIds`; validators check values and consumer references.
+
 Settings/config: `WeaponsProcurementConfig` is the Luna/System-property bridge. `StockReviewConfig` and `WeaponMarketBlacklist` own JSON loading, defaults, and legacy compatibility.
 
 Campaign lifecycle: `WeaponsProcurementModPlugin` registers transient scripts only. `StockReviewHotkeyScript` owns market-backed opening and close/reopen. `WeaponsProcurementFixerCatalogUpdater` owns observed catalog updates and diagnostics.
@@ -53,6 +55,7 @@ Validation/tooling/docs: validators must reflect the current architecture. Maint
 | Fixer persistence | save key v1 | save compatibility loss | migration-before-change | static and runtime save proof | active |
 | Ship trading | exact-member local code | ship loss or remote leakage | local-only gate | in-game ship buy/sell | active |
 | Settings/config | Luna and JSON loaders | broken user configs | compatibility and config-contract validators | static plus Luna runtime | active |
+| Build dependency parity | installed Shatter Lib jar may lag checkout APIs | source/package validation blocked | align dependency before release/runtime proof | build with current Shatter Lib | active |
 | Public/export | curated export scripts | private leak/public breakage | explicit release gate | export/leak scan | parked |
 | Broad polish | many split UI owners | churn without value | avoid cosmetic moves | none unless touched | low-value |
 
@@ -88,7 +91,7 @@ Stop when remaining work is cosmetic, risky without behavior need, lacks practic
 
 ## Immediate Actions
 
-1. Keep `tools/validate-jar-classes.ps1`, `.github/workflows/sanity.yml`, and `tools/validate-compatibility-surfaces.ps1` green before runtime cleanup.
+1. Keep `tools/validate-jar-classes.ps1`, `.github/workflows/sanity.yml`, `tools/validate-compatibility-surfaces.ps1`, and `weaponsprocurement.CompatibilityIds` green before runtime cleanup.
 2. Use this document plus `docs/CODE_QUALITY.md` when selecting bounded cleanup.
 3. Expand parser/key tests only where they protect real shipped config or save contracts not covered by the current validators.
 4. Finish rollback forced-failure runtime validation before changing trade execution semantics.

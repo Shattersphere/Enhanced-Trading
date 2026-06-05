@@ -1,12 +1,14 @@
 package weaponsprocurement.stock.item
 
+import weaponsprocurement.CompatibilityIds
+
 enum class StockItemType(
     val sectionLabel: String,
     val singularLabel: String,
     private val keyPrefix: String,
 ) {
-    WEAPON("Weapons", "Weapon", "W:"),
-    WING("Wings", "Wing", "F:");
+    WEAPON("Weapons", "Weapon", CompatibilityIds.StockItemKeys.WEAPON_PREFIX),
+    WING("Wings", "Wing", CompatibilityIds.StockItemKeys.WING_PREFIX);
 
     fun key(itemId: String?): String = keyPrefix + (itemId ?: "")
 

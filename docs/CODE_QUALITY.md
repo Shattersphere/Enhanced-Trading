@@ -1,6 +1,6 @@
 # Code Quality
 
-Generic repo-local standards. `AGENTS.md` owns operating rules; Starsector runtime/deploy constraints may override this file.
+Generic repo-local standards. `AGENTS.md` owns operating rules; the `code-quality` skill owns review/refactor workflow; Starsector runtime/deploy constraints may override this file.
 
 ## Defaults
 
@@ -26,9 +26,34 @@ Generic repo-local standards. `AGENTS.md` owns operating rules; Starsector runti
 - Do not use obfuscated vanilla classes directly in public-safe implementation paths.
 - Keep dangerous validation and forced-failure hooks disabled by default.
 
+## File And Package Size
+
+Counts are prompts for design review, not quotas.
+
+- For hand-written source files, prefer about 300 LOC. Keep files under 500 LOC when practical; larger files need a clear reason such as framework glue, cohesive UI/runtime ownership, or a split that would hide the relevant Starsector invariant.
+- Split files by responsibility: presentation/state, parser/renderer, model/persistence, planning/execution, validation/mutation, public API/implementation, or per-feature/per-host module.
+- For ordinary non-root packages/subpackages, aim for a cohesive namespace that scans quickly: about 5-12 source files and 2-6 child packages is a useful default range.
+- Repo/source roots may have more children when each maps to a clear top-level domain, layer, app, or feature area.
+- Recheck package boundaries above roughly 15-20 files or 8+ child packages, or when responsibilities blur; avoid both one-file churn and catch-all packages like `utils`, `common`, or `misc`.
+
+## Performance
+
+Consider performance for hot/repeated paths:
+
+- per-frame/tick/input/render loops;
+- repeated parsing/canonicalization/reflection/allocation;
+- large market, cargo, and variant scans;
+- startup/load/save;
+- build/deploy scripts;
+- UI rebuilds.
+
+Prefer structural wins: cache stable derived data, bound scans, reuse indexes, make expensive work event-driven or cadence-limited, and measure before larger optimization.
+
 ## Comments
 
 Comment why, not obvious mechanics. Useful comment topics include invariants, failure modes, compatibility constraints, performance tradeoffs, reflection/classloader boundaries, generated-data assumptions, migration risks, and deploy/release invariants.
+
+Keep comments current. Remove stale comments rather than explaining around them.
 
 ## Tests And Validators
 

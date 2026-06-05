@@ -72,9 +72,13 @@ function Assert-PersistentCatalogAssignments {
     Add-Pass "FixerMarketObservedCatalog.kt writes only sanitized catalog maps to PERSISTENT_KEY"
 }
 
+$compatibilityIds = Read-Text "src/main/kotlin/weaponsprocurement/CompatibilityIds.kt"
+Assert-Contains "CompatibilityIds.kt" $compatibilityIds 'const val FIXER_OBSERVED_CATALOG_KEY: String = "weaponsProcurement.fixerObservedCatalog.v1"'
+Assert-Contains "CompatibilityIds.kt" $compatibilityIds 'const val FIXER_OBSERVED_CATALOG_VALUE_SEPARATOR: String = "|"'
+
 $catalog = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerMarketObservedCatalog.kt"
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'PERSISTENT_KEY = "weaponsProcurement.fixerObservedCatalog.v1"'
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'VALUE_SEPARATOR = "|"'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'PERSISTENT_KEY = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_KEY'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'VALUE_SEPARATOR = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_VALUE_SEPARATOR'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'existing is Map<*, *>'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'sanitizedCatalog(sector, existing)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'val catalog = HashMap<String, String>()'

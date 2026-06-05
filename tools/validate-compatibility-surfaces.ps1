@@ -111,20 +111,41 @@ foreach ($key in @(
     Assert-Contains "data/config/LunaSettings.csv" $luna $key
 }
 
+$compatibilityIds = Read-Text "src/main/kotlin/weaponsprocurement/CompatibilityIds.kt"
+foreach ($needle in @(
+    'const val MOD_ID: String = "enhanced_trading"',
+    'const val TRADE_HOTKEY: String = "wp_trade_hotkey"',
+    'const val TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"',
+    'const val SHIP_CATALOG: String = "wp.debug.shipCatalog"',
+    'const val SHIP_CATALOG_VIEW: String = "wp.debug.shipCatalogView"',
+    'const val STOCK_REVIEW: String = "data/config/enhanced_trading_stock.json"',
+    'const val MARKET_BLACKLIST: String = "data/config/enhanced_trading_market_blacklist.json"',
+    'const val WEAPON_PREFIX: String = "W:"',
+    'const val WING_PREFIX: String = "F:"',
+    'const val SECTOR_KEY: String = "BANNED_FROM_SECTOR_MARKET"',
+    'const val FIXERS_KEY: String = "BANNED_FROM_FIXERS_MARKET"',
+    'const val FIXER_OBSERVED_CATALOG_KEY: String = "weaponsProcurement.fixerObservedCatalog.v1"',
+    'const val FIXER_OBSERVED_CATALOG_VALUE_SEPARATOR: String = "|"',
+    'const val FIXERS_MARKET_SUBMARKET_ID: String = "wp_fixers_market"',
+    'const val DEBUG_EMPTY_ITEM_ICON: String = "graphics/ui/wp_debug_empty_item.png"'
+)) {
+    Assert-Contains "CompatibilityIds.kt" $compatibilityIds $needle
+}
+
 $settingsConfig = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponsProcurementConfig.kt"
 foreach ($needle in @(
-    'MOD_ID = "enhanced_trading"',
-    'SETTING_TRADE_HOTKEY = "wp_trade_hotkey"',
-    'KEY_DEBUG_TRADE_FAILURE_STEP: String = "wp.debug.failTradeStep"',
-    'KEY_DEBUG_SHIP_CATALOG: String = "wp.debug.shipCatalog"',
-    'KEY_DEBUG_SHIP_CATALOG_VIEW: String = "wp.debug.shipCatalogView"'
+    'MOD_ID = CompatibilityIds.MOD_ID',
+    'SETTING_TRADE_HOTKEY = CompatibilityIds.Luna.TRADE_HOTKEY',
+    'KEY_DEBUG_TRADE_FAILURE_STEP: String = CompatibilityIds.Diagnostics.TRADE_FAILURE_STEP',
+    'KEY_DEBUG_SHIP_CATALOG: String = CompatibilityIds.Diagnostics.SHIP_CATALOG',
+    'KEY_DEBUG_SHIP_CATALOG_VIEW: String = CompatibilityIds.Diagnostics.SHIP_CATALOG_VIEW'
 )) {
     Assert-Contains "WeaponsProcurementConfig.kt" $settingsConfig $needle
 }
 
 $stockConfig = Read-Text "src/main/kotlin/weaponsprocurement/config/StockReviewConfig.kt"
 foreach ($needle in @(
-    'CONFIG_PATH = "data/config/enhanced_trading_stock.json"',
+    'CONFIG_PATH = CompatibilityIds.ConfigFiles.STOCK_REVIEW',
     'json.optJSONObject("desiredDefaults")',
     'json.optJSONObject("perWeapon")',
     'json.optJSONObject("perItem")',
@@ -136,23 +157,23 @@ foreach ($needle in @(
 
 $blacklistConfig = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponMarketBlacklist.kt"
 foreach ($needle in @(
-    'CONFIG_PATH = "data/config/enhanced_trading_market_blacklist.json"',
-    'SECTOR_KEY = "BANNED_FROM_SECTOR_MARKET"',
-    'FIXERS_KEY = "BANNED_FROM_FIXERS_MARKET"'
+    'CONFIG_PATH = CompatibilityIds.ConfigFiles.MARKET_BLACKLIST',
+    'SECTOR_KEY = CompatibilityIds.MarketBlacklist.SECTOR_KEY',
+    'FIXERS_KEY = CompatibilityIds.MarketBlacklist.FIXERS_KEY'
 )) {
     Assert-Contains "WeaponMarketBlacklist.kt" $blacklistConfig $needle
 }
 
 $stockItemType = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/StockItemType.kt"
-Assert-Contains "StockItemType.kt" $stockItemType 'WEAPON("Weapons", "Weapon", "W:")'
-Assert-Contains "StockItemType.kt" $stockItemType 'WING("Wings", "Wing", "F:")'
+Assert-Contains "StockItemType.kt" $stockItemType 'WEAPON("Weapons", "Weapon", CompatibilityIds.StockItemKeys.WEAPON_PREFIX)'
+Assert-Contains "StockItemType.kt" $stockItemType 'WING("Wings", "Wing", CompatibilityIds.StockItemKeys.WING_PREFIX)'
 
 $fixerCatalog = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerMarketObservedCatalog.kt"
-Assert-Contains "FixerMarketObservedCatalog.kt" $fixerCatalog 'PERSISTENT_KEY = "weaponsProcurement.fixerObservedCatalog.v1"'
-Assert-Contains "FixerMarketObservedCatalog.kt" $fixerCatalog 'VALUE_SEPARATOR = "|"'
+Assert-Contains "FixerMarketObservedCatalog.kt" $fixerCatalog 'PERSISTENT_KEY = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_KEY'
+Assert-Contains "FixerMarketObservedCatalog.kt" $fixerCatalog 'VALUE_SEPARATOR = CompatibilityIds.Persistence.FIXER_OBSERVED_CATALOG_VALUE_SEPARATOR'
 
 $globalMarket = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/GlobalWeaponMarketService.kt"
-Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'VIRTUAL_SUBMARKET_ID: String = "wp_fixers_market"'
+Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'VIRTUAL_SUBMARKET_ID: String = CompatibilityIds.Markets.FIXERS_MARKET_SUBMARKET_ID'
 
 $submarketAccess = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/StockSubmarketAccess.kt"
 Assert-Contains "StockSubmarketAccess.kt" $submarketAccess 'Submarkets.SUBMARKET_STORAGE == submarketId'

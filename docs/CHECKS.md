@@ -45,3 +45,4 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 - `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.
 - `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency; it does not prove LunaLib runtime UI behavior.
 - `tools/validate-fixer-persistence-contracts.ps1` is static contract coverage for the current Fixer observed-catalog save key, string-map encoding, sanitization, and blacklist/safety gates; it does not prove save migration in a live campaign.
+- Build validation also depends on the installed Shatter Lib jar matching the APIs consumed by this repo; `validateLocalBuildEnvironment` checks dependency presence, not API freshness.

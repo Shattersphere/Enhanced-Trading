@@ -4,6 +4,7 @@ import weaponsprocurement.stock.fixer.TheoreticalSaleIndex.Candidate
 import com.fs.starfarer.api.campaign.FactionAPI
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import weaponsprocurement.CompatibilityIds
 import weaponsprocurement.config.WeaponMarketBlacklist
 import weaponsprocurement.config.WeaponsProcurementConfig
 import weaponsprocurement.stock.fixer.FixerCatalogMetadata
@@ -201,7 +202,7 @@ class GlobalWeaponMarketService {
 
     companion object {
         @JvmField
-        val VIRTUAL_SUBMARKET_ID: String = "wp_fixers_market"
+        val VIRTUAL_SUBMARKET_ID: String = CompatibilityIds.Markets.FIXERS_MARKET_SUBMARKET_ID
 
         @JvmField
         val SECTOR_MARKET_NAME: String = "Sector Market"
