@@ -1,6 +1,6 @@
 # Repo Map
 
-Orientation helper for major paths. Regenerate the inventory with:
+Selective orientation helper for major paths. Use direct `rg --files` for exact discovery; use `ctx_tree` only when output would be large or noisy. Regenerate the inventory with:
 
 ```powershell
 python scripts/update-repo-map.py --write

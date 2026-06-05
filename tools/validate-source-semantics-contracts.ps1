@@ -211,6 +211,31 @@ foreach ($needle in @(
 )) {
     Assert-Contains "StockReviewExecutionController.kt source dispatch contract" $executionController $needle
 }
+$stockSourcesSection = Get-Section $executionController 'private fun stockSources(' 'private fun virtualUnitPrice('
+foreach ($needle in @(
+    'val snapshot = host.snapshot()',
+    'val record = snapshot?.getRecord(itemKey)',
+    'if (record == null) {',
+    'return Collections.emptyList()',
+    'if (sourceId.isNullOrEmpty()) {',
+    'return record.submarketStocks',
+    'for (stock in record.submarketStocks) {',
+    'if (stock.matchesSource(sourceId)) {',
+    'result.add(stock)'
+)) {
+    Assert-Contains "StockReviewExecutionController.kt current snapshot source guard" $stockSourcesSection $needle
+}
+Assert-Order "StockReviewExecutionController.kt current snapshot source guard" $stockSourcesSection @(
+    'val snapshot = host.snapshot()',
+    'val record = snapshot?.getRecord(itemKey)',
+    'if (record == null) {',
+    'return Collections.emptyList()',
+    'if (sourceId.isNullOrEmpty()) {',
+    'return record.submarketStocks',
+    'for (stock in record.submarketStocks) {',
+    'if (stock.matchesSource(sourceId)) {',
+    'result.add(stock)'
+)
 
 $sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
 $blackMarketToggle = Get-Section $sourceTransitionController 'fun toggleBlackMarket()' 'fun resetAllTrades()'
