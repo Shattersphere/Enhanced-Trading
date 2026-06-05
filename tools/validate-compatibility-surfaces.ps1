@@ -3,40 +3,7 @@ param()
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $failures = New-Object System.Collections.Generic.List[string]
-
-function Add-Failure {
-    param([string]$Message)
-    $script:failures.Add($Message)
-    Write-Host "FAIL: $Message"
-}
-
-function Add-Pass {
-    param([string]$Message)
-    Write-Host "PASS: $Message"
-}
-
-function Read-Text {
-    param([string]$RelativePath)
-    $path = Join-Path $repoRoot $RelativePath
-    if (-not (Test-Path -LiteralPath $path)) {
-        Add-Failure "$RelativePath is missing"
-        return ""
-    }
-    return Get-Content -LiteralPath $path -Raw
-}
-
-function Assert-Contains {
-    param(
-        [string]$RelativePath,
-        [string]$Text,
-        [string]$Needle
-    )
-    if ($Text.Contains($Needle)) {
-        Add-Pass "$RelativePath contains $Needle"
-    } else {
-        Add-Failure "$RelativePath must contain $Needle"
-    }
-}
+. (Join-Path $PSScriptRoot "lib\Validation.Assertions.ps1")
 
 function Assert-JsonValue {
     param(

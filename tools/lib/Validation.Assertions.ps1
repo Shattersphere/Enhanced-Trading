@@ -70,6 +70,89 @@ function Assert-NotMatch {
     }
 }
 
+function Assert-Equal {
+    param(
+        [string]$Label,
+        [object]$Actual,
+        [object]$Expected
+    )
+    if ($Actual -eq $Expected) {
+        Add-Pass "$Label is $Expected"
+    } else {
+        Add-Failure "$Label expected $Expected but was $Actual"
+    }
+}
+
+function Assert-NumberRange {
+    param(
+        [string]$Label,
+        [object]$Value,
+        [double]$Min,
+        [double]$Max
+    )
+    if ($null -eq $Value -or -not ($Value -is [int] -or $Value -is [long] -or $Value -is [double] -or $Value -is [decimal])) {
+        Add-Failure "$Label must be numeric"
+        return
+    }
+    $number = [double]$Value
+    if ($number -lt $Min -or $number -gt $Max) {
+        Add-Failure "$Label must be between $Min and $Max"
+    } else {
+        Add-Pass "$Label is within $Min..$Max"
+    }
+}
+
+function Assert-Boolean {
+    param(
+        [string]$Label,
+        [object]$Value
+    )
+    if ($Value -is [bool]) {
+        Add-Pass "$Label is Boolean"
+    } else {
+        Add-Failure "$Label must be Boolean"
+    }
+}
+
+function Assert-ObjectKeys {
+    param(
+        [string]$Label,
+        [object]$Object,
+        [string[]]$AllowedKeys
+    )
+    if ($null -eq $Object) {
+        Add-Failure "$Label is missing"
+        return
+    }
+    foreach ($key in $Object.PSObject.Properties.Name) {
+        if ($AllowedKeys -notcontains $key) {
+            Add-Failure "$Label has unsupported key '$key'"
+        }
+    }
+    Add-Pass "$Label has only supported keys"
+}
+
+function Assert-StringArray {
+    param(
+        [string]$Label,
+        [object]$Object,
+        [string]$PropertyName
+    )
+    if ($null -eq $Object -or -not $Object.PSObject.Properties.Name.Contains($PropertyName)) {
+        Add-Failure "$Label missing $PropertyName"
+        return
+    }
+    $values = @($Object.$PropertyName)
+    foreach ($value in $values) {
+        if ($value -is [string] -and -not [string]::IsNullOrWhiteSpace($value)) {
+            Add-Pass "$PropertyName entry '$value' is a non-empty string"
+        } else {
+            Add-Failure "$PropertyName entries must be non-empty strings"
+        }
+    }
+    Add-Pass "$PropertyName is a string list with $($values.Count) entr$(if ($values.Count -eq 1) { 'y' } else { 'ies' })"
+}
+
 function Assert-Order {
     param(
         [string]$Label,
