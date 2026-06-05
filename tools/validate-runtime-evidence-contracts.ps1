@@ -66,9 +66,21 @@ foreach ($needle in @(
     "Invoke-ValidationCommand -Label `"rollback diagnostic analysis`"",
     "Invoke-ValidationCommand -Label `"ship catalog diagnostic analysis`"",
     "ConvertTo-PowerShellArrayLiteral -Values `$expectedSteps",
-    "ConvertTo-PowerShellArrayLiteral -Values `$expectedHulls"
+    "ConvertTo-PowerShellArrayLiteral -Values `$expectedHulls",
+    "`$shipRequired = `$ExpectShipHull.Count -gt 0",
+    "Invoke-ValidationCommand -Label `"ship catalog diagnostic analysis`" -Command `$shipCommand -Required:`$shipRequired"
 )) {
     Assert-Contains "collect-runtime-validation-evidence.ps1 contract" $collector $needle
+}
+
+$shipAnalyzer = Read-Text "tools/analyze-ship-catalog-diagnostics.ps1"
+foreach ($needle in @(
+    "function Get-RequiredIntField",
+    "Ship catalog summary missing required field",
+    "Ship catalog summary field",
+    "is not an integer"
+)) {
+    Assert-Contains "analyze-ship-catalog-diagnostics.ps1 contract" $shipAnalyzer $needle
 }
 
 $collectorLiteral = ConvertTo-PowerShellLiteral -Value $collectorPath
@@ -157,6 +169,21 @@ try {
             "PASS: Expected hull 'hull_alpha' appeared in diagnostic detail.",
             "PASS: Expected hull 'hull_beta' appeared in diagnostic detail.",
             "PASS: Runtime validation evidence collection completed."
+        )
+
+    @(
+        "WP_SHIP_CATALOG_DIAG PASS summary observedHullTypes=0 theoreticalHullTypes=2 common=2 uncommon=0 rare=0",
+        "WP_SHIP_CATALOG_DIAG theoretical hull=hull_alpha"
+    ) | Set-Content -LiteralPath $shipLog -Encoding UTF8
+
+    Invoke-CollectorCommand `
+        -Label "ship catalog evidence rejects malformed summary" `
+        -Command "`$env:STARSECTOR_DIRECTORY = ''; & $collectorLiteral -LogPath $shipLiteral -ExpectShipHull @('hull_alpha')" `
+        -ExpectedExitCode 1 `
+        -ExpectedOutput @(
+            "Ship catalog summary missing required field 'veryRare'.",
+            "FAIL: ship catalog diagnostic analysis failed with exit code 1",
+            "Runtime validation evidence collection failed."
         )
 } finally {
     foreach ($path in @($rollbackLog, $shipLog)) {

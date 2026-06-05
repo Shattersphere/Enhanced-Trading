@@ -62,6 +62,25 @@ function To-Int {
     return $Default
 }
 
+function Get-RequiredIntField {
+    param(
+        [string]$Line,
+        [string]$Name,
+        [System.Collections.Generic.List[string]]$Failures
+    )
+    $raw = Get-Field -Line $Line -Name $Name
+    if ($null -eq $raw -or [string]::IsNullOrWhiteSpace([string]$raw)) {
+        $Failures.Add("Ship catalog summary missing required field '$Name'.")
+        return 0
+    }
+    $parsed = 0
+    if ([int]::TryParse([string]$raw, [ref]$parsed)) {
+        return $parsed
+    }
+    $Failures.Add("Ship catalog summary field '$Name' is not an integer: '$raw'.")
+    return 0
+}
+
 function Latest-DiagnosticWindow {
     param([string[]]$Lines)
     if ($All -or $Lines.Count -eq 0) {
@@ -121,12 +140,13 @@ if ($summaryLines.Count -eq 0) {
 }
 
 $summary = $summaryLines[-1]
-$observedHullTypes = To-Int (Get-Field -Line $summary -Name "observedHullTypes")
-$theoreticalHullTypes = To-Int (Get-Field -Line $summary -Name "theoreticalHullTypes")
-$common = To-Int (Get-Field -Line $summary -Name "common")
-$uncommon = To-Int (Get-Field -Line $summary -Name "uncommon")
-$rare = To-Int (Get-Field -Line $summary -Name "rare")
-$veryRare = To-Int (Get-Field -Line $summary -Name "veryRare")
+$failures = New-Object System.Collections.Generic.List[string]
+$observedHullTypes = Get-RequiredIntField -Line $summary -Name "observedHullTypes" -Failures $failures
+$theoreticalHullTypes = Get-RequiredIntField -Line $summary -Name "theoreticalHullTypes" -Failures $failures
+$common = Get-RequiredIntField -Line $summary -Name "common" -Failures $failures
+$uncommon = Get-RequiredIntField -Line $summary -Name "uncommon" -Failures $failures
+$rare = Get-RequiredIntField -Line $summary -Name "rare" -Failures $failures
+$veryRare = Get-RequiredIntField -Line $summary -Name "veryRare" -Failures $failures
 
 if ($theoreticalHullTypes -gt 0) {
     Write-Gate -Status "PASS" -Message "Theoretical ship catalog produced $theoreticalHullTypes hull type(s)."
@@ -182,6 +202,16 @@ if ($missingTargetLines.Count -gt 0) {
 }
 
 if ($theoreticalHullTypes -le 0 -or $targetFailures.Count -gt 0) {
+    foreach ($failure in $failures) {
+        Write-Gate -Status "FAIL" -Message $failure
+    }
+    throw "Ship catalog diagnostic analysis failed."
+}
+
+if ($failures.Count -gt 0) {
+    foreach ($failure in $failures) {
+        Write-Gate -Status "FAIL" -Message $failure
+    }
     throw "Ship catalog diagnostic analysis failed."
 }
 

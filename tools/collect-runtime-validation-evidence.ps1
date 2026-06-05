@@ -179,7 +179,8 @@ if ($AnalyzeShipCatalog -or $ExpectShipHull.Count -gt 0) {
     if ($AllowMissingShipTargets) {
         $shipCommand += " -AllowMissingTargets"
     }
-    Invoke-ValidationCommand -Label "ship catalog diagnostic analysis" -Command $shipCommand
+    $shipRequired = $ExpectShipHull.Count -gt 0
+    Invoke-ValidationCommand -Label "ship catalog diagnostic analysis" -Command $shipCommand -Required:$shipRequired
 } else {
     Write-Gate -Status "SKIP" -Message "Ship catalog diagnostics not requested. Pass -AnalyzeShipCatalog or -ExpectShipHull."
 }
