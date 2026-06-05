@@ -40,6 +40,12 @@ class StockReviewConfig private constructor(
         return ignored == true
     }
 
+    fun isIgnored(itemType: StockItemType, itemId: String?): Boolean {
+        val typedIgnored = ignoredItems[itemType.key(itemId)]
+        if (typedIgnored != null) return typedIgnored
+        return ignoredItems[itemId] == true
+    }
+
     fun desiredFighterWingCount(wingId: String?): Int {
         val override = desiredOverride(StockItemType.WING, wingId)
         return override ?: fighterWingDesired

@@ -59,7 +59,7 @@ class WeaponStockSnapshotBuilder {
             val wingSpec = if (StockItemType.WING == itemType) StockItemSpecs.wingSpec(itemId) else null
             if (spec == null && wingSpec == null) continue
             val displayName = displayName(itemType, spec, wingSpec) ?: continue
-            if (config.isIgnored(itemKey) || config.isIgnored(itemId)) continue
+            if (config.isIgnored(itemType, itemId)) continue
 
             val ownedCount = getCount(owned, itemKey)
             val purchasableCount = marketStock.getPurchasableTotal(itemKey)

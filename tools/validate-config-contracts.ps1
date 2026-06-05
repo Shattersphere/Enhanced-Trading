@@ -217,10 +217,16 @@ foreach ($needle in @(
     Assert-Contains "StockReviewConfig.kt stock JSON parser uses schema constants" $stockReviewConfigSource $needle
 }
 Assert-Contains "StockReviewConfig.kt desired override contract" $stockReviewConfigSource 'private fun desiredOverride(itemType: StockItemType, itemId: String?): Int?'
+Assert-Contains "StockReviewConfig.kt ignored override contract" $stockReviewConfigSource 'fun isIgnored(itemType: StockItemType, itemId: String?): Boolean'
 Assert-Order "StockReviewConfig.kt typed/raw override priority" $stockReviewConfigSource @(
     'val typedOverride = desiredOverrides[itemType.key(itemId)]',
     'if (typedOverride != null) return typedOverride',
     'return desiredOverrides[itemId]'
+)
+Assert-Order "StockReviewConfig.kt typed/raw ignored priority" $stockReviewConfigSource @(
+    'val typedIgnored = ignoredItems[itemType.key(itemId)]',
+    'if (typedIgnored != null) return typedIgnored',
+    'return ignoredItems[itemId] == true'
 )
 Assert-Contains "StockReviewConfig.kt weapon override contract" $stockReviewConfigSource 'val override = desiredOverride(StockItemType.WEAPON, weaponId)'
 Assert-Contains "StockReviewConfig.kt wing override contract" $stockReviewConfigSource 'val override = desiredOverride(StockItemType.WING, wingId)'
@@ -232,6 +238,8 @@ Assert-NotContains "DesiredStockService.kt wing desired contract" $desiredStockS
 
 $snapshotBuilderSource = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/WeaponStockSnapshotBuilder.kt"
 Assert-Contains "WeaponStockSnapshotBuilder.kt wing desired contract" $snapshotBuilderSource 'desiredStockService.desiredWingCount(itemId)'
+Assert-Contains "WeaponStockSnapshotBuilder.kt ignored override contract" $snapshotBuilderSource 'config.isIgnored(itemType, itemId)'
+Assert-NotContains "WeaponStockSnapshotBuilder.kt ignored override contract" $snapshotBuilderSource 'config.isIgnored(itemKey) || config.isIgnored(itemId)'
 
 $blacklistSource = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponMarketBlacklist.kt"
 foreach ($needle in @(
