@@ -114,7 +114,7 @@ object StockItemStacks {
     fun unitCargoSpace(stack: CargoStackAPI?): Float {
         if (stack == null) return 1f
         val value = stack.cargoSpacePerUnit
-        return if (value <= 0f) 1f else value
+        return if (value <= 0f || value.isNaN() || value.isInfinite()) 1f else value
     }
 
     @JvmStatic

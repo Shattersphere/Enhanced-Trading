@@ -118,18 +118,24 @@ $plan = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/StockPurchasePl
 foreach ($needle in @(
     'val lineCost = TradeMoney.lineTotal(source.unitPrice, quantity)',
     'if (lineCost < 0L) continue',
+    'val lineSpace = source.unitCargoSpace * quantity',
+    'if (lineSpace < 0f || lineSpace.isNaN() || lineSpace.isInfinite()) continue',
     'lines.add(StockPurchaseLine(source, quantity))',
     'remaining -= quantity',
-    'totalCost = TradeMoney.safeAdd(totalCost, lineCost)'
+    'totalCost = TradeMoney.safeAdd(totalCost, lineCost)',
+    'totalSpace += lineSpace'
 )) {
-    Assert-Contains "StockPurchasePlan.kt invalid-price guard" $plan $needle
+    Assert-Contains "StockPurchasePlan.kt invalid plan-source guard" $plan $needle
 }
-Assert-Order "StockPurchasePlan.kt invalid-price guard" $plan @(
+Assert-Order "StockPurchasePlan.kt invalid plan-source guard" $plan @(
     'val lineCost = TradeMoney.lineTotal(source.unitPrice, quantity)',
     'if (lineCost < 0L) continue',
+    'val lineSpace = source.unitCargoSpace * quantity',
+    'if (lineSpace < 0f || lineSpace.isNaN() || lineSpace.isInfinite()) continue',
     'lines.add(StockPurchaseLine(source, quantity))',
     'remaining -= quantity',
-    'totalCost = TradeMoney.safeAdd(totalCost, lineCost)'
+    'totalCost = TradeMoney.safeAdd(totalCost, lineCost)',
+    'totalSpace += lineSpace'
 )
 
 $money = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/TradeMoney.kt"

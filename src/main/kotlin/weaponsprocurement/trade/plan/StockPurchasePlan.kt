@@ -23,11 +23,13 @@ class StockPurchasePlan private constructor(
                 if (quantity <= 0) continue
                 val lineCost = TradeMoney.lineTotal(source.unitPrice, quantity)
                 if (lineCost < 0L) continue
+                val lineSpace = source.unitCargoSpace * quantity
+                if (lineSpace < 0f || lineSpace.isNaN() || lineSpace.isInfinite()) continue
                 lines.add(StockPurchaseLine(source, quantity))
                 remaining -= quantity
                 totalQuantity += quantity
                 totalCost = TradeMoney.safeAdd(totalCost, lineCost)
-                totalSpace += source.unitCargoSpace * quantity
+                totalSpace += lineSpace
             }
             return StockPurchasePlan(lines, totalQuantity, totalCost, totalSpace)
         }

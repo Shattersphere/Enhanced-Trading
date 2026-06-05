@@ -100,6 +100,16 @@ foreach ($needle in @(
     Assert-Contains "MarketStockService.kt builder merge metadata contract" $marketStock $needle
 }
 
+$stockItemStacks = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/StockItemStacks.kt"
+foreach ($needle in @(
+    'fun unitCargoSpace(stack: CargoStackAPI?): Float',
+    'if (stack == null) return 1f',
+    'val value = stack.cargoSpacePerUnit',
+    'return if (value <= 0f || value.isNaN() || value.isInfinite()) 1f else value'
+)) {
+    Assert-Contains "StockItemStacks.kt cargo-space source contract" $stockItemStacks $needle
+}
+
 $submarketWeaponStock = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/SubmarketWeaponStock.kt"
 foreach ($needle in @(
     'val sourceId: String?',
