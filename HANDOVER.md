@@ -32,7 +32,7 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `e92b77f` (`Extract weapon tooltip row builder`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `50f0f23` (`Extract item tooltip context builder`).
 
 Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
@@ -40,8 +40,9 @@ Recent commits hardened trade and ship execution around unsafe mutation failures
 - `StockReviewTooltipIconPanelPlugin`: sprite-backed icon panel drawing for non-weapon tooltip icons.
 - `StockReviewWingTooltipRenderer`: fighter LPC tooltip rendering.
 - `StockReviewWeaponTooltipRows`: weapon primary/ancillary stat row derivation.
+- `StockReviewItemTooltipContext`: cargo-space, price, owned-count, and Shatter Lib context-line construction.
 
-`StockReviewItemTooltip` still owns the padded weapon tooltip shell, cargo/price/owned context, description/custom text handling, Shatter Lib context construction, and weapon icon-grid rendering. It remains a practical next cleanup target, but only through small extractions that preserve Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation and current debug/stress behavior.
+`StockReviewItemTooltip` still owns the padded weapon tooltip shell, description/custom text handling, and weapon icon-grid rendering. It remains a practical next cleanup target, but only through small extractions that preserve Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation and current debug/stress behavior.
 
 Runtime proof has not caught up to static/source cleanup because the live installed Shatter Lib jar is stale. Until `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar` contains `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`, build with the Shatter Lib checkout override for source/package proof only and do not claim live deploy parity.
 
@@ -213,7 +214,8 @@ Normal item records delegate to Shatter Lib `ShatterWeaponTooltip` and `ShatterW
 
 Current item-tooltip owners:
 
-- `StockReviewItemTooltip`: item tooltip orchestration, cargo/price/owned context, description/custom text, Shatter Lib context, and remaining weapon debug renderer shell.
+- `StockReviewItemTooltip`: item tooltip orchestration, description/custom text, and remaining weapon debug renderer shell.
+- `StockReviewItemTooltipContext`: cargo-space, price, owned-count, and Shatter Lib context-line construction.
 - `StockReviewWeaponTooltipRows`: weapon stat rows.
 - `StockReviewWingTooltipRenderer`: fighter LPC panel layout.
 - `StockReviewTooltipIconPanelPlugin`: sprite icon panel drawing.
@@ -304,6 +306,6 @@ Prepare public export:
 
 ## Recommended Next Steps
 
-Recommended: continue one bounded tooltip cleanup before expanding scope. The best next source-safe chunk is extracting weapon icon-grid rendering or cargo/context line construction from `StockReviewItemTooltip`, then running GUI/Kotlin/jar checks and recording that runtime visual proof is still outstanding.
+Recommended: continue one bounded tooltip cleanup before expanding scope. The best next source-safe chunk is extracting weapon icon-grid rendering from `StockReviewItemTooltip`, then running GUI/Kotlin/jar checks and recording that runtime visual proof is still outstanding.
 
 After the stale installed Shatter Lib dependency is resolved, deploy/parity-check the mod, visually smoke weapon/wing/ship tooltips and the 4x5 ship grid, then perform rollback fault validation for item trades and update `.agent/BRIEF.md` with the verified runtime result.

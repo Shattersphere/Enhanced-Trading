@@ -11,7 +11,7 @@ This file is active work only. Completed migrations, old public-release cleanup 
 - Cargo-cell weapon/LPC badges live in the standalone private `D:\Sean Mods\Weapon Badges` repo. Do not reintroduce badge helpers, generated badge sprites, count bridges, or `CargoStackView` patching tools here.
 - Template-synced project facts and checks now live in `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`. Use those as the source of truth for commands, paths, dependencies, Git mode, and shared-library authorization.
 - Live deploy/runtime proof is currently blocked by the installed Shatter Lib jar at `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar`, which is missing `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`. Build with the Shatter Lib checkout override for source/package proof only; do not claim live parity until the installed dependency is updated and deploy parity passes.
-- Recent pushed modernization baseline: `e92b77f` split weapon tooltip row building after earlier commits extracted stock tooltip models, icon-panel rendering, and wing tooltip rendering. Source/static checks passed for that work, but in-game tooltip acceptance was not run.
+- Recent pushed modernization baseline: `50f0f23` split item tooltip context construction after earlier commits extracted stock tooltip models, icon-panel rendering, wing tooltip rendering, and weapon tooltip row building. Source/static checks passed for that work, but in-game tooltip acceptance was not run.
 - A requested sync with `D:\Sean Code Projects\General Projects\Generic Template Repo` was started only as read-only comparison before this handoff request superseded it. The template repo currently has uncommitted governance updates; future sync should be a separate docs/tooling task.
 
 ## Active Work
@@ -25,7 +25,7 @@ Scope:
 - Ship grid density, paging, hull-class text filtering, and filter modal layout.
 - Ship, weapon, and wing tooltip sizing, truncation, stat sourcing, and debug stress records.
 - Debug UI visibility behind the LunaLib debug toggle.
-- Source cleanup around tooltip owners only where it reduces real maintenance cost; current likely next split is weapon icon-grid rendering or cargo/context line construction out of `StockReviewItemTooltip`.
+- Source cleanup around tooltip owners only where it reduces real maintenance cost; current likely next split is weapon icon-grid rendering out of `StockReviewItemTooltip`.
 
 Constraints:
 
