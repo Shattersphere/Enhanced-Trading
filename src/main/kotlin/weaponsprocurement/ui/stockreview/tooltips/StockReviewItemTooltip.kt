@@ -1,6 +1,5 @@
 package weaponsprocurement.ui.stockreview.tooltips
 
-import weaponsprocurement.ui.WimGuiText
 import weaponsprocurement.ui.WimGuiPanelPlugin
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
@@ -9,7 +8,6 @@ import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.CargoStackAPI
 import com.fs.starfarer.api.loading.Description
 import com.fs.starfarer.api.loading.FighterWingSpecAPI
-import com.fs.starfarer.api.loading.WeaponSpecAPI
 import com.fs.starfarer.api.ui.Alignment
 import com.fs.starfarer.api.ui.CustomPanelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
@@ -79,7 +77,13 @@ class StockReviewItemTooltip private constructor(
         val spec = record.spec ?: return
         tooltip.addTitle(record.displayName, titleColor())
         Misc.addDesignTypePara(tooltip, spec.manufacturer, SMALL_PAD)
-        addDescription(tooltip)
+        StockReviewWeaponTooltipTextRenderer.addDescription(
+            tooltip,
+            record.itemId,
+            CONTENT_WIDTH,
+            SECTION_PAD,
+            SMALL_PAD,
+        )
         addCargoContext(tooltip)
 
         addSectionHeading(tooltip, "Primary data", SECTION_PAD)
@@ -91,7 +95,15 @@ class StockReviewItemTooltip private constructor(
             weaponRows().primaryRows(spec),
             SECTION_CONTENT_PAD,
         )
-        addSpecPara(tooltip, spec.customPrimary, spec.customPrimaryHL, CUSTOM_TEXT_PAD, spec)
+        StockReviewWeaponTooltipTextRenderer.addCustomSpecPara(
+            tooltip,
+            spec.customPrimary,
+            spec.customPrimaryHL,
+            spec,
+            CONTENT_WIDTH,
+            CUSTOM_TEXT_PAD,
+            SMALL_PAD,
+        )
 
         addSectionHeading(tooltip, "Ancillary data", SECTION_PAD)
         StockReviewWeaponTooltipIconGridRenderer.addDamageTypeGrid(
@@ -101,13 +113,26 @@ class StockReviewItemTooltip private constructor(
             weaponRows().ancillaryRows(spec),
             SECTION_CONTENT_PAD,
         )
-        addSpecPara(tooltip, spec.customAncillary, spec.customAncillaryHL, CUSTOM_TEXT_PAD, spec)
+        StockReviewWeaponTooltipTextRenderer.addCustomSpecPara(
+            tooltip,
+            spec.customAncillary,
+            spec.customAncillaryHL,
+            spec,
+            CONTENT_WIDTH,
+            CUSTOM_TEXT_PAD,
+            SMALL_PAD,
+        )
     }
 
     private fun createDebugWeaponTooltip(tooltip: TooltipMakerAPI, profile: StockDebugItemProfile) {
         tooltip.addTitle(profile.tooltipTitle, titleColor())
         Misc.addDesignTypePara(tooltip, profile.manufacturer, SMALL_PAD)
-        tooltip.addPara(tooltipFormat(truncateForTooltipLines(profile.description, DESCRIPTION_MAX_LINES + 2, CONTENT_WIDTH, tooltip)), SECTION_PAD, textColor())
+        StockReviewWeaponTooltipTextRenderer.addDebugDescription(
+            tooltip,
+            profile.description,
+            CONTENT_WIDTH,
+            SECTION_PAD,
+        )
         addCargoContext(tooltip)
 
         addSectionHeading(tooltip, "Primary data", SECTION_PAD)
@@ -129,55 +154,10 @@ class StockReviewItemTooltip private constructor(
         )
     }
 
-    private fun addDescription(tooltip: TooltipMakerAPI) {
-        val description: Description = try {
-            Global.getSettings().getDescription(record.itemId, Description.Type.WEAPON)
-        } catch (_: RuntimeException) {
-            null
-        } ?: return
-        val firstPara = description.text1FirstPara
-        if (hasText(firstPara)) {
-            val label = tooltip.addPara(tooltipFormat(truncateForTooltipLines(firstPara.trim(), DESCRIPTION_MAX_LINES, CONTENT_WIDTH, tooltip)), SECTION_PAD)
-            if (hasText(description.text2) && description.text2.trim().startsWith("-")) {
-                label.italicize()
-            }
-        }
-        if (hasText(description.text2) && description.text2.trim().startsWith("-")) {
-            val label = tooltip.addPara(tooltipFormat(description.text2.trim()), SMALL_PAD, mutedColor())
-            label.italicize()
-        }
-    }
-
     private fun addCargoContext(tooltip: TooltipMakerAPI) {
         for (line in itemContext.weaponCargoLines()) {
             addHighlightedPara(tooltip, line.text, line.highlight, SECTION_PAD)
         }
-    }
-
-    private fun addSpecPara(tooltip: TooltipMakerAPI, text: String?, highlight: String?, pad: Float, spec: WeaponSpecAPI) {
-        if (!hasText(text)) {
-            return
-        }
-        tooltip.addSpacer(SMALL_PAD)
-        val rawHighlights = splitHighlights(highlight)
-        val substitutedText = substituteFormatSpecifiers(text, rawHighlights, spec)
-        val displayText = truncateForTooltipLines(substitutedText, CUSTOM_TEXT_MAX_LINES, CONTENT_WIDTH, tooltip)
-        val highlights = visibleHighlights(displayText, rawHighlights)
-        if (highlights.isNotEmpty()) {
-            val label = tooltip.addPara(tooltipFormat(displayText), pad, textColor(), highlightColor(), *highlights)
-            label.setHighlight(*highlights)
-            label.setHighlightColor(highlightColor())
-            tooltip.addSpacer(SMALL_PAD)
-            return
-        }
-        tooltip.addPara(tooltipFormat(displayText), pad, textColor())
-        tooltip.addSpacer(SMALL_PAD)
-    }
-
-    private fun truncateForTooltipLines(text: String?, maxLines: Int, width: Float, tooltip: TooltipMakerAPI): String {
-        val source = text?.takeIf { hasText(it) } ?: return text ?: ""
-        val normalized = source.trim().replace(Regex("\\s+"), " ")
-        return WimGuiText.wrapToWidth(normalized, tooltip, width, maxLines).joinToString("\n")
     }
 
     private fun addHighlightedPara(tooltip: TooltipMakerAPI, text: String, highlight: String?, pad: Float) {
@@ -201,8 +181,6 @@ class StockReviewItemTooltip private constructor(
         private const val SECTION_CONTENT_PAD = 12f
         private const val CUSTOM_TEXT_PAD = 6f
         private const val SECTION_HEADING_HEIGHT = 22f
-        private const val DESCRIPTION_MAX_LINES = 4
-        private const val CUSTOM_TEXT_MAX_LINES = 3
         @JvmStatic
         @Suppress("UNUSED_PARAMETER")
         fun forRecord(record: WeaponStockRecord?, toggleText: String?): TooltipMakerAPI.TooltipCreator? {
@@ -384,85 +362,11 @@ class StockReviewItemTooltip private constructor(
             return Math.round(value).toString()
         }
 
-        private fun splitHighlights(highlight: String?): Array<String> {
-            val source = highlight?.takeIf { hasText(it) } ?: return emptyArray()
-            val result = ArrayList<String>()
-            for (raw in source.split("|")) {
-                val trimmed = raw.trim()
-                if (trimmed.isNotEmpty()) {
-                    result.add(trimmed)
-                }
-            }
-            return result.toTypedArray()
-        }
-
         private fun titleColor(): Color = Misc.getTooltipTitleAndLightHighlightColor()
 
         private fun textColor(): Color = StockReviewTooltipPanel.TEXT
 
-        private fun mutedColor(): Color = StockReviewTooltipPanel.MUTED
-
         private fun highlightColor(): Color = Misc.getHighlightColor()
-
-        private fun visibleHighlights(text: String?, highlights: Array<String>?): Array<String> {
-            if (!hasText(text) || highlights == null || highlights.isEmpty()) {
-                return emptyArray()
-            }
-            val result = ArrayList<String>()
-            val source = text ?: return emptyArray()
-            for (highlight in highlights) {
-                if (hasText(highlight) && source.contains(highlight)) {
-                    result.add(highlight)
-                }
-            }
-            return result.toTypedArray()
-        }
-
-        private fun substituteFormatSpecifiers(text: String?, highlights: Array<String>, spec: WeaponSpecAPI): String {
-            if (!hasText(text)) {
-                return text ?: ""
-            }
-            val source = text ?: return ""
-            val result = StringBuilder(source.length)
-            var highlightIndex = 0
-            var i = 0
-            while (i < source.length) {
-                val c = source[i]
-                if (c != '%' || i + 1 >= source.length) {
-                    result.append(c)
-                    i++
-                    continue
-                }
-                val next = source[i + 1]
-                if (next == '%') {
-                    result.append('%')
-                    i += 2
-                    continue
-                }
-                if (next == 's' || next == 'd' || next == 'f') {
-                    result.append(formatHighlightValue(highlights, highlightIndex, spec))
-                    highlightIndex++
-                    i += 2
-                    continue
-                }
-                result.append(c)
-                i++
-            }
-            return result.toString()
-        }
-
-        private fun formatHighlightValue(highlights: Array<String>?, index: Int, spec: WeaponSpecAPI?): String {
-            if (highlights != null && index >= 0 && index < highlights.size && hasText(highlights[index])) {
-                return highlights[index].trim()
-            }
-            if (index == 0 && spec != null && spec.derivedStats != null) {
-                val value = if (spec.isBeam) spec.derivedStats.dps else spec.derivedStats.damagePerShot
-                if (validNumber(value) && value > 0f) {
-                    return formatOneDecimalTrim(value)
-                }
-            }
-            return "?"
-        }
 
         private fun tooltipFormat(value: String?): String = value?.replace("%", "%%") ?: ""
 
