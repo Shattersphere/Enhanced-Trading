@@ -6,10 +6,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.rendering.StockReviewWeaponIconPlugin
 import com.fs.starfarer.api.Global
-import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin
 import com.fs.starfarer.api.campaign.CargoStackAPI
-import com.fs.starfarer.api.combat.DamageType
-import com.fs.starfarer.api.combat.WeaponAPI
 import com.fs.starfarer.api.loading.Description
 import com.fs.starfarer.api.loading.FighterWingSpecAPI
 import com.fs.starfarer.api.loading.WeaponSpecAPI
@@ -86,18 +83,24 @@ class StockReviewItemTooltip private constructor(
         addCargoContext(tooltip)
 
         addSectionHeading(tooltip, "Primary data", SECTION_PAD)
-        addIconGrid(
+        StockReviewWeaponTooltipIconGridRenderer.addWeaponGrid(
             tooltip,
+            CONTENT_WIDTH,
             StockReviewWeaponIconPlugin.spriteName(spec),
-            weaponRows().primaryRows(spec),
-            true,
             StockReviewWeaponIconPlugin.motifType(spec),
+            weaponRows().primaryRows(spec),
             SECTION_CONTENT_PAD,
         )
         addSpecPara(tooltip, spec.customPrimary, spec.customPrimaryHL, CUSTOM_TEXT_PAD, spec)
 
         addSectionHeading(tooltip, "Ancillary data", SECTION_PAD)
-        addIconGrid(tooltip, damageIconSpriteName(spec.damageType), weaponRows().ancillaryRows(spec), false, null, SECTION_CONTENT_PAD)
+        StockReviewWeaponTooltipIconGridRenderer.addDamageTypeGrid(
+            tooltip,
+            CONTENT_WIDTH,
+            spec.damageType,
+            weaponRows().ancillaryRows(spec),
+            SECTION_CONTENT_PAD,
+        )
         addSpecPara(tooltip, spec.customAncillary, spec.customAncillaryHL, CUSTOM_TEXT_PAD, spec)
     }
 
@@ -108,10 +111,22 @@ class StockReviewItemTooltip private constructor(
         addCargoContext(tooltip)
 
         addSectionHeading(tooltip, "Primary data", SECTION_PAD)
-        addIconGrid(tooltip, profile.iconSpriteName, debugRows(profile.primaryRows), false, null, SECTION_CONTENT_PAD)
+        StockReviewWeaponTooltipIconGridRenderer.addSpriteGrid(
+            tooltip,
+            CONTENT_WIDTH,
+            profile.iconSpriteName,
+            debugRows(profile.primaryRows),
+            SECTION_CONTENT_PAD,
+        )
 
         addSectionHeading(tooltip, "Ancillary data", SECTION_PAD)
-        addIconGrid(tooltip, profile.iconSpriteName, debugRows(profile.ancillaryRows), false, null, SECTION_CONTENT_PAD)
+        StockReviewWeaponTooltipIconGridRenderer.addSpriteGrid(
+            tooltip,
+            CONTENT_WIDTH,
+            profile.iconSpriteName,
+            debugRows(profile.ancillaryRows),
+            SECTION_CONTENT_PAD,
+        )
     }
 
     private fun addDescription(tooltip: TooltipMakerAPI) {
@@ -137,44 +152,6 @@ class StockReviewItemTooltip private constructor(
         for (line in itemContext.weaponCargoLines()) {
             addHighlightedPara(tooltip, line.text, line.highlight, SECTION_PAD)
         }
-    }
-
-    private fun addIconGrid(
-        tooltip: TooltipMakerAPI,
-        spriteName: String?,
-        rows: List<StockReviewTooltipStatRow>,
-        weaponTile: Boolean,
-        motifType: WeaponAPI.WeaponType?,
-        pad: Float,
-    ) {
-        if (rows.isEmpty()) {
-            return
-        }
-        val visibleRows = cappedRows(rows, MAX_ICON_GRID_ROWS)
-        val height = maxOf(ICON_SIZE + ICON_TOP, visibleRows.size * GRID_ROW_HEIGHT)
-        val panel = Global.getSettings().createCustom(CONTENT_WIDTH, height, BaseCustomUIPanelPlugin())
-        val icon = panel.createCustomPanel(
-            ICON_SIZE,
-            ICON_SIZE,
-            if (weaponTile) StockReviewWeaponIconPlugin(spriteName, motifType) else StockReviewTooltipIconPanelPlugin(spriteName, ICON_INSET),
-        )
-        panel.addComponent(icon).inTL(ICON_LEFT, minOf(ICON_TOP, maxOf(0f, height - ICON_SIZE)))
-
-        for (i in visibleRows.indices) {
-            val row = visibleRows[i]
-            addStatRow(panel, ICON_LEFT + ICON_SIZE + ICON_GRID_GAP, i * GRID_ROW_HEIGHT, GRID_WIDTH, GRID_ROW_HEIGHT, row)
-        }
-        tooltip.addCustom(panel, pad)
-        tooltip.addSpacer(GRID_BOTTOM_PAD)
-    }
-
-    private fun cappedRows(rows: List<StockReviewTooltipStatRow>, maxRows: Int): List<StockReviewTooltipStatRow> {
-        if (rows.size <= maxRows) {
-            return rows
-        }
-        val capped = ArrayList(rows.subList(0, maxOf(1, maxRows)))
-        capped[capped.size - 1] = StockReviewTooltipStatRow("", "...")
-        return capped
     }
 
     private fun addSpecPara(tooltip: TooltipMakerAPI, text: String?, highlight: String?, pad: Float, spec: WeaponSpecAPI) {
@@ -223,19 +200,7 @@ class StockReviewItemTooltip private constructor(
         private const val SMALL_PAD = 4f
         private const val SECTION_CONTENT_PAD = 12f
         private const val CUSTOM_TEXT_PAD = 6f
-        private const val GRID_BOTTOM_PAD = 8f
-        private const val GRID_ROW_HEIGHT = 24f
         private const val SECTION_HEADING_HEIGHT = 22f
-        private const val ICON_SIZE = 92f
-        private const val ICON_LEFT = 28f
-        private const val ICON_TOP = 12f
-        private const val ICON_INSET = 2f
-        private const val ICON_GRID_GAP = 28f
-        private const val GRID_WIDTH = CONTENT_WIDTH - ICON_LEFT - ICON_SIZE - ICON_GRID_GAP - 8f
-        private const val GRID_MIN_LABEL_WIDTH = 108f
-        private const val GRID_MAX_LABEL_WIDTH = 252f
-        private const val GRID_MIN_VALUE_WIDTH = 86f
-        private const val MAX_ICON_GRID_ROWS = 10
         private const val DESCRIPTION_MAX_LINES = 4
         private const val CUSTOM_TEXT_MAX_LINES = 3
         @JvmStatic
@@ -272,30 +237,6 @@ class StockReviewItemTooltip private constructor(
             )
         }
 
-        private fun addStatRow(panel: CustomPanelAPI, x: Float, y: Float, width: Float, height: Float, row: StockReviewTooltipStatRow?) {
-            if (row == null) {
-                return
-            }
-            if (!hasText(row.label)) {
-                addPanelLabel(panel, row.value, highlightColor(), x, y, width, height, Alignment.RMID)
-                return
-            }
-            StockReviewTooltipPanel.addStatRow(
-                panel,
-                row.label,
-                row.value,
-                textColor(),
-                highlightColor(),
-                x,
-                y,
-                width,
-                height,
-                GRID_MIN_LABEL_WIDTH,
-                GRID_MAX_LABEL_WIDTH,
-                GRID_MIN_VALUE_WIDTH,
-            )
-        }
-
         private fun addSectionHeading(tooltip: TooltipMakerAPI, text: String, pad: Float) {
             val panel = StockReviewTooltipPanel.createSectionBand(CONTENT_WIDTH, SECTION_HEADING_HEIGHT)
             addPanelLabel(panel, text, textColor(), 0f, 0f, CONTENT_WIDTH, SECTION_HEADING_HEIGHT, Alignment.MID)
@@ -313,24 +254,6 @@ class StockReviewItemTooltip private constructor(
             alignment: Alignment,
         ) {
             StockReviewTooltipPanel.addLabel(parent, text, color, x, y, width, height, alignment)
-        }
-
-        private fun damageIconSpriteName(type: DamageType?): String? {
-            var key = "icon_other"
-            if (DamageType.KINETIC == type) {
-                key = "icon_kinetic"
-            } else if (DamageType.HIGH_EXPLOSIVE == type) {
-                key = "icon_high_explosive"
-            } else if (DamageType.FRAGMENTATION == type) {
-                key = "icon_fragmentation"
-            } else if (DamageType.ENERGY == type) {
-                key = "icon_energy"
-            }
-            return try {
-                Global.getSettings().getSpriteName("ui", key)
-            } catch (_: RuntimeException) {
-                null
-            }
         }
 
         private fun addRow(rows: MutableList<StockReviewTooltipStatRow>, label: String, value: String?) {
