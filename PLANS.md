@@ -10,6 +10,7 @@ This file is active work only. Completed migrations, old public-release cleanup 
 - Ship trading is not wired into Sector Market or Fixer's Market.
 - Cargo-cell weapon/LPC badges live in the standalone private `D:\Sean Mods\Weapon Badges` repo. Do not reintroduce badge helpers, generated badge sprites, count bridges, or `CargoStackView` patching tools here.
 - Template-synced project facts and checks now live in `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`. Use those as the source of truth for commands, paths, dependencies, Git mode, and shared-library authorization.
+- Live deploy/runtime proof is currently blocked by the installed Shatter Lib jar at `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar`, which is missing `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`. Build with the Shatter Lib checkout override for source/package proof only; do not claim live parity until the installed dependency is updated and deploy parity passes.
 
 ## Active Work
 
@@ -38,9 +39,11 @@ Done when:
 
 ### 2. Runtime Rollback Fault Validation
 
-Status: active, manual-runtime evidence needed
+Status: active, blocked by stale installed Shatter Lib runtime dependency
 
 Diagnostic support emits structured `WP_STOCK_REVIEW_ROLLBACK` log records and includes `tools/analyze-trade-rollback-diagnostics.ps1` for pass/fail summarization.
+
+Before running the matrix, resolve the current deploy blocker reported by `tools/deploy-live-mod.ps1 -Status -StarsectorDir 'C:\Games\Starsector'`: the installed Shatter Lib jar must contain `com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterItemTooltipContext.class` and `com/shattersphere/shatterlib/starsector/ui/tooltip/ShatterTooltipContextLine.class`.
 
 Manual validation matrix:
 

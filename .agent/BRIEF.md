@@ -43,7 +43,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - Starsector classloading can keep stale jar/class state until restart.
 - Luna settings, data/config files, graphics, and metadata matter; jar parity alone is not sufficient for data-heavy changes.
 - Public release to `Shattersphere-Mods` must be curated. Do not mirror this private repo because it contains agent docs and local/private references.
-- Live deploy/runtime validation is currently blocked until the installed Shatter Lib jar has the API classes required by the current Enhanced Trading jar.
+- Live deploy/runtime validation is currently blocked until the installed Shatter Lib jar has the API classes required by the current Enhanced Trading jar: `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`.
 
 ## Next Best Step
 
