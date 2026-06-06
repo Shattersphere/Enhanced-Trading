@@ -78,8 +78,7 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun toggleFilter(filter: StockReviewFilter?) {
         if (filters.toggleFilter(filter)) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
@@ -88,8 +87,7 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun clearFilters() {
         if (filters.clearFilters()) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
@@ -97,8 +95,7 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun toggleShipSizeFilter(size: StockReviewShipSizeFilter?) {
         if (shipFilters.toggleSize(size)) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
@@ -108,22 +105,19 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun setShipFilterField(field: StockReviewShipFilterField?, value: String?) {
         if (shipFilters.setField(field, value)) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
     fun appendShipFilterField(field: StockReviewShipFilterField?, char: Char) {
         if (shipFilters.appendField(field, char)) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
     fun backspaceShipFilterField(field: StockReviewShipFilterField?) {
         if (shipFilters.backspaceField(field)) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
@@ -131,8 +125,7 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun clearShipFilters() {
         if (shipFilters.clear()) {
-            listScrollOffset = 0
-            markContentChanged()
+            resetListAndMarkContentChanged()
         }
     }
 
@@ -167,8 +160,7 @@ class StockReviewState : WimGuiScrollableListState {
 
     fun cycleTradeKind() {
         tradeKind = tradeKind.next()
-        listScrollOffset = 0
-        markContentChanged()
+        resetListAndMarkContentChanged()
     }
 
     fun setTradeKind(tradeKind: StockReviewTradeKind) {
@@ -176,8 +168,7 @@ class StockReviewState : WimGuiScrollableListState {
             return
         }
         this.tradeKind = tradeKind
-        listScrollOffset = 0
-        markContentChanged()
+        resetListAndMarkContentChanged()
     }
 
     fun getShipHullFilter(): String = shipHullFilter
@@ -190,8 +181,7 @@ class StockReviewState : WimGuiScrollableListState {
             return
         }
         itemSearch = normalized
-        listScrollOffset = 0
-        markContentChanged()
+        resetListAndMarkContentChanged()
     }
 
     fun appendItemSearch(char: Char) {
@@ -214,8 +204,7 @@ class StockReviewState : WimGuiScrollableListState {
             return
         }
         shipHullFilter = normalized
-        listScrollOffset = 0
-        markContentChanged()
+        resetListAndMarkContentChanged()
     }
 
     fun appendShipHullFilter(char: Char) {
@@ -268,6 +257,11 @@ class StockReviewState : WimGuiScrollableListState {
 
     private fun markContentChanged() {
         contentRevision++
+    }
+
+    private fun resetListAndMarkContentChanged() {
+        listScrollOffset = 0
+        markContentChanged()
     }
 
     private fun markContentChangedIf(changed: Boolean) {
