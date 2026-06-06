@@ -19,7 +19,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 - Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWingTooltipLayoutBuilder`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, `StockReviewWeaponTooltipIconGridRenderer`, and `StockReviewWeaponTooltipTextRenderer`. `StockReviewItemTooltip` remains the narrow orchestration/legacy weapon shell.
 - Fighter LPC Advanced Info rows now source real fighter hull stats through `WeaponStockRecord`; wing tooltip rows reuse the same labels to avoid stat drift between list rows and tooltips.
 - Fixer live and persistent observation now share `FixerReferenceSourceSelector` for purchasable reference-source filtering and price/source-name tie-breaking.
-- Remote-source sell quotes now match execution by using legal-only local sell pricing while preserving Sector black-market remote buys. Black-market submarket eligibility probing now uses the same OPEN/SNEAK trade-mode policy as transaction reporting.
+- Remote-source sell quotes now match execution by using legal-only local sell pricing while preserving Sector black-market remote buys. Black-market submarket eligibility probing and item/ship transaction reporting now share `StockSubmarketTradeModes` for OPEN/SNEAK policy.
 
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
@@ -28,7 +28,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `c6c710e` (`Align market policy contracts`)
+- Known-good source commit: `5811cdc` (`Centralize submarket trade modes`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
