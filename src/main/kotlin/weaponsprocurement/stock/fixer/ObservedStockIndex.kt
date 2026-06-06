@@ -56,7 +56,7 @@ class ObservedStockIndex {
                 unsupportedSeen = true
             }
             val currentCheapest = cheapest
-            if (currentCheapest == null || compareReferenceSource(source, currentCheapest) < 0) {
+            if (currentCheapest == null || FixerReferenceSourceSelector.compare(source, currentCheapest) < 0) {
                 cheapest = source
             }
         }
@@ -66,14 +66,6 @@ class ObservedStockIndex {
 
         val isOnlyUnsupportedCustomSubmarket: Boolean
             get() = unsupportedSeen && !vanillaSupportedSeen
-
-        companion object {
-            private fun compareReferenceSource(left: SubmarketWeaponStock, right: SubmarketWeaponStock): Int {
-                val result = left.baseUnitPrice.compareTo(right.baseUnitPrice)
-                if (result != 0) return result
-                return (left.displaySourceName ?: "").compareTo(right.displaySourceName ?: "", ignoreCase = true)
-            }
-        }
     }
 
     companion object {

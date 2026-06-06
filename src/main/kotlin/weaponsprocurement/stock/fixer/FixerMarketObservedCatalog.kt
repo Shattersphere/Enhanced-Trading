@@ -5,7 +5,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import org.apache.log4j.Logger
 import weaponsprocurement.CompatibilityIds
 import weaponsprocurement.config.WeaponMarketBlacklist
-import weaponsprocurement.stock.item.SubmarketWeaponStock
 import weaponsprocurement.stock.market.MarketStockService
 import java.util.Collections
 import java.util.HashMap
@@ -23,7 +22,7 @@ class FixerMarketObservedCatalog {
             val stock = marketStockService.collectCurrentMarketItemStock(market, true)
             for (itemKey in stock.itemKeys()) {
                 if (!FixerCatalogPolicy.isEligibleObservedItem(itemKey, blacklist)) continue
-                val source = cheapestReferenceSource(stock.getSubmarketStocks(itemKey)) ?: continue
+                val source = FixerReferenceSourceSelector.cheapest(stock.getSubmarketStocks(itemKey)) ?: continue
                 if (!catalog.containsKey(itemKey)) added++
                 catalog[itemKey] = encode(source.baseUnitPrice, source.unitCargoSpace)
             }
@@ -102,19 +101,6 @@ class FixerMarketObservedCatalog {
             return FixerCatalogPolicy.isSafeItem(itemKey)
         }
 
-        private fun cheapestReferenceSource(sources: List<SubmarketWeaponStock>?): SubmarketWeaponStock? {
-            var best: SubmarketWeaponStock? = null
-            if (sources == null) return null
-            for (source in sources) {
-                if (source.count <= 0 || !source.isPurchasable()) continue
-                val currentBest = best
-                if (currentBest == null || compareReferenceSource(source, currentBest) < 0) {
-                    best = source
-                }
-            }
-            return best
-        }
-
         private fun rawCatalog(sector: SectorAPI?): MutableMap<String, String>? {
             val persistentData = sector?.persistentData ?: return null
             val existing = persistentData[PERSISTENT_KEY]
@@ -191,15 +177,5 @@ class FixerMarketObservedCatalog {
                 LOG.warn("WP_FIXER_CATALOG pruned $pruned invalid or unsafe persistent entries.")
             }
         }
-
-        private fun compareReferenceSource(left: SubmarketWeaponStock, right: SubmarketWeaponStock): Int {
-            val result = left.baseUnitPrice.compareTo(right.baseUnitPrice)
-            return if (result != 0) {
-                result
-            } else {
-                left.displaySourceName.orEmpty().compareTo(right.displaySourceName.orEmpty(), ignoreCase = true)
-            }
-        }
-
     }
 }

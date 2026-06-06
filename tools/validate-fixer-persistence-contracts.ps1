@@ -46,6 +46,7 @@ Assert-NotMatch "FixerMarketObservedCatalog.kt" $catalog '\bdata\s+class\s+Obser
 Assert-NotMatch "FixerMarketObservedCatalog.kt" $catalog '\bSerializable\b'
 
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerCatalogPolicy.isEligibleObservedItem(itemKey, blacklist)'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerReferenceSourceSelector.cheapest(stock.getSubmarketStocks(itemKey))'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerCatalogPolicy.isSafeItem(itemKey)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'private fun decodePersistentItem(itemKey: String?, encoded: String?): ObservedItem?'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!FixerCatalogPolicy.isSafeItem(itemKey)) return null'
@@ -61,6 +62,16 @@ Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'parts[1].trim().toFloa
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!isFinite(unitCargoSpace)) return null'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'Math.max(0.01f, unitCargoSpace)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'else 1f'
+
+$selector = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerReferenceSourceSelector.kt"
+Assert-Contains "FixerReferenceSourceSelector.kt" $selector 'internal object FixerReferenceSourceSelector'
+Assert-Contains "FixerReferenceSourceSelector.kt" $selector 'fun cheapest(sources: List<SubmarketWeaponStock>?): SubmarketWeaponStock?'
+Assert-Contains "FixerReferenceSourceSelector.kt" $selector 'return source.count > 0 && source.isPurchasable()'
+Assert-Contains "FixerReferenceSourceSelector.kt" $selector 'left.baseUnitPrice.compareTo(right.baseUnitPrice)'
+Assert-Contains "FixerReferenceSourceSelector.kt" $selector 'left.displaySourceName.orEmpty().compareTo(right.displaySourceName.orEmpty(), ignoreCase = true)'
+
+$observedStockIndex = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/ObservedStockIndex.kt"
+Assert-Contains "ObservedStockIndex.kt" $observedStockIndex 'FixerReferenceSourceSelector.compare(source, currentCheapest)'
 
 $policy = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerCatalogPolicy.kt"
 Assert-Contains "FixerCatalogPolicy.kt" $policy 'fun isEligibleObservedItem(itemKey: String?, blacklist: WeaponMarketBlacklist?): Boolean'
