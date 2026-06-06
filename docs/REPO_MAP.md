@@ -65,6 +65,9 @@ python scripts/update-repo-map.py --write
   - `scripts/README.md`
   - `scripts/update-repo-map.py`
 - `src/`
+  - `src/contractTest/`
+    - `src/contractTest/kotlin/`
+      - `src/contractTest/kotlin/weaponsprocurement/`
   - `src/main/`
     - `src/main/kotlin/`
       - `src/main/kotlin/com/`
