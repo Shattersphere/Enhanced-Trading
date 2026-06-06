@@ -8,6 +8,7 @@ $failures = New-Object System.Collections.Generic.List[string]
 $shipDir = "src/main/kotlin/weaponsprocurement/ui/stockreview/ships"
 $snapshotBuilder = Read-Text "$shipDir/StockReviewShipSnapshotBuilder.kt"
 $executionController = Read-Text "$shipDir/StockReviewShipExecutionController.kt"
+$shipPreflight = Read-Text "$shipDir/StockReviewShipPreflight.kt"
 $pendingTrade = Read-Text "$shipDir/StockReviewPendingShipTrade.kt"
 $pendingTrades = Read-Text "$shipDir/StockReviewPendingShipTrades.kt"
 $tradeController = Read-Text "$shipDir/StockReviewShipTradeController.kt"
@@ -19,6 +20,7 @@ $availability = Read-Text "$shipDir/StockReviewShipAvailability.kt"
 $sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
 $panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewPanelPlugin.kt"
 $actionRowButtons = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewActionRowButtons.kt"
+$footerSpec = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rows/StockReviewFooterSpec.kt"
 $sourceState = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewSourceState.kt"
 $state = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewState.kt"
 $shipFilterState = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewShipFilterState.kt"
@@ -103,7 +105,7 @@ foreach ($needle in @(
     "val credits = playerFleet.cargo?.credits",
     'host.postMessage("Ship trades require accessible player credits.")',
     "val orderedTrades = shipExecutionOrder(trades)",
-    "val estimatedCost = netShipCreditCost(orderedTrades)",
+    "val estimatedCost = StockReviewShipPreflight.netCreditCost(orderedTrades)",
     'host.postMessage("Ship order value is too large.")',
     'host.postMessage("Need ${StockReviewFormat.credits(estimatedCost)} for these ship trades.")',
     "for (trade in orderedTrades)",
@@ -120,7 +122,7 @@ foreach ($needle in @(
 Assert-Order "StockReviewShipExecutionController.kt ship execution preflight" $confirm @(
     "val credits = playerFleet.cargo?.credits",
     "val orderedTrades = shipExecutionOrder(trades)",
-    "val estimatedCost = netShipCreditCost(orderedTrades)",
+    "val estimatedCost = StockReviewShipPreflight.netCreditCost(orderedTrades)",
     "if (estimatedCost > TradeMoney.MAX_EXECUTABLE_CREDITS)",
     "if (estimatedCost > 0L && credits.get() + 0.01f < estimatedCost.toFloat())",
     "for (trade in orderedTrades)"
@@ -130,12 +132,19 @@ Assert-Order "StockReviewShipExecutionController.kt ship sell-first order" $conf
     "addMatchingSide(result, trades, true)"
 )
 foreach ($needle in @(
-    "private fun netShipCreditCost(trades: List<StockReviewPendingShipTrade>): Long",
+    "object StockReviewShipPreflight",
+    "fun canConfirm(trades: List<StockReviewPendingShipTrade>?): Boolean",
+    "Global.getSector()?.playerFleet?.cargo?.credits?.get() ?: return false",
+    "fun canConfirm(trades: List<StockReviewPendingShipTrade>, credits: Float): Boolean",
+    "cost > TradeMoney.MAX_EXECUTABLE_CREDITS",
+    "credits + 0.01f >= cost.toFloat()",
+    "fun netCreditCost(trades: List<StockReviewPendingShipTrade>): Long",
     "TradeMoney.safeAdd(total, value)",
     "TradeMoney.safeAdd(total, -value)"
 )) {
-    Assert-Contains "StockReviewShipExecutionController.kt net credit cost contract" $confirm $needle
+    Assert-Contains "StockReviewShipPreflight.kt confirm/cost contract" $shipPreflight $needle
 }
+Assert-Contains "StockReviewFooterSpec.kt ship confirm preflight contract" $footerSpec "StockReviewShipPreflight.canConfirm(pendingShipTrades)"
 
 $executeBuy = Get-Section $executionController "private fun executeBuy(" "private fun executeSell("
 Assert-Order "StockReviewShipExecutionController.kt buy mutation order" $executeBuy @(
@@ -299,17 +308,26 @@ foreach ($needle in @(
 $shipBlackMarketToggle = Get-Section $sourceTransitionController "fun toggleBlackMarket()" "if (!state.getSourceMode().supportsBlackMarketToggle())"
 foreach ($needle in @(
     "if (state.isShipTrading()) {",
-    "state.toggleBlackMarketForShipTrading()",
+    "val changed = state.toggleBlackMarketForShipTrading()",
     "pendingShipTrades.clear()",
+    "clearHiddenItemTradesAfterSharedBlackMarketChange()",
     "host.rebuildSnapshot()",
     "host.requestContentRebuild()",
     "return"
 )) {
     Assert-Contains "StockReviewSourceTransitionController.kt ship source-filter contract" $shipBlackMarketToggle $needle
 }
+foreach ($needle in @(
+    "pendingTrades.clear()",
+    "localMarketIntent.clear()",
+    'host.postMessage("Queued item trades were reset because black market inclusion changed.")'
+)) {
+    Assert-Contains "StockReviewSourceTransitionController.kt hidden item reset contract" $sourceTransitionController $needle
+}
 Assert-Order "StockReviewSourceTransitionController.kt ship source-filter contract" $shipBlackMarketToggle @(
-    "state.toggleBlackMarketForShipTrading()",
+    "val changed = state.toggleBlackMarketForShipTrading()",
     "pendingShipTrades.clear()",
+    "clearHiddenItemTradesAfterSharedBlackMarketChange()",
     "host.rebuildSnapshot()",
     "host.requestContentRebuild()"
 )

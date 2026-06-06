@@ -6,6 +6,7 @@ import weaponsprocurement.ui.stockreview.actions.StockReviewAction
 import weaponsprocurement.ui.stockreview.controls.StockReviewActionButtonFactory
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.ships.StockReviewPendingShipTrade
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipPreflight
 import weaponsprocurement.ui.stockreview.state.StockReviewTradeKind
 import weaponsprocurement.ui.stockreview.trade.StockReviewPendingTrade
 import weaponsprocurement.ui.stockreview.trade.StockReviewTradeContext
@@ -34,7 +35,11 @@ class StockReviewFooterContext(
         if (tradeKind == StockReviewTradeKind.SHIPS) !pendingShipTrades.isNullOrEmpty() else !pendingTrades.isNullOrEmpty()
 
     fun canConfirm(): Boolean =
-        if (tradeKind == StockReviewTradeKind.SHIPS) hasPendingTrades() else hasPendingTrades() && tradeContext.canConfirm()
+        if (tradeKind == StockReviewTradeKind.SHIPS) {
+            StockReviewShipPreflight.canConfirm(pendingShipTrades)
+        } else {
+            hasPendingTrades() && tradeContext.canConfirm()
+        }
 }
 
 class StockReviewFooterSpec private constructor(

@@ -146,8 +146,10 @@ class StockReviewState : WimGuiScrollableListState {
     fun toggleBlackMarket() {
         markContentChangedIf(source.toggleBlackMarket())
     }
-    fun toggleBlackMarketForShipTrading() {
-        markContentChangedIf(source.toggleBlackMarketForShipTrading())
+    fun toggleBlackMarketForShipTrading(): Boolean {
+        val changed = source.toggleBlackMarketForShipTrading()
+        markContentChangedIf(changed)
+        return changed
     }
     fun getSourceMode(): StockSourceMode = source.getSourceMode()
     fun cycleSourceMode() {

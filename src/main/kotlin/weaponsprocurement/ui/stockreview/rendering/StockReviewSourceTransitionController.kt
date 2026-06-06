@@ -83,8 +83,11 @@ class StockReviewSourceTransitionController(
 
     fun toggleBlackMarket() {
         if (state.isShipTrading()) {
-            state.toggleBlackMarketForShipTrading()
+            val changed = state.toggleBlackMarketForShipTrading()
             pendingShipTrades.clear()
+            if (changed) {
+                clearHiddenItemTradesAfterSharedBlackMarketChange()
+            }
             clearSourceWarningAndReviewMode()
             state.setListScrollOffset(0)
             host.rebuildSnapshot()
@@ -121,6 +124,15 @@ class StockReviewSourceTransitionController(
         )
         StockReviewTradeWarnings.clear(state)
         host.requestContentRebuild()
+    }
+
+    private fun clearHiddenItemTradesAfterSharedBlackMarketChange() {
+        val hadPendingItemTrades = !pendingTrades.isEmpty()
+        pendingTrades.clear()
+        localMarketIntent.clear()
+        if (hadPendingItemTrades) {
+            host.postMessage("Queued item trades were reset because black market inclusion changed.")
+        }
     }
 
     fun resetAllTrades() {

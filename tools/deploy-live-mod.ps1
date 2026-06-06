@@ -70,7 +70,9 @@ function Get-DeployItemManifest {
         $optional = $optionalItems -contains $item
 
         if ($optional -and -not (Test-Path -LiteralPath $sourcePath)) {
-            continue
+            if ($SourceSide -or -not (Test-Path -LiteralPath $path)) {
+                continue
+            }
         }
         if (-not (Test-Path -LiteralPath $path)) {
             $kind = if ($SourceSide) { "MISSING_SOURCE" } else { "MISSING_LIVE" }

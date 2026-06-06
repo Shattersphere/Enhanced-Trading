@@ -95,6 +95,13 @@ Assert-Order "deploy-live-mod.ps1 check-only runtime dependency gate" $deployScr
     'if ($RequireCurrent -and !$contentReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase))',
     'if ($RequireCurrent -and !$runtimeDependencyReport.LiveState.StartsWith("current", [System.StringComparison]::OrdinalIgnoreCase))'
 )
+Assert-Order "deploy-live-mod.ps1 optional live stale manifest contract" $deployScript @(
+    '$optional = $optionalItems -contains $item',
+    'if ($optional -and -not (Test-Path -LiteralPath $sourcePath)) {',
+    'if ($SourceSide -or -not (Test-Path -LiteralPath $path)) {',
+    'continue',
+    'if (-not (Test-Path -LiteralPath $path)) {'
+)
 Assert-Order "collect-runtime-validation-evidence.ps1 deploy parity gate" $collector @(
     'if ($RequireDeployParity) {',
     'Invoke-ValidationTool -Label "deploy parity" -ScriptName "deploy-live-mod.ps1" -Arguments @(',

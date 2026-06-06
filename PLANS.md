@@ -120,6 +120,14 @@ A 2026-06-06 static review noted that the ship `Max cost` filter applies to `rec
 
 Before changing `StockReviewShipFilters`, confirm whether `Max cost` should apply only to buy records or to all ship transaction values. If it is buy-only, make the predicate side-aware. If it is side-agnostic, update the label/help copy so users understand that high-value sell opportunities are filtered too.
 
+### 8. Fixer Theoretical Catalog Candidate Semantics
+
+Status: deferred until Starsector/faction data intent is confirmed
+
+A 2026-06-06 static review noted that `TheoreticalSaleIndex.candidateIds(...)` uses sell-frequency keys when a faction has a non-empty frequency map, and only falls back to known weapons/fighters when the map is empty. This may exclude faction-known items missing from partial frequency maps, but it may also be intentional if sell-frequency maps are the authoritative sale set.
+
+Before broadening Fixer's theoretical stock, inspect vanilla and representative modded faction data to determine whether known-but-unweighted weapons or wings are expected to appear for sale. If known items should remain eligible, use the union of known IDs and frequency keys while preserving observed-catalog persistence and rarity policy. If sell-frequency keys are authoritative, add a source comment near `candidateIds(...)` explaining that choice.
+
 ## Retired Or Completed
 
 - Generic template sync: rechecked 2026-06-07. Current template governance changes were already mostly present here; imported only safe doc-routing cleanup and left Starsector deploy, validation, compatibility, shared-library, Git, and public/private rules intact.

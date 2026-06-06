@@ -55,7 +55,7 @@ class StockReviewShipExecutionController(
             return
         }
         val orderedTrades = shipExecutionOrder(trades)
-        val estimatedCost = netShipCreditCost(orderedTrades)
+        val estimatedCost = StockReviewShipPreflight.netCreditCost(orderedTrades)
         if (estimatedCost > TradeMoney.MAX_EXECUTABLE_CREDITS) {
             host.postMessage("Ship order value is too large.")
             host.requestContentRebuild()
@@ -110,19 +110,6 @@ class StockReviewShipExecutionController(
                 result.add(trade)
             }
         }
-    }
-
-    private fun netShipCreditCost(trades: List<StockReviewPendingShipTrade>): Long {
-        var total = 0L
-        for (trade in trades) {
-            val value = trade.unitPrice.toLong()
-            total = if (trade.isBuy()) {
-                TradeMoney.safeAdd(total, value)
-            } else {
-                TradeMoney.safeAdd(total, -value)
-            }
-        }
-        return total
     }
 
     private fun executeBuy(
