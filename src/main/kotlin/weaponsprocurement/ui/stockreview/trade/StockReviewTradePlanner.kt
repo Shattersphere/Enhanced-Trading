@@ -27,10 +27,28 @@ class StockReviewTradePlanner private constructor() {
         }
     }
 
+    private enum class ExecutionPhase {
+        SELL {
+            override fun matches(trade: StockReviewPendingTrade): Boolean = trade.isSell()
+        },
+        SOURCE_BUY {
+            override fun matches(trade: StockReviewPendingTrade): Boolean =
+                trade.isBuy() && trade.submarketId != null
+        },
+        GENERIC_BUY {
+            override fun matches(trade: StockReviewPendingTrade): Boolean =
+                trade.isBuy() && trade.submarketId == null
+        };
+
+        abstract fun matches(trade: StockReviewPendingTrade): Boolean
+    }
+
     companion object {
-        private const val MATCH_SELL = 0
-        private const val MATCH_SELLER_BUY = 1
-        private const val MATCH_GENERIC_BUY = 2
+        private val EXECUTION_PHASES = arrayOf(
+            ExecutionPhase.SELL,
+            ExecutionPhase.SOURCE_BUY,
+            ExecutionPhase.GENERIC_BUY,
+        )
 
         @JvmStatic
         fun tradeableRecords(snapshot: WeaponStockSnapshot?, category: StockCategory?): List<WeaponStockRecord> {
@@ -135,32 +153,22 @@ class StockReviewTradePlanner private constructor() {
             if (pendingTrades.isNullOrEmpty()) {
                 return result
             }
-            addMatching(result, pendingTrades, MATCH_SELL)
-            addMatching(result, pendingTrades, MATCH_SELLER_BUY)
-            addMatching(result, pendingTrades, MATCH_GENERIC_BUY)
+            for (phase in EXECUTION_PHASES) {
+                addMatching(result, pendingTrades, phase)
+            }
             return result
         }
 
         private fun addMatching(
             result: MutableList<StockReviewPendingTrade>,
             pendingTrades: List<StockReviewPendingTrade>,
-            match: Int,
+            phase: ExecutionPhase,
         ) {
             for (trade in pendingTrades) {
-                if (matches(trade, match)) {
+                if (phase.matches(trade)) {
                     result.add(trade)
                 }
             }
-        }
-
-        private fun matches(trade: StockReviewPendingTrade, match: Int): Boolean {
-            if (match == MATCH_SELL) {
-                return trade.isSell()
-            }
-            if (match == MATCH_SELLER_BUY) {
-                return trade.isBuy() && trade.submarketId != null
-            }
-            return trade.isBuy() && trade.submarketId == null
         }
 
         private fun filteredRecords(

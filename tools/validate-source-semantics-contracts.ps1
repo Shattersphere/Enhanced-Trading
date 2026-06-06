@@ -204,6 +204,25 @@ Assert-Contains "StockPurchaseExecutor.kt real-source buy contract" $buyPlanExec
 Assert-Contains "StockPurchaseExecutor.kt real-source buy contract" $buyPlanExecutor 'flushTransactionReports(log, reportLines)'
 
 $executionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewExecutionController.kt"
+$tradePlanner = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewTradePlanner.kt"
+Assert-Order "StockReviewTradePlanner.kt pending execution order" $tradePlanner @(
+    'private val EXECUTION_PHASES = arrayOf(',
+    'ExecutionPhase.SELL,',
+    'ExecutionPhase.SOURCE_BUY,',
+    'ExecutionPhase.GENERIC_BUY,'
+)
+foreach ($needle in @(
+    'SELL {',
+    'override fun matches(trade: StockReviewPendingTrade): Boolean = trade.isSell()',
+    'SOURCE_BUY {',
+    'trade.isBuy() && trade.submarketId != null',
+    'GENERIC_BUY {',
+    'trade.isBuy() && trade.submarketId == null',
+    'for (phase in EXECUTION_PHASES) {',
+    'addMatching(result, pendingTrades, phase)'
+)) {
+    Assert-Contains "StockReviewTradePlanner.kt pending execution order" $tradePlanner $needle
+}
 foreach ($needle in @(
     'val sourceMode = snapshot?.getSourceMode() ?: StockSourceMode.LOCAL',
     'if (trade.isSell()) {',
