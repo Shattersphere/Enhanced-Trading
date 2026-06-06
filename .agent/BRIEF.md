@@ -17,6 +17,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 - Trade and ship execution guardrails now fail closed around unsafe credit/cargo mutations, exact-member ship mutation failures, nonfinite settings/cargo-space values, post-commit transaction reports, and Fixer catalog decoding.
 - Runtime dependency checks now surface stale installed Shatter Lib jars during deploy/parity workflows.
 - Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWingTooltipLayoutBuilder`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, `StockReviewWeaponTooltipIconGridRenderer`, and `StockReviewWeaponTooltipTextRenderer`. `StockReviewItemTooltip` remains the narrow orchestration/legacy weapon shell.
+- Fighter LPC Advanced Info rows now source real fighter hull stats through `WeaponStockRecord`; wing tooltip rows reuse the same labels to avoid stat drift between list rows and tooltips.
 
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
@@ -25,7 +26,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `1e0b86f` (`Extract wing tooltip layout builder`)
+- Known-good source commit: `88a47bc` (`Source wing advanced stat labels`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 

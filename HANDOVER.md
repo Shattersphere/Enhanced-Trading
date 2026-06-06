@@ -32,7 +32,7 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `1e0b86f` (`Extract wing tooltip layout builder`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `88a47bc` (`Source wing advanced stat labels`).
 
 Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
@@ -43,7 +43,7 @@ Recent commits hardened trade and ship execution around unsafe mutation failures
 - `StockReviewItemTooltipContext`: cargo-space, price, owned-count, and Shatter Lib context-line construction.
 - `StockReviewWeaponTooltipIconGridRenderer`: weapon/debug icon-grid panel rendering and measured stat-row layout.
 - `StockReviewWeaponTooltipTextRenderer`: weapon description, debug description, custom primary/ancillary text, highlight substitution, and measured text truncation.
-- `StockReviewWingTooltipLayoutBuilder`: real/debug fighter LPC layout construction, stat sourcing, description lookup, system labels, and armament summary.
+- `StockReviewWingTooltipLayoutBuilder`: real/debug fighter LPC layout construction, description lookup, system labels, and armament summary; real fighter stat rows reuse `WeaponStockRecord` labels.
 
 `StockReviewItemTooltip` still owns item-tooltip orchestration and the padded weapon tooltip shell. Pause before further tooltip source cleanup unless another small extraction clearly reduces maintenance cost while preserving Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation and current debug/stress behavior.
 
@@ -89,7 +89,7 @@ Important model owners:
 - `StockItemType`: typed key parsing and construction.
 - `StockItemStacks`: reference cargo stacks, base buy/sell pricing, local tariff math, and cargo-space references.
 - `StockItemSpecs`: safe access to weapon and wing specs.
-- `WeaponStockRecord`: UI-facing derived data for one stock item.
+- `WeaponStockRecord`: UI-facing derived data for one stock item, including real fighter LPC Advanced Info stat labels.
 - `WeaponStockSnapshot`: grouped item records for one popup rebuild.
 - `WeaponStockSnapshotBuilder`: merges player inventory, local or remote stock, desired thresholds, and config ignores.
 - `DesiredStockService`: default and per-item desired stock.
@@ -222,7 +222,7 @@ Current item-tooltip owners:
 - `StockReviewWeaponTooltipRows`: weapon stat rows.
 - `StockReviewWeaponTooltipIconGridRenderer`: weapon/debug icon-grid panel rendering and measured stat-row layout.
 - `StockReviewWeaponTooltipTextRenderer`: weapon description, debug description, custom primary/ancillary text, highlight substitution, and measured text truncation.
-- `StockReviewWingTooltipLayoutBuilder`: real/debug fighter LPC layout construction, description lookup, system labels, and armament summary.
+- `StockReviewWingTooltipLayoutBuilder`: real/debug fighter LPC layout construction, description lookup, system labels, and armament summary; real fighter stat rows reuse `WeaponStockRecord` labels.
 - `StockReviewWingTooltipRenderer`: fighter LPC panel layout.
 - `StockReviewTooltipIconPanelPlugin`: sprite icon panel drawing.
 - `StockReviewTooltipPanel`: shared row/label/band primitives and max-height cap.
