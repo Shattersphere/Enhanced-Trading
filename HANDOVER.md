@@ -32,9 +32,9 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `8d9ed91` (`Harden ship and Fixer lifecycle gates`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `b85c9a4` (`Fail closed disabled debug UI modes`).
 
-Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, shared Fixer reference-source selection/value normalization, remote sell quote policy, centralized OPEN/SNEAK submarket trade-mode policy, startup Luna config publication for the Fixer updater, local-only ship black-market state, ship-only open-gate availability, confirm-time ship sell eligibility, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
+Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, shared Fixer reference-source selection/value normalization, remote sell quote policy, centralized OPEN/SNEAK submarket trade-mode policy, startup Luna config publication for the Fixer updater, local-only ship black-market state, ship-only open-gate availability, confirm-time ship sell eligibility, developer-only debug UI gating, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
 - `StockReviewTooltipModels`: shared tooltip row/layout models.
 - `StockReviewTooltipIconPanelPlugin`: sprite-backed icon panel drawing for non-weapon tooltip icons.
@@ -204,7 +204,7 @@ Known Starsector UI traps:
 
 ## Debug UI And Stress Records
 
-The Luna setting `wp_enable_debug_ui` is the master gate for debug UI. When disabled, the public popup should not show Colors, debug rows, debug weapons/wings, or the debug ship.
+The Luna setting `wp_enable_debug_ui` is the master gate for debug UI. When disabled, the public popup should not show Colors, debug rows, debug weapons/wings, or the debug ship. If the setting is disabled while a debug screen is already active, `StockReviewModeController` forces the popup back to normal modes from the input/render path.
 
 Debug records are intentionally extreme and should reuse normal row/tooltip paths as much as possible. They exist to reveal layout failure under long names, large values, dense armaments, and worst-case descriptions. If a debug record needs special handling, keep it small and documented; do not duplicate the whole normal row or tooltip pipeline.
 
