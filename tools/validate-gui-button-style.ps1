@@ -55,6 +55,8 @@ if ($controlsText -notmatch "(Color|val) hover = .*colors(\?|\.)\.hover|val hove
 }
 
 $stockReviewStylePath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewStyle.kt"
+$stockReviewHotkeyScriptPath = Join-Path $repoRoot "src\main\kotlin\weaponsprocurement\lifecycle\StockReviewHotkeyScript.kt"
+$weaponsProcurementModPluginPath = Join-Path $repoRoot "src\main\kotlin\weaponsprocurement\plugins\WeaponsProcurementModPlugin.kt"
 $weaponStockRecordPath = Join-Path $repoRoot "src\main\kotlin\weaponsprocurement\stock\item\WeaponStockRecord.kt"
 $stockReviewListModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListModel.kt"
 $stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewReviewListModel.kt"
@@ -82,7 +84,9 @@ $stockReviewShipCatalogDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows
 $stockReviewTradeSummaryRendererPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryRenderer.kt"
 $stockReviewTradeSummaryFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryFields.kt"
 $stockReviewModeControllerPath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewModeController.kt"
+$stockReviewSourceStatePath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewSourceState.kt"
 $stockReviewPanelPluginPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewPanelPlugin.kt"
+$stockReviewSourceTransitionControllerPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewSourceTransitionController.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 $stockReviewShatterItemTooltipFactoryPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewShatterItemTooltipFactory.kt"
 $stockReviewWingTooltipLayoutBuilderPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewWingTooltipLayoutBuilder.kt"
@@ -92,6 +96,9 @@ $stockReviewWeaponTooltipIconGridRendererPath = Join-Path $kotlinGuiDir "stockre
 $stockReviewWeaponTooltipTextRendererPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewWeaponTooltipTextRenderer.kt"
 $stockReviewTooltipPanelPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewTooltipPanel.kt"
 $stockReviewShipGridRendererPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipGridRenderer.kt"
+$stockReviewShipAvailabilityPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipAvailability.kt"
+$stockReviewShipEligibilityPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipEligibility.kt"
+$stockReviewShipExecutionControllerPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipExecutionController.kt"
 $stockReviewShipTooltipPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipTooltip.kt"
 $stockReviewShipTooltipRowsPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipTooltipRows.kt"
 $stockReviewItemInfoFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoFields.kt"
@@ -114,7 +121,7 @@ $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\renderi
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 $wimGuiTooltipPath = Join-Path $kotlinGuiDir "WimGuiTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewModeControllerPath, $stockReviewPanelPluginPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewHotkeyScriptPath, $weaponsProcurementModPluginPath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewModeControllerPath, $stockReviewSourceStatePath, $stockReviewPanelPluginPath, $stockReviewSourceTransitionControllerPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipAvailabilityPath, $stockReviewShipEligibilityPath, $stockReviewShipExecutionControllerPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -150,8 +157,13 @@ if ($directStockReviewActionCellHits.Count -gt 0) {
 }
 
 $styleText = Get-Content -LiteralPath $stockReviewStylePath -Raw
+$hotkeyScriptText = Get-Content -LiteralPath $stockReviewHotkeyScriptPath -Raw
+$modPluginText = Get-Content -LiteralPath $weaponsProcurementModPluginPath -Raw
 $modeControllerText = Get-Content -LiteralPath $stockReviewModeControllerPath -Raw
+$sourceStateText = Get-Content -LiteralPath $stockReviewSourceStatePath -Raw
 $panelPluginText = Get-Content -LiteralPath $stockReviewPanelPluginPath -Raw
+$sourceTransitionControllerText = Get-Content -LiteralPath $stockReviewSourceTransitionControllerPath -Raw
+$actionRowButtonsText = Get-Content -LiteralPath $stockReviewActionRowButtonsPath -Raw
 if ($styleText -notmatch "fun showDebugUi\(\): Boolean = WeaponsProcurementConfig\.isDebugUiEnabled\(\)") {
     throw "Stock-review worst-case debug rows and debug controls must be gated by WeaponsProcurementConfig.isDebugUiEnabled()."
 }
@@ -166,6 +178,20 @@ if (-not $modeControllerText.Contains("fun enforceDebugUiEnabled(debugUiEnabled:
     -not $panelPluginText.Contains("override fun renderContent(") -or
     -not $panelPluginText.Contains("enforceDebugModeGate()")) {
     throw "Stock-review debug modes must fail closed from input and render paths when the Luna debug UI setting is disabled."
+}
+if (-not $modPluginText.Contains("WeaponsProcurementConfig.refreshAndPublishSettings()") -or
+    $modPluginText.IndexOf("WeaponsProcurementConfig.refreshAndPublishSettings()") -gt $modPluginText.IndexOf("WeaponsProcurementFixerCatalogUpdater()")) {
+    throw "WeaponsProcurementModPlugin must publish Luna settings before registering the Fixer catalog updater."
+}
+if ($hotkeyScriptText -notmatch "StockReviewShipAvailability\.hasLocalTradeOpportunity\(market, Global\.getSector\(\)\?\.playerFleet, config\.isIncludeBlackMarket\(\)\)") {
+    throw "Stock-review open gating must include local ship buy/sell opportunities while preserving the market-backed dialog requirement."
+}
+if ($actionRowButtonsText -notmatch "isIncludeBlackMarketForShipTrading\(\)" -or
+    $sourceStateText -notmatch "fun isIncludeBlackMarketForShipTrading\(\): Boolean = includeBlackMarket" -or
+    $sourceStateText -notmatch "fun toggleBlackMarketForShipTrading\(\): Boolean" -or
+    $sourceTransitionControllerText -notmatch "state\.toggleBlackMarketForShipTrading\(\)" -or
+    $sourceTransitionControllerText -notmatch "pendingShipTrades\.clear\(\)") {
+    throw "Ship-trading black-market state must stay local-only and independent of the previous item source mode."
 }
 if ($styleText -notmatch "const val ROW_ICON_INDENT = ACTION_BUTTON_HEIGHT \+ BUTTON_GAP" -or
     $styleText -notmatch "const val WEAPON_INDENT = ROW_ICON_INDENT") {
@@ -564,6 +590,9 @@ $weaponTooltipIconGridRendererText = Get-Content -LiteralPath $stockReviewWeapon
 $weaponTooltipTextRendererText = Get-Content -LiteralPath $stockReviewWeaponTooltipTextRendererPath -Raw
 $tooltipPanelText = Get-Content -LiteralPath $stockReviewTooltipPanelPath -Raw
 $shipGridRendererText = Get-Content -LiteralPath $stockReviewShipGridRendererPath -Raw
+$shipAvailabilityText = Get-Content -LiteralPath $stockReviewShipAvailabilityPath -Raw
+$shipEligibilityText = Get-Content -LiteralPath $stockReviewShipEligibilityPath -Raw
+$shipExecutionControllerText = Get-Content -LiteralPath $stockReviewShipExecutionControllerPath -Raw
 $shipTooltipText = Get-Content -LiteralPath $stockReviewShipTooltipPath -Raw
 $shipTooltipRowsText = Get-Content -LiteralPath $stockReviewShipTooltipRowsPath -Raw
 $wimGuiTooltipText = Get-Content -LiteralPath $wimGuiTooltipPath -Raw
@@ -647,6 +676,14 @@ if ($shipGridRendererText -notmatch "private const val TARGET_COLUMNS = 4" -or
     $shipGridRendererText -notmatch "if \(column < TARGET_COLUMNS / 2\)" -or
     $shipGridRendererText -notmatch "if \(record\.isDebug\(\)\) StockReviewShipTooltip\(record\) else ShatterShipTooltip\(record\.member\)") {
     throw "Stock-review ship grid must preserve the user-confirmed 4-column by 5-row card layout, row-page scrolling, side-aware tooltip placement, and Shatter Lib delegation for normal ship records."
+}
+if ($shipAvailabilityText -notmatch "object StockReviewShipAvailability" -or
+    $shipAvailabilityText -notmatch "StockReviewShipEligibility\.isTradeableShip\(member\)" -or
+    $shipAvailabilityText -notmatch "StockReviewShipEligibility\.isSellableShip\(member\)" -or
+    $shipEligibilityText -notmatch "fun isSellableShip\(member: FleetMemberAPI\?\): Boolean" -or
+    $shipEligibilityText -notmatch "member\?\.isFlagship != true" -or
+    $shipExecutionControllerText -notmatch "StockReviewShipEligibility\.isSellableShip\(member\)") {
+    throw "Stock-review ship availability and sell execution must share tradeable/sellable guards, including the confirmation-time flagship check."
 }
 if ($shipTooltipText -match "data class TooltipLayout" -or
     $shipTooltipText -match "WimGuiText\.estimatedChars" -or
