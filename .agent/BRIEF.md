@@ -26,7 +26,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `0157fad` (`Clarify stock review action construction`)
+- Known-good source commit: `8252e0f` (`Centralize stock review state reset changes`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
