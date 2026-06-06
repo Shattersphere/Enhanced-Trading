@@ -19,6 +19,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 - Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWingTooltipLayoutBuilder`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, `StockReviewWeaponTooltipIconGridRenderer`, and `StockReviewWeaponTooltipTextRenderer`. `StockReviewItemTooltip` remains the narrow orchestration/legacy weapon shell.
 - Fighter LPC Advanced Info rows now source real fighter hull stats through `WeaponStockRecord`; wing tooltip rows reuse the same labels to avoid stat drift between list rows and tooltips.
 - Fixer live and persistent observation now share `FixerReferenceSourceSelector` for purchasable reference-source filtering and price/source-name tie-breaking.
+- Remote-source sell quotes now match execution by using legal-only local sell pricing while preserving Sector black-market remote buys. Black-market submarket eligibility probing now uses the same OPEN/SNEAK trade-mode policy as transaction reporting.
 
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
@@ -27,7 +28,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `a04fdab` (`Share Fixer reference source selection`)
+- Known-good source commit: `c6c710e` (`Align market policy contracts`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
@@ -46,6 +47,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - Ship trading is local-only in its first implementation. Sector Market and Fixer's Market ship trading remain intentionally out of scope.
 - The ship grid layout is a good reference baseline; the public-API ship tooltip still needs in-game visual acceptance against the vanilla ship buy/sell screen after layout polish.
 - Tooltip cleanup remains source/static validated only. In-game visual proof is still required for weapon, wing, and ship tooltip layout acceptance.
+- Black-market eligibility probing is statically aligned with transaction-report trade modes, but in-game/API proof is still needed for vanilla and modded black-market submarket behavior.
 - Runtime rollback fault validation still needs in-game evidence.
 - Rollback diagnostics now emit structured `WP_STOCK_REVIEW_ROLLBACK` records; use `tools/analyze-trade-rollback-diagnostics.ps1` after a forced-failure run to verify restored cargo counts and credits.
 - Weapon Badges is standalone in `D:\Sean Mods\Weapon Badges`; do not reintroduce cargo-cell badge assets, core patching, or badge count publishing here.
