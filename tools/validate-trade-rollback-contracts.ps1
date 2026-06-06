@@ -35,6 +35,7 @@ if ($luna.Contains("wp.debug.failTradeStep")) {
 }
 
 $executor = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseExecutor.kt"
+$rollbackJournal = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseRollbackJournal.kt"
 $transactionReporter = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockMarketTransactionReporter.kt"
 foreach ($step in $steps) {
     $constantName = "FAIL_" + $step.ToUpperInvariant().Replace("-", "_")
@@ -95,13 +96,22 @@ foreach ($needle in @(
     '" creditsAtFailure=" + formatFloat(report.creditsAtFailure)',
     '" creditsAfterRollback=" + formatFloat(report.creditsAfterRollback)',
     '" touched=" + report.touchedSummary()',
-    'StockItemCargo.reconcileItemCount(snapshot.cargo, itemType, itemId, snapshot.itemCountBefore)',
-    'playerCargo.credits.set(creditsBefore)',
-    'get() = if (failedCargos == 0 && creditsRestored && countsRestored) "PASS" else "FAIL"',
-    'for (ch in label)',
     'for (ch in raw)'
 )) {
     Assert-Contains "StockPurchaseExecutor.kt rollback contract" $executor $needle
+}
+
+foreach ($needle in @(
+    'internal class MutationJournal(',
+    'fun recordCargo(cargo: CargoAPI?, label: String)',
+    'fun rollback(itemType: StockItemType, itemId: String): RollbackReport',
+    'StockItemCargo.reconcileItemCount(snapshot.cargo, itemType, itemId, snapshot.itemCountBefore)',
+    'playerCargo.credits.set(creditsBefore)',
+    'get() = if (failedCargos == 0 && creditsRestored && countsRestored) "PASS" else "FAIL"',
+    'fun touchedSummary(): String',
+    'for (ch in label)'
+)) {
+    Assert-Contains "StockPurchaseRollbackJournal.kt rollback contract" $rollbackJournal $needle
 }
 
 $checks = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseChecks.kt"
