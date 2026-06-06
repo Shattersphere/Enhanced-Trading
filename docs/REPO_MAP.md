@@ -59,6 +59,7 @@ python scripts/update-repo-map.py --write
   - `graphics/ui/`
 - `scripts/`
   - `scripts/check-template-state.py`
+  - `scripts/create_review_code_zip.ps1`
   - `scripts/init-private-github.ps1`
   - `scripts/init-private-github.sh`
   - `scripts/README.md`
@@ -104,4 +105,5 @@ python scripts/update-repo-map.py --write
 - `PLANS.md`
 - `README.md`
 - `settings.gradle.kts`
+- `zip_review_code.bat`
 <!-- END GENERATED PATH INVENTORY -->

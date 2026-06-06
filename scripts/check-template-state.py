@@ -18,6 +18,7 @@ REQUIRED = [
     "AGENTS.md",
     "README.md",
     "CHANGELOG.md",
+    "zip_review_code.bat",
     "INIT_AGENT_PROMPT.md",
     ".agent/INDEX.md",
     ".agent/DOC_SYSTEM.md",
@@ -36,6 +37,8 @@ REQUIRED = [
     "docs/DIRECTORY_DOC_POLICY.md",
     "docs/ASSET_PROVENANCE.md",
     "scripts/README.md",
+    "scripts/create_review_code_zip.ps1",
+    "scripts/check-template-state.py",
     "scripts/update-repo-map.py",
     "scripts/init-private-github.ps1",
     "scripts/init-private-github.sh",
@@ -59,7 +62,7 @@ FREQUENT_DOC_LIMIT = 12_000
 
 
 def iter_text_files() -> list[Path]:
-    skip_parts = {".git", "__pycache__", "node_modules", "build", "dist", "out", "target"}
+    skip_parts = {".git", "__pycache__", "node_modules", "build", "dist", "out", "target", "zips"}
     files: list[Path] = []
     for path in ROOT.rglob("*"):
         if not path.is_file():

@@ -2,6 +2,15 @@
 
 Maintenance/setup helpers. Ordinary code changes should not need most of these.
 
+## Review Archive
+
+```powershell
+.\zip_review_code.bat
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create_review_code_zip.ps1 -RepoRoot . -OutputDir .\zips
+```
+
+The batch file is the normal entrypoint. Direct invocation is useful for diagnostics or custom `-MaxFileSizeMb`.
+
 ## Template/project Hygiene
 
 ```powershell

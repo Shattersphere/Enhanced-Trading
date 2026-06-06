@@ -7,6 +7,7 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | Check | Command | Use when | Evidence to report | Cost/risk |
 |---|---|---|---|---|
 | Template/project hygiene | `python scripts/check-template-state.py --initialized` | Template sync, doc-system edits, governance file changes | Pass/fail and warnings | low |
+| Review archive smoke | `.\zip_review_code.bat` | Zipper sync or review-archive script changes | Zip path, included/skipped counts, and whether the source tree stayed clean except generated ignored zip output | low |
 | Repo map freshness | `python scripts/update-repo-map.py --write` then review diff | Tracked structure changes | Whether `docs/REPO_MAP.md` changed | low |
 | Public doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1` | Public docs changes | Pass/fail | low |
 | Private doc links | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs` | Agent/private docs changes | Pass/fail | low |

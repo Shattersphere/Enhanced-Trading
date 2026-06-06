@@ -1,9 +1,26 @@
+zips/
+*.zip
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini
 build/
 .gradle/
+.gradle-*/
+.kotlin/
 .agent-deploy/
+Public Release/
+debug text/
 Deploy Status.txt
 tools/patcher/build/
 .pytest_cache/
 *.class
+*.log
+*.tmp
+*.temp
 *.wim_tmp
 jars/*.tmp.jar
+out/
+target/
+node_modules/
