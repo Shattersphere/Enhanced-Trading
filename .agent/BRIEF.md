@@ -16,7 +16,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 
 - Trade and ship execution guardrails now fail closed around unsafe credit/cargo mutations, exact-member ship mutation failures, nonfinite settings/cargo-space values, post-commit transaction reports, and Fixer catalog decoding.
 - Runtime dependency checks now surface stale installed Shatter Lib jars during deploy/parity workflows.
-- Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWingTooltipLayoutBuilder`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, `StockReviewWeaponTooltipIconGridRenderer`, and `StockReviewWeaponTooltipTextRenderer`. `StockReviewItemTooltip` remains the narrow orchestration/legacy weapon shell.
+- Weapon and fighter LPC tooltip code has been split into smaller owners: `StockReviewTooltipModels`, `StockReviewTooltipIconPanelPlugin`, `StockReviewWingTooltipRenderer`, `StockReviewWingTooltipLayoutBuilder`, `StockReviewWeaponTooltipRows`, `StockReviewItemTooltipContext`, `StockReviewShatterItemTooltipFactory`, `StockReviewWeaponTooltipIconGridRenderer`, and `StockReviewWeaponTooltipTextRenderer`. `StockReviewItemTooltip` remains the narrow debug/custom tooltip orchestrator.
 - Fighter LPC Advanced Info rows now source real fighter hull stats through `WeaponStockRecord`; wing tooltip rows reuse the same labels to avoid stat drift between list rows and tooltips.
 - Fixer live and persistent observation now share `FixerReferenceSourceSelector` for purchasable reference-source filtering and price/source-name tie-breaking.
 - Remote-source sell quotes now match execution by using legal-only local sell pricing while preserving Sector black-market remote buys. Black-market submarket eligibility probing and item/ship transaction reporting now share `StockSubmarketTradeModes` for OPEN/SNEAK policy.
@@ -29,7 +29,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `8d9ed91` (`Harden ship and Fixer lifecycle gates`)
+- Known-good source commit: `1daf5d7` (`Extract Shatter item tooltip factory`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 

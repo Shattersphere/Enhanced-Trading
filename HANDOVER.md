@@ -41,11 +41,12 @@ Recent commits hardened trade and ship execution around unsafe mutation failures
 - `StockReviewWingTooltipRenderer`: fighter LPC tooltip rendering.
 - `StockReviewWeaponTooltipRows`: weapon primary/ancillary stat row derivation.
 - `StockReviewItemTooltipContext`: cargo-space, price, owned-count, and Shatter Lib context-line construction.
+- `StockReviewShatterItemTooltipFactory`: normal-record Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation.
 - `StockReviewWeaponTooltipIconGridRenderer`: weapon/debug icon-grid panel rendering and measured stat-row layout.
 - `StockReviewWeaponTooltipTextRenderer`: weapon description, debug description, custom primary/ancillary text, highlight substitution, and measured text truncation.
 - `StockReviewWingTooltipLayoutBuilder`: real/debug fighter LPC layout construction, description lookup, system labels, and armament summary; real fighter stat rows reuse `WeaponStockRecord` labels.
 
-`StockReviewItemTooltip` still owns item-tooltip orchestration and the padded weapon tooltip shell. Pause before further tooltip source cleanup unless another small extraction clearly reduces maintenance cost while preserving Shatter Lib `ShatterWeaponTooltip`/`ShatterWingTooltip` delegation and current debug/stress behavior.
+`StockReviewItemTooltip` owns debug/custom item-tooltip orchestration and the padded weapon tooltip shell. Normal item records route through `StockReviewShatterItemTooltipFactory`. Pause before further tooltip source cleanup unless another small extraction clearly reduces maintenance cost while preserving Shatter Lib delegation and current debug/stress behavior.
 
 Runtime proof has not caught up to static/source cleanup because the live installed Shatter Lib jar is stale. Until `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar` contains `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`, build with the Shatter Lib checkout override for source/package proof only and do not claim live deploy parity.
 
@@ -219,6 +220,7 @@ Current item-tooltip owners:
 
 - `StockReviewItemTooltip`: item tooltip orchestration and padded weapon tooltip shell.
 - `StockReviewItemTooltipContext`: cargo-space, price, owned-count, and Shatter Lib context-line construction.
+- `StockReviewShatterItemTooltipFactory`: normal-record Shatter Lib weapon/LPC tooltip creation.
 - `StockReviewWeaponTooltipRows`: weapon stat rows.
 - `StockReviewWeaponTooltipIconGridRenderer`: weapon/debug icon-grid panel rendering and measured stat-row layout.
 - `StockReviewWeaponTooltipTextRenderer`: weapon description, debug description, custom primary/ancillary text, highlight substitution, and measured text truncation.
