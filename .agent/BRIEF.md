@@ -26,7 +26,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `88a47bc` (`Source wing advanced stat labels`)
+- Known-good source commit: `b876bc6` (`Add pure logic contract validation`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
