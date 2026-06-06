@@ -12,7 +12,7 @@ This file is active work only. Completed migrations, old public-release cleanup 
 - Template-synced project facts and checks now live in `docs/PROJECT_FACTS.md` and `docs/CHECKS.md`. Use those as the source of truth for commands, paths, dependencies, Git mode, and shared-library authorization.
 - Live deploy/runtime proof is currently blocked by the installed Shatter Lib jar at `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar`, which is missing `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`. Build with the Shatter Lib checkout override for source/package proof only; do not claim live parity until the installed dependency is updated and deploy parity passes.
 - Recent pushed modernization baseline: `88a47bc` sources fighter LPC Advanced Info stats from real fighter hull data through `WeaponStockRecord`, with wing tooltip rows reusing those labels after earlier commits split stock tooltip models, icon-panel rendering, wing tooltip rendering/layout construction, weapon tooltip row building, item tooltip context construction, weapon tooltip icon-grid rendering, and weapon tooltip text rendering. Source/static checks passed for that work, but in-game tooltip acceptance was not run.
-- A requested sync with `D:\Sean Code Projects\General Projects\Generic Template Repo` was started only as read-only comparison before this handoff request superseded it. The template repo currently has uncommitted governance updates; future sync should be a separate docs/tooling task.
+- Generic template sync was rechecked against the current uncommitted `D:\Sean Code Projects\General Projects\Generic Template Repo` worktree on 2026-06-07. Template hygiene passed; Starsector-specific commands, compatibility surfaces, deploy policy, shared-library gates, and public/private boundaries were preserved.
 
 ## Active Work
 
@@ -96,28 +96,9 @@ Status: deferred new feature
 
 Do not add Sector Market or Fixer's Market ship trading as part of UI polish. Remote ship trading needs a separate design for ship identity, source draining, pricing, virtual availability, and failure handling.
 
-### 5. Generic Template Sync
-
-Status: requested, not yet implemented
-
-Scope:
-
-- Compare the current working tree of `D:\Sean Code Projects\General Projects\Generic Template Repo` against this repo's governance docs and scripts.
-- Import only template changes that improve doc routing, template hygiene checks, or maintainer workflows.
-- Preserve all Starsector-specific facts in `docs/PROJECT_FACTS.md`, validation commands in `docs/CHECKS.md`, deploy/live rules in `AGENTS.md`, and private release boundaries in `.agent/PUBLIC_RELEASE.md`.
-
-Validation:
-
-- `python scripts/check-template-state.py --initialized`
-- `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-doc-links.ps1 -IncludePrivateDocs`
-- `git diff --check`
-
-Gate:
-
-- Stop for human review before adopting template text that weakens Starsector deploy policy, public/private boundaries, shared-library gates, Git finalization mode, or compatibility-surface protection.
-
 ## Retired Or Completed
 
+- Generic template sync: rechecked 2026-06-07. Current template governance changes were already mostly present here; imported only safe doc-routing cleanup and left Starsector deploy, validation, compatibility, shared-library, Git, and public/private rules intact.
 - Kotlin/Gradle migration: complete. Use `tools/validate-kotlin-migration.ps1` as the guard.
 - UI primitive and stock-review package ownership split: complete. See `HANDOVER.md` and `.agent/ARCHITECTURE_MAP.md`.
 - Badge split: active ownership is now standalone in `D:\Sean Mods\Weapon Badges`. Historical context is archived in `.agent/archive/deep-dives/patched-badges.md`, but it is not active implementation guidance for this repo.

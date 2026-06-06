@@ -1,6 +1,6 @@
 # Enhanced Trading Brief
 
-Last updated: 2026-06-06
+Last updated: 2026-06-07
 
 ## Current State
 
@@ -21,7 +21,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
-The repo has been synced with the generic template doc system. Exact facts now live in `docs/PROJECT_FACTS.md`, validation commands in `docs/CHECKS.md`, and generated orientation in `docs/REPO_MAP.md`.
+The repo has been synced with the generic template doc system. Exact facts now live in `docs/PROJECT_FACTS.md`, validation commands in `docs/CHECKS.md`, generated orientation in `docs/REPO_MAP.md`, active work in `PLANS.md`, and parked long-horizon work in `.agent/BACKLOG.md`.
 
 ## Known-Good Source State
 
@@ -52,7 +52,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - Luna settings, data/config files, graphics, and metadata matter; jar parity alone is not sufficient for data-heavy changes.
 - Public release to `Shattersphere-Mods` must be curated. Do not mirror this private repo because it contains agent docs and local/private references.
 - Live deploy/runtime validation is currently blocked until the installed Shatter Lib jar has the API classes required by the current Enhanced Trading jar: `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`.
-- A template sync request was interrupted by this handoff request. The named template repo has uncommitted governance updates; future sync should be a docs/tooling-only pass that preserves this repo's Starsector commands, compatibility surfaces, and deploy policy.
+- Generic template sync was rechecked against the current uncommitted template worktree on 2026-06-07. Template hygiene passed; the repo already had the current script/doc-budget changes, and the only imported change was routing cleanup for `.agent/DOC_SYSTEM.md` and `.agent/BACKLOG.md`.
 
 ## Next Best Step
 

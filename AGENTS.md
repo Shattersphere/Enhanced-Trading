@@ -52,8 +52,10 @@ Use the smallest relevant check from `docs/CHECKS.md`; exact commands and path r
 - `docs/PROJECT_FACTS.md`: exact source-of-truth facts.
 - `docs/CHECKS.md`: validation menu and evidence rules.
 - `docs/REPO_MAP.md`: generated orientation map.
+- `.agent/DOC_SYSTEM.md`: doc-routing, budget, archive, and compaction rules.
 - `.agent/BRIEF.md`: current handoff summary.
 - `.agent/PLAN.md`: pointer to active work in `PLANS.md`.
+- `.agent/BACKLOG.md`: long-horizon parked work and sequencing notes.
 - `.agent/HANDOVER.md`: pointer to private handoff in `HANDOVER.md`.
 - `.agent/archive/INDEX.md`: archive map. Read it before opening deep dives.
 
