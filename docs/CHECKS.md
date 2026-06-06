@@ -15,6 +15,7 @@ A lightweight validation command menu. Use the smallest check that gives useful 
 | GitHub sanity workflow | `.github/workflows/sanity.yml` on `main` push, pull request, or manual dispatch | CI/validator wiring changes | Workflow trigger and step coverage | low/medium |
 | Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | Runtime/source changes | Build passed/failed; key error if failed | medium; requires Starsector path; accepts `-ShatterLibDir` |
 | Build environment | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | Dependency/path checks | Resolved Starsector, dependency paths, and Shatter Lib API freshness | low/medium; requires local install |
+| Pure logic contracts | `.\gradlew.bat --no-daemon validatePureLogicContracts -PstarsectorDir=C:\Games\Starsector -PshatterLibDir="D:\Sean Code Projects\Starsector Projects\Shatter Lib"` | Changing item-key parsing, sort aliases, or `TradeMoney` guards | Pass/fail by executable contract case | low/medium; requires Starsector/dependency paths because Gradle configures the mod classpath |
 | GUI button style | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | GUI/button rendering changes | Pass/fail | low |
 | Kotlin/source boundary | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | Source/package/build boundary changes | Pass/fail and skipped jar/export checks | low/medium |
 | Committed jar class boundary | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-jar-classes.ps1 -JarPath .\jars\enhanced-trading.jar -Label Repo` | Jar/package boundary changes | Required classes, stale classes, and dependency-bundling status | low/medium |
@@ -55,7 +56,7 @@ Do not claim build, deploy, runtime, or in-game evidence unless that command or 
 
 - Runtime UI, LunaLib behavior, campaign interactions, rollback safety, and Starsector classloader behavior require in-game evidence; compile and jar parity are not enough.
 - `tools/collect-runtime-validation-evidence.ps1` only summarizes deploy/log evidence. It does not create in-game proof; use `-RequireDeployParity`, `-RequireLiveJar`, or `-RequireRollbackPass` when a session needs those gates to fail closed.
-- No dedicated unit-test suite is declared in the current Gradle build.
+- No broad unit-test suite is declared. A no-framework Gradle `validatePureLogicContracts` runner covers pure item-key, sort-alias, and trade-money behavior without creating runtime evidence.
 - `tools/validate-compatibility-surfaces.ps1` guards current shipped ids and documented absences; update the modernization plan before adding new Starsector data-id families.
 - `tools/validate-validation-assertions.ps1` guards shared assertion helper behavior; it does not validate any Starsector runtime contract by itself.
 - `tools/validate-config-contracts.ps1` is static contract coverage for Luna/JSON/source consistency, item-key parsing, blacklist matching, finite numeric settings, and trade-money guards; it does not prove LunaLib runtime UI behavior.

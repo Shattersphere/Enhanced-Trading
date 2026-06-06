@@ -197,6 +197,32 @@ foreach ($needle in @(
     Assert-Contains "StockItemType item-key contract" $stockItemTypeSource $needle
 }
 
+$buildGradleSource = Read-Text "build.gradle.kts"
+foreach ($needle in @(
+    'create("contractTest")',
+    'java.exclude("contractTest/**")',
+    'kotlin.srcDirs("src/contractTest/kotlin")',
+    'tasks.register<JavaExec>("validatePureLogicContracts")',
+    'mainClass.set("weaponsprocurement.validation.PureLogicContractsKt")'
+)) {
+    Assert-Contains "Pure logic contract runner wiring" $buildGradleSource $needle
+}
+
+$pureLogicContractSource = Read-Text "src/contractTest/kotlin/weaponsprocurement/validation/PureLogicContracts.kt"
+foreach ($needle in @(
+    'StockItemType.WEAPON.key("lightmg")',
+    'StockItemType.WING.key("broadsword_wing")',
+    'StockItemType.rawId("W:lightmg")',
+    'StockItemType.rawId("F:broadsword_wing")',
+    'StockSortMode.fromConfig("cost")',
+    'StockSortMode.fromConfig("for-sale")',
+    'TradeMoney.lineTotal(-1, 5)',
+    'TradeMoney.safeAdd(Long.MAX_VALUE, 1L)',
+    'TradeMoney.canExecuteCreditMutation(TradeMoney.MAX_EXECUTABLE_CREDITS + 1L)'
+)) {
+    Assert-Contains "Pure logic contract runner coverage" $pureLogicContractSource $needle
+}
+
 $stockReviewConfigSource = Read-Text "src/main/kotlin/weaponsprocurement/config/StockReviewConfig.kt"
 foreach ($needle in @(
     'private const val JSON_DESIRED_DEFAULTS = "desiredDefaults"',

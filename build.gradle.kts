@@ -175,8 +175,16 @@ sourceSets {
     named("main") {
         java.setSrcDirs(listOf("src"))
         java.exclude("main/**")
+        java.exclude("contractTest/**")
         kotlin.srcDirs("src/main/kotlin")
         resources.setSrcDirs(emptyList<String>())
+    }
+    create("contractTest") {
+        java.setSrcDirs(emptyList<String>())
+        kotlin.srcDirs("src/contractTest/kotlin")
+        resources.setSrcDirs(emptyList<String>())
+        compileClasspath += sourceSets["main"].output + configurations["compileClasspath"]
+        runtimeClasspath += output + compileClasspath + sourceSets["main"].output
     }
 }
 
@@ -252,4 +260,12 @@ tasks.register("buildMod") {
     group = "build"
     description = "Builds the public-safe clean Enhanced Trading jar."
     dependsOn("jar")
+}
+
+tasks.register<JavaExec>("validatePureLogicContracts") {
+    group = "verification"
+    description = "Runs no-framework contract checks for shipped key, sort, and money logic."
+    dependsOn("classes", "contractTestClasses")
+    classpath = sourceSets["contractTest"].runtimeClasspath
+    mainClass.set("weaponsprocurement.validation.PureLogicContractsKt")
 }

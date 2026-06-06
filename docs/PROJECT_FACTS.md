@@ -55,6 +55,7 @@ Commands here are authoritative. If a command is unknown, leave it unknown rathe
 | Build | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` | repo root | Requires Starsector path. |
 | Build without clean | `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipClean` | repo root | Local iteration only. |
 | Validate local build env | `.\gradlew.bat --no-daemon validateLocalBuildEnvironment -PstarsectorDir=<path>` | repo root | Checks Starsector/dependency API jars. |
+| Pure logic contracts | `.\gradlew.bat --no-daemon validatePureLogicContracts -PstarsectorDir=C:\Games\Starsector -PshatterLibDir="D:\Sean Code Projects\Starsector Projects\Shatter Lib"` | repo root | No-framework executable checks for item keys, sort aliases, and trade-money guards. Requires dependency paths because Gradle configures the full mod classpath. |
 | GUI style validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-gui-button-style.ps1` | repo root | Runtime/source UI guard. |
 | Kotlin migration validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-kotlin-migration.ps1` | repo root | Source/package boundary guard. |
 | Assertion helper validation | `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\validate-validation-assertions.ps1` | repo root | Shared assertion behavior. |
