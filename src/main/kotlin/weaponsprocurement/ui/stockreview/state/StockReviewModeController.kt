@@ -46,6 +46,25 @@ class StockReviewModeController(private var reviewMode: Boolean) {
             StockReviewScreenMode.TRADE -> false
         }
 
+    fun enforceDebugUiEnabled(debugUiEnabled: Boolean, state: StockReviewState): Boolean {
+        if (debugUiEnabled) {
+            return false
+        }
+        return when (currentScreenMode()) {
+            StockReviewScreenMode.COLOR_DEBUG -> {
+                leaveColorDebug(state)
+                true
+            }
+            StockReviewScreenMode.SHIP_CATALOG_DEBUG -> {
+                leaveShipCatalogDebug(state)
+                true
+            }
+            StockReviewScreenMode.FILTERS,
+            StockReviewScreenMode.REVIEW,
+            StockReviewScreenMode.TRADE -> false
+        }
+    }
+
     fun isColorDebugPersistent(): Boolean = colorDebugPersistent
 
     fun getColorDebugTargetIndex(): Int = colorDebugTargetIndex

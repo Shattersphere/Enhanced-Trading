@@ -24,6 +24,7 @@ import weaponsprocurement.ui.stockreview.ships.StockReviewShipHullFilterInput
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshot
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipSnapshotBuilder
 import weaponsprocurement.ui.stockreview.ships.StockReviewShipTradeController
+import weaponsprocurement.config.WeaponsProcurementConfig
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.input.InputEventAPI
@@ -104,6 +105,12 @@ class StockReviewPanelPlugin(
     override fun shouldCloseFromExternalInput(): Boolean = StockReviewHotkeyScript.consumeCloseRequest()
 
     override fun handleInput(events: List<InputEventAPI>, root: CustomPanelAPI?): Boolean {
+        if (enforceDebugModeGate()) {
+            itemSearchFocused = false
+            shipHullFilterFocused = false
+            focusedShipFilterField = null
+            return true
+        }
         if (modes.currentScreenMode() == StockReviewScreenMode.FILTERS && state.isShipTrading()) {
             itemSearchFocused = false
             shipHullFilterFocused = false
@@ -148,6 +155,7 @@ class StockReviewPanelPlugin(
         content: CustomPanelAPI,
         buttonBindings: MutableList<WimGuiButtonBinding<StockReviewAction>>,
     ): WimGuiListBounds {
+        enforceDebugModeGate()
         val currentSnapshot = snapshots.current() ?: return StockReviewStyle.initialListBounds(modes.currentScreenMode())
         val screenMode = modes.currentScreenMode()
         return renderer.render(
@@ -243,6 +251,9 @@ class StockReviewPanelPlugin(
         unhandledActionWarningLogged = true
         LOG.warn("WP_STOCK_REVIEW unhandled action type=${action.getType()} group=${action.getGroup().name}")
     }
+
+    private fun enforceDebugModeGate(): Boolean =
+        modes.enforceDebugUiEnabled(WeaponsProcurementConfig.isDebugUiEnabled(), state)
 
     override fun rebuildSnapshot() {
         snapshots.rebuild()

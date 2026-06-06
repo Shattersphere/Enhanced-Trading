@@ -81,6 +81,8 @@ $stockReviewColorDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\Stock
 $stockReviewShipCatalogDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewShipCatalogDebugRows.kt"
 $stockReviewTradeSummaryRendererPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryRenderer.kt"
 $stockReviewTradeSummaryFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryFields.kt"
+$stockReviewModeControllerPath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewModeController.kt"
+$stockReviewPanelPluginPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewPanelPlugin.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 $stockReviewShatterItemTooltipFactoryPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewShatterItemTooltipFactory.kt"
 $stockReviewWingTooltipLayoutBuilderPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewWingTooltipLayoutBuilder.kt"
@@ -112,7 +114,7 @@ $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\renderi
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 $wimGuiTooltipPath = Join-Path $kotlinGuiDir "WimGuiTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewModeControllerPath, $stockReviewPanelPluginPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -148,8 +150,22 @@ if ($directStockReviewActionCellHits.Count -gt 0) {
 }
 
 $styleText = Get-Content -LiteralPath $stockReviewStylePath -Raw
+$modeControllerText = Get-Content -LiteralPath $stockReviewModeControllerPath -Raw
+$panelPluginText = Get-Content -LiteralPath $stockReviewPanelPluginPath -Raw
 if ($styleText -notmatch "fun showDebugUi\(\): Boolean = WeaponsProcurementConfig\.isDebugUiEnabled\(\)") {
     throw "Stock-review worst-case debug rows and debug controls must be gated by WeaponsProcurementConfig.isDebugUiEnabled()."
+}
+if (-not $modeControllerText.Contains("fun enforceDebugUiEnabled(debugUiEnabled: Boolean, state: StockReviewState): Boolean") -or
+    -not $modeControllerText.Contains("StockReviewScreenMode.COLOR_DEBUG -> {") -or
+    -not $modeControllerText.Contains("leaveColorDebug(state)") -or
+    -not $modeControllerText.Contains("StockReviewScreenMode.SHIP_CATALOG_DEBUG -> {") -or
+    -not $modeControllerText.Contains("leaveShipCatalogDebug(state)") -or
+    -not $panelPluginText.Contains("modes.enforceDebugUiEnabled(WeaponsProcurementConfig.isDebugUiEnabled(), state)") -or
+    -not $panelPluginText.Contains("if (enforceDebugModeGate()) {") -or
+    -not $panelPluginText.Contains("focusedShipFilterField = null") -or
+    -not $panelPluginText.Contains("override fun renderContent(") -or
+    -not $panelPluginText.Contains("enforceDebugModeGate()")) {
+    throw "Stock-review debug modes must fail closed from input and render paths when the Luna debug UI setting is disabled."
 }
 if ($styleText -notmatch "const val ROW_ICON_INDENT = ACTION_BUTTON_HEIGHT \+ BUTTON_GAP" -or
     $styleText -notmatch "const val WEAPON_INDENT = ROW_ICON_INDENT") {
