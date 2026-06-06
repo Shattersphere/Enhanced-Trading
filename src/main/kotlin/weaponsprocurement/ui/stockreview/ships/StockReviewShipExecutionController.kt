@@ -2,13 +2,13 @@ package weaponsprocurement.ui.stockreview.ships
 
 import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.CampaignFleetAPI
-import com.fs.starfarer.api.campaign.CampaignUIAPI
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import org.apache.log4j.Logger
 import weaponsprocurement.stock.market.StockSubmarketAccess
+import weaponsprocurement.stock.market.StockSubmarketTradeModes
 
 /**
  * Confirms queued exact-member ship trades. The FleetMember id must still exist in the
@@ -180,7 +180,7 @@ class StockReviewShipExecutionController(
     ) {
         val plugin = submarket.plugin ?: return
         try {
-            val transaction = PlayerMarketTransaction(market, submarket, tradeMode(submarket))
+            val transaction = PlayerMarketTransaction(market, submarket, StockSubmarketTradeModes.forSubmarket(submarket))
             val saleInfo = PlayerMarketTransaction.ShipSaleInfo(member, unitPrice.toFloat())
             if (bought) {
                 transaction.shipsBought.add(saleInfo)
@@ -194,9 +194,6 @@ class StockReviewShipExecutionController(
             LOG.warn("WP_STOCK_REVIEW ship transaction report failed for ${member.id} at ${submarket.specId}", t)
         }
     }
-
-    private fun tradeMode(submarket: SubmarketAPI): CampaignUIAPI.CoreUITradeMode =
-        if (submarket.plugin?.isBlackMarket == true) CampaignUIAPI.CoreUITradeMode.SNEAK else CampaignUIAPI.CoreUITradeMode.OPEN
 
     companion object {
         private val LOG: Logger = Global.getLogger(StockReviewShipExecutionController::class.java)

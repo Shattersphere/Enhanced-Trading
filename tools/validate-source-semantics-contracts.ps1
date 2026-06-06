@@ -132,14 +132,21 @@ foreach ($needle in @(
     'if (submarket.cargoNullOk == null) return false',
     'Submarkets.SUBMARKET_STORAGE == submarketId',
     'Submarkets.LOCAL_RESOURCES == submarketId',
-    '!plugin.isHidden && plugin.isEnabled(TradeModeCoreUi(tradeMode(submarket)))',
-    'private fun tradeMode(submarket: SubmarketAPI): CampaignUIAPI.CoreUITradeMode',
-    'submarket.plugin?.isBlackMarket == true',
-    'CampaignUIAPI.CoreUITradeMode.SNEAK',
-    'CampaignUIAPI.CoreUITradeMode.OPEN',
-    'private class TradeModeCoreUi('
+    '!plugin.isHidden && plugin.isEnabled(StockSubmarketTradeModes.coreUiFor(submarket))'
 )) {
     Assert-Contains "StockSubmarketAccess.kt trade-eligible source contract" $submarketAccess $needle
+}
+$tradeModes = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/StockSubmarketTradeModes.kt"
+foreach ($needle in @(
+    'object StockSubmarketTradeModes',
+    'fun forSubmarket(submarket: SubmarketAPI?): CampaignUIAPI.CoreUITradeMode',
+    'submarket?.plugin?.isBlackMarket == true',
+    'CampaignUIAPI.CoreUITradeMode.SNEAK',
+    'CampaignUIAPI.CoreUITradeMode.OPEN',
+    'fun coreUiFor(submarket: SubmarketAPI?): CoreUIAPI = TradeModeCoreUi(forSubmarket(submarket))',
+    'private class TradeModeCoreUi('
+)) {
+    Assert-Contains "StockSubmarketTradeModes.kt OPEN/SNEAK contract" $tradeModes $needle
 }
 
 $marketSources = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseMarketSources.kt"
@@ -197,6 +204,8 @@ foreach ($needle in @(
 }
 
 $executor = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockPurchaseExecutor.kt"
+$transactionReporter = Read-Text "src/main/kotlin/weaponsprocurement/trade/execution/StockMarketTransactionReporter.kt"
+Assert-Contains "StockMarketTransactionReporter.kt trade-mode owner" $transactionReporter 'StockSubmarketTradeModes.forSubmarket(submarket)'
 $fixerExecutor = Get-Section $executor 'fun buyFromFixersMarket(' 'fun buyPlan('
 Assert-Contains "StockPurchaseExecutor.kt Fixer execution contract" $fixerExecutor 'StockItemCargo.addItem(playerCargo, itemType, itemId, quantity)'
 Assert-Contains "StockPurchaseExecutor.kt Fixer execution contract" $fixerExecutor 'playerCargo.credits.subtract(totalCost.toFloat())'

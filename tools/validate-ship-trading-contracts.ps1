@@ -160,7 +160,7 @@ Assert-NotContains "StockReviewShipExecutionController.kt throwable rollback/rep
 Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "private fun findTradeSubmarket(market: MarketAPI?, submarketId: String?, includeBlackMarket: Boolean): SubmarketAPI?"
 Assert-Contains "StockReviewShipExecutionController.kt submarket lookup" $executionController "StockSubmarketAccess.isTradeEligible(it, includeBlackMarket)"
 Assert-Contains "StockReviewShipExecutionController.kt member lookup" $executionController "members?.firstOrNull { it?.id == memberId }"
-Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "PlayerMarketTransaction(market, submarket, tradeMode(submarket))"
+Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "PlayerMarketTransaction(market, submarket, StockSubmarketTradeModes.forSubmarket(submarket))"
 Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "PlayerMarketTransaction.ShipSaleInfo(member, unitPrice.toFloat())"
 Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "plugin.reportPlayerMarketTransaction(transaction)"
 Assert-Contains "StockReviewShipExecutionController.kt transaction reporting" $executionController "LOG.warn(`"WP_STOCK_REVIEW ship transaction report failed for"
