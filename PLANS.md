@@ -104,6 +104,14 @@ A 2026-06-06 static review noted that local ship pricing uses `SubmarketAPI.tari
 
 Before changing `StockReviewShipPricing`, compare `submarket.tariff` and `submarket.plugin?.tariff` for vanilla open, black-market, military, and representative modded submarkets, then compare Enhanced Trading ship buy/sell quotes with the vanilla market UI. Preserve the current base buy/sell value calculation unless runtime evidence proves that is also wrong.
 
+### 6. Update Interval Setting Validation
+
+Status: deferred until lifecycle/runtime intent is confirmed
+
+A 2026-06-06 static review noted that `wp_update_interval_seconds` is exposed through LunaLib, read, clamped, published to `wp.config.updateIntervalSeconds`, and logged, but no current source consumer was found outside config/validators. Do not remove or rename the setting without a compatibility decision.
+
+Before changing popup lifecycle behavior, confirm whether open stock-review snapshots should periodically refresh while the popup is open or remain input/action/reopen driven. If periodic refresh is still intended, wire the effective interval into the actual snapshot refresh path and runtime-test low/high interval values. If the setting is legacy/no-op, update the Luna description and config docs so it no longer promises active refresh behavior.
+
 ## Retired Or Completed
 
 - Generic template sync: rechecked 2026-06-07. Current template governance changes were already mostly present here; imported only safe doc-routing cleanup and left Starsector deploy, validation, compatibility, shared-library, Git, and public/private rules intact.

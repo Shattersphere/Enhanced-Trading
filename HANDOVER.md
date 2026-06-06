@@ -50,7 +50,7 @@ Recent commits hardened trade and ship execution around unsafe mutation failures
 
 Runtime proof has not caught up to static/source cleanup because the live installed Shatter Lib jar is stale. Until `C:\Games\Starsector\mods\Shatter Lib\jars\shatter-lib.jar` contains `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class`, build with the Shatter Lib checkout override for source/package proof only and do not claim live deploy parity.
 
-A generic-template sync was requested and started only as read-only comparison before the current handover request superseded it. The template repo currently has uncommitted governance updates. Treat template sync as a future docs/tooling task, not as source/runtime work.
+Generic-template sync was rechecked on 2026-06-07 against the current uncommitted template worktree. The repo already had the current script/doc-budget changes; only safe doc-routing cleanup was imported, while Starsector deploy, validation, compatibility, shared-library, Git, and public/private rules were preserved.
 
 ## Document Map
 

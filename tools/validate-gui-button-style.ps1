@@ -83,6 +83,7 @@ $stockReviewColorDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\Stock
 $stockReviewShipCatalogDebugRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewShipCatalogDebugRows.kt"
 $stockReviewTradeSummaryRendererPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryRenderer.kt"
 $stockReviewTradeSummaryFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewTradeSummaryFields.kt"
+$stockReviewTradeWarningsPath = Join-Path $kotlinGuiDir "stockreview\trade\StockReviewTradeWarnings.kt"
 $stockReviewModeControllerPath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewModeController.kt"
 $stockReviewSourceStatePath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewSourceState.kt"
 $stockReviewPanelPluginPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewPanelPlugin.kt"
@@ -216,6 +217,7 @@ $stockReviewFiltersText = Get-Content -LiteralPath $stockReviewFiltersPath -Raw
 $tradePlannerText = Get-Content -LiteralPath $stockReviewTradePlannerPath -Raw
 $tradeGroupSectionsText = Get-Content -LiteralPath $stockReviewTradeGroupSectionsPath -Raw
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
+$tradeWarningsText = Get-Content -LiteralPath $stockReviewTradeWarningsPath -Raw
 $itemTypeHeadingRowsText = Get-Content -LiteralPath $stockReviewItemTypeHeadingRowsPath -Raw
 $stockCategoryHeadingRowsText = Get-Content -LiteralPath $stockReviewStockCategoryHeadingRowsPath -Raw
 $tradeGroupHeadingRowsText = Get-Content -LiteralPath $stockReviewTradeGroupHeadingRowsPath -Raw
@@ -280,6 +282,10 @@ if ($stockReviewFiltersText -notmatch "fun matchesSearch\(record: WeaponStockRec
     $tradePlannerText -notmatch "val terms = StockReviewFilters\.searchTerms\(searchQuery\)" -or
     $tradePlannerText -notmatch "StockReviewFilters\.matchesSearchTerms\(record, terms\)") {
     throw "Stock-review visible rows and bulk sufficient actions must share the item search predicate."
+}
+if ($tradeWarningsText -notmatch "tradeContext\.totalCargoSpaceDelta\(\) > tradeContext\.cargoSpaceLeft\(\) \+ 0\.01f" -or
+    $tradeWarningsText -match "cargoSpaceLeft\(\) <= 0\.01f") {
+    throw "Stock-review cargo-capacity warnings must follow net positive cargo-space demand, not full-cargo state alone."
 }
 if ($tradeGroupSectionsText -notmatch "class StockReviewTradeGroupSection" -or
     $tradeGroupSectionsText -notmatch "object StockReviewTradeGroupSections" -or
@@ -690,6 +696,11 @@ if ($shipGridRendererText -notmatch "private const val TARGET_COLUMNS = 4" -or
     $shipGridRendererText -notmatch "if \(column < TARGET_COLUMNS / 2\)" -or
     $shipGridRendererText -notmatch "if \(record\.isDebug\(\)\) StockReviewShipTooltip\(record\) else ShatterShipTooltip\(record\.member\)") {
     throw "Stock-review ship grid must preserve the user-confirmed 4-column by 5-row card layout, row-page scrolling, side-aware tooltip placement, and Shatter Lib delegation for normal ship records."
+}
+if ($shipGridRendererText -notmatch "state\.getActiveShipFilterCount\(\) <= 0" -or
+    $shipGridRendererText -notmatch "No ships match the current ship filters" -or
+    $shipGridRendererText -notmatch "No ships match the current hull-class filter") {
+    throw "Stock-review ship empty-state copy must distinguish no local ship trades from active ship filters."
 }
 if ($shipAvailabilityText -notmatch "object StockReviewShipAvailability" -or
     $shipAvailabilityText -notmatch "StockReviewShipEligibility\.isTradeableShip\(member\)" -or

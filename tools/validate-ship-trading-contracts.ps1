@@ -78,6 +78,7 @@ foreach ($needle in @(
     "if (member == null) return false",
     "if (member.isFighterWing) return false",
     "if (member.isStation) return false",
+    "if (member.hullSpec == null) return false",
     "return member.type != null"
 )) {
     Assert-Contains "StockReviewShipEligibility.kt tradeable filter" $tradeable $needle

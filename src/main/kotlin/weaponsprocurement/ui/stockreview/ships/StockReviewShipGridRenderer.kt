@@ -61,10 +61,13 @@ object StockReviewShipGridRenderer {
         val listPanel = root.createCustomPanel(spec.panelWidth, panelHeight, WimGuiPanelPlugin(spec.panelFill, spec.panelBorder))
         root.addComponent(listPanel).inTL(spec.panelLeft, spec.panelTop)
         if (records.isEmpty()) {
-            val message = if (state.getShipHullFilter().isBlank()) {
-                "No local ships are available to buy or sell with the current market settings."
-            } else {
-                "No ships match the current hull-class filter."
+            val message = when {
+                state.getActiveShipFilterCount() <= 0 ->
+                    "No local ships are available to buy or sell with the current market settings."
+                state.getShipHullFilter().isNotBlank() && state.getActiveShipFilterCount() == 1 ->
+                    "No ships match the current hull-class filter."
+                else ->
+                    "No ships match the current ship filters."
             }
             WimGuiControls.addLabel(
                 listPanel,

@@ -41,9 +41,7 @@ class StockReviewTradeWarnings private constructor() {
                 return
             }
             val tradeContext = StockReviewTradeContext(snapshot, pendingTrades)
-            if (tradeContext.cargoSpaceLeft() <= 0.01f ||
-                tradeContext.totalCargoSpaceDelta() > tradeContext.cargoSpaceLeft() + 0.01f
-            ) {
+            if (tradeContext.totalCargoSpaceDelta() > tradeContext.cargoSpaceLeft() + 0.01f) {
                 state.setTradeWarning(NO_CARGO_CAPACITY)
                 return
             }
