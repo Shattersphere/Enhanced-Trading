@@ -112,6 +112,14 @@ A 2026-06-06 static review noted that `wp_update_interval_seconds` is exposed th
 
 Before changing popup lifecycle behavior, confirm whether open stock-review snapshots should periodically refresh while the popup is open or remain input/action/reopen driven. If periodic refresh is still intended, wire the effective interval into the actual snapshot refresh path and runtime-test low/high interval values. If the setting is legacy/no-op, update the Luna description and config docs so it no longer promises active refresh behavior.
 
+### 7. Ship Max-Cost Filter Semantics
+
+Status: deferred until UX intent is confirmed
+
+A 2026-06-06 static review noted that the ship `Max cost` filter applies to `record.price.finalCredits` for both buy and sell records. For buy records this is purchase cost; for sell records it is sale proceeds. This may be either an unintended affordability-filter bug or an intentional maximum transaction-value filter.
+
+Before changing `StockReviewShipFilters`, confirm whether `Max cost` should apply only to buy records or to all ship transaction values. If it is buy-only, make the predicate side-aware. If it is side-agnostic, update the label/help copy so users understand that high-value sell opportunities are filtered too.
+
 ## Retired Or Completed
 
 - Generic template sync: rechecked 2026-06-07. Current template governance changes were already mostly present here; imported only safe doc-routing cleanup and left Starsector deploy, validation, compatibility, shared-library, Git, and public/private rules intact.

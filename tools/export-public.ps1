@@ -45,6 +45,7 @@ $includeFiles = @(
     "tools/deploy-live-mod.ps1",
     "tools/lib/Deploy.Common.ps1",
     "tools/analyze-trade-rollback-diagnostics.ps1",
+    "tools/analyze-ship-catalog-diagnostics.ps1",
     "tools/validate-doc-links.ps1",
     "tools/validate-gui-button-style.ps1",
     "tools/validate-live-gui-classes.ps1"
@@ -75,6 +76,39 @@ function Get-RelativePath {
     return $full.Substring($base.Length + 1)
 }
 
+function Remove-WorkflowStepByScript {
+    param(
+        [string]$WorkflowText,
+        [string]$ScriptName
+    )
+
+    return [regex]::Replace(
+        $WorkflowText,
+        "(?ms)\r?\n      - name: .*?\r?\n        (?:shell: pwsh\r?\n        )?run: .*?$([regex]::Escape($ScriptName)).*?\r?\n",
+        "`r`n"
+    )
+}
+
+function Assert-PublicToolReferencesExist {
+    $referenceFiles = Get-ChildItem -LiteralPath $resolvedOutput -Recurse -File |
+        Where-Object { $_.Extension -in @(".md", ".yml", ".yaml") }
+    $missing = @()
+    foreach ($file in $referenceFiles) {
+        $text = Get-Content -LiteralPath $file.FullName -Raw
+        foreach ($match in [regex]::Matches($text, 'tools[\\/][A-Za-z0-9_.-]+\.ps1')) {
+            $relativeReference = $match.Value.Replace("/", "\")
+            $target = Join-Path $resolvedOutput $relativeReference
+            if (-not (Test-Path -LiteralPath $target)) {
+                $relativeFile = Get-RelativePath -BasePath $resolvedOutput -FullPath $file.FullName
+                $missing += "$relativeFile references missing $relativeReference"
+            }
+        }
+    }
+    if ($missing.Count -gt 0) {
+        throw "Public export references missing scripts:`n$($missing -join "`n")"
+    }
+}
+
 foreach ($file in $includeFiles) {
     Copy-RepoFile -RelativePath $file
 }
@@ -88,21 +122,21 @@ if (Test-Path -LiteralPath $publicWorkflow) {
         "(?ms)\r?\n      - name: Set up Java for jar inspection\r?\n        uses: actions/setup-java@v5\r?\n        with:\r?\n          distribution: temurin\r?\n          java-version: '17'\r?\n",
         "`r`n"
     )
-    $workflowText = [regex]::Replace(
-        $workflowText,
-        "(?ms)\r?\n      - name: Validate committed jar stale classes\r?\n        shell: pwsh\r?\n        run: .*?validate-jar-classes.*?\r?\n",
-        "`r`n"
-    )
-    $workflowText = [regex]::Replace(
-        $workflowText,
-        "(?ms)\r?\n      - name: Validate public export boundary\r?\n        shell: pwsh\r?\n        run: .*?export-public\.ps1.*?\r?\n",
-        "`r`n"
-    )
-    $workflowText = [regex]::Replace(
-        $workflowText,
-        "(?ms)\r?\n      - name: Validate Kotlin migration boundaries\r?\n        shell: pwsh\r?\n        run: .*?validate-kotlin-migration\.ps1.*?\r?\n",
-        "`r`n"
-    )
+    foreach ($scriptName in @(
+        "export-public.ps1",
+        "validate-jar-classes.ps1",
+        "validate-kotlin-migration.ps1",
+        "validate-compatibility-surfaces.ps1",
+        "validate-validation-assertions.ps1",
+        "validate-config-contracts.ps1",
+        "validate-fixer-persistence-contracts.ps1",
+        "validate-trade-rollback-contracts.ps1",
+        "validate-source-semantics-contracts.ps1",
+        "validate-ship-trading-contracts.ps1",
+        "validate-runtime-evidence-contracts.ps1"
+    )) {
+        $workflowText = Remove-WorkflowStepByScript -WorkflowText $workflowText -ScriptName $scriptName
+    }
     Set-Content -LiteralPath $publicWorkflow -Value $workflowText -NoNewline
 }
 $publicDeploy = Join-Path $resolvedOutput "tools/deploy-live-mod.ps1"
@@ -197,6 +231,17 @@ if ($badLinks.Count -gt 0) {
 Write-Host "Documentation link validation passed."
 '@ | Set-Content -LiteralPath $publicDocValidator -NoNewline
 
+$publicPackaging = Join-Path $resolvedOutput "PACKAGING.md"
+if (Test-Path -LiteralPath $publicPackaging) {
+    $packagingText = Get-Content -LiteralPath $publicPackaging -Raw
+    $packagingText = [regex]::Replace(
+        $packagingText,
+        "(?m)^powershell -NoProfile -ExecutionPolicy Bypass -File \.\\tools\\validate-kotlin-migration\.ps1\r?\n",
+        ""
+    )
+    Set-Content -LiteralPath $publicPackaging -Value $packagingText -NoNewline
+}
+
 $srcRoot = Join-Path $repoRoot "src"
 $sources = Get-ChildItem -LiteralPath $srcRoot -Recurse -File |
     Where-Object {
@@ -243,5 +288,6 @@ foreach ($file in $scanFiles) {
 if ($leaks.Count -gt 0) {
     throw "Public export leak scan failed:`n$($leaks -join "`n")"
 }
+Assert-PublicToolReferencesExist
 
 Write-Host "Exported public Enhanced Trading source to $resolvedOutput"

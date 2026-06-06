@@ -17,11 +17,12 @@ function Write-Gate {
 }
 
 function Resolve-DefaultLogPath {
-    $candidates = @(
-        (Join-Path (Join-Path $repoRoot "logs") "starsector.log"),
-        "C:\Games\Starsector\starsector-core\starsector.log",
-        (Join-Path $repoRoot "starsector.log")
-    )
+    $candidates = New-Object System.Collections.Generic.List[string]
+    $candidates.Add((Join-Path (Join-Path $repoRoot "logs") "starsector.log"))
+    if (-not [string]::IsNullOrWhiteSpace($env:STARSECTOR_DIRECTORY)) {
+        $candidates.Add((Join-Path (Join-Path $env:STARSECTOR_DIRECTORY "starsector-core") "starsector.log"))
+    }
+    $candidates.Add((Join-Path $repoRoot "starsector.log"))
     foreach ($candidate in $candidates) {
         if (Test-Path -LiteralPath $candidate) {
             return $candidate

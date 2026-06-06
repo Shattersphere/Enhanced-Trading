@@ -165,6 +165,14 @@ foreach ($needle in @(
     Assert-Contains "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook $needle
 }
 Assert-Contains "StockReviewQuoteBook.kt fallback cargo guard" $quoteBook 'if (stock.unitCargoSpace > 0f && !stock.unitCargoSpace.isNaN() && !stock.unitCargoSpace.isInfinite())'
+Assert-Contains "StockReviewQuoteBook.kt fallback cargo guard" $quoteBook 'val reference = StockItemStacks.referenceUnitCargoSpace(record.itemType, record.itemId)'
+Assert-Order "StockReviewQuoteBook.kt fallback cargo guard" $quoteBook @(
+    'var foundStockCargo = false',
+    'foundStockCargo = true',
+    'if (!foundStockCargo)',
+    'val reference = StockItemStacks.referenceUnitCargoSpace(record.itemType, record.itemId)',
+    'result = reference'
+)
 Assert-Order "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook @(
     'val cost = TradeMoney.lineTotal(stock.unitPrice, quantity)',
     'if (cost < 0L) continue',

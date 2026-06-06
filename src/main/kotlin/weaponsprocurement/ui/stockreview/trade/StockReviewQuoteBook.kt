@@ -3,6 +3,7 @@ package weaponsprocurement.ui.stockreview.trade
 
 
 import weaponsprocurement.stock.item.SubmarketWeaponStock
+import weaponsprocurement.stock.item.StockItemStacks
 import weaponsprocurement.trade.plan.TradeMoney
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
@@ -190,10 +191,18 @@ class StockReviewQuoteBook(private val snapshot: WeaponStockSnapshot?) {
         var result = 1f
         val record = findRecord(itemKey)
         if (record != null) {
+            var foundStockCargo = false
             for (stock in record.submarketStocks) {
                 if (stock.unitCargoSpace > 0f && !stock.unitCargoSpace.isNaN() && !stock.unitCargoSpace.isInfinite()) {
                     result = stock.unitCargoSpace
+                    foundStockCargo = true
                     break
+                }
+            }
+            if (!foundStockCargo) {
+                val reference = StockItemStacks.referenceUnitCargoSpace(record.itemType, record.itemId)
+                if (reference > 0f && !reference.isNaN() && !reference.isInfinite()) {
+                    result = reference
                 }
             }
         }
