@@ -26,7 +26,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `d11117c` (`Name pending trade execution phases`)
+- Known-good source commit: `5e75045` (`Make stock override precedence explicit`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
