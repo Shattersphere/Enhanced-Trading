@@ -9,7 +9,7 @@ object StockSubmarketAccess {
         if (submarket == null) return false
         val id = submarket.specId
         if (isNonTradeSubmarket(id)) return false
-        if (!includeBlackMarket && Submarkets.SUBMARKET_BLACK == id) return false
+        if (!includeBlackMarket && StockSubmarketTradeModes.isBlackMarket(submarket)) return false
         if (submarket.cargoNullOk == null) return false
 
         val plugin = submarket.plugin ?: return true

@@ -57,9 +57,14 @@ foreach ($needle in @(
     Assert-Contains "StockReviewSnapshotController.kt source normalization contract" $snapshotController $needle
 }
 foreach ($needle in @(
+    'val previousShipBlackMarket = state.isIncludeBlackMarketForShipTrading()',
     'val sourceModeNormalized = snapshots.rebuild()',
-    'clearPlansAfterSourceNormalization()',
+    'val shipBlackMarketNormalized = previousShipBlackMarket != state.isIncludeBlackMarketForShipTrading()',
+    'clearPlansAfterSourceNormalization(shipBlackMarketNormalized)',
     'pendingTrades.clear()',
+    'val hadPendingShipTrades = clearShipTrades && !pendingShipTrades.isEmpty()',
+    'if (clearShipTrades) {',
+    'pendingShipTrades.clear()',
     'localMarketIntent.clear()',
     'modes.exitReview(state)',
     'Queued trades were reset because the selected stock source is no longer enabled.'
@@ -156,7 +161,7 @@ foreach ($needle in @(
 $submarketAccess = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/StockSubmarketAccess.kt"
 foreach ($needle in @(
     'if (isNonTradeSubmarket(id)) return false',
-    'if (!includeBlackMarket && Submarkets.SUBMARKET_BLACK == id) return false',
+    'if (!includeBlackMarket && StockSubmarketTradeModes.isBlackMarket(submarket)) return false',
     'if (submarket.cargoNullOk == null) return false',
     'Submarkets.SUBMARKET_STORAGE == submarketId',
     'Submarkets.LOCAL_RESOURCES == submarketId',
@@ -168,7 +173,11 @@ $tradeModes = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/StockSu
 foreach ($needle in @(
     'object StockSubmarketTradeModes',
     'fun forSubmarket(submarket: SubmarketAPI?): CampaignUIAPI.CoreUITradeMode',
-    'submarket?.plugin?.isBlackMarket == true',
+    'if (isBlackMarket(submarket))',
+    'fun isBlackMarket(submarket: SubmarketAPI?): Boolean',
+    'Submarkets.SUBMARKET_BLACK == submarket.specId',
+    'plugin.isBlackMarket',
+    'catch (_: RuntimeException)',
     'CampaignUIAPI.CoreUITradeMode.SNEAK',
     'CampaignUIAPI.CoreUITradeMode.OPEN',
     'fun coreUiFor(submarket: SubmarketAPI?): CoreUIAPI = TradeModeCoreUi(forSubmarket(submarket))',

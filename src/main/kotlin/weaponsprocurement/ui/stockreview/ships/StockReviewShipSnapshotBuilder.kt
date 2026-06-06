@@ -8,6 +8,7 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI
 import com.fs.starfarer.api.fleet.FleetMemberType
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets
 import weaponsprocurement.stock.market.StockSubmarketAccess
+import weaponsprocurement.stock.market.StockSubmarketTradeModes
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 
 /**
@@ -162,7 +163,7 @@ class StockReviewShipSnapshotBuilder {
     private fun sellTarget(market: MarketAPI?, includeBlackMarket: Boolean): SubmarketAPI? {
         val submarkets = market?.submarketsCopy ?: return null
         if (includeBlackMarket) {
-            submarkets.firstOrNull { it?.specId == Submarkets.SUBMARKET_BLACK && StockSubmarketAccess.isTradeEligible(it, true) }
+            submarkets.firstOrNull { StockSubmarketTradeModes.isBlackMarket(it) && StockSubmarketAccess.isTradeEligible(it, true) }
                 ?.let { return it }
         }
         submarkets.firstOrNull { it?.specId == Submarkets.SUBMARKET_OPEN && StockSubmarketAccess.isTradeEligible(it, includeBlackMarket) }

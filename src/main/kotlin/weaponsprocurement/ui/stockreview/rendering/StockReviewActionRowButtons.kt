@@ -1,6 +1,7 @@
 package weaponsprocurement.ui.stockreview.rendering
 
 import weaponsprocurement.config.WeaponsProcurementConfig
+import weaponsprocurement.stock.item.StockSortMode
 import weaponsprocurement.stock.item.WeaponStockSnapshot
 import weaponsprocurement.ui.WimGuiButtonSpec
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
@@ -22,7 +23,7 @@ object StockReviewActionRowButtonPolicies {
     fun tradeKindLabel(context: StockReviewActionRowContext): String = "Trade: ${context.state.getTradeKind().label}"
 
     @JvmStatic
-    fun sortLabel(context: StockReviewActionRowContext): String = "Sort: ${context.snapshot.getSortMode().label}"
+    fun sortLabel(context: StockReviewActionRowContext): String = "Sort: ${sortModeLabel(context)}"
 
     @JvmStatic
     fun sourceLabel(context: StockReviewActionRowContext): String =
@@ -69,7 +70,12 @@ object StockReviewActionRowButtonPolicies {
     fun openFilters(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.openFilters()
 
     @JvmStatic
-    fun sortTooltip(context: StockReviewActionRowContext): String = StockReviewTooltips.sort(context.snapshot.getSortMode())
+    fun sortTooltip(context: StockReviewActionRowContext): String =
+        if (context.state.isShipTrading() && StockSortMode.RARITY == context.snapshot.getSortMode()) {
+            "Cycle ship sorting. Sorts by hull size first, then name."
+        } else {
+            StockReviewTooltips.sort(context.snapshot.getSortMode())
+        }
 
     @JvmStatic
     fun tradeKindTooltip(context: StockReviewActionRowContext): String = "Switch between item trading and local ship trading."
@@ -85,6 +91,13 @@ object StockReviewActionRowButtonPolicies {
     @JvmStatic
     fun filtersTooltip(context: StockReviewActionRowContext): String =
         if (context.state.isShipTrading()) "Open the ship filter list." else "Open the weapon and fighter filter list."
+
+    private fun sortModeLabel(context: StockReviewActionRowContext): String =
+        if (context.state.isShipTrading() && StockSortMode.RARITY == context.snapshot.getSortMode()) {
+            "Size"
+        } else {
+            context.snapshot.getSortMode().label
+        }
 }
 
 class StockReviewActionRowButtons private constructor() {

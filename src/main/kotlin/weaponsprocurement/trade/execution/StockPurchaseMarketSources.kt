@@ -5,6 +5,7 @@ import weaponsprocurement.stock.item.StockItemStacks
 import weaponsprocurement.stock.item.StockItemType
 import weaponsprocurement.stock.item.SubmarketWeaponStock
 import weaponsprocurement.stock.market.MarketStockService
+import weaponsprocurement.stock.market.StockSubmarketTradeModes
 import weaponsprocurement.trade.plan.StockPurchaseSource
 import weaponsprocurement.trade.plan.StockSellTarget
 
@@ -115,7 +116,7 @@ class StockPurchaseMarketSources private constructor() {
                     StockItemStacks.sellUnitPrice(submarket, playerStack),
                     StockItemStacks.sellBaseUnitPrice(playerStack),
                 )
-                if (plugin != null && plugin.isBlackMarket) {
+                if (StockSubmarketTradeModes.isBlackMarket(submarket)) {
                     bestBlackMarket = betterSellTarget(bestBlackMarket, candidate)
                 } else {
                     bestLegalMarket = betterSellTarget(bestLegalMarket, candidate)

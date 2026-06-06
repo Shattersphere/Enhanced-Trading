@@ -70,7 +70,7 @@ foreach ($needle in @(
 $sellTarget = Get-Section $snapshotBuilder "private fun sellTarget(" "`n}"
 Assert-Order "StockReviewShipSnapshotBuilder.kt sell target priority" $sellTarget @(
     "if (includeBlackMarket) {",
-    "it?.specId == Submarkets.SUBMARKET_BLACK",
+    "StockSubmarketTradeModes.isBlackMarket(it)",
     "it?.specId == Submarkets.SUBMARKET_OPEN",
     "it?.specId == Submarkets.GENERIC_MILITARY",
     "return submarkets.firstOrNull { StockSubmarketAccess.isTradeEligible(it, includeBlackMarket) }"
@@ -334,6 +334,16 @@ Assert-Order "StockReviewSourceTransitionController.kt ship source-filter contra
 
 Assert-Contains "StockReviewPanelPlugin.kt ship execution host contract" $panelPlugin "override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarketForShipTrading()"
 Assert-Contains "StockReviewPanelPlugin.kt ship snapshot contract" $panelPlugin "shipSnapshotBuilder.build(market(), playerFleet(), state.isIncludeBlackMarketForShipTrading())"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "val previousShipBlackMarket = state.isIncludeBlackMarketForShipTrading()"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "val shipBlackMarketNormalized = previousShipBlackMarket != state.isIncludeBlackMarketForShipTrading()"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "clearPlansAfterSourceNormalization(shipBlackMarketNormalized)"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "val hadPendingShipTrades = clearShipTrades && !pendingShipTrades.isEmpty()"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "if (clearShipTrades) {"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "pendingShipTrades.clear()"
+Assert-Contains "StockReviewPanelPlugin.kt source normalization clears ship trades" $panelPlugin "if (hadPendingTrades || hadPendingShipTrades)"
+Assert-Contains "StockReviewActionRowButtons.kt ship sort alias contract" $actionRowButtons "if (context.state.isShipTrading() && StockSortMode.RARITY == context.snapshot.getSortMode())"
+Assert-Contains "StockReviewActionRowButtons.kt ship sort alias contract" $actionRowButtons '"Size"'
+Assert-Contains "StockReviewActionRowButtons.kt ship sort alias contract" $actionRowButtons "Sorts by hull size first, then name."
 Assert-Contains "StockReviewActionRowButtons.kt ship black-market label contract" $actionRowButtons "context.state.isIncludeBlackMarketForShipTrading()"
 Assert-Contains "StockReviewSourceState.kt ship black-market state contract" $sourceState "fun isIncludeBlackMarketForShipTrading(): Boolean = includeBlackMarket"
 Assert-Contains "StockReviewSourceState.kt ship black-market state contract" $sourceState "fun toggleBlackMarketForShipTrading(): Boolean"
