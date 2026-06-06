@@ -263,6 +263,8 @@ Assert-Order "StockReviewConfig.kt legacy/current override precedence" $stockRev
 )
 Assert-Contains "StockReviewConfig.kt desired override contract" $stockReviewConfigSource 'private fun desiredOverride(itemType: StockItemType, itemId: String?): Int?'
 Assert-Contains "StockReviewConfig.kt ignored override contract" $stockReviewConfigSource 'fun isIgnored(itemType: StockItemType, itemId: String?): Boolean'
+Assert-Contains "StockReviewConfig.kt storage policy contract" $stockReviewConfigSource 'OwnedSourcePolicy.FLEET_AND_ACCESSIBLE_STORAGE'
+Assert-Contains "StockReviewConfig.kt storage policy contract" $stockReviewConfigSource 'OwnedSourcePolicy.FLEET_ONLY'
 Assert-Order "StockReviewConfig.kt typed/raw override priority" $stockReviewConfigSource @(
     'val typedOverride = desiredOverrides[itemType.key(itemId)]',
     'if (typedOverride != null) return typedOverride',
@@ -273,6 +275,11 @@ Assert-Order "StockReviewConfig.kt typed/raw ignored priority" $stockReviewConfi
     'if (typedIgnored != null) return typedIgnored',
     'return ignoredItems[itemId] == true'
 )
+
+$configDoc = Read-Text "CONFIG.md"
+Assert-Contains "CONFIG.md storage key compatibility" $configDoc '`sources.includeCurrentMarketStorage` is a legacy JSON key kept for config compatibility.'
+Assert-Contains "CONFIG.md storage key compatibility" $configDoc 'all storage locations the player can currently access'
+Assert-Contains "CONFIG.md storage key compatibility" $configDoc 'When false, it counts fleet cargo only.'
 Assert-Contains "StockReviewConfig.kt weapon override contract" $stockReviewConfigSource 'val override = desiredOverride(StockItemType.WEAPON, weaponId)'
 Assert-Contains "StockReviewConfig.kt wing override contract" $stockReviewConfigSource 'val override = desiredOverride(StockItemType.WING, wingId)'
 

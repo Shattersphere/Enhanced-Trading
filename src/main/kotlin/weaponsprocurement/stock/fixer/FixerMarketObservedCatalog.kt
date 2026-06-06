@@ -83,7 +83,10 @@ class FixerMarketObservedCatalog {
     ) {
         companion object {
             fun create(baseUnitPrice: Int, unitCargoSpace: Float): ObservedItem {
-                return ObservedItem(baseUnitPrice, unitCargoSpace)
+                return ObservedItem(
+                    FixerReferenceValues.sanitizeBaseUnitPrice(baseUnitPrice),
+                    FixerReferenceValues.sanitizeUnitCargoSpace(unitCargoSpace),
+                )
             }
         }
     }
@@ -142,7 +145,8 @@ class FixerMarketObservedCatalog {
         }
 
         private fun encode(baseUnitPrice: Int, unitCargoSpace: Float): String {
-            return "${Math.max(0, baseUnitPrice)}$VALUE_SEPARATOR${sanitizeUnitCargoSpace(unitCargoSpace)}"
+            return "${FixerReferenceValues.sanitizeBaseUnitPrice(baseUnitPrice)}" +
+                "$VALUE_SEPARATOR${FixerReferenceValues.sanitizeUnitCargoSpace(unitCargoSpace)}"
         }
 
         private fun decode(value: String?): ObservedItem? {
@@ -151,8 +155,8 @@ class FixerMarketObservedCatalog {
             return try {
                 val baseUnitPrice = if (parts.isNotEmpty()) parts[0].trim().toInt() else 0
                 val unitCargoSpace = if (parts.size > 1) parts[1].trim().toFloat() else 1f
-                if (!isFinite(unitCargoSpace)) return null
-                ObservedItem.create(Math.max(0, baseUnitPrice), sanitizeUnitCargoSpace(unitCargoSpace))
+                if (!FixerReferenceValues.isFiniteUnitCargoSpace(unitCargoSpace)) return null
+                ObservedItem.create(baseUnitPrice, unitCargoSpace)
             } catch (_: RuntimeException) {
                 null
             }
@@ -161,14 +165,6 @@ class FixerMarketObservedCatalog {
         private fun decodePersistentItem(itemKey: String?, encoded: String?): ObservedItem? {
             if (!FixerCatalogPolicy.isSafeItem(itemKey)) return null
             return decode(encoded)
-        }
-
-        private fun sanitizeUnitCargoSpace(unitCargoSpace: Float): Float {
-            return if (isFinite(unitCargoSpace)) Math.max(0.01f, unitCargoSpace) else 1f
-        }
-
-        private fun isFinite(value: Float): Boolean {
-            return !value.isNaN() && !value.isInfinite()
         }
 
         private fun logPrunedEntries(pruned: Int) {

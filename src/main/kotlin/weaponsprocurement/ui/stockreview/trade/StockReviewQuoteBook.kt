@@ -208,7 +208,7 @@ class StockReviewQuoteBook(private val snapshot: WeaponStockSnapshot?) {
         if (playerSellUnitPrices == null) {
             playerSellUnitPrices = StockReviewPlayerCargo.sellUnitPricesByItem(
                 snapshot?.getMarket(),
-                snapshot != null && snapshot.isIncludeBlackMarket(),
+                includeBlackMarketForSellQuotes(),
             )
         }
         val price = playerSellUnitPrices?.get(itemKey)
@@ -220,6 +220,11 @@ class StockReviewQuoteBook(private val snapshot: WeaponStockSnapshot?) {
     private fun findRecord(itemKey: String?): WeaponStockRecord? {
         if (snapshot == null || itemKey == null) return null
         return snapshot.getRecord(itemKey)
+    }
+
+    private fun includeBlackMarketForSellQuotes(): Boolean {
+        val currentSnapshot = snapshot ?: return false
+        return !currentSnapshot.getSourceMode().isRemote() && currentSnapshot.isIncludeBlackMarket()
     }
 
     private class SubmarketStockPriceComparator private constructor() : Comparator<SubmarketWeaponStock> {

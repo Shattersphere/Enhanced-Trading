@@ -17,7 +17,7 @@ object StockSubmarketAccess {
 
         val plugin = submarket.plugin ?: return true
         return try {
-            !plugin.isHidden && plugin.isEnabled(OpenMarketCoreUi)
+            !plugin.isHidden && plugin.isEnabled(TradeModeCoreUi(tradeMode(submarket)))
         } catch (_: RuntimeException) {
             false
         }
@@ -27,8 +27,18 @@ object StockSubmarketAccess {
     fun isNonTradeSubmarket(submarketId: String?): Boolean =
         Submarkets.SUBMARKET_STORAGE == submarketId || Submarkets.LOCAL_RESOURCES == submarketId
 
-    private object OpenMarketCoreUi : CoreUIAPI {
-        override fun getTradeMode(): CampaignUIAPI.CoreUITradeMode = CampaignUIAPI.CoreUITradeMode.OPEN
+    private fun tradeMode(submarket: SubmarketAPI): CampaignUIAPI.CoreUITradeMode {
+        return if (submarket.plugin?.isBlackMarket == true) {
+            CampaignUIAPI.CoreUITradeMode.SNEAK
+        } else {
+            CampaignUIAPI.CoreUITradeMode.OPEN
+        }
+    }
+
+    private class TradeModeCoreUi(
+        private val tradeMode: CampaignUIAPI.CoreUITradeMode,
+    ) : CoreUIAPI {
+        override fun getTradeMode(): CampaignUIAPI.CoreUITradeMode = tradeMode
 
         override fun getHintPanel(): HintPanelAPI? = null
     }

@@ -11,6 +11,7 @@ import weaponsprocurement.stock.fixer.FixerCatalogMetadata
 import weaponsprocurement.stock.fixer.FixerCatalogSource
 import weaponsprocurement.stock.fixer.FixerMarketObservedCatalog
 import weaponsprocurement.stock.fixer.FixerRarity
+import weaponsprocurement.stock.fixer.FixerReferenceValues
 import weaponsprocurement.stock.fixer.ObservedStockIndex
 import weaponsprocurement.stock.fixer.RarityClassifier
 import weaponsprocurement.stock.fixer.TheoreticalSaleIndex
@@ -192,12 +193,8 @@ class GlobalWeaponMarketService {
         var rarity: FixerRarity?,
         var source: FixerCatalogSource?,
     ) {
-        val baseUnitPrice: Int = Math.max(0, baseUnitPrice)
-        val unitCargoSpace: Float = if (!unitCargoSpace.isNaN() && !unitCargoSpace.isInfinite()) {
-            Math.max(0.01f, unitCargoSpace)
-        } else {
-            1f
-        }
+        val baseUnitPrice: Int = FixerReferenceValues.sanitizeBaseUnitPrice(baseUnitPrice)
+        val unitCargoSpace: Float = FixerReferenceValues.sanitizeUnitCargoSpace(unitCargoSpace)
     }
 
     companion object {

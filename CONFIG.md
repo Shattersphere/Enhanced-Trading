@@ -48,6 +48,10 @@ Raw ids are still accepted in compatibility paths, but prefixed keys avoid colli
 
 `perWeapon` remains supported as a legacy alias. If both `perWeapon` and `perItem` define the same item, `perItem` wins.
 
+## Storage Counting
+
+`sources.includeCurrentMarketStorage` is a legacy JSON key kept for config compatibility. When true, the stock review counts fleet cargo plus all storage locations the player can currently access, matching the in-game header text. When false, it counts fleet cargo only.
+
 ## Remote Market Blacklist
 
 `data/config/enhanced_trading_market_blacklist.json` blocks items from remote sources:

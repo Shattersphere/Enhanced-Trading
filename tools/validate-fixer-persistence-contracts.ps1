@@ -54,14 +54,23 @@ Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'return decode(encoded)
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!FixerCatalogPolicy.isBanned(blacklist, itemKey))'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'Collections.unmodifiableMap(result)'
 
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'Math.max(0, baseUnitPrice)'
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'sanitizeUnitCargoSpace(unitCargoSpace)'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerReferenceValues.sanitizeBaseUnitPrice(baseUnitPrice)'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'FixerReferenceValues.sanitizeUnitCargoSpace(unitCargoSpace)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'split(VALUE_SEPARATOR, limit = 2)'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'parts[0].trim().toInt()'
 Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'parts[1].trim().toFloat()'
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!isFinite(unitCargoSpace)) return null'
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'Math.max(0.01f, unitCargoSpace)'
-Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'else 1f'
+Assert-Contains "FixerMarketObservedCatalog.kt" $catalog 'if (!FixerReferenceValues.isFiniteUnitCargoSpace(unitCargoSpace)) return null'
+
+$referenceValues = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerReferenceValues.kt"
+Assert-Contains "FixerReferenceValues.kt" $referenceValues 'internal object FixerReferenceValues'
+Assert-Contains "FixerReferenceValues.kt" $referenceValues 'fun sanitizeBaseUnitPrice(baseUnitPrice: Int): Int = Math.max(0, baseUnitPrice)'
+Assert-Contains "FixerReferenceValues.kt" $referenceValues 'fun sanitizeUnitCargoSpace(unitCargoSpace: Float): Float'
+Assert-Contains "FixerReferenceValues.kt" $referenceValues 'return if (isFiniteUnitCargoSpace(unitCargoSpace)) Math.max(0.01f, unitCargoSpace) else 1f'
+Assert-Contains "FixerReferenceValues.kt" $referenceValues 'return !unitCargoSpace.isNaN() && !unitCargoSpace.isInfinite()'
+
+$globalMarket = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/GlobalWeaponMarketService.kt"
+Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'FixerReferenceValues.sanitizeBaseUnitPrice(baseUnitPrice)'
+Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'FixerReferenceValues.sanitizeUnitCargoSpace(unitCargoSpace)'
 
 $selector = Read-Text "src/main/kotlin/weaponsprocurement/stock/fixer/FixerReferenceSourceSelector.kt"
 Assert-Contains "FixerReferenceSourceSelector.kt" $selector 'internal object FixerReferenceSourceSelector'
@@ -111,7 +120,6 @@ Assert-Contains "WeaponsProcurementFixerCatalogUpdater.kt" $updater 'private con
 Assert-Contains "WeaponsProcurementFixerCatalogUpdater.kt" $updater 'private const val FAILURE_RETRY_INTERVAL_DAYS = 0.05f'
 Assert-Contains "WeaponsProcurementFixerCatalogUpdater.kt" $updater 'private const val MAX_SCAN_LOGS = 10'
 
-$globalMarket = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/GlobalWeaponMarketService.kt"
 Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'val persistentObserved = observedCatalog.observedItems(sector, blacklist)'
 Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'addTheoreticalCandidates(sector, references, blacklist, persistentObserved)'
 Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'persistentObserved: Map<String, FixerMarketObservedCatalog.ObservedItem>'

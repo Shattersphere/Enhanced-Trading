@@ -132,7 +132,12 @@ foreach ($needle in @(
     'if (submarket.cargoNullOk == null) return false',
     'Submarkets.SUBMARKET_STORAGE == submarketId',
     'Submarkets.LOCAL_RESOURCES == submarketId',
-    '!plugin.isHidden && plugin.isEnabled(OpenMarketCoreUi)'
+    '!plugin.isHidden && plugin.isEnabled(TradeModeCoreUi(tradeMode(submarket)))',
+    'private fun tradeMode(submarket: SubmarketAPI): CampaignUIAPI.CoreUITradeMode',
+    'submarket.plugin?.isBlackMarket == true',
+    'CampaignUIAPI.CoreUITradeMode.SNEAK',
+    'CampaignUIAPI.CoreUITradeMode.OPEN',
+    'private class TradeModeCoreUi('
 )) {
     Assert-Contains "StockSubmarketAccess.kt trade-eligible source contract" $submarketAccess $needle
 }
@@ -239,6 +244,16 @@ foreach ($needle in @(
     'return purchaseService.buyCheapestItem('
 )) {
     Assert-Contains "StockReviewExecutionController.kt source dispatch contract" $executionController $needle
+}
+$quoteBook = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewQuoteBook.kt"
+foreach ($needle in @(
+    'StockReviewPlayerCargo.sellUnitPricesByItem(',
+    'includeBlackMarketForSellQuotes()',
+    'private fun includeBlackMarketForSellQuotes(): Boolean',
+    'val currentSnapshot = snapshot ?: return false',
+    'return !currentSnapshot.getSourceMode().isRemote() && currentSnapshot.isIncludeBlackMarket()'
+)) {
+    Assert-Contains "StockReviewQuoteBook.kt remote sell quote policy" $quoteBook $needle
 }
 foreach ($needle in @(
     'private fun virtualUnitCargoSpace(itemKey: String?): Float',
