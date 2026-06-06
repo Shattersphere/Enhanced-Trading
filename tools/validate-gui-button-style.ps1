@@ -55,6 +55,7 @@ if ($controlsText -notmatch "(Color|val) hover = .*colors(\?|\.)\.hover|val hove
 }
 
 $stockReviewStylePath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewStyle.kt"
+$weaponStockRecordPath = Join-Path $repoRoot "src\main\kotlin\weaponsprocurement\stock\item\WeaponStockRecord.kt"
 $stockReviewListModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListModel.kt"
 $stockReviewReviewModelPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewReviewListModel.kt"
 $stockReviewListSectionPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewListSection.kt"
@@ -107,7 +108,7 @@ $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\renderi
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 $wimGuiTooltipPath = Join-Path $kotlinGuiDir "WimGuiTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -327,6 +328,7 @@ $debugCellGroupText = Get-Content -LiteralPath $stockReviewDebugCellGroupPath -R
 $colorDebugRowsText = Get-Content -LiteralPath $stockReviewColorDebugRowsPath -Raw
 $shipCatalogDebugRowsText = Get-Content -LiteralPath $stockReviewShipCatalogDebugRowsPath -Raw
 $itemInfoFieldsText = Get-Content -LiteralPath $stockReviewItemInfoFieldsPath -Raw
+$weaponStockRecordText = Get-Content -LiteralPath $weaponStockRecordPath -Raw
 $tradeSummaryRendererText = Get-Content -LiteralPath $stockReviewTradeSummaryRendererPath -Raw
 $tradeSummaryFieldsText = Get-Content -LiteralPath $stockReviewTradeSummaryFieldsPath -Raw
 $actionControlsText = Get-Content -LiteralPath $stockReviewActionControlsPath -Raw
@@ -446,6 +448,16 @@ if ($itemInfoFieldsText -notmatch "object StockReviewItemInfoFields" -or
     $itemInfoRowsText -match "isPositiveValue") {
     throw "Stock-review Basic/Advanced detail fields must be declared in StockReviewItemInfoFields."
 }
+if ($weaponStockRecordText -notmatch "wingHullSpec\(\)\?\.minCrew" -or
+    $weaponStockRecordText -notmatch "wingHullSpec\(\)\?\.hitpoints" -or
+    $weaponStockRecordText -notmatch "wingHullSpec\(\)\?\.armorRating" -or
+    $weaponStockRecordText -notmatch "wingHullSpec\(\)\?\.engineSpec\?\.maxSpeed" -or
+    $weaponStockRecordText -notmatch "wingHullSpec\(\)\?\.fluxCapacity" -or
+    $weaponStockRecordText -notmatch "wingHullSpec\(\)\?\.fluxDissipation" -or
+    $weaponStockRecordText -notmatch "positiveOneDecimalLabel\(wingHullSpec\(\)\?\.shieldSpec\?\.fluxPerDamageAbsorbed\)" -or
+    $weaponStockRecordText -notmatch "positiveRoundedLabel\(wingHullSpec\(\)\?\.shieldSpec\?\.arc\)") {
+    throw "Stock-review wing Advanced Info rows must source real fighter hull stats through WeaponStockRecord."
+}
 if ($detailRowSpecText -notmatch "class StockReviewDetailRowSpec" -or
     $detailRowSpecText -notmatch "fun itemInfo" -or
     $detailRowSpecText -notmatch "fun sourceAllocation" -or
@@ -560,6 +572,16 @@ if ($tooltipText -notmatch "StockReviewWingTooltipLayoutBuilder\.forDebugProfile
     $wingTooltipLayoutBuilderText -notmatch "wingArmamentsLabel" -or
     $wingTooltipLayoutBuilderText -notmatch "StockReviewWingTooltipLayout") {
     throw "Stock-review wing tooltip layout construction must route through StockReviewWingTooltipLayoutBuilder."
+}
+if ($wingTooltipLayoutBuilderText -notmatch "record\.wingCrewPerFighterLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingHullIntegrityLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingArmorRatingLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingTopSpeedLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingFluxCapacityLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingFluxDissipationLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingShieldEfficiencyLabel" -or
+    $wingTooltipLayoutBuilderText -notmatch "record\.wingShieldArcLabel") {
+    throw "Stock-review wing tooltip rows must reuse WeaponStockRecord fighter stat labels."
 }
 if ($wimGuiTooltipText -notmatch "MAX_SCREEN_HEIGHT_FRACTION = 0\.95f" -or
     $wimGuiTooltipText -notmatch "fun maxTooltipHeight\(\): Float" -or

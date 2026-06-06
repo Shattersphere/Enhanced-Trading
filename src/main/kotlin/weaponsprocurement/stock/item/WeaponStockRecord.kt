@@ -421,30 +421,32 @@ class WeaponStockRecord(
         get() = debugValue("wingRefitTimeLabel") ?: if (wingSpec == null) "?" else formatOneDecimal(wingSpec.refitTime) + "s"
 
     val wingCrewPerFighterLabel: String
-        get() = debugValue("wingCrewPerFighterLabel") ?: "?"
+        get() = debugValue("wingCrewPerFighterLabel") ?: roundedLabel(wingHullSpec()?.minCrew)
 
     val wingHullIntegrityLabel: String
-        get() = debugValue("wingHullIntegrityLabel") ?: "?"
+        get() = debugValue("wingHullIntegrityLabel") ?: roundedLabel(wingHullSpec()?.hitpoints)
 
     val wingArmorRatingLabel: String
-        get() = debugValue("wingArmorRatingLabel") ?: "?"
+        get() = debugValue("wingArmorRatingLabel") ?: roundedLabel(wingHullSpec()?.armorRating)
 
     val wingTopSpeedLabel: String
-        get() = debugValue("wingTopSpeedLabel") ?: "?"
+        get() = debugValue("wingTopSpeedLabel") ?: roundedLabel(wingHullSpec()?.engineSpec?.maxSpeed)
 
     val wingFluxCapacityLabel: String
-        get() = debugValue("wingFluxCapacityLabel") ?: "?"
+        get() = debugValue("wingFluxCapacityLabel") ?: roundedLabel(wingHullSpec()?.fluxCapacity)
 
     val wingFluxDissipationLabel: String
-        get() = debugValue("wingFluxDissipationLabel") ?: "?"
+        get() = debugValue("wingFluxDissipationLabel") ?: roundedLabel(wingHullSpec()?.fluxDissipation)
 
     val wingShieldEfficiencyLabel: String
-        get() = debugValue("wingShieldEfficiencyLabel") ?: "?"
+        get() = debugValue("wingShieldEfficiencyLabel") ?: positiveOneDecimalLabel(wingHullSpec()?.shieldSpec?.fluxPerDamageAbsorbed)
 
     val wingShieldArcLabel: String
-        get() = debugValue("wingShieldArcLabel") ?: "?"
+        get() = debugValue("wingShieldArcLabel") ?: positiveRoundedLabel(wingHullSpec()?.shieldSpec?.arc)
 
     private fun debugValue(key: String): String? = debugProfile?.value(key)
+
+    private fun wingHullSpec() = wingSpec?.variant?.hullSpec
 
     private fun projectileWeaponSpec(): ProjectileWeaponSpecAPI? {
         return if (spec is ProjectileWeaponSpecAPI) spec else null
@@ -464,6 +466,31 @@ class WeaponStockRecord(
         private fun formatTwoDecimals(value: Float): String {
             if (value.isNaN() || value.isInfinite()) return "?"
             return String.format(Locale.US, "%.2f", value)
+        }
+
+        private fun roundedLabel(value: Float?): String {
+            if (value == null || !validNumber(value)) return "?"
+            return Math.round(value).toString()
+        }
+
+        private fun positiveRoundedLabel(value: Float?): String {
+            if (value == null || !validNumber(value) || value <= 0f) return "?"
+            return Math.round(value).toString()
+        }
+
+        private fun positiveOneDecimalLabel(value: Float?): String {
+            if (value == null || !validNumber(value) || value <= 0f) return "?"
+            return formatOneDecimalTrim(value)
+        }
+
+        private fun validNumber(value: Float): Boolean = !value.isNaN() && !value.isInfinite()
+
+        private fun formatOneDecimalTrim(value: Float): String {
+            val rounded = Math.round(value)
+            if (Math.abs(value - rounded) < 0.05f) {
+                return rounded.toString()
+            }
+            return String.format(Locale.US, "%.1f", value)
         }
 
         private fun valueOrUnknown(value: Any?): String {

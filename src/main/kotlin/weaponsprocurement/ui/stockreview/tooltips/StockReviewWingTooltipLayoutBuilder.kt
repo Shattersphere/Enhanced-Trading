@@ -17,17 +17,17 @@ internal object StockReviewWingTooltipLayoutBuilder {
         val rows = ArrayList<StockReviewTooltipStatRow>()
         addRow(rows, "Primary role", spec.roleDesc?.takeIf { hasText(it) } ?: format(spec.role))
         addRow(rows, "Ordnance points", record.wingOpCostLabel)
-        addRow(rows, "Crew per fighter", integer(hull?.minCrew))
+        addRow(rows, "Crew per fighter", record.wingCrewPerFighterLabel)
         addRow(rows, "Maximum engagement range", record.rangeLabel)
         addRow(rows, "Fighters in wing", spec.numFighters.toString())
         addRow(rows, "Base replacement time (seconds)", integer(spec.refitTime))
-        addRow(rows, "Hull integrity", integer(hull?.hitpoints))
-        addRow(rows, "Armor rating", integer(hull?.armorRating))
-        addRow(rows, "Top speed", integer(hull?.engineSpec?.maxSpeed))
-        addRow(rows, "Flux capacity", integer(hull?.fluxCapacity))
-        addRow(rows, "Flux dissipation", integer(hull?.fluxDissipation))
-        addRow(rows, "Shield efficiency", shieldEfficiency(hull?.shieldSpec?.fluxPerDamageAbsorbed))
-        addRow(rows, "Shield arc", shieldArc(hull?.shieldSpec?.arc))
+        addRow(rows, "Hull integrity", record.wingHullIntegrityLabel)
+        addRow(rows, "Armor rating", record.wingArmorRatingLabel)
+        addRow(rows, "Top speed", record.wingTopSpeedLabel)
+        addRow(rows, "Flux capacity", record.wingFluxCapacityLabel)
+        addRow(rows, "Flux dissipation", record.wingFluxDissipationLabel)
+        addRow(rows, "Shield efficiency", record.wingShieldEfficiencyLabel)
+        addRow(rows, "Shield arc", record.wingShieldArcLabel)
         val system = wingSystemLabel(hull?.shipSystemId)
         val armaments = wingArmamentsLabel(spec)
         return StockReviewWingTooltipLayout(wingTitle(spec), manufacturer, description, rows, system, armaments)
@@ -123,20 +123,6 @@ internal object StockReviewWingTooltipLayoutBuilder {
         return Math.round(value).toString()
     }
 
-    private fun shieldEfficiency(value: Float?): String? {
-        if (value == null || !validNumber(value) || value <= 0f) {
-            return null
-        }
-        return formatOneDecimalTrim(value)
-    }
-
-    private fun shieldArc(value: Float?): String? {
-        if (value == null || !validNumber(value) || value <= 0f) {
-            return null
-        }
-        return Math.round(value).toString()
-    }
-
     private fun hasText(value: String?): Boolean = value != null && value.trim().isNotEmpty()
 
     private fun hasMeaningful(value: String?): Boolean {
@@ -174,14 +160,4 @@ internal object StockReviewWingTooltipLayoutBuilder {
         return result.toString()
     }
 
-    private fun formatOneDecimalTrim(value: Float): String {
-        if (!validNumber(value)) {
-            return "?"
-        }
-        val rounded = Math.round(value)
-        if (Math.abs(value - rounded) < 0.05f) {
-            return rounded.toString()
-        }
-        return String.format(Locale.US, "%.1f", value)
-    }
 }
