@@ -137,6 +137,7 @@ $requiredClasses = @(
     'weaponsprocurement/ui/stockreview/trade/StockReviewPendingTrade.class',
     'weaponsprocurement/ui/stockreview/tooltips/StockReviewItemTooltip.class',
     'weaponsprocurement/ui/stockreview/tooltips/StockReviewItemTooltipContext.class',
+    'weaponsprocurement/ui/stockreview/tooltips/StockReviewShatterItemTooltipFactory.class',
     'weaponsprocurement/ui/stockreview/tooltips/StockReviewTooltipIconPanelPlugin.class',
     'weaponsprocurement/ui/stockreview/tooltips/StockReviewTooltipPanel.class',
     'weaponsprocurement/ui/stockreview/tooltips/StockReviewWeaponTooltipIconGridRenderer.class',

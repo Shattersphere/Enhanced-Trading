@@ -1,8 +1,6 @@
 package weaponsprocurement.ui.stockreview.tooltips
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI
-import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWeaponTooltip
-import com.shattersphere.shatterlib.starsector.ui.tooltip.ShatterWingTooltip
 import weaponsprocurement.stock.item.WeaponStockRecord
 
 /**
@@ -44,29 +42,7 @@ class StockReviewItemTooltip private constructor(
             if (record.isDebug()) {
                 return StockReviewItemTooltip(record)
             }
-            if (record.isWing() && record.wingSpec == null) {
-                return null
-            }
-            if (!record.isWing() && record.spec == null) {
-                return null
-            }
-            val itemId = record.itemId ?: return null
-            val context = StockReviewItemTooltipContext(record)
-            if (record.isWing()) {
-                val spec = record.wingSpec ?: return null
-                return ShatterWingTooltip(
-                    wingId = itemId,
-                    spec = spec,
-                    includeReplacementNotes = false,
-                    context = context.shatterContext(),
-                )
-            }
-            val spec = record.spec ?: return null
-            return ShatterWeaponTooltip(
-                weaponId = itemId,
-                spec = spec,
-                context = context.shatterContext(),
-            )
+            return StockReviewShatterItemTooltipFactory.forRecord(record)
         }
     }
 }
