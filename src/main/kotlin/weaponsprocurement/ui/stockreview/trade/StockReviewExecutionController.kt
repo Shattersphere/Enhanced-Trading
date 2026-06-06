@@ -56,8 +56,7 @@ class StockReviewExecutionController(
             return
         }
         if (estimatedCost > TradeMoney.MAX_EXECUTABLE_CREDITS) {
-            host.postMessage("Order value is too large.")
-            host.requestContentRebuild()
+            reportOversizedOrder()
             return
         }
         val credits = tradeContext.credits()
@@ -105,6 +104,12 @@ class StockReviewExecutionController(
             return
         }
         host.reopen(false)
+    }
+
+    private fun reportOversizedOrder() {
+        host.postMessage("Order value is too large.")
+        host.updateTradeWarning(StockReviewTradeWarnings.ORDER_VALUE_TOO_LARGE)
+        host.requestContentRebuild()
     }
 
     private fun executePendingTradeSafely(

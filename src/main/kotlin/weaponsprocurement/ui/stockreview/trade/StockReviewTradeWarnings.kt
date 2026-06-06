@@ -3,12 +3,14 @@ package weaponsprocurement.ui.stockreview.trade
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
+import weaponsprocurement.trade.plan.TradeMoney
 
 class StockReviewTradeWarnings private constructor() {
     companion object {
         const val NONE = "None"
         const val NO_CARGO_CAPACITY = "Not enough cargo capacity"
         const val NOT_ENOUGH_CREDITS = "Not enough credits"
+        const val ORDER_VALUE_TOO_LARGE = "Order value is too large"
         const val LOW_CREDIT_BALANCE = "Credit balance at <5% of initial balance"
         const val LOW_CARGO_CAPACITY = "Cargo capacity at <5% of total capacity"
 
@@ -46,6 +48,10 @@ class StockReviewTradeWarnings private constructor() {
                 return
             }
             val netCost = tradeContext.totalCost()
+            if (netCost > TradeMoney.MAX_EXECUTABLE_CREDITS) {
+                state.setTradeWarning(ORDER_VALUE_TOO_LARGE)
+                return
+            }
             if (netCost != StockReviewQuoteBook.PRICE_UNAVAILABLE.toLong() &&
                 netCost > 0 &&
                 remainingCreditsAfterTrade(tradeContext) < state.getInitialCredits() * 0.05f
@@ -86,6 +92,9 @@ class StockReviewTradeWarnings private constructor() {
                 ),
             )
             val fullCost = fullQuote.totalCost()
+            if (fullCost > TradeMoney.MAX_EXECUTABLE_CREDITS) {
+                return ORDER_VALUE_TOO_LARGE
+            }
             if (fullCost != StockReviewQuoteBook.PRICE_UNAVAILABLE.toLong() && fullCost > tradeContext.credits()) {
                 return NOT_ENOUGH_CREDITS
             }

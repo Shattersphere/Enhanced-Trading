@@ -124,12 +124,9 @@ class StockReviewSourceTransitionController(
     }
 
     fun resetAllTrades() {
-        if (state.isShipTrading()) {
-            pendingShipTrades.clear()
-        } else {
-            pendingTrades.clear()
-            localMarketIntent.clear()
-        }
+        pendingTrades.clear()
+        pendingShipTrades.clear()
+        localMarketIntent.clear()
         host.updateTradeWarning(null)
         host.requestContentRebuild()
     }

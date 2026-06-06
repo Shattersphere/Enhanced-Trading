@@ -192,6 +192,11 @@ function Test-ExcludedFilePattern {
         [System.IO.FileInfo] $File
     )
 
+    $relativeFilePath = (Get-RelativePath -FullPath $File.FullName).Replace('\', '/')
+    if ($relativeFilePath.Equals('gradle/wrapper/gradle-wrapper.jar', [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $false
+    }
+
     if ($File.Name -like '*.example' -or
         $File.Name -like '*.sample' -or
         $File.Name -like '*.template') {
@@ -231,6 +236,7 @@ function Write-ReviewArchiveNotes {
         '',
         'This archive is source-first review context, not a release package.',
         'Generated zips, build output, deploy staging, logs, local secrets, jars, and image-heavy assets are omitted by default.',
+        'The checked-in Gradle wrapper jar is included so wrapper-based build checks can run from the archive.',
         'Some included config files may reference omitted runtime assets. Use the full repo or a curated release package for asset-existence, install, deploy, or visual review.',
         'Repo-specific copies may add narrow exceptions for review-critical assets or checked-in binaries.',
         ("Max file size: {0} MB" -f $MaxFileSizeMb)

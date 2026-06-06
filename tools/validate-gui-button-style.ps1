@@ -88,6 +88,7 @@ $stockReviewModeControllerPath = Join-Path $kotlinGuiDir "stockreview\state\Stoc
 $stockReviewSourceStatePath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewSourceState.kt"
 $stockReviewPanelPluginPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewPanelPlugin.kt"
 $stockReviewSourceTransitionControllerPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewSourceTransitionController.kt"
+$stockReviewUiActionDispatcherPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewUiActionDispatcher.kt"
 $stockReviewTooltipPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewItemTooltip.kt"
 $stockReviewShatterItemTooltipFactoryPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewShatterItemTooltipFactory.kt"
 $stockReviewWingTooltipLayoutBuilderPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewWingTooltipLayoutBuilder.kt"
@@ -124,7 +125,7 @@ $stockReviewFiltersPath = Join-Path $kotlinGuiDir "stockreview\state\StockReview
 $stockReviewTradePlannerPath = Join-Path $kotlinGuiDir "stockreview\trade\StockReviewTradePlanner.kt"
 $wimGuiTooltipPath = Join-Path $kotlinGuiDir "WimGuiTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $stockReviewHotkeyScriptPath, $weaponsProcurementModPluginPath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewModeControllerPath, $stockReviewSourceStatePath, $stockReviewPanelPluginPath, $stockReviewSourceTransitionControllerPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipAvailabilityPath, $stockReviewShipEligibilityPath, $stockReviewShipExecutionControllerPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $stockReviewHotkeyScriptPath, $weaponsProcurementModPluginPath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewModeControllerPath, $stockReviewSourceStatePath, $stockReviewPanelPluginPath, $stockReviewSourceTransitionControllerPath, $stockReviewUiActionDispatcherPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipAvailabilityPath, $stockReviewShipEligibilityPath, $stockReviewShipExecutionControllerPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -166,6 +167,7 @@ $modeControllerText = Get-Content -LiteralPath $stockReviewModeControllerPath -R
 $sourceStateText = Get-Content -LiteralPath $stockReviewSourceStatePath -Raw
 $panelPluginText = Get-Content -LiteralPath $stockReviewPanelPluginPath -Raw
 $sourceTransitionControllerText = Get-Content -LiteralPath $stockReviewSourceTransitionControllerPath -Raw
+$uiActionDispatcherText = Get-Content -LiteralPath $stockReviewUiActionDispatcherPath -Raw
 $actionRowButtonsText = Get-Content -LiteralPath $stockReviewActionRowButtonsPath -Raw
 if ($styleText -notmatch "fun showDebugUi\(\): Boolean = WeaponsProcurementConfig\.isDebugUiEnabled\(\)") {
     throw "Stock-review worst-case debug rows and debug controls must be gated by WeaponsProcurementConfig.isDebugUiEnabled()."
@@ -449,6 +451,24 @@ if ($footerSpecText -match "StockReviewActionGroup" -or
     $footerButtonsText -notmatch "PURCHASE_ALL" -or
     $footerButtonsText -notmatch "RESET_ALL") {
     throw "Stock-review footer specs must use explicit button-set kinds, with button definitions declared in StockReviewFooterButtons."
+}
+if (-not $sourceTransitionControllerText.Contains("pendingTrades.clear()") -or
+    -not $sourceTransitionControllerText.Contains("pendingShipTrades.clear()") -or
+    -not $sourceTransitionControllerText.Contains("localMarketIntent.clear()")) {
+    throw "Reset All Trades must clear item trades, ship trades, and local market intent."
+}
+foreach ($needle in @(
+    "StockReviewActionGroup.ROW_EXPANSION -> rowExpansion.handle(action)",
+    "StockReviewActionGroup.SOURCE_TRANSITIONS -> sourceTransitions.handle(action)",
+    "StockReviewActionGroup.SCROLL -> scroll.handle(action)",
+    "StockReviewActionGroup.FILTERS -> filters.handle(action)",
+    "StockReviewActionGroup.DEBUG_MODE -> debugMode.handle(action)",
+    "StockReviewActionGroup.NAVIGATION -> navigation.handle(action)",
+    "else -> false"
+)) {
+    if (-not $uiActionDispatcherText.Contains($needle)) {
+        throw "StockReviewUiActionDispatcher must propagate controller handled results. Missing: $needle"
+    }
 }
 if ($actionRowRendererText -match "StockReviewActionGroup" -or
     $actionRowRendererText -match "BUTTON_FACTORY\.button" -or

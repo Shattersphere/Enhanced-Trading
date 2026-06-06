@@ -1,11 +1,7 @@
 package weaponsprocurement.ui.stockreview.rendering
 
 import weaponsprocurement.ui.stockreview.actions.StockReviewAction
-import weaponsprocurement.ui.stockreview.actions.StockReviewAction.Type
-import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatch
-import weaponsprocurement.ui.stockreview.actions.StockReviewActionDispatcher
 import weaponsprocurement.ui.stockreview.actions.StockReviewActionGroup
-import weaponsprocurement.ui.stockreview.actions.StockReviewActionHandlerGroup
 
 class StockReviewUiActionDispatcher(
     private val rowExpansion: StockReviewRowExpansionController,
@@ -15,26 +11,16 @@ class StockReviewUiActionDispatcher(
     private val debugMode: StockReviewDebugModeController,
     private val navigation: StockReviewNavigationController,
 ) {
-    private val dispatcher: StockReviewActionDispatcher = StockReviewActionDispatch.of(
-        StockReviewActionHandlerGroup.group(StockReviewActionGroup.ROW_EXPANSION) { action ->
-            rowExpansion.handle(action)
-        },
-        StockReviewActionHandlerGroup.group(StockReviewActionGroup.SOURCE_TRANSITIONS) { action ->
-            sourceTransitions.handle(action)
-        },
-        StockReviewActionHandlerGroup.group(StockReviewActionGroup.SCROLL) { action ->
-            scroll.handle(action)
-        },
-        StockReviewActionHandlerGroup.group(StockReviewActionGroup.FILTERS) { action ->
-            filters.handle(action)
-        },
-        StockReviewActionHandlerGroup.group(StockReviewActionGroup.DEBUG_MODE) { action ->
-            debugMode.handle(action)
-        },
-        StockReviewActionHandlerGroup.group(StockReviewActionGroup.NAVIGATION) { action ->
-            navigation.handle(action)
-        },
-    )
-
-    fun handle(action: StockReviewAction?): Boolean = dispatcher.handle(action)
+    fun handle(action: StockReviewAction?): Boolean {
+        if (action == null) return false
+        return when (action.getGroup()) {
+            StockReviewActionGroup.ROW_EXPANSION -> rowExpansion.handle(action)
+            StockReviewActionGroup.SOURCE_TRANSITIONS -> sourceTransitions.handle(action)
+            StockReviewActionGroup.SCROLL -> scroll.handle(action)
+            StockReviewActionGroup.FILTERS -> filters.handle(action)
+            StockReviewActionGroup.DEBUG_MODE -> debugMode.handle(action)
+            StockReviewActionGroup.NAVIGATION -> navigation.handle(action)
+            else -> false
+        }
+    }
 }

@@ -5,6 +5,7 @@ package weaponsprocurement.ui.stockreview.trade
 import weaponsprocurement.stock.item.SubmarketWeaponStock
 import weaponsprocurement.stock.item.WeaponStockRecord
 import weaponsprocurement.stock.item.WeaponStockSnapshot
+import weaponsprocurement.trade.plan.TradeMoney
 import java.util.HashMap
 
 class StockReviewTradeContext(
@@ -123,6 +124,7 @@ class StockReviewTradeContext(
 
     fun canConfirm(): Boolean {
         return totalCostValue != StockReviewQuoteBook.PRICE_UNAVAILABLE.toLong() &&
+            totalCostValue <= TradeMoney.MAX_EXECUTABLE_CREDITS &&
             totalCostValue <= creditsValue &&
             totalCargoSpaceDeltaValue <= cargoSpaceLeftValue + 0.01f
     }
@@ -167,6 +169,7 @@ class StockReviewTradeContext(
             adjustedCargoSpaceDelta = adjusted.totalCargoSpaceDelta()
         }
         if (adjustedCost == StockReviewQuoteBook.PRICE_UNAVAILABLE.toLong()) return false
+        if (adjustedCost > TradeMoney.MAX_EXECUTABLE_CREDITS) return false
         if (adjustedCost > creditsValue) return false
         return adjustedCargoSpaceDelta <= cargoSpaceLeftValue + 0.01f
     }

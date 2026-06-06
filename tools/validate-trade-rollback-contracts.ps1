@@ -152,6 +152,9 @@ Assert-Order "StockPurchasePlan.kt invalid plan-source guard" $plan @(
 )
 
 $quoteBook = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewQuoteBook.kt"
+$tradeContext = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewTradeContext.kt"
+$reviewExecutionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewExecutionController.kt"
+$tradeWarnings = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/trade/StockReviewTradeWarnings.kt"
 foreach ($needle in @(
     'val cost = TradeMoney.lineTotal(stock.unitPrice, quantity)',
     'if (cost < 0L) continue',
@@ -186,6 +189,28 @@ Assert-Order "StockReviewQuoteBook.kt invalid quote-source guard" $quoteBook @(
     'totalCargo += cargo',
     'allocations.add(StockReviewSellerAllocation(stock.displaySourceName, stock.sourceId, quantity, cost))'
 )
+
+foreach ($needle in @(
+    'import weaponsprocurement.trade.plan.TradeMoney',
+    'totalCostValue <= TradeMoney.MAX_EXECUTABLE_CREDITS',
+    'if (adjustedCost > TradeMoney.MAX_EXECUTABLE_CREDITS) return false'
+)) {
+    Assert-Contains "StockReviewTradeContext.kt executable credit preflight" $tradeContext $needle
+}
+foreach ($needle in @(
+    'const val ORDER_VALUE_TOO_LARGE = "Order value is too large"',
+    'if (netCost > TradeMoney.MAX_EXECUTABLE_CREDITS)',
+    'return ORDER_VALUE_TOO_LARGE'
+)) {
+    Assert-Contains "StockReviewTradeWarnings.kt executable credit warning" $tradeWarnings $needle
+}
+foreach ($needle in @(
+    'if (estimatedCost > TradeMoney.MAX_EXECUTABLE_CREDITS)',
+    'reportOversizedOrder()',
+    'host.updateTradeWarning(StockReviewTradeWarnings.ORDER_VALUE_TOO_LARGE)'
+)) {
+    Assert-Contains "StockReviewExecutionController.kt executable credit preflight" $reviewExecutionController $needle
+}
 
 $money = Read-Text "src/main/kotlin/weaponsprocurement/trade/plan/TradeMoney.kt"
 foreach ($needle in @(
