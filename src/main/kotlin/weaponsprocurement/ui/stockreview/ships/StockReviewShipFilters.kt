@@ -8,6 +8,10 @@ import java.util.Locale
 
 object StockReviewShipFilters {
     @JvmStatic
+    fun filter(records: List<StockReviewShipRecord>, state: StockReviewState): List<StockReviewShipRecord> =
+        filterByHullClass(records, state.getShipHullFilter()).filter { matches(it, state) }
+
+    @JvmStatic
     fun matches(record: StockReviewShipRecord, state: StockReviewState): Boolean {
         val activeSizes = state.getActiveShipSizeFilters()
         if (activeSizes.isNotEmpty() && activeSizes.none { it.hullSize == record.member.hullSpec.hullSize }) {
@@ -66,6 +70,22 @@ object StockReviewShipFilters {
 
     private fun matchesMin(value: Int, min: Int?): Boolean =
         min == null || value >= min
+
+    private fun filterByHullClass(records: List<StockReviewShipRecord>, filter: String): List<StockReviewShipRecord> {
+        val tokens = filter.lowercase(Locale.ROOT).split(Regex("\\s+")).filter { it.isNotBlank() }
+        if (tokens.isEmpty()) {
+            return records
+        }
+        return records.filter { record ->
+            val searchable = listOfNotNull(
+                record.member.hullSpec?.hullName,
+                record.member.hullSpec?.nameWithDesignationWithDashClass,
+                record.member.hullSpec?.hullId,
+                record.member.specId,
+            ).joinToString(" ").lowercase(Locale.ROOT)
+            tokens.all { searchable.contains(it) }
+        }
+    }
 
     private fun ordnancePoints(record: StockReviewShipRecord): Int =
         if (record.isDebug()) 999 else record.member.hullSpec.getOrdnancePoints(Global.getSector()?.playerStats)

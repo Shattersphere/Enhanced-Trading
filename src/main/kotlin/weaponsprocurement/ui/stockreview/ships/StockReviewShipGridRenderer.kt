@@ -15,7 +15,6 @@ import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 import weaponsprocurement.ui.stockreview.rendering.StockReviewStyle
 import weaponsprocurement.ui.stockreview.state.StockReviewState
 import java.awt.Color
-import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -44,7 +43,7 @@ object StockReviewShipGridRenderer {
     ): WimGuiListBounds {
         val spec = StockReviewStyle.TRADE_LIST
         val panelHeight = shipPanelHeight(spec.panelTop)
-        val records = filterShipRecords(snapshot.allRecords(state.getSortMode()), state)
+        val records = StockReviewShipFilters.filter(snapshot.allRecords(state.getSortMode()), state)
         val columns = TARGET_COLUMNS
         val cardWidth = (spec.panelWidth - (columns - 1) * CARD_GAP - 2f * spec.rowHorizontalPad) / columns
         val totalRows = ceil(records.size / columns.toFloat()).toInt()
@@ -281,22 +280,4 @@ object StockReviewShipGridRenderer {
         )
     }
 
-    private fun filterShipRecords(records: List<StockReviewShipRecord>, state: StockReviewState): List<StockReviewShipRecord> =
-        filterByHullClass(records, state.getShipHullFilter()).filter { StockReviewShipFilters.matches(it, state) }
-
-    private fun filterByHullClass(records: List<StockReviewShipRecord>, filter: String): List<StockReviewShipRecord> {
-        val tokens = filter.lowercase(Locale.ROOT).split(Regex("\\s+")).filter { it.isNotBlank() }
-        if (tokens.isEmpty()) {
-            return records
-        }
-        return records.filter { record ->
-            val searchable = listOfNotNull(
-                record.member.hullSpec?.hullName,
-                record.member.hullSpec?.nameWithDesignationWithDashClass,
-                record.member.hullSpec?.hullId,
-                record.member.specId,
-            ).joinToString(" ").lowercase(Locale.ROOT)
-            tokens.all { searchable.contains(it) }
-        }
-    }
 }

@@ -11,6 +11,8 @@ $executionController = Read-Text "$shipDir/StockReviewShipExecutionController.kt
 $pendingTrade = Read-Text "$shipDir/StockReviewPendingShipTrade.kt"
 $pendingTrades = Read-Text "$shipDir/StockReviewPendingShipTrades.kt"
 $tradeController = Read-Text "$shipDir/StockReviewShipTradeController.kt"
+$shipGridRenderer = Read-Text "$shipDir/StockReviewShipGridRenderer.kt"
+$shipFilters = Read-Text "$shipDir/StockReviewShipFilters.kt"
 $pricing = Read-Text "$shipDir/StockReviewShipPricing.kt"
 $sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
 $panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewPanelPlugin.kt"
@@ -208,6 +210,21 @@ foreach ($needle in @(
 )) {
     Assert-Contains "StockReviewShipTradeController.kt stale selection contract" $tradeController $needle
 }
+
+foreach ($needle in @(
+    "fun filter(records: List<StockReviewShipRecord>, state: StockReviewState): List<StockReviewShipRecord> =",
+    "filterByHullClass(records, state.getShipHullFilter()).filter { matches(it, state) }",
+    "record.member.hullSpec?.hullName",
+    "record.member.hullSpec?.nameWithDesignationWithDashClass",
+    "record.member.hullSpec?.hullId",
+    "record.member.specId",
+    "tokens.all { searchable.contains(it) }"
+)) {
+    Assert-Contains "StockReviewShipFilters.kt combined filter contract" $shipFilters $needle
+}
+Assert-Contains "StockReviewShipGridRenderer.kt filter ownership contract" $shipGridRenderer "val records = StockReviewShipFilters.filter(snapshot.allRecords(state.getSortMode()), state)"
+Assert-NotContains "StockReviewShipGridRenderer.kt filter ownership contract" $shipGridRenderer "private fun filterByHullClass"
+Assert-NotContains "StockReviewShipGridRenderer.kt filter ownership contract" $shipGridRenderer "record.member.hullSpec?.hullId"
 
 foreach ($needle in @(
     'val base = roundCredit(member?.baseBuyValue ?: 0f)',
