@@ -1,7 +1,6 @@
 package weaponsprocurement.ui.stockreview.ships
 
 import com.fs.starfarer.api.Global
-import com.fs.starfarer.api.combat.ShipAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import com.fs.starfarer.api.loading.Description
 import com.fs.starfarer.api.loading.WeaponSlotAPI
@@ -11,11 +10,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import weaponsprocurement.ui.WimGuiPanelPlugin
 import weaponsprocurement.ui.WimGuiText
+import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltipStatRow
 import weaponsprocurement.ui.stockreview.tooltips.StockReviewTooltipPanel
 import java.awt.Color
 import java.util.Locale
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 /**
  * Public-API approximation of the vanilla ship-sale tooltip. It avoids obfuscated UI classes,
@@ -26,6 +25,7 @@ class StockReviewShipTooltip(
 ) : TooltipMakerAPI.TooltipCreator {
     private val member: FleetMemberAPI = record.member
     private val debugProfile: StockReviewShipDebugProfile? = record.debugProfile
+    private val rows = StockReviewShipTooltipRows(member, debugProfile)
 
     override fun isTooltipExpandable(tooltipParam: Any?): Boolean = false
 
@@ -77,38 +77,9 @@ class StockReviewShipTooltip(
         addSectionHeading(panel, "Combat performance", COMBAT_X, dataHeadingTop, COMBAT_WIDTH)
         val dataRowsTop = dataHeadingTop + SECTION_HEIGHT + 10f
 
-        val logisticsLeft = debugProfile?.logisticsLeft?.map { StatRow(it.label, it.value) } ?: listOf(
-            StatRow("CR per deployment", percent(StockReviewShipStats.crPerDeployment(member))),
-            StatRow("Recovery rate (per day)", percent(member.repairTracker?.recoveryRate ?: member.stats.repairRatePercentPerDay.modifiedValue / 100f)),
-            StatRow("Recovery cost (supplies)", integer(StockReviewShipStats.suppliesToRecover(member))),
-            StatRow("Deployment points", integer(member.deploymentPointsCost)),
-            StatRow("Peak performance (sec)", integer(StockReviewShipStats.peakPerformanceSeconds(member))),
-            StatRow("Crew complement", "${integer(member.crewComposition?.crew ?: 0f)} / ${integer(StockReviewShipStats.maxCrew(member))}"),
-            StatRow("Hull size", hullSize(member.hullSpec.hullSize)),
-            StatRow("Ordnance points", member.hullSpec.getOrdnancePoints(Global.getSector()?.playerStats).toString()),
-        )
-        val logisticsRight = debugProfile?.logisticsRight?.map { StatRow(it.label, it.value) } ?: listOf(
-            StatRow("Maintenance (supplies/mo)", oneDecimal(StockReviewShipStats.maintenancePerMonth(member))),
-            StatRow("Cargo capacity", integer(StockReviewShipStats.cargoCapacity(member))),
-            StatRow("Maximum crew", integer(StockReviewShipStats.maxCrew(member))),
-            StatRow("Skeleton crew required", integer(StockReviewShipStats.minCrew(member))),
-            StatRow("Fuel capacity", integer(StockReviewShipStats.fuelCapacity(member))),
-            StatRow("Maximum burn", integer(member.stats.maxBurnLevel.modifiedValue)),
-            StatRow("Fuel / light year", oneDecimal(StockReviewShipStats.fuelPerLightYear(member))),
-            StatRow("Sensor profile", integer(member.stats.sensorProfile.modifiedValue)),
-            StatRow("Sensor strength", integer(member.stats.sensorStrength.modifiedValue)),
-        )
-        val combat = debugProfile?.combat?.map { StatRow(it.label, it.value) } ?: listOf(
-            StatRow("Hull integrity", integer(StockReviewShipStats.hullIntegrity(member))),
-            StatRow("Armor rating", integer(StockReviewShipStats.armorRating(member))),
-            StatRow("Defense", defenseLabel()),
-            StatRow("Shield arc", shieldArcLabel()),
-            StatRow("Shield upkeep/sec", shieldUpkeepLabel()),
-            StatRow("Shield efficiency", shieldEfficiencyLabel()),
-            StatRow("Flux capacity", integer(StockReviewShipStats.fluxCapacity(member))),
-            StatRow("Flux dissipation", integer(StockReviewShipStats.fluxDissipation(member))),
-            StatRow("Top speed", integer(StockReviewShipStats.topSpeed(member))),
-        )
+        val logisticsLeft = rows.logisticsLeft()
+        val logisticsRight = rows.logisticsRight()
+        val combat = rows.combat()
 
         addStatRows(panel, logisticsLeft, PAD, dataRowsTop, 380f, 172f, 292f, 70f)
         addStatRows(panel, logisticsRight, 410f, dataRowsTop, 382f, 184f, 296f, 70f)
@@ -131,7 +102,7 @@ class StockReviewShipTooltip(
 
     private fun addStatRows(
         panel: CustomPanelAPI,
-        rows: List<StatRow>,
+        rows: List<StockReviewTooltipStatRow>,
         x: Float,
         y: Float,
         width: Float,
@@ -146,7 +117,7 @@ class StockReviewShipTooltip(
                 row.label,
                 row.value,
                 TEXT,
-                row.color,
+                HIGHLIGHT,
                 x,
                 rowY,
                 width,
@@ -267,43 +238,6 @@ class StockReviewShipTooltip(
         return names.joinToString(", ").ifBlank { "None" }
     }
 
-    private fun defenseLabel(): String {
-        val type = member.hullSpec.defenseType ?: return "None"
-        return when (type.name) {
-            "OMNI" -> "Omni Shield"
-            "FRONT" -> "Front Shield"
-            "PHASE" -> "Phase Cloak"
-            "NONE" -> "None"
-            else -> prettyEnum(type.name)
-        }
-    }
-
-    private fun shieldArcLabel(): String {
-        val shield = member.hullSpec.shieldSpec ?: return ""
-        return integer(StockReviewShipStats.shieldArc(member))
-    }
-
-    private fun shieldUpkeepLabel(): String {
-        val shield = member.hullSpec.shieldSpec ?: return ""
-        return integer(StockReviewShipStats.shieldUpkeepPerSecond(member))
-    }
-
-    private fun shieldEfficiencyLabel(): String {
-        val shield = member.hullSpec.shieldSpec ?: return ""
-        return oneDecimalTrim(StockReviewShipStats.shieldFluxPerDamage(member))
-    }
-
-    private fun percent(value: Float): String = "${(value * 100f).roundToInt()}%"
-    private fun integer(value: Float): String = value.roundToInt().toString()
-    private fun oneDecimal(value: Float): String = String.format(Locale.US, "%.1f", value)
-    private fun oneDecimalTrim(value: Float): String {
-        val formatted = oneDecimal(value)
-        return if (formatted.endsWith(".0")) formatted.dropLast(2) else formatted
-    }
-
-    private fun hullSize(value: ShipAPI.HullSize?): String =
-        value?.name?.lowercase(Locale.ROOT)?.replaceFirstChar(Char::titlecase) ?: "Unknown"
-
     private fun prettyEnum(value: String): String =
         value.lowercase(Locale.ROOT).split('_').joinToString(" ") { it.replaceFirstChar(Char::titlecase) }
 
@@ -316,12 +250,6 @@ class StockReviewShipTooltip(
         "LARGE" -> 2
         else -> 3
     }
-
-    private data class StatRow(
-        val label: String,
-        val value: String,
-        val color: Color = HIGHLIGHT,
-    )
 
     private data class MountKey(
         val size: String,

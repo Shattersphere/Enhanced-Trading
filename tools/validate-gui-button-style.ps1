@@ -89,6 +89,7 @@ $stockReviewWeaponTooltipIconGridRendererPath = Join-Path $kotlinGuiDir "stockre
 $stockReviewWeaponTooltipTextRendererPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewWeaponTooltipTextRenderer.kt"
 $stockReviewTooltipPanelPath = Join-Path $kotlinGuiDir "stockreview\tooltips\StockReviewTooltipPanel.kt"
 $stockReviewShipTooltipPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipTooltip.kt"
+$stockReviewShipTooltipRowsPath = Join-Path $kotlinGuiDir "stockreview\ships\StockReviewShipTooltipRows.kt"
 $stockReviewItemInfoFieldsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewItemInfoFields.kt"
 $stockReviewActionControlsPath = Join-Path $kotlinGuiDir "stockreview\controls\StockReviewActionControls.kt"
 $stockReviewRowSpecPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewRowSpec.kt"
@@ -109,7 +110,7 @@ $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\renderi
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
 $wimGuiTooltipPath = Join-Path $kotlinGuiDir "WimGuiTooltip.kt"
 
-foreach ($requiredPath in @($stockReviewStylePath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipTooltipPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
+foreach ($requiredPath in @($stockReviewStylePath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewTooltipPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         throw "Required stock-review UI source missing: $requiredPath"
     }
@@ -544,6 +545,7 @@ $weaponTooltipIconGridRendererText = Get-Content -LiteralPath $stockReviewWeapon
 $weaponTooltipTextRendererText = Get-Content -LiteralPath $stockReviewWeaponTooltipTextRendererPath -Raw
 $tooltipPanelText = Get-Content -LiteralPath $stockReviewTooltipPanelPath -Raw
 $shipTooltipText = Get-Content -LiteralPath $stockReviewShipTooltipPath -Raw
+$shipTooltipRowsText = Get-Content -LiteralPath $stockReviewShipTooltipRowsPath -Raw
 $wimGuiTooltipText = Get-Content -LiteralPath $wimGuiTooltipPath -Raw
 if ($tooltipText -match "CodexDataV2|setCodexEntry|F10") {
     throw "Stock-review item tooltips must not attach the broken Codex/F10 footer."
@@ -604,10 +606,27 @@ if ($wimGuiTooltipText -notmatch "MAX_SCREEN_HEIGHT_FRACTION = 0\.95f" -or
 }
 if ($shipTooltipText -match "data class TooltipLayout" -or
     $shipTooltipText -match "WimGuiText\.estimatedChars" -or
+    $shipTooltipText -notmatch "StockReviewShipTooltipRows\(member, debugProfile\)" -or
+    $shipTooltipText -notmatch "rows\.logisticsLeft\(\)" -or
+    $shipTooltipText -notmatch "rows\.logisticsRight\(\)" -or
+    $shipTooltipText -notmatch "rows\.combat\(\)" -or
     $shipTooltipText -notmatch "StockReviewTooltipPanel\.addStatRow" -or
     $shipTooltipText -notmatch "panel\.position\.setSize\(WIDTH, StockReviewTooltipPanel\.capHeight\(max\(MIN_HEIGHT, finalY \+ PAD\)\)\)" -or
     $shipTooltipText -notmatch "WimGuiText\.wrapToWidth") {
     throw "Stock-review ship tooltip must use measured wrapping and post-render height sizing, not a separate estimated layout pass."
+}
+foreach ($needle in @(
+    "fun logisticsLeft(): List<StockReviewTooltipStatRow>",
+    "fun logisticsRight(): List<StockReviewTooltipStatRow>",
+    "fun combat(): List<StockReviewTooltipStatRow>",
+    'StockReviewTooltipStatRow("CR per deployment"',
+    'StockReviewTooltipStatRow("Cargo capacity"',
+    'StockReviewTooltipStatRow("Defense"',
+    'StockReviewShipStats.shieldFluxPerDamage(member)'
+)) {
+    if ($shipTooltipRowsText -notmatch [regex]::Escape($needle)) {
+        throw "Stock-review ship tooltip stat rows must stay in StockReviewShipTooltipRows with vanilla-facing stat coverage."
+    }
 }
 if (($tooltipText + $wingTooltipRendererText + $weaponTooltipIconGridRendererText) -match "private const val WING_LABEL_WIDTH|private const val GRID_LABEL_WIDTH" -or
     $wingTooltipRendererText -notmatch "MIN_LABEL_WIDTH" -or
