@@ -32,7 +32,7 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `34f608c` (`Extract purchase rollback journal`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `0157fad` (`Clarify stock review action construction`).
 
 Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
