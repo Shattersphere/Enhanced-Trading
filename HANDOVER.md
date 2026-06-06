@@ -32,7 +32,7 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `8252e0f` (`Centralize stock review state reset changes`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `d11117c` (`Name pending trade execution phases`).
 
 Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
