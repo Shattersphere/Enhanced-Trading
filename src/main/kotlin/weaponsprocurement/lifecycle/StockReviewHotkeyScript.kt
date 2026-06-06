@@ -19,6 +19,7 @@ import weaponsprocurement.stock.market.MarketStockService
 import weaponsprocurement.stock.item.StockItemStacks
 import weaponsprocurement.config.StockReviewConfig
 import weaponsprocurement.config.WeaponsProcurementConfig
+import weaponsprocurement.ui.stockreview.ships.StockReviewShipAvailability
 
 /**
  * Owns the trade-popup hotkey lifecycle. Opening intentionally requires a market-backed
@@ -120,6 +121,9 @@ class StockReviewHotkeyScript : EveryFrameScript {
                     }
                 }
                 if (playerHasTradeableCargo()) {
+                    return true
+                }
+                if (StockReviewShipAvailability.hasLocalTradeOpportunity(market, Global.getSector()?.playerFleet, config.isIncludeBlackMarket())) {
                     return true
                 }
                 hasEnabledRemoteSource()

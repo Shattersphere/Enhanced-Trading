@@ -45,7 +45,7 @@ class StockReviewShipSnapshotBuilder {
         member: FleetMemberAPI?,
         submarket: SubmarketAPI,
     ) {
-        if (!isTradeableShip(member)) return
+        if (!StockReviewShipEligibility.isTradeableShip(member)) return
         val id = member?.id?.takeIf { it.isNotBlank() } ?: return
         val quote = StockReviewShipPricing.buyQuote(member, submarket)
         records.add(
@@ -66,8 +66,7 @@ class StockReviewShipSnapshotBuilder {
         member: FleetMemberAPI?,
         submarket: SubmarketAPI,
     ) {
-        if (!isTradeableShip(member)) return
-        if (member?.isFlagship == true) return
+        if (!StockReviewShipEligibility.isSellableShip(member)) return
         val id = member?.id?.takeIf { it.isNotBlank() } ?: return
         val quote = StockReviewShipPricing.sellQuote(member, submarket)
         records.add(
@@ -173,10 +172,4 @@ class StockReviewShipSnapshotBuilder {
         return submarkets.firstOrNull { StockSubmarketAccess.isTradeEligible(it, includeBlackMarket) }
     }
 
-    private fun isTradeableShip(member: FleetMemberAPI?): Boolean {
-        if (member == null) return false
-        if (member.isFighterWing) return false
-        if (member.isStation) return false
-        return member.type != null
-    }
 }

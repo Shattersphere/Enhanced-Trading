@@ -4,6 +4,7 @@ import com.fs.starfarer.api.BaseModPlugin
 import com.fs.starfarer.api.EveryFrameScript
 import com.fs.starfarer.api.Global
 import org.apache.log4j.Logger
+import weaponsprocurement.config.WeaponsProcurementConfig
 import weaponsprocurement.lifecycle.StockReviewHotkeyScript
 import weaponsprocurement.lifecycle.WeaponsProcurementFixerCatalogUpdater
 
@@ -18,6 +19,7 @@ class WeaponsProcurementModPlugin : BaseModPlugin() {
             LOG.warn("WP_PLUGIN registration skipped: sector is null")
             return
         }
+        WeaponsProcurementConfig.refreshAndPublishSettings()
         if (!hasScript(sector.transientScripts, StockReviewHotkeyScript::class.java) &&
             !hasScript(sector.scripts, StockReviewHotkeyScript::class.java)
         ) {

@@ -122,6 +122,10 @@ class StockReviewShipExecutionController(
             failures.add("${trade.memberName} is no longer available to sell.")
             return false
         }
+        if (!StockReviewShipEligibility.isSellableShip(member)) {
+            failures.add("${trade.memberName} is no longer eligible to sell.")
+            return false
+        }
         val credits = playerFleet.cargo?.credits
         if (credits == null) {
             failures.add("credits are unavailable for ${trade.memberName}.")

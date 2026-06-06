@@ -14,8 +14,14 @@ $tradeController = Read-Text "$shipDir/StockReviewShipTradeController.kt"
 $shipGridRenderer = Read-Text "$shipDir/StockReviewShipGridRenderer.kt"
 $shipFilters = Read-Text "$shipDir/StockReviewShipFilters.kt"
 $pricing = Read-Text "$shipDir/StockReviewShipPricing.kt"
+$eligibility = Read-Text "$shipDir/StockReviewShipEligibility.kt"
+$availability = Read-Text "$shipDir/StockReviewShipAvailability.kt"
 $sourceTransitionController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSourceTransitionController.kt"
 $panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewPanelPlugin.kt"
+$actionRowButtons = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewActionRowButtons.kt"
+$sourceState = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewSourceState.kt"
+$state = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewState.kt"
+$hotkeyScript = Read-Text "src/main/kotlin/weaponsprocurement/lifecycle/StockReviewHotkeyScript.kt"
 
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Builds the local-only ship trade snapshot"
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Remote ship trading needs separate source semantics before being added."
@@ -34,7 +40,7 @@ Assert-NotContains "StockReviewShipSnapshotBuilder.kt local-only contract" $snap
 
 $buyRecord = Get-Section $snapshotBuilder "private fun addBuyRecord(" "private fun addSellRecord("
 foreach ($needle in @(
-    "if (!isTradeableShip(member)) return",
+    "if (!StockReviewShipEligibility.isTradeableShip(member)) return",
     'val id = member?.id?.takeIf { it.isNotBlank() } ?: return',
     'StockReviewShipPricing.buyQuote(member, submarket)',
     '"B|${submarket.specId}|$id"',
@@ -47,8 +53,7 @@ foreach ($needle in @(
 
 $sellRecord = Get-Section $snapshotBuilder "private fun addSellRecord(" "private fun addDebugRecord("
 foreach ($needle in @(
-    "if (!isTradeableShip(member)) return",
-    "if (member?.isFlagship == true) return",
+    "if (!StockReviewShipEligibility.isSellableShip(member)) return",
     'val id = member?.id?.takeIf { it.isNotBlank() } ?: return',
     'StockReviewShipPricing.sellQuote(member, submarket)',
     '"S|$id"',
@@ -59,7 +64,7 @@ foreach ($needle in @(
     Assert-Contains "StockReviewShipSnapshotBuilder.kt sell record contract" $sellRecord $needle
 }
 
-$sellTarget = Get-Section $snapshotBuilder "private fun sellTarget(" "private fun isTradeableShip("
+$sellTarget = Get-Section $snapshotBuilder "private fun sellTarget(" "`n}"
 Assert-Order "StockReviewShipSnapshotBuilder.kt sell target priority" $sellTarget @(
     "if (includeBlackMarket) {",
     "it?.specId == Submarkets.SUBMARKET_BLACK",
@@ -68,15 +73,17 @@ Assert-Order "StockReviewShipSnapshotBuilder.kt sell target priority" $sellTarge
     "return submarkets.firstOrNull { StockSubmarketAccess.isTradeEligible(it, includeBlackMarket) }"
 )
 
-$tradeable = Get-Section $snapshotBuilder "private fun isTradeableShip(" "`n}"
+$tradeable = Get-Section $eligibility "fun isTradeableShip(" "fun isSellableShip("
 foreach ($needle in @(
     "if (member == null) return false",
     "if (member.isFighterWing) return false",
     "if (member.isStation) return false",
     "return member.type != null"
 )) {
-    Assert-Contains "StockReviewShipSnapshotBuilder.kt tradeable filter" $tradeable $needle
+    Assert-Contains "StockReviewShipEligibility.kt tradeable filter" $tradeable $needle
 }
+$sellable = Get-Section $eligibility "fun isSellableShip(" "`n}"
+Assert-Contains "StockReviewShipEligibility.kt sellable filter" $sellable "return isTradeableShip(member) && member?.isFlagship != true"
 
 Assert-Contains "StockReviewShipExecutionController.kt exact-member contract" $executionController "Confirms queued exact-member ship trades."
 Assert-Contains "StockReviewShipExecutionController.kt exact-member contract" $executionController "source/player list at confirm time or the trade fails cleanly"
@@ -128,6 +135,8 @@ Assert-Order "StockReviewShipExecutionController.kt sell mutation order" $execut
     "val target = findTradeSubmarket(market, trade.submarketId, includeBlackMarket)",
     "val member = findMember(playerFleet.fleetData?.membersListCopy, trade.memberId)",
     'failures.add("${trade.memberName} is no longer available to sell.")',
+    "if (!StockReviewShipEligibility.isSellableShip(member))",
+    'failures.add("${trade.memberName} is no longer eligible to sell.")',
     "val credits = playerFleet.cargo?.credits",
     'failures.add("credits are unavailable for ${trade.memberName}.")',
     'return runShipMutation(trade, failures, "sale")',
@@ -143,6 +152,18 @@ foreach ($needle in @(
 )) {
     Assert-Contains "StockReviewShipExecutionController.kt sell rollback guard" $executeSell $needle
 }
+
+foreach ($needle in @(
+    "object StockReviewShipAvailability",
+    "fun hasLocalTradeOpportunity(",
+    "hasBuyCandidate(market, includeBlackMarket) || hasSellCandidate(market, playerFleet, includeBlackMarket)",
+    "StockReviewShipEligibility.isTradeableShip(member)",
+    "StockReviewShipEligibility.isSellableShip(member)",
+    "StockSubmarketAccess.isTradeEligible(it, includeBlackMarket)"
+)) {
+    Assert-Contains "StockReviewShipAvailability.kt open gate contract" $availability $needle
+}
+Assert-Contains "StockReviewHotkeyScript.kt ship-only open gate" $hotkeyScript "StockReviewShipAvailability.hasLocalTradeOpportunity(market, Global.getSector()?.playerFleet, config.isIncludeBlackMarket())"
 
 foreach ($needle in @(
     "private fun runShipMutation(",
@@ -242,7 +263,7 @@ foreach ($needle in @(
 $shipBlackMarketToggle = Get-Section $sourceTransitionController "fun toggleBlackMarket()" "if (!state.getSourceMode().supportsBlackMarketToggle())"
 foreach ($needle in @(
     "if (state.isShipTrading()) {",
-    "state.toggleBlackMarket()",
+    "state.toggleBlackMarketForShipTrading()",
     "pendingShipTrades.clear()",
     "host.rebuildSnapshot()",
     "host.requestContentRebuild()",
@@ -251,13 +272,19 @@ foreach ($needle in @(
     Assert-Contains "StockReviewSourceTransitionController.kt ship source-filter contract" $shipBlackMarketToggle $needle
 }
 Assert-Order "StockReviewSourceTransitionController.kt ship source-filter contract" $shipBlackMarketToggle @(
-    "state.toggleBlackMarket()",
+    "state.toggleBlackMarketForShipTrading()",
     "pendingShipTrades.clear()",
     "host.rebuildSnapshot()",
     "host.requestContentRebuild()"
 )
 
-Assert-Contains "StockReviewPanelPlugin.kt ship execution host contract" $panelPlugin "override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarket()"
+Assert-Contains "StockReviewPanelPlugin.kt ship execution host contract" $panelPlugin "override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarketForShipTrading()"
+Assert-Contains "StockReviewPanelPlugin.kt ship snapshot contract" $panelPlugin "shipSnapshotBuilder.build(market(), playerFleet(), state.isIncludeBlackMarketForShipTrading())"
+Assert-Contains "StockReviewActionRowButtons.kt ship black-market label contract" $actionRowButtons "context.state.isIncludeBlackMarketForShipTrading()"
+Assert-Contains "StockReviewSourceState.kt ship black-market state contract" $sourceState "fun isIncludeBlackMarketForShipTrading(): Boolean = includeBlackMarket"
+Assert-Contains "StockReviewSourceState.kt ship black-market state contract" $sourceState "fun toggleBlackMarketForShipTrading(): Boolean"
+Assert-Contains "StockReviewState.kt ship black-market state contract" $state "fun isIncludeBlackMarketForShipTrading(): Boolean = source.isIncludeBlackMarketForShipTrading()"
+Assert-Contains "StockReviewState.kt ship black-market state contract" $state "fun toggleBlackMarketForShipTrading()"
 
 if ($failures.Count -gt 0) {
     throw "Ship trading contract validation failed with $($failures.Count) failure(s)."

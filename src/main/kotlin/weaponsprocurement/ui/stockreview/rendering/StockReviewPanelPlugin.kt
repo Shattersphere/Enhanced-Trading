@@ -218,7 +218,7 @@ class StockReviewPanelPlugin(
 
     override fun playerFleet() = sector()?.playerFleet
 
-    override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarket()
+    override fun includeBlackMarket(): Boolean = state.isIncludeBlackMarketForShipTrading()
 
     override fun postMessage(message: String?) {
         reportMessage(message)
@@ -246,7 +246,7 @@ class StockReviewPanelPlugin(
 
     override fun rebuildSnapshot() {
         snapshots.rebuild()
-        currentShipSnapshot = shipSnapshotBuilder.build(market(), playerFleet(), state.isIncludeBlackMarket())
+        currentShipSnapshot = shipSnapshotBuilder.build(market(), playerFleet(), state.isIncludeBlackMarketForShipTrading())
     }
 
     override fun exitReviewMode() {

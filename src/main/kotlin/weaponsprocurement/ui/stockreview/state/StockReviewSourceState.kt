@@ -38,12 +38,20 @@ class StockReviewSourceState {
 
     fun isIncludeBlackMarket(): Boolean = getSourceMode().supportsBlackMarketToggle() && includeBlackMarket
 
+    fun isIncludeBlackMarketForShipTrading(): Boolean = includeBlackMarket
+
     fun toggleBlackMarket(): Boolean {
         val previous = includeBlackMarket
         if (!getSourceMode().supportsBlackMarketToggle()) {
             includeBlackMarket = false
             return previous != includeBlackMarket
         }
+        includeBlackMarket = !includeBlackMarket
+        return previous != includeBlackMarket
+    }
+
+    fun toggleBlackMarketForShipTrading(): Boolean {
+        val previous = includeBlackMarket
         includeBlackMarket = !includeBlackMarket
         return previous != includeBlackMarket
     }

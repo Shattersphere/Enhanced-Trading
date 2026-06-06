@@ -107,6 +107,12 @@ foreach ($tag in @(
 }
 
 $updater = Read-Text "src/main/kotlin/weaponsprocurement/lifecycle/WeaponsProcurementFixerCatalogUpdater.kt"
+$plugin = Read-Text "src/main/kotlin/weaponsprocurement/plugins/WeaponsProcurementModPlugin.kt"
+Assert-Contains "WeaponsProcurementModPlugin.kt config publish contract" $plugin 'WeaponsProcurementConfig.refreshAndPublishSettings()'
+Assert-Order "WeaponsProcurementModPlugin.kt config publish before updater registration" $plugin @(
+    'WeaponsProcurementConfig.refreshAndPublishSettings()',
+    'sector.addTransientScript(WeaponsProcurementFixerCatalogUpdater())'
+)
 Assert-Contains "WeaponsProcurementFixerCatalogUpdater.kt" $updater 'class WeaponsProcurementFixerCatalogUpdater : EveryFrameScript'
 Assert-Contains "WeaponsProcurementFixerCatalogUpdater.kt" $updater 'override fun runWhilePaused(): Boolean = true'
 Assert-Contains "WeaponsProcurementFixerCatalogUpdater.kt" $updater 'if (!WeaponsProcurementConfig.isFixersMarketEnabled())'

@@ -142,8 +142,12 @@ class StockReviewState : WimGuiScrollableListState {
     }
     fun isIncludeCurrentMarketStorage(): Boolean = source.isIncludeCurrentMarketStorage()
     fun isIncludeBlackMarket(): Boolean = source.isIncludeBlackMarket()
+    fun isIncludeBlackMarketForShipTrading(): Boolean = source.isIncludeBlackMarketForShipTrading()
     fun toggleBlackMarket() {
         markContentChangedIf(source.toggleBlackMarket())
+    }
+    fun toggleBlackMarketForShipTrading() {
+        markContentChangedIf(source.toggleBlackMarketForShipTrading())
     }
     fun getSourceMode(): StockSourceMode = source.getSourceMode()
     fun cycleSourceMode() {

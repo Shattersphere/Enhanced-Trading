@@ -30,7 +30,7 @@ object StockReviewActionRowButtonPolicies {
 
     @JvmStatic
     fun blackMarketLabel(context: StockReviewActionRowContext): String =
-        "Black Market: ${StockReviewUiText.onOff(context.state.isIncludeBlackMarket())}"
+        "Black Market: ${StockReviewUiText.onOff(includeBlackMarket(context))}"
 
     @JvmStatic
     fun filtersLabel(context: StockReviewActionRowContext): String =
@@ -45,6 +45,13 @@ object StockReviewActionRowButtonPolicies {
 
     @JvmStatic
     fun actionBackground(context: StockReviewActionRowContext): Color = StockReviewStyle.ACTION_BACKGROUND
+
+    private fun includeBlackMarket(context: StockReviewActionRowContext): Boolean =
+        if (context.state.isShipTrading()) {
+            context.state.isIncludeBlackMarketForShipTrading()
+        } else {
+            context.state.isIncludeBlackMarket()
+        }
 
     @JvmStatic
     fun cycleSortMode(context: StockReviewActionRowContext): StockReviewAction = StockReviewAction.cycleSortMode()
