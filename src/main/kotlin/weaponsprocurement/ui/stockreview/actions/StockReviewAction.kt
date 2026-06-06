@@ -77,167 +77,194 @@ class StockReviewAction private constructor(
     fun getGroup(): StockReviewActionGroup = StockReviewActionGroup.forType(type)
 
     companion object {
+        private fun action(
+            type: Type,
+            category: StockCategory? = null,
+            itemType: StockItemType? = null,
+            tradeGroup: StockReviewTradeGroup? = null,
+            reviewItemGroup: StockReviewReviewItemGroup? = null,
+            filterGroup: StockReviewFilterGroup? = null,
+            filter: StockReviewFilter? = null,
+            shipSizeFilter: StockReviewShipSizeFilter? = null,
+            itemKey: String? = null,
+            submarketId: String? = null,
+            quantity: Int = 0,
+        ): StockReviewAction =
+            StockReviewAction(
+                type,
+                category,
+                itemType,
+                tradeGroup,
+                reviewItemGroup,
+                filterGroup,
+                filter,
+                shipSizeFilter,
+                itemKey,
+                submarketId,
+                quantity,
+            )
+
         @JvmStatic
         fun toggle(category: StockCategory?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_CATEGORY, category, null, null, null, null, null, null, null, null, 0)
+            action(Type.TOGGLE_CATEGORY, category = category)
 
         @JvmStatic
         fun toggle(itemType: StockItemType?, category: StockCategory?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_CATEGORY, category, itemType, null, null, null, null, null, null, null, 0)
+            action(Type.TOGGLE_CATEGORY, category = category, itemType = itemType)
 
         @JvmStatic
         fun toggle(itemType: StockItemType?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_ITEM_TYPE, null, itemType, null, null, null, null, null, null, null, 0)
+            action(Type.TOGGLE_ITEM_TYPE, itemType = itemType)
 
         @JvmStatic
         fun toggle(tradeGroup: StockReviewTradeGroup?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_TRADE_GROUP, null, null, tradeGroup, null, null, null, null, null, null, 0)
+            action(Type.TOGGLE_TRADE_GROUP, tradeGroup = tradeGroup)
 
         @JvmStatic
         fun toggle(reviewItemGroup: StockReviewReviewItemGroup?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_REVIEW_ITEM_GROUP, null, null, null, reviewItemGroup, null, null, null, null, null, 0)
+            action(Type.TOGGLE_REVIEW_ITEM_GROUP, reviewItemGroup = reviewItemGroup)
 
         @JvmStatic
         fun toggle(filterGroup: StockReviewFilterGroup?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_FILTER_GROUP, null, null, null, null, filterGroup, null, null, null, null, 0)
+            action(Type.TOGGLE_FILTER_GROUP, filterGroup = filterGroup)
 
         @JvmStatic
         fun toggleShipSizeFilter(size: StockReviewShipSizeFilter?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_SHIP_SIZE_FILTER, null, null, null, null, null, null, size, null, null, 0)
+            action(Type.TOGGLE_SHIP_SIZE_FILTER, shipSizeFilter = size)
 
         @JvmStatic
         fun toggleItem(itemKey: String?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_ITEM, null, null, null, null, null, null, null, itemKey, null, 0)
+            action(Type.TOGGLE_ITEM, itemKey = itemKey)
 
         @JvmStatic
         fun toggleTradeKind(): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_TRADE_KIND, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.TOGGLE_TRADE_KIND)
 
         @JvmStatic
         fun buyBest(itemKey: String?, quantity: Int): StockReviewAction = adjustPlan(itemKey, quantity)
 
         @JvmStatic
         fun adjustPlan(itemKey: String?, delta: Int): StockReviewAction =
-            StockReviewAction(Type.ADJUST_PLAN, null, null, null, null, null, null, null, itemKey, null, delta)
+            action(Type.ADJUST_PLAN, itemKey = itemKey, quantity = delta)
 
         @JvmStatic
         fun toggleShipPlan(recordKey: String?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_SHIP_PLAN, null, null, null, null, null, null, null, recordKey, null, 0)
+            action(Type.TOGGLE_SHIP_PLAN, itemKey = recordKey)
 
         @JvmStatic
         fun resetPlan(itemKey: String?): StockReviewAction =
-            StockReviewAction(Type.RESET_PLAN, null, null, null, null, null, null, null, itemKey, null, 0)
+            action(Type.RESET_PLAN, itemKey = itemKey)
 
         @JvmStatic
         fun resetShipPlan(recordKey: String?): StockReviewAction =
-            StockReviewAction(Type.RESET_SHIP_PLAN, null, null, null, null, null, null, null, recordKey, null, 0)
+            action(Type.RESET_SHIP_PLAN, itemKey = recordKey)
 
         @JvmStatic
         fun adjustToSufficient(itemKey: String?, delta: Int): StockReviewAction =
-            StockReviewAction(Type.ADJUST_TO_SUFFICIENT, null, null, null, null, null, null, null, itemKey, null, delta)
+            action(Type.ADJUST_TO_SUFFICIENT, itemKey = itemKey, quantity = delta)
 
         @JvmStatic
         fun cycleSortMode(): StockReviewAction =
-            StockReviewAction(Type.CYCLE_SORT_MODE, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.CYCLE_SORT_MODE)
 
         @JvmStatic
         fun toggleBlackMarket(): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_BLACK_MARKET, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.TOGGLE_BLACK_MARKET)
 
         @JvmStatic
         fun cycleSourceMode(): StockReviewAction =
-            StockReviewAction(Type.CYCLE_SOURCE_MODE, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.CYCLE_SOURCE_MODE)
 
         @JvmStatic
         fun scrollList(delta: Int): StockReviewAction =
-            StockReviewAction(Type.SCROLL_LIST, null, null, null, null, null, null, null, null, null, delta)
+            action(Type.SCROLL_LIST, quantity = delta)
 
         @JvmStatic
         fun reviewPurchase(): StockReviewAction =
-            StockReviewAction(Type.REVIEW_PURCHASE, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.REVIEW_PURCHASE)
 
         @JvmStatic
         fun purchaseAllUntilSufficient(): StockReviewAction =
-            StockReviewAction(Type.PURCHASE_ALL_UNTIL_SUFFICIENT, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.PURCHASE_ALL_UNTIL_SUFFICIENT)
 
         @JvmStatic
         fun sellAllUntilSufficient(): StockReviewAction =
-            StockReviewAction(Type.SELL_ALL_UNTIL_SUFFICIENT, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.SELL_ALL_UNTIL_SUFFICIENT)
 
         @JvmStatic
         fun resetAllTrades(): StockReviewAction =
-            StockReviewAction(Type.RESET_ALL_TRADES, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.RESET_ALL_TRADES)
 
         @JvmStatic
         fun openFilters(): StockReviewAction =
-            StockReviewAction(Type.OPEN_FILTERS, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.OPEN_FILTERS)
 
         @JvmStatic
         fun toggleFilter(filter: StockReviewFilter?): StockReviewAction =
-            StockReviewAction(Type.TOGGLE_FILTER, null, null, null, null, null, filter, null, null, null, 0)
+            action(Type.TOGGLE_FILTER, filter = filter)
 
         @JvmStatic
         fun resetFilters(): StockReviewAction =
-            StockReviewAction(Type.RESET_FILTERS, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.RESET_FILTERS)
 
         @JvmStatic
         fun clearItemSearch(): StockReviewAction =
-            StockReviewAction(Type.CLEAR_ITEM_SEARCH, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.CLEAR_ITEM_SEARCH)
 
         @JvmStatic
         fun clearShipHullFilter(): StockReviewAction =
-            StockReviewAction(Type.CLEAR_SHIP_HULL_FILTER, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.CLEAR_SHIP_HULL_FILTER)
 
         @JvmStatic
         fun openColorDebug(): StockReviewAction =
-            StockReviewAction(Type.OPEN_COLOR_DEBUG, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.OPEN_COLOR_DEBUG)
 
         @JvmStatic
         fun openShipCatalogDebug(): StockReviewAction =
-            StockReviewAction(Type.OPEN_SHIP_CATALOG_DEBUG, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.OPEN_SHIP_CATALOG_DEBUG)
 
         @JvmStatic
         fun debugCycleTarget(delta: Int): StockReviewAction =
-            StockReviewAction(Type.DEBUG_CYCLE_TARGET, null, null, null, null, null, null, null, null, null, delta)
+            action(Type.DEBUG_CYCLE_TARGET, quantity = delta)
 
         @JvmStatic
         fun debugTogglePersistence(): StockReviewAction =
-            StockReviewAction(Type.DEBUG_TOGGLE_PERSISTENCE, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.DEBUG_TOGGLE_PERSISTENCE)
 
         @JvmStatic
         fun debugAdjustRed(delta: Int): StockReviewAction =
-            StockReviewAction(Type.DEBUG_ADJUST_RED, null, null, null, null, null, null, null, null, null, delta)
+            action(Type.DEBUG_ADJUST_RED, quantity = delta)
 
         @JvmStatic
         fun debugAdjustGreen(delta: Int): StockReviewAction =
-            StockReviewAction(Type.DEBUG_ADJUST_GREEN, null, null, null, null, null, null, null, null, null, delta)
+            action(Type.DEBUG_ADJUST_GREEN, quantity = delta)
 
         @JvmStatic
         fun debugAdjustBlue(delta: Int): StockReviewAction =
-            StockReviewAction(Type.DEBUG_ADJUST_BLUE, null, null, null, null, null, null, null, null, null, delta)
+            action(Type.DEBUG_ADJUST_BLUE, quantity = delta)
 
         @JvmStatic
         fun debugApply(): StockReviewAction =
-            StockReviewAction(Type.DEBUG_APPLY, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.DEBUG_APPLY)
 
         @JvmStatic
         fun debugConfirm(): StockReviewAction =
-            StockReviewAction(Type.DEBUG_CONFIRM, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.DEBUG_CONFIRM)
 
         @JvmStatic
         fun debugRestore(): StockReviewAction =
-            StockReviewAction(Type.DEBUG_RESTORE, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.DEBUG_RESTORE)
 
         @JvmStatic
         fun debugNoop(): StockReviewAction =
-            StockReviewAction(Type.DEBUG_NOOP, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.DEBUG_NOOP)
 
         @JvmStatic
         fun confirmPurchase(): StockReviewAction =
-            StockReviewAction(Type.CONFIRM_PURCHASE, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.CONFIRM_PURCHASE)
 
         @JvmStatic
         fun goBack(): StockReviewAction =
-            StockReviewAction(Type.GO_BACK, null, null, null, null, null, null, null, null, null, 0)
+            action(Type.GO_BACK)
     }
 }
