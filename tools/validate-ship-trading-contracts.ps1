@@ -21,6 +21,7 @@ $panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rend
 $actionRowButtons = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewActionRowButtons.kt"
 $sourceState = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewSourceState.kt"
 $state = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewState.kt"
+$shipFilterState = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewShipFilterState.kt"
 $hotkeyScript = Read-Text "src/main/kotlin/weaponsprocurement/lifecycle/StockReviewHotkeyScript.kt"
 
 Assert-Contains "StockReviewShipSnapshotBuilder.kt local-only contract" $snapshotBuilder "Builds the local-only ship trade snapshot"
@@ -273,6 +274,14 @@ foreach ($needle in @(
 Assert-Contains "StockReviewShipGridRenderer.kt filter ownership contract" $shipGridRenderer "val records = StockReviewShipFilters.filter(snapshot.allRecords(state.getSortMode()), state)"
 Assert-NotContains "StockReviewShipGridRenderer.kt filter ownership contract" $shipGridRenderer "private fun filterByHullClass"
 Assert-NotContains "StockReviewShipGridRenderer.kt filter ownership contract" $shipGridRenderer "record.member.hullSpec?.hullId"
+foreach ($needle in @(
+    'return normalizeNumeric(normalized)',
+    "val significant = value.trimStart('0')",
+    'private const val MAX_INT_TEXT = "2147483647"',
+    'significant.length == MAX_INT_TEXT.length && significant > MAX_INT_TEXT'
+)) {
+    Assert-Contains "StockReviewShipFilterState.kt numeric overflow contract" $shipFilterState $needle
+}
 
 foreach ($needle in @(
     'val base = roundCredit(member?.baseBuyValue ?: 0f)',

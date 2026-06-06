@@ -71,6 +71,7 @@ class StockPurchaseMarketSources private constructor() {
                 if (!MarketStockService.isTradeSubmarket(submarket, true)) continue
                 val cargo = submarket?.cargoNullOk
                 val stack = StockItemCargo.itemStack(cargo, itemType, itemId)
+                if (!StockItemStacks.isPurchasableItemStack(submarket, stack, itemType)) continue
                 val liveAvailable = if (stack == null) 0 else Math.round(stack.size)
                 val available = Math.min(stock.count, liveAvailable)
                 if (available <= 0) continue

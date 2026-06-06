@@ -107,11 +107,25 @@ class StockReviewShipFilterState {
 
     fun activeCount(): Int = activeSizes.size + fields.values.count { it.isNotBlank() }
 
-    private fun normalize(field: StockReviewShipFilterField, value: String?): String =
-        value.orEmpty()
+    private fun normalize(field: StockReviewShipFilterField, value: String?): String {
+        val normalized = value.orEmpty()
             .filter { isAllowed(field, it) }
             .take(MAX_FIELD_LENGTH)
             .trimStart()
+        if (!field.numeric) return normalized
+        return normalizeNumeric(normalized)
+    }
+
+    private fun normalizeNumeric(value: String): String {
+        val significant = value.trimStart('0')
+        if (significant.isEmpty()) return if (value.isEmpty()) "" else "0"
+        if (significant.length > MAX_INT_TEXT.length ||
+            (significant.length == MAX_INT_TEXT.length && significant > MAX_INT_TEXT)
+        ) {
+            return MAX_INT_TEXT
+        }
+        return significant
+    }
 
     private fun isAllowed(field: StockReviewShipFilterField, char: Char): Boolean =
         if (field.numeric) {
@@ -122,5 +136,6 @@ class StockReviewShipFilterState {
 
     companion object {
         private const val MAX_FIELD_LENGTH = 32
+        private const val MAX_INT_TEXT = "2147483647"
     }
 }

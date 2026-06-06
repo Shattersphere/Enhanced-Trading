@@ -154,8 +154,10 @@ class StockReviewState : WimGuiScrollableListState {
         markContentChangedIf(source.cycleSourceMode())
     }
 
-    fun normalizeSourceMode() {
-        markContentChangedIf(source.normalizeSourceMode())
+    fun normalizeSourceMode(): Boolean {
+        val changed = source.normalizeSourceMode()
+        markContentChangedIf(changed)
+        return changed
     }
 
     fun getTradeKind(): StockReviewTradeKind = tradeKind

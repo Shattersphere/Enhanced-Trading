@@ -8,6 +8,10 @@ $failures = New-Object System.Collections.Generic.List[string]
 $compatibilityIds = Read-Text "src/main/kotlin/weaponsprocurement/CompatibilityIds.kt"
 Assert-Contains "CompatibilityIds.kt" $compatibilityIds 'const val FIXERS_MARKET_SUBMARKET_ID: String = "wp_fixers_market"'
 
+$panelPlugin = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewPanelPlugin.kt"
+$snapshotController = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/rendering/StockReviewSnapshotController.kt"
+$state = Read-Text "src/main/kotlin/weaponsprocurement/ui/stockreview/state/StockReviewState.kt"
+
 $sourceMode = Read-Text "src/main/kotlin/weaponsprocurement/stock/item/StockSourceMode.kt"
 foreach ($needle in @(
     'LOCAL("Local", false)',
@@ -38,6 +42,30 @@ Assert-Order "WeaponStockSnapshotBuilder marketStock dispatch" $snapshotBuilder 
     'return globalWeaponMarketService.collectSectorWeaponStock(sector, includeBlackMarket)',
     'return marketStockService.collectCurrentMarketItemStock(market, includeBlackMarket)'
 )
+
+foreach ($needle in @(
+    'fun normalizeSourceMode(): Boolean',
+    'return changed'
+)) {
+    Assert-Contains "StockReviewState.kt source normalization contract" $state $needle
+}
+foreach ($needle in @(
+    'fun rebuild(): Boolean',
+    'val sourceModeNormalized = state.normalizeSourceMode()',
+    'return sourceModeNormalized'
+)) {
+    Assert-Contains "StockReviewSnapshotController.kt source normalization contract" $snapshotController $needle
+}
+foreach ($needle in @(
+    'val sourceModeNormalized = snapshots.rebuild()',
+    'clearPlansAfterSourceNormalization()',
+    'pendingTrades.clear()',
+    'localMarketIntent.clear()',
+    'modes.exitReview(state)',
+    'Queued trades were reset because the selected stock source is no longer enabled.'
+)) {
+    Assert-Contains "StockReviewPanelPlugin.kt source normalization pending-trade guard" $panelPlugin $needle
+}
 
 $globalMarket = Read-Text "src/main/kotlin/weaponsprocurement/stock/market/GlobalWeaponMarketService.kt"
 Assert-Contains "GlobalWeaponMarketService.kt" $globalMarket 'val VIRTUAL_SUBMARKET_ID: String = CompatibilityIds.Markets.FIXERS_MARKET_SUBMARKET_ID'
@@ -171,6 +199,7 @@ foreach ($needle in @(
     'if (!MarketStockService.isTradeSubmarket(submarket, true)) continue',
     'val cargo = submarket?.cargoNullOk',
     'val stack = StockItemCargo.itemStack(cargo, itemType, itemId)',
+    'if (!StockItemStacks.isPurchasableItemStack(submarket, stack, itemType)) continue',
     'val liveAvailable = if (stack == null) 0 else Math.round(stack.size)',
     'val available = Math.min(stock.count, liveAvailable)',
     'StockPurchaseSource(',

@@ -256,8 +256,22 @@ class StockReviewPanelPlugin(
         modes.enforceDebugUiEnabled(WeaponsProcurementConfig.isDebugUiEnabled(), state)
 
     override fun rebuildSnapshot() {
-        snapshots.rebuild()
+        val sourceModeNormalized = snapshots.rebuild()
+        if (sourceModeNormalized) {
+            clearPlansAfterSourceNormalization()
+        }
         currentShipSnapshot = shipSnapshotBuilder.build(market(), playerFleet(), state.isIncludeBlackMarketForShipTrading())
+    }
+
+    private fun clearPlansAfterSourceNormalization() {
+        val hadPendingTrades = !pendingTrades.isEmpty()
+        pendingTrades.clear()
+        localMarketIntent.clear()
+        StockReviewTradeWarnings.clear(state)
+        modes.exitReview(state)
+        if (hadPendingTrades) {
+            reportMessage("Queued trades were reset because the selected stock source is no longer enabled.")
+        }
     }
 
     override fun exitReviewMode() {

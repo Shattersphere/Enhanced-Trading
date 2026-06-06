@@ -20,8 +20,8 @@ class StockReviewSnapshotController(
 
     fun hasSnapshot(): Boolean = snapshot != null
 
-    fun rebuild() {
-        state.normalizeSourceMode()
+    fun rebuild(): Boolean {
+        val sourceModeNormalized = state.normalizeSourceMode()
         renderer.invalidateModelCache()
         val host = WimGuiCampaignDialogHost.current()
         snapshot = snapshotBuilder.build(
@@ -33,5 +33,6 @@ class StockReviewSnapshotController(
             state.isIncludeBlackMarket(),
             state.getSourceMode(),
         )
+        return sourceModeNormalized
     }
 }
