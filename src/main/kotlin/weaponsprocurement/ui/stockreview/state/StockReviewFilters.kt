@@ -4,6 +4,7 @@ package weaponsprocurement.ui.stockreview.state
 
 import weaponsprocurement.stock.item.WeaponStockRecord
 import java.util.EnumSet
+import java.util.Locale
 
 class StockReviewFilters private constructor() {
     companion object {
@@ -22,6 +23,43 @@ class StockReviewFilters private constructor() {
 
         @JvmStatic
         fun count(activeFilters: Set<StockReviewFilter>?): Int = activeFilters?.size ?: 0
+
+        @JvmStatic
+        fun matchesSearch(record: WeaponStockRecord?, searchQuery: String?): Boolean =
+            matchesSearchTerms(record, searchTerms(searchQuery))
+
+        @JvmStatic
+        fun matchesSearchTerms(record: WeaponStockRecord?, terms: List<String>): Boolean {
+            if (terms.isEmpty()) {
+                return true
+            }
+            if (record == null) {
+                return false
+            }
+            val searchable = listOfNotNull(
+                record.displayName,
+                record.displayNameWithFixerMarker,
+                record.itemId,
+                record.itemKey,
+                record.itemType.sectionLabel,
+                record.itemType.singularLabel,
+                record.sizeLabel,
+                record.typeLabel,
+                record.primaryRoleLabel,
+                record.damageTypeLabel,
+                record.fixerRarityLabel,
+                record.fixerAvailabilityLabel,
+            ).joinToString(" ").lowercase(Locale.ROOT)
+            return terms.all { searchable.contains(it) }
+        }
+
+        @JvmStatic
+        fun searchTerms(searchQuery: String?): List<String> =
+            searchQuery
+                ?.lowercase(Locale.ROOT)
+                ?.split(Regex("\\s+"))
+                ?.filter { it.isNotBlank() }
+                ?: emptyList()
 
         @JvmStatic
         fun activeInGroup(activeFilters: Set<StockReviewFilter>?, group: StockReviewFilterGroup?): Set<StockReviewFilter> {

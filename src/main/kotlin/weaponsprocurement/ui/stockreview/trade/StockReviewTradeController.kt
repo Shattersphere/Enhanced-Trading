@@ -55,7 +55,11 @@ class StockReviewTradeController(
         var added = 0
         var explicitWarning: String? = null
         val quoteBook = StockReviewQuoteBook(snapshot)
-        val records = StockReviewTradePlanner.cheapestFirstFilteredBuyableRecords(snapshot, state.getActiveFilters())
+        val records = StockReviewTradePlanner.cheapestFirstFilteredBuyableRecords(
+            snapshot,
+            state.getActiveFilters(),
+            state.getItemSearch(),
+        )
         var tradeContext = StockReviewTradeContext(snapshot, pendingTrades.asList())
         for (record in records) {
             val needed = tradeContext.buyNeededForSufficiency(record)
@@ -90,7 +94,11 @@ class StockReviewTradeController(
     fun sellAllUntilSufficient() {
         val snapshot = host.snapshot() ?: return
         var removed = 0
-        val records = StockReviewTradePlanner.filteredTradeableRecords(snapshot, state.getActiveFilters())
+        val records = StockReviewTradePlanner.filteredTradeableRecords(
+            snapshot,
+            state.getActiveFilters(),
+            state.getItemSearch(),
+        )
         var tradeContext = StockReviewTradeContext(snapshot, pendingTrades.asList())
         for (record in records) {
             val quantity = tradeContext.sellableUntilSufficient(record)

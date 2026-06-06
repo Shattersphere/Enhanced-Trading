@@ -98,6 +98,13 @@ foreach ($needle in @(
     "val market = host.market()",
     "val playerFleet = host.playerFleet()",
     "val includeBlackMarket = host.includeBlackMarket()",
+    "val credits = playerFleet.cargo?.credits",
+    'host.postMessage("Ship trades require accessible player credits.")',
+    "val orderedTrades = shipExecutionOrder(trades)",
+    "val estimatedCost = netShipCreditCost(orderedTrades)",
+    'host.postMessage("Ship order value is too large.")',
+    'host.postMessage("Need ${StockReviewFormat.credits(estimatedCost)} for these ship trades.")',
+    "for (trade in orderedTrades)",
     "executeBuy(market, playerFleet, includeBlackMarket, trade, failures)",
     "executeSell(market, playerFleet, includeBlackMarket, trade, failures)",
     "pendingTrades.reset(trade.recordKey)",
@@ -107,6 +114,25 @@ foreach ($needle in @(
     'host.postMessage("Some ship trades could not be completed: ${failures.first()}")'
 )) {
     Assert-Contains "StockReviewShipExecutionController.kt confirmation contract" $confirm $needle
+}
+Assert-Order "StockReviewShipExecutionController.kt ship execution preflight" $confirm @(
+    "val credits = playerFleet.cargo?.credits",
+    "val orderedTrades = shipExecutionOrder(trades)",
+    "val estimatedCost = netShipCreditCost(orderedTrades)",
+    "if (estimatedCost > TradeMoney.MAX_EXECUTABLE_CREDITS)",
+    "if (estimatedCost > 0L && credits.get() + 0.01f < estimatedCost.toFloat())",
+    "for (trade in orderedTrades)"
+)
+Assert-Order "StockReviewShipExecutionController.kt ship sell-first order" $confirm @(
+    "addMatchingSide(result, trades, false)",
+    "addMatchingSide(result, trades, true)"
+)
+foreach ($needle in @(
+    "private fun netShipCreditCost(trades: List<StockReviewPendingShipTrade>): Long",
+    "TradeMoney.safeAdd(total, value)",
+    "TradeMoney.safeAdd(total, -value)"
+)) {
+    Assert-Contains "StockReviewShipExecutionController.kt net credit cost contract" $confirm $needle
 }
 
 $executeBuy = Get-Section $executionController "private fun executeBuy(" "private fun executeSell("

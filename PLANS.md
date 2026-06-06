@@ -96,6 +96,14 @@ Status: deferred new feature
 
 Do not add Sector Market or Fixer's Market ship trading as part of UI polish. Remote ship trading needs a separate design for ship identity, source draining, pricing, virtual availability, and failure handling.
 
+### 5. Ship Tariff Source Validation
+
+Status: deferred until runtime/API evidence
+
+A 2026-06-06 static review noted that local ship pricing uses `SubmarketAPI.tariff` while item pricing prefers `submarket.plugin?.tariff` and falls back to `submarket.tariff`. This is a source-proven mismatch but not enough evidence to change ship pricing safely.
+
+Before changing `StockReviewShipPricing`, compare `submarket.tariff` and `submarket.plugin?.tariff` for vanilla open, black-market, military, and representative modded submarkets, then compare Enhanced Trading ship buy/sell quotes with the vanilla market UI. Preserve the current base buy/sell value calculation unless runtime evidence proves that is also wrong.
+
 ## Retired Or Completed
 
 - Generic template sync: rechecked 2026-06-07. Current template governance changes were already mostly present here; imported only safe doc-routing cleanup and left Starsector deploy, validation, compatibility, shared-library, Git, and public/private rules intact.

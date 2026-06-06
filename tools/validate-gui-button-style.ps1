@@ -119,6 +119,8 @@ $stockReviewLegacyItemRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\Stock
 $stockReviewLegacyHeadingRowsPath = Join-Path $kotlinGuiDir "stockreview\rows\StockReviewHeadingRows.kt"
 $stockReviewActionRowRendererPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowRenderer.kt"
 $stockReviewActionRowButtonsPath = Join-Path $kotlinGuiDir "stockreview\rendering\StockReviewActionRowButtons.kt"
+$stockReviewFiltersPath = Join-Path $kotlinGuiDir "stockreview\state\StockReviewFilters.kt"
+$stockReviewTradePlannerPath = Join-Path $kotlinGuiDir "stockreview\trade\StockReviewTradePlanner.kt"
 $wimGuiTooltipPath = Join-Path $kotlinGuiDir "WimGuiTooltip.kt"
 
 foreach ($requiredPath in @($stockReviewStylePath, $stockReviewHotkeyScriptPath, $weaponsProcurementModPluginPath, $weaponStockRecordPath, $stockReviewListModelPath, $stockReviewReviewModelPath, $stockReviewListSectionPath, $stockReviewListSourceSpecPath, $stockReviewListEmptyRowsPath, $stockReviewItemTypeSectionsPath, $stockReviewStockCategorySectionsPath, $stockReviewTradeGroupSectionsPath, $stockReviewItemRowFramePath, $stockReviewTradeItemRowsPath, $stockReviewReviewItemRowsPath, $stockReviewWorstCaseItemRowsPath, $stockReviewSectionRowAppendersPath, $stockReviewItemInfoRowsPath, $stockReviewRowLayoutPath, $stockReviewDetailRowsPath, $stockReviewDetailRowSpecPath, $stockReviewSourceAllocationRowsPath, $stockReviewCellGroupPath, $stockReviewDebugCellGroupPath, $stockReviewTradeCellsPath, $stockReviewColorDebugRowsPath, $stockReviewShipCatalogDebugRowsPath, $stockReviewTradeSummaryRendererPath, $stockReviewTradeSummaryFieldsPath, $stockReviewModeControllerPath, $stockReviewSourceStatePath, $stockReviewPanelPluginPath, $stockReviewSourceTransitionControllerPath, $stockReviewTooltipPath, $stockReviewShatterItemTooltipFactoryPath, $stockReviewWingTooltipLayoutBuilderPath, $stockReviewWingTooltipRendererPath, $stockReviewWeaponTooltipRendererPath, $stockReviewWeaponTooltipIconGridRendererPath, $stockReviewWeaponTooltipTextRendererPath, $stockReviewTooltipPanelPath, $stockReviewShipGridRendererPath, $stockReviewShipAvailabilityPath, $stockReviewShipEligibilityPath, $stockReviewShipExecutionControllerPath, $stockReviewShipTooltipPath, $stockReviewShipTooltipRowsPath, $stockReviewItemInfoFieldsPath, $stockReviewActionControlsPath, $stockReviewRowSpecPath, $stockReviewRowSpecsPath, $stockReviewListRowPath, $stockReviewFooterSpecPath, $stockReviewFooterButtonsPath, $stockReviewItemTypeHeadingRowsPath, $stockReviewStockCategoryHeadingRowsPath, $stockReviewTradeGroupHeadingRowsPath, $stockReviewFilterHeadingRowsPath, $stockReviewItemDetailHeadingRowsPath, $stockReviewFilterRowsPath, $stockReviewFilterGroupSectionsPath, $stockReviewActionRowRendererPath, $stockReviewActionRowButtonsPath)) {
@@ -210,6 +212,8 @@ $listSourceSpecText = Get-Content -LiteralPath $stockReviewListSourceSpecPath -R
 $listEmptyRowsText = Get-Content -LiteralPath $stockReviewListEmptyRowsPath -Raw
 $itemTypeSectionsText = Get-Content -LiteralPath $stockReviewItemTypeSectionsPath -Raw
 $stockCategorySectionsText = Get-Content -LiteralPath $stockReviewStockCategorySectionsPath -Raw
+$stockReviewFiltersText = Get-Content -LiteralPath $stockReviewFiltersPath -Raw
+$tradePlannerText = Get-Content -LiteralPath $stockReviewTradePlannerPath -Raw
 $tradeGroupSectionsText = Get-Content -LiteralPath $stockReviewTradeGroupSectionsPath -Raw
 $reviewModelText = Get-Content -LiteralPath $stockReviewReviewModelPath -Raw
 $itemTypeHeadingRowsText = Get-Content -LiteralPath $stockReviewItemTypeHeadingRowsPath -Raw
@@ -266,6 +270,16 @@ if ($stockCategorySectionsText -notmatch "class StockReviewStockCategorySection"
     $listModelText -match "categoryHeading" -or
     $listModelText -match "filteredRecords") {
     throw "Stock-review stock-category order, filters, headings, colors, top gaps, and debug-row policy must live in StockReviewStockCategorySections."
+}
+if ($stockReviewFiltersText -notmatch "fun matchesSearch\(record: WeaponStockRecord\?, searchQuery: String\?\): Boolean" -or
+    $stockReviewFiltersText -notmatch "fun searchTerms\(searchQuery: String\?\): List<String>" -or
+    $stockCategorySectionsText -notmatch "val terms = StockReviewFilters\.searchTerms\(searchQuery\)" -or
+    $stockCategorySectionsText -notmatch "StockReviewFilters\.matchesSearchTerms\(record, terms\)" -or
+    $stockCategorySectionsText -match "private fun matchesSearch" -or
+    $tradePlannerText -notmatch "searchQuery: String\?" -or
+    $tradePlannerText -notmatch "val terms = StockReviewFilters\.searchTerms\(searchQuery\)" -or
+    $tradePlannerText -notmatch "StockReviewFilters\.matchesSearchTerms\(record, terms\)") {
+    throw "Stock-review visible rows and bulk sufficient actions must share the item search predicate."
 }
 if ($tradeGroupSectionsText -notmatch "class StockReviewTradeGroupSection" -or
     $tradeGroupSectionsText -notmatch "object StockReviewTradeGroupSections" -or

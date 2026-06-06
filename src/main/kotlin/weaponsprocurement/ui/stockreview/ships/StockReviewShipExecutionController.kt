@@ -9,10 +9,13 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI
 import org.apache.log4j.Logger
 import weaponsprocurement.stock.market.StockSubmarketAccess
 import weaponsprocurement.stock.market.StockSubmarketTradeModes
+import weaponsprocurement.trade.plan.TradeMoney
+import weaponsprocurement.ui.stockreview.rendering.StockReviewFormat
 
 /**
  * Confirms queued exact-member ship trades. The FleetMember id must still exist in the
  * source/player list at confirm time or the trade fails cleanly and leaves the plan visible.
+ * Sells run before buys so one queued ship sale can fund queued purchases.
  */
 class StockReviewShipExecutionController(
     private val pendingTrades: StockReviewPendingShipTrades,
@@ -45,9 +48,27 @@ class StockReviewShipExecutionController(
             host.requestContentRebuild()
             return
         }
+        val credits = playerFleet.cargo?.credits
+        if (credits == null) {
+            host.postMessage("Ship trades require accessible player credits.")
+            host.requestContentRebuild()
+            return
+        }
+        val orderedTrades = shipExecutionOrder(trades)
+        val estimatedCost = netShipCreditCost(orderedTrades)
+        if (estimatedCost > TradeMoney.MAX_EXECUTABLE_CREDITS) {
+            host.postMessage("Ship order value is too large.")
+            host.requestContentRebuild()
+            return
+        }
+        if (estimatedCost > 0L && credits.get() + 0.01f < estimatedCost.toFloat()) {
+            host.postMessage("Need ${StockReviewFormat.credits(estimatedCost)} for these ship trades.")
+            host.requestContentRebuild()
+            return
+        }
         val failures = ArrayList<String>()
         val executed = ArrayList<StockReviewPendingShipTrade>()
-        for (trade in trades) {
+        for (trade in orderedTrades) {
             val ok = if (trade.isBuy()) {
                 executeBuy(market, playerFleet, includeBlackMarket, trade, failures)
             } else {
@@ -70,6 +91,38 @@ class StockReviewShipExecutionController(
         }
         host.postMessage("Some ship trades could not be completed: ${failures.first()}")
         host.requestContentRebuild()
+    }
+
+    private fun shipExecutionOrder(trades: List<StockReviewPendingShipTrade>): List<StockReviewPendingShipTrade> {
+        val result = ArrayList<StockReviewPendingShipTrade>()
+        addMatchingSide(result, trades, false)
+        addMatchingSide(result, trades, true)
+        return result
+    }
+
+    private fun addMatchingSide(
+        result: MutableList<StockReviewPendingShipTrade>,
+        trades: List<StockReviewPendingShipTrade>,
+        buy: Boolean,
+    ) {
+        for (trade in trades) {
+            if (trade.isBuy() == buy) {
+                result.add(trade)
+            }
+        }
+    }
+
+    private fun netShipCreditCost(trades: List<StockReviewPendingShipTrade>): Long {
+        var total = 0L
+        for (trade in trades) {
+            val value = trade.unitPrice.toLong()
+            total = if (trade.isBuy()) {
+                TradeMoney.safeAdd(total, value)
+            } else {
+                TradeMoney.safeAdd(total, -value)
+            }
+        }
+        return total
     }
 
     private fun executeBuy(

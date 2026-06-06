@@ -102,14 +102,16 @@ class StockReviewTradePlanner private constructor() {
         fun filteredTradeableRecords(
             snapshot: WeaponStockSnapshot?,
             activeFilters: Set<StockReviewFilter>?,
-        ): List<WeaponStockRecord> = filteredRecords(tradeableRecords(snapshot), activeFilters)
+            searchQuery: String?,
+        ): List<WeaponStockRecord> = filteredRecords(tradeableRecords(snapshot), activeFilters, searchQuery)
 
         @JvmStatic
         fun cheapestFirstFilteredBuyableRecords(
             snapshot: WeaponStockSnapshot?,
             activeFilters: Set<StockReviewFilter>?,
+            searchQuery: String?,
         ): List<WeaponStockRecord> {
-            val result = filteredRecords(buyableRecords(snapshot), activeFilters)
+            val result = filteredRecords(buyableRecords(snapshot), activeFilters, searchQuery)
             return result.sortedWith(CheapestBuyRecordComparator(snapshot))
         }
 
@@ -174,13 +176,17 @@ class StockReviewTradePlanner private constructor() {
         private fun filteredRecords(
             records: List<WeaponStockRecord>,
             activeFilters: Set<StockReviewFilter>?,
+            searchQuery: String?,
         ): List<WeaponStockRecord> {
-            if (StockReviewFilters.count(activeFilters) <= 0) {
+            val terms = StockReviewFilters.searchTerms(searchQuery)
+            if (StockReviewFilters.count(activeFilters) <= 0 && terms.isEmpty()) {
                 return records
             }
             val result = ArrayList<WeaponStockRecord>()
             for (record in records) {
-                if (StockReviewFilters.matches(record, activeFilters)) {
+                if (StockReviewFilters.matches(record, activeFilters) &&
+                    StockReviewFilters.matchesSearchTerms(record, terms)
+                ) {
                     result.add(record)
                 }
             }
