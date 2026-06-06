@@ -246,13 +246,21 @@ foreach ($needle in @(
     'json.optJSONObject(JSON_DESIRED_DEFAULTS)',
     'json.optJSONObject(JSON_SOURCES)',
     'json.optJSONObject(JSON_DISPLAY)',
-    'json.optJSONObject(JSON_PER_WEAPON)',
-    'json.optJSONObject(JSON_PER_ITEM)',
+    'private val ITEM_OVERRIDE_KEYS = arrayOf(',
+    'JSON_PER_WEAPON,',
+    'JSON_PER_ITEM,',
+    'for (overrideKey in ITEM_OVERRIDE_KEYS) {',
+    'readItemOverrideBlock(json.optJSONObject(overrideKey), desired, ignored, defaultDesired)',
     'itemConfig.has(JSON_DESIRED)',
     'itemConfig.has(JSON_IGNORED)'
 )) {
     Assert-Contains "StockReviewConfig.kt stock JSON parser uses schema constants" $stockReviewConfigSource $needle
 }
+Assert-Order "StockReviewConfig.kt legacy/current override precedence" $stockReviewConfigSource @(
+    'private val ITEM_OVERRIDE_KEYS = arrayOf(',
+    'JSON_PER_WEAPON,',
+    'JSON_PER_ITEM,'
+)
 Assert-Contains "StockReviewConfig.kt desired override contract" $stockReviewConfigSource 'private fun desiredOverride(itemType: StockItemType, itemId: String?): Int?'
 Assert-Contains "StockReviewConfig.kt ignored override contract" $stockReviewConfigSource 'fun isIgnored(itemType: StockItemType, itemId: String?): Boolean'
 Assert-Order "StockReviewConfig.kt typed/raw override priority" $stockReviewConfigSource @(

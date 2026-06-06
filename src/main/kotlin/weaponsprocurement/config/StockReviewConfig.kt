@@ -95,6 +95,10 @@ class StockReviewConfig private constructor(
         private const val JSON_FIGHTER_WING = "fighterWing"
         private const val JSON_DESIRED = "desired"
         private const val JSON_IGNORED = "ignored"
+        private val ITEM_OVERRIDE_KEYS = arrayOf(
+            JSON_PER_WEAPON,
+            JSON_PER_ITEM,
+        )
 
         @JvmStatic
         fun load(): StockReviewConfig {
@@ -146,8 +150,7 @@ class StockReviewConfig private constructor(
 
             val overrides = HashMap<String, Int>()
             val ignored = HashMap<String, Boolean>()
-            readPerItemOverrides(json.optJSONObject(JSON_PER_WEAPON), overrides, ignored, medium)
-            readPerItemOverrides(json.optJSONObject(JSON_PER_ITEM), overrides, ignored, medium)
+            readItemOverrideBlocks(json, overrides, ignored, medium)
 
             return StockReviewConfig(
                 small,
@@ -174,7 +177,18 @@ class StockReviewConfig private constructor(
             return json?.optString(key, defaultValue) ?: defaultValue
         }
 
-        private fun readPerItemOverrides(
+        private fun readItemOverrideBlocks(
+            json: JSONObject,
+            desired: MutableMap<String, Int>,
+            ignored: MutableMap<String, Boolean>,
+            defaultDesired: Int,
+        ) {
+            for (overrideKey in ITEM_OVERRIDE_KEYS) {
+                readItemOverrideBlock(json.optJSONObject(overrideKey), desired, ignored, defaultDesired)
+            }
+        }
+
+        private fun readItemOverrideBlock(
             json: JSONObject?,
             desired: MutableMap<String, Int>,
             ignored: MutableMap<String, Boolean>,

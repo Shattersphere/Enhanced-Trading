@@ -163,13 +163,20 @@ foreach ($needle in @(
     'private const val JSON_INCLUDE_CURRENT_MARKET_STORAGE = "includeCurrentMarketStorage"',
     'private const val JSON_INCLUDE_BLACK_MARKET = "includeBlackMarket"',
     'json.optJSONObject(JSON_DESIRED_DEFAULTS)',
-    'json.optJSONObject(JSON_PER_WEAPON)',
-    'json.optJSONObject(JSON_PER_ITEM)',
+    'private val ITEM_OVERRIDE_KEYS = arrayOf(',
+    'JSON_PER_WEAPON,',
+    'JSON_PER_ITEM,',
+    'readItemOverrideBlock(json.optJSONObject(overrideKey), desired, ignored, defaultDesired)',
     'optBoolean(sources, JSON_INCLUDE_CURRENT_MARKET_STORAGE, true)',
     'optBoolean(sources, JSON_INCLUDE_BLACK_MARKET, true)'
 )) {
     Assert-Contains "StockReviewConfig.kt" $stockConfig $needle
 }
+Assert-Order "StockReviewConfig.kt legacy/current override precedence" $stockConfig @(
+    'private val ITEM_OVERRIDE_KEYS = arrayOf(',
+    'JSON_PER_WEAPON,',
+    'JSON_PER_ITEM,'
+)
 
 $blacklistConfig = Read-Text "src/main/kotlin/weaponsprocurement/config/WeaponMarketBlacklist.kt"
 foreach ($needle in @(
