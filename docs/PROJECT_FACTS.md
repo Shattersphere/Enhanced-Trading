@@ -125,8 +125,8 @@ Enhanced Trading consumes Shatter Lib at build/runtime. Keep `build.gradle.kts`,
 
 ## Known-Good Baseline
 
-- Commit: `5e75045d4b65e26ce89bfcc1e05b322260e5a814`
-- Build/check status: full build with `-ShatterLibDir` checkout override, config contracts, Fixer persistence contracts, compatibility surfaces, Kotlin migration, repo jar classes, deploy status, and `git diff --check` passed for the stock override precedence cleanup. GUI style, ship trading contracts, source semantics, trade rollback, pure logic, runtime evidence, doc links, and template hygiene validators were not rerun for this bounded config-parser cleanup before this baseline update.
+- Commit: `a04fdab5c4fc6f36a83820cd6ef07be02c99d718`
+- Build/check status: full build with `-ShatterLibDir` checkout override, Fixer persistence contracts, source semantics contracts, config contracts, compatibility surfaces, Kotlin migration, repo jar classes, deploy status, and `git diff --check` passed for the shared Fixer reference-source selector cleanup. GUI style, ship trading contracts, trade rollback, pure logic, runtime evidence, doc links, and template hygiene validators were not rerun for this bounded Fixer cleanup before this baseline update.
 - Runtime/manual validation: not run; live runtime proof remains gated by the installed Shatter Lib jar, currently missing `ShatterItemTooltipContext.class` and `ShatterTooltipContextLine.class` in the live `C:\Games\Starsector\mods\Shatter Lib` dependency.
 - Date: 2026-06-07
 

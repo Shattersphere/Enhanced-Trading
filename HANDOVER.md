@@ -32,9 +32,9 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `5e75045` (`Make stock override precedence explicit`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `a04fdab` (`Share Fixer reference source selection`).
 
-Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
+Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, shared Fixer reference-source selection, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
 - `StockReviewTooltipModels`: shared tooltip row/layout models.
 - `StockReviewTooltipIconPanelPlugin`: sprite-backed icon panel drawing for non-weapon tooltip icons.
