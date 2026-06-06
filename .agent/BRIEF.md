@@ -26,7 +26,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `a06fe17` (`Extract weapon tooltip renderer`)
+- Known-good source commit: `6661f91` (`Move ship filtering into filter owner`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 

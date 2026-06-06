@@ -32,7 +32,7 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `a06fe17` (`Extract weapon tooltip renderer`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `6661f91` (`Move ship filtering into filter owner`).
 
 Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, post-commit transaction reports, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
