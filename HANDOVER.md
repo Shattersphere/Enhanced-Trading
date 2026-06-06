@@ -32,9 +32,9 @@ Template-synced project facts live in `docs/PROJECT_FACTS.md`; validation comman
 
 ## Recent Work Snapshot
 
-The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `5811cdc` (`Centralize submarket trade modes`).
+The recent modernization run has been intentionally bounded and behavior-preserving. Latest pushed source baseline is `8d9ed91` (`Harden ship and Fixer lifecycle gates`).
 
-Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, shared Fixer reference-source selection/value normalization, remote sell quote policy, centralized OPEN/SNEAK submarket trade-mode policy, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
+Recent commits hardened trade and ship execution around unsafe mutation failures, nonfinite numeric settings/cargo-space values, Fixer catalog decoding, shared Fixer reference-source selection/value normalization, remote sell quote policy, centralized OPEN/SNEAK submarket trade-mode policy, startup Luna config publication for the Fixer updater, local-only ship black-market state, ship-only open-gate availability, confirm-time ship sell eligibility, post-commit transaction reports, rollback journaling, and stale runtime Shatter Lib dependency detection. They also split item tooltip code into smaller owners:
 
 - `StockReviewTooltipModels`: shared tooltip row/layout models.
 - `StockReviewTooltipIconPanelPlugin`: sprite-backed icon panel drawing for non-weapon tooltip icons.

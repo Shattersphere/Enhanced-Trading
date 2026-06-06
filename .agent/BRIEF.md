@@ -20,6 +20,7 @@ Recent modernization work has focused on bounded, behavior-preserving hardening 
 - Fighter LPC Advanced Info rows now source real fighter hull stats through `WeaponStockRecord`; wing tooltip rows reuse the same labels to avoid stat drift between list rows and tooltips.
 - Fixer live and persistent observation now share `FixerReferenceSourceSelector` for purchasable reference-source filtering and price/source-name tie-breaking.
 - Remote-source sell quotes now match execution by using legal-only local sell pricing while preserving Sector black-market remote buys. Black-market submarket eligibility probing and item/ship transaction reporting now share `StockSubmarketTradeModes` for OPEN/SNEAK policy.
+- Fixer updater registration now publishes Luna settings before the background catalog gate, and ship trading has local-only black-market state, ship-only open-gate availability, and confirm-time sell eligibility rechecks.
 
 For modder handoff, `HANDOVER.md` is the deep onboarding guide and `.agent/ARCHITECTURE_MAP.md` is the diagram-first map of the runtime, UI, trade, and build/deploy surfaces. Read those before large feature work or ownership handoff.
 
@@ -28,7 +29,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 ## Known-Good Source State
 
 - Current branch: `main`
-- Known-good source commit: `5811cdc` (`Centralize submarket trade modes`)
+- Known-good source commit: `8d9ed91` (`Harden ship and Fixer lifecycle gates`)
 - Template-sync baseline before generic doc-system specialization: `daa8c7c36c81b55517ddc5fee78a10a32374c317`
 - Version in `mod_info.json`: `0.2.0`
 
@@ -48,6 +49,7 @@ The repo has been synced with the generic template doc system. Exact facts now l
 - The ship grid layout is a good reference baseline; the public-API ship tooltip still needs in-game visual acceptance against the vanilla ship buy/sell screen after layout polish.
 - Tooltip cleanup remains source/static validated only. In-game visual proof is still required for weapon, wing, and ship tooltip layout acceptance.
 - Black-market eligibility probing is statically aligned with transaction-report trade modes, but in-game/API proof is still needed for vanilla and modded black-market submarket behavior.
+- Ship-only open gating, ship black-market toggling from Fixer's item source, and stale ship-sell rejection are source/static validated only; in-game acceptance is still needed.
 - Runtime rollback fault validation still needs in-game evidence.
 - Rollback diagnostics now emit structured `WP_STOCK_REVIEW_ROLLBACK` records; use `tools/analyze-trade-rollback-diagnostics.ps1` after a forced-failure run to verify restored cargo counts and credits.
 - Weapon Badges is standalone in `D:\Sean Mods\Weapon Badges`; do not reintroduce cargo-cell badge assets, core patching, or badge count publishing here.
